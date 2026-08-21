@@ -8948,8 +8948,8 @@
     }
   },
   "$meta": {
-    "version": "1.68",
-    "generated": "2026-08-21T13:48:27.297Z",
-    "sha256": "29a929add3902e80b9f937648752e9ba13440d834ed2e801f74a1c2d9534c04e"
+    "version": "1.2",
+    "generated": "2026-08-21T13:50:19.180Z",
+    "sha256": "cb17ecb27ff697ecf87c8a57e465ca70abf4dc02e8b2dc83d2f004a7fe0fa258"
   }
 }
