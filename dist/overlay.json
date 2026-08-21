@@ -8614,7 +8614,20 @@
           }
         },
         "6761ff17cdc36bd66102e9d0": {
+          "name": "Neuanfang",
           "objectives": {
+            "6761ff17cdc36bd66102e9d8": {
+              "description": "Übergib eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "6761ff17cdc36bd66102e9d9": {
+              "description": "Übergib eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "6761ff17cdc36bd66102e9da": {
+              "description": "Übergib eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "6761ff17cdc36bd66102e9e1": {
+              "description": "Übergib eine beliebige im Raid gefundene Händler-Figur"
+            },
             "6762015739c53fca8ac51336": {
               "description": "Eliminiere PMCs"
             },
@@ -8624,7 +8637,20 @@
           }
         },
         "6848100b00afffa81f09e365": {
+          "name": "Neuanfang",
           "objectives": {
+            "6848100b00afffa81f09e36d": {
+              "description": "Übergib eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "6848100b00afffa81f09e36e": {
+              "description": "Übergib eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "6848100b00afffa81f09e36f": {
+              "description": "Übergib eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "6848100b00afffa81f09e376": {
+              "description": "Übergib eine beliebige im Raid gefundene Händler-Figur"
+            },
             "6848100b00afffa81f09e369": {
               "description": "Eliminiere PMCs"
             },
@@ -8640,7 +8666,23 @@
           }
         },
         "68481881f43abfdda2058369": {
+          "name": "Neuanfang",
           "objectives": {
+            "68486a0eda4828c0772e337b": {
+              "description": "Überlebe und entkomme aus Interchange"
+            },
+            "68481881f43abfdda2058371": {
+              "description": "Übergib eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "68481881f43abfdda2058372": {
+              "description": "Übergib eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "68481881f43abfdda2058373": {
+              "description": "Übergib eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "68481881f43abfdda205837a": {
+              "description": "Übergib eine beliebige im Raid gefundene Händler-Figur"
+            },
             "68481881f43abfdda205836d": {
               "description": "Eliminiere PMCs"
             },
@@ -8949,7 +8991,7 @@
   },
   "$meta": {
     "version": "1.68",
-    "generated": "2026-08-21T13:48:27.297Z",
-    "sha256": "29a929add3902e80b9f937648752e9ba13440d834ed2e801f74a1c2d9534c04e"
+    "generated": "2026-08-21T13:58:07.758Z",
+    "sha256": "d4155418912f9334349c4815fb589567bd67eb91c4825f94189ba07f8964e320"
   }
 }
