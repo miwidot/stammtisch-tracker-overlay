@@ -8444,6 +8444,13 @@
             }
           }
         },
+        "64f5aac4b63b74469b6c14c2": {
+          "objectives": {
+            "6a26943d55478d73e6b4fadf": {
+              "description": "Finde die Wohnung von Prapors Freund in Streets of Tarkov"
+            }
+          }
+        },
         "5d25aed386f77442734d25d2": {
           "objectives": {
             "5d25af3c86f77443ff46b9e7": {
@@ -8472,7 +8479,7 @@
   },
   "$meta": {
     "version": "1.67",
-    "generated": "2026-08-21T09:27:15.921Z",
-    "sha256": "7302d755db76ae061b22ce205f9a2f7997bf22631097305f4fea4f3e1d96d5e3"
+    "generated": "2026-08-21T10:00:41.576Z",
+    "sha256": "d2dd5ac0e2dd4f73d90d3e7ebe36ec91d7a3f1b90c1355b56832da93d4fb13cb"
   }
 }
