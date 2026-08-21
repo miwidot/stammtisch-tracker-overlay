@@ -1,0 +1,42 @@
+{
+  // Deutsche (de) Locale-Korrekturen — Tarkov Stammtisch.
+  //
+  // Diese Datei existiert NUR in unserem Fork. Upstream kennt sie nicht,
+  // deshalb kann sie bei einem `git merge upstream/main` niemals einen
+  // Konflikt erzeugen. Das ist Absicht: alles Deutsche gehoert hier hinein,
+  // nichts davon in bestehende Upstream-Dateien.
+  //
+  // Was hier hingehoert:
+  //   Korrekturen am DEUTSCHEN Bundle von tarkov.dev (regular/tasks_de).
+  //   Also Faelle, in denen die deutsche Uebersetzung fehlt, falsch oder
+  //   unverstaendlich ist. Der Build legt sie unter locales.de.tasks ab;
+  //   der Tracker wendet sie an, wenn er auf Deutsch gerendert wird —
+  //   nach den sprachneutralen Daten-Korrekturen.
+  //
+  // Was hier NICHT hingehoert:
+  //   Sachliche Datenfehler (falsches Level, falsche Map, falscher Haendler).
+  //   Die sind sprachunabhaengig und gehoeren nach src/overrides/tasks.json5
+  //   — und weil sie alle betreffen, gehoeren sie als PR zurueck an Upstream,
+  //   nicht in unseren Fork. Siehe FORK.md.
+  //
+  // Format (validiert gegen src/schemas/locale-override.schema.json):
+  //
+  //   tasks: {
+  //     '<task-id>': {
+  //       name: 'Deutscher Questname',
+  //       objectives: {
+  //         '<objective-id>': { description: 'Deutsche Beschreibung' },
+  //       },
+  //     },
+  //   },
+  //
+  // Jede Korrektur bekommt einen Beleg als Kommentar (Wiki-Link oder
+  // json.tarkov.dev-URL), damit spaeter nachvollziehbar ist, warum sie
+  // existiert — und damit `npm run check-overrides` erkennen kann, wenn
+  // Upstream sie inzwischen selbst behoben hat und wir sie entfernen koennen.
+
+  tasks: {
+    // Noch keine Eintraege. Die erste Fuellung kommt aus der
+    // Uebersetzungs-Workbench im Admin (siehe FORK.md).
+  },
+}

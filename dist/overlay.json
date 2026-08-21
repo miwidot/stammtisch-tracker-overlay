@@ -8420,6 +8420,9 @@
     }
   },
   "locales": {
+    "de": {
+      "tasks": {}
+    },
     "en": {
       "tasks": {
         "6761ff17cdc36bd66102e9d0": {
@@ -8439,7 +8442,7 @@
   },
   "$meta": {
     "version": "1.67",
-    "generated": "2026-08-20T01:01:55.857Z",
-    "sha256": "ae52e8aefa94a67c26bd7cbd7f5884257f6c7018949cada18b1aef3d6dd818a0"
+    "generated": "2026-08-21T04:03:08.810Z",
+    "sha256": "81210d77fa86f8e16cea3bc51446cb859659fd3fe181cd41153e7bcbd410d058"
   }
 }
