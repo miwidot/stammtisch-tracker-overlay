@@ -225,7 +225,7 @@
         },
         // Was: Hand over the items
         '59c50f1686f77412ef2c01e7': {
-          description: 'Übergebe die Halbmasken',
+          description: 'Übergib die Halbmasken',
         },
       },
     },
@@ -247,7 +247,7 @@
         },
         // Was: Hand over the items
         '59ca29ab86f77445ab431c86': {
-          description: 'Übergebe die Messer',
+          description: 'Übergib die Messer',
         },
       },
     },
@@ -375,19 +375,19 @@
       objectives: {
         // Was: Hand over any found in raid PMC figurine
         '6761ff17cdc36bd66102e9d8': {
-          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene PMC-Figur',
         },
         // Was: Hand over any found in raid Scav figurine
         '6761ff17cdc36bd66102e9d9': {
-          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Scav-Figur',
         },
         // Was: Hand over any found in raid Boss figurine
         '6761ff17cdc36bd66102e9da': {
-          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Boss-Figur',
         },
         // Was: Hand over any found in raid Trader figurine
         '6761ff17cdc36bd66102e9e1': {
-          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Händler-Figur',
         },
       },
     },
@@ -398,19 +398,19 @@
       objectives: {
         // Was: Hand over any found in raid PMC figurine
         '6848100b00afffa81f09e36d': {
-          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene PMC-Figur',
         },
         // Was: Hand over any found in raid Scav figurine
         '6848100b00afffa81f09e36e': {
-          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Scav-Figur',
         },
         // Was: Hand over any found in raid Boss figurine
         '6848100b00afffa81f09e36f': {
-          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Boss-Figur',
         },
         // Was: Hand over any found in raid Trader figurine
         '6848100b00afffa81f09e376': {
-          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Händler-Figur',
         },
       },
     },
@@ -431,19 +431,19 @@
         },
         // Was: Hand over any found in raid PMC figurine
         '68481881f43abfdda2058371': {
-          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene PMC-Figur',
         },
         // Was: Hand over any found in raid Scav figurine
         '68481881f43abfdda2058372': {
-          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Scav-Figur',
         },
         // Was: Hand over any found in raid Boss figurine
         '68481881f43abfdda2058373': {
-          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Boss-Figur',
         },
         // Was: Hand over any found in raid Trader figurine
         '68481881f43abfdda205837a': {
-          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Händler-Figur',
         },
       },
     },

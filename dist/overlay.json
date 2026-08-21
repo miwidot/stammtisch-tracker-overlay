@@ -8529,7 +8529,7 @@
               "description": "Finde Halbmasken im Raid"
             },
             "59c50f1686f77412ef2c01e7": {
-              "description": "Übergebe die Halbmasken"
+              "description": "Übergib die Halbmasken"
             }
           }
         },
@@ -8545,7 +8545,7 @@
               "description": "Finde Bars A-2607 95Kh18 Messer im Raid"
             },
             "59ca29ab86f77445ab431c86": {
-              "description": "Übergebe die Messer"
+              "description": "Übergib die Messer"
             }
           }
         },
@@ -8617,16 +8617,16 @@
           "name": "Neuanfang",
           "objectives": {
             "6761ff17cdc36bd66102e9d8": {
-              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene PMC-Figur"
             },
             "6761ff17cdc36bd66102e9d9": {
-              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Scav-Figur"
             },
             "6761ff17cdc36bd66102e9da": {
-              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Boss-Figur"
             },
             "6761ff17cdc36bd66102e9e1": {
-              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Händler-Figur"
             }
           }
         },
@@ -8634,16 +8634,16 @@
           "name": "Neuanfang",
           "objectives": {
             "6848100b00afffa81f09e36d": {
-              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene PMC-Figur"
             },
             "6848100b00afffa81f09e36e": {
-              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Scav-Figur"
             },
             "6848100b00afffa81f09e36f": {
-              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Boss-Figur"
             },
             "6848100b00afffa81f09e376": {
-              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Händler-Figur"
             }
           }
         },
@@ -8654,16 +8654,16 @@
               "description": "Überlebe und entkomme aus Interchange"
             },
             "68481881f43abfdda2058371": {
-              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene PMC-Figur"
             },
             "68481881f43abfdda2058372": {
-              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Scav-Figur"
             },
             "68481881f43abfdda2058373": {
-              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Boss-Figur"
             },
             "68481881f43abfdda205837a": {
-              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+              "description": "Übergib eine beliebige im Raid gefundene Händler-Figur"
             }
           }
         }
@@ -8687,8 +8687,8 @@
     }
   },
   "$meta": {
-    "version": "1.0",
-    "generated": "2026-08-21T11:47:32.085Z",
-    "sha256": "29cbcff7871eefa2ce46e36faef10ffc2320f28f1ebfe63d990e43225ddc9fc8"
+    "version": "1.68",
+    "generated": "2026-08-21T12:07:13.203Z",
+    "sha256": "5a7fb516dcbcc06996cadc7fbbb736dae13e76ae2dd2d7f75e4dc034abe4caf8"
   }
 }
