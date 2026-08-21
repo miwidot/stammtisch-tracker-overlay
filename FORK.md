@@ -42,22 +42,21 @@ Der Build (`scripts/build.ts`) lädt **alle** JSON5-Dateien aus `src/overrides/l
 | `tests/file-loader.test.ts` | prüft die `package.json` am Wurzelverzeichnis statt des Ordnernamens | → upstream, hilft jedem Fork               |
 | `dist/overlay.json`         | eingecheckter Build — siehe unten                                    | bleibt, konstruktionsbedingt               |
 
-### ⚠️ `dist/overlay.json` konfliktiert bei **jedem** Merge
+### `dist/overlay.json` fassen wir nicht an
 
-Upstreams CI schreibt die Datei nach jedem Push selbst neu (`chore: build overlay [skip ci]`). Wir checken sie ebenfalls ein, weil der stammdev-Deploy sie per Git zieht. Damit ist der Konflikt kein Unfall, sondern der Normalfall — am 2026-08-21 dreimal in einer Sitzung.
+Upstream checkt die Datei mit Absicht ein — für sie ist sie das Produkt, die Standard-`OVERLAY_URL` des Trackers zeigt auf `raw.githubusercontent.com/.../dist/overlay.json`.
 
-**Ein Build-Artefakt wird nicht von Hand zusammengeführt.** Es wird neu gebaut:
+**Für uns ist sie es nicht.** Unser nginx liefert `~/overlay-fork/dist/overlay.json` aus, und der Server erzeugt diese Datei bei jedem Deploy selbst mit `npm run build`. Die eingecheckte Fassung liest bei uns niemand.
 
-```bash
-git pull                    # Konflikt nur in dist/overlay.json
-npm run validate            # die Quelle ist sauber zusammengeführt
-npm run build               # erzeugt dist/ aus der zusammengeführten Quelle
-git add dist/overlay.json && git commit --no-edit
-```
+Solange auch unsere CI sie schrieb, gab es zwei Historien für ein erzeugtes Artefakt — und damit einen Konflikt bei **jedem** Upstream-Sync. Am 2026-08-21 dreimal in einer Sitzung, zweimal mit stillschweigend zurückgedrehten Inhalten.
 
-Auf dem Server gilt dasselbe in umgekehrter Richtung: dort ist `dist/` lokal gebaut und weicht immer ab, deshalb **vor** jedem Pull `git checkout -- dist/`.
+Deshalb:
 
-Wer stattdessen die Konfliktmarker in der JSON-Datei von Hand auflöst, rät — bei 250 000 Zeilen erzeugter Ausgabe fällt ein Fehler erst im Tracker auf.
+- Der Schritt `Commit dist` in `.github/workflows/ci.yml` ist bei uns auf `if: false` gesetzt. Die Tag- und Release-Schritte hängen daran und entfallen mit — auch das ist gewollt, ein Fork schneidet keine Releases. Die Versionskennung kommt weiterhin aus upstreams Tags (`git fetch upstream` holt sie mit).
+- Unsere `dist/overlay.json` steht auf upstreams Stand und bleibt dort. Upstreams Änderungen laufen dadurch konfliktfrei durch.
+- **Niemals selbst committen.** Nach einem lokalen `npm run build` ist das Arbeitsverzeichnis schmutzig — das ist normal, die Änderung gehört verworfen: `git checkout -- dist/`.
+
+⚠️ **Die eine Falle, die dadurch entsteht:** Wer je ohne `npm run build` deployt, liefert upstreams Overlay **ohne unser Deutsch** aus — still, ohne Fehlermeldung. Der Deploy-Ablauf unten baut immer; weicht davon nicht ab.
 
 ---
 

@@ -82,8 +82,16 @@ jobs:
         run: |
           npm run build
 
+      # Fork: disabled. This repo is not the delivery path here - stammdev
+      # clones it and runs `npm run build` on every deploy, so the committed
+      # artifact is never read. Writing it from CI only produced a second
+      # history for a generated file and a merge conflict with upstream's own
+      # build commit on every sync. Leaving the step in place (rather than
+      # deleting it) keeps the diff to upstream small.
+      # The tag and release steps below are gated on this one and therefore
+      # skip as well, which is wanted: a fork should not cut releases.
       - name: Commit dist (main branch only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: false
         id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
