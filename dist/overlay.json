@@ -8475,7 +8475,7 @@
         "5a03153686f77442d90e2171": {
           "objectives": {
             "5c9a17c686f7747dbe2da3c1": {
-              "description": "Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine Steyr AUG auf Factory benutzt"
+              "description": "Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt"
             }
           }
         },
@@ -8529,7 +8529,7 @@
               "description": "Finde Halbmasken im Raid"
             },
             "59c50f1686f77412ef2c01e7": {
-              "description": "Übergib die Halbmasken"
+              "description": "Übergebe die Halbmasken"
             }
           }
         },
@@ -8545,7 +8545,7 @@
               "description": "Finde Bars A-2607 95Kh18 Messer im Raid"
             },
             "59ca29ab86f77445ab431c86": {
-              "description": "Übergib die Messer"
+              "description": "Übergebe die Messer"
             }
           }
         },
@@ -8990,8 +8990,8 @@
     }
   },
   "$meta": {
-    "version": "1.5",
-    "generated": "2026-08-21T14:13:06.718Z",
-    "sha256": "ba5d01a93255f48f9a20b1a830468b8fb29cfaafe1fe45a949044d73908a6063"
+    "version": "1.68",
+    "generated": "2026-08-21T14:23:56.117Z",
+    "sha256": "205ea9a9610e5780dbc24bfe7526c83973e4cbc5e660d29a49a3b93a681ea29b"
   }
 }

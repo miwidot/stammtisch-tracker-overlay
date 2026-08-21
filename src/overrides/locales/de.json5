@@ -83,8 +83,8 @@
     // Dosenschießen / Shooting Cans (Lv 1)
     '657315df034d76585f032e01': {
       objectives: {
-        // Was: Eliminate any target on Ground Zero
         '6a54a310b22ea41cf1c54a20': {
+          // Was: Eliminate any target on Ground Zero
           description: 'Eliminiere ein beliebiges Ziel auf Ground Zero',
         },
       },
@@ -93,8 +93,8 @@
     // Grenadier (Lv 6)
     '5c0d190cd09282029f5390d8': {
       objectives: {
-        // Was: Eliminate any target with hand grenades or grenade launchers
         '5c1b760686f77412780211a3': {
+          // Was: Eliminate any target with hand grenades or grenade launchers
           description: 'Eliminiere ein beliebiges Ziel mit Handgranaten oder Granatwerfern',
         },
       },
@@ -103,8 +103,8 @@
     // Angelausrüstung / Fishing Gear (Lv 8)
     '5a27b75b86f7742e97191958': {
       objectives: {
-        // Was: Stash an MF-UNTAR body armor in the boat
         '5a27d81a86f774472a6e0456': {
+          // Was: Stash an MF-UNTAR body armor in the boat
           description: 'Verstaue eine MF-UNTAR-Schutzweste im Boot',
         },
       },
@@ -113,8 +113,8 @@
     // Feuchte Angelegenheit – Teil 1 / A Shooting Position (Lv 8)
     '5a27bb8386f7741c770d2d0a': {
       objectives: {
-        // Was: Eliminate Scavs with an M4A1, M16, ADAR, or TX-15 on Shoreline
         '5c9de99286f7741ced54c902': {
+          // Was: Eliminate Scavs with an M4A1, M16, ADAR, or TX-15 on Shoreline
           description: 'Eliminiere Scavs mit einer M4A1, M16, ADAR oder TX-15 auf Shoreline',
         },
       },
@@ -123,9 +123,9 @@
     // One-Way Ticket (Lv 8)
     '5a03153686f77442d90e2171': {
       objectives: {
-        // Was: Eliminate any target with headshots using a Steyr AUG on Factory
         '5c9a17c686f7747dbe2da3c1': {
-          description: 'Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine Steyr AUG auf Factory benutzt',
+          // Was: Eliminate 15 targets with headshots while using an AUG on Factory
+          description: 'Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt',
         },
       },
     },
@@ -133,12 +133,12 @@
     // Der Tarkov Schütze – Teil 2 / The Tarkov Shooter - Part 2 (Lv 9)
     '5bc479e586f7747f376c7da3': {
       objectives: {
-        // Was: Shoot any target in the legs from over 40 meters away with a bolt-action rifle
         '5bd983d886f7747ba73fc246': {
+          // Was: Shoot any target in the legs from over 40 meters away with a bolt-action rifle
           description: 'Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in die Beine',
         },
-        // Was: Shoot any target in the head from over 40 meters away with a bolt-action rifle
         '5bd9944f86f774035c4877f3': {
+          // Was: Shoot any target in the head from over 40 meters away with a bolt-action rifle
           description: 'Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in den Kopf',
         },
       },
@@ -189,8 +189,8 @@
     //
     // German item names sourced from https://json.tarkov.dev/regular/items_de
     // (not guessed).
-    // Was: The Punisher - Part 1
     '59c512ad86f7741f0d09de9b': {
+      // Was: The Punisher - Part 1
       name: 'Der Peiniger – Teil 1',
       objectives: {
         // Was: Eliminate Scavs with AKS-74U on Customs
@@ -200,8 +200,8 @@
       },
     },
 
-    // Was: The Punisher - Part 2
     '59c50a9e86f7745fef66f4ff': {
+      // Was: The Punisher - Part 2
       name: 'Der Peiniger – Teil 2',
       objectives: {
         // Was: Eliminate Scavs with AKM series weapons on Shoreline
@@ -211,8 +211,8 @@
       },
     },
 
-    // Was: The Punisher - Part 3
     '59c50c8886f7745fed3193bf': {
+      // Was: The Punisher - Part 3
       name: 'Der Peiniger – Teil 3',
       objectives: {
         // Was: Eliminate Scavs with 9x39 caliber weapons on Reserve
@@ -225,7 +225,7 @@
         },
         // Was: Hand over the items
         '59c50f1686f77412ef2c01e7': {
-          description: 'Übergib die Halbmasken',
+          description: 'Übergebe die Halbmasken',
         },
       },
     },
@@ -247,7 +247,7 @@
         },
         // Was: Hand over the items
         '59ca29ab86f77445ab431c86': {
-          description: 'Übergib die Messer',
+          description: 'Übergebe die Messer',
         },
       },
     },
@@ -369,8 +369,8 @@
     // string "Finde eine Killa-Figur im Raid" elsewhere in this bundle.
     // "Trader" -> "Händler" has no direct precedent in the data reviewed for
     // this bundle; flagging for reviewer sign-off.
-    // Was: New Beginning
     '6761ff17cdc36bd66102e9d0': {
+      // Was: New Beginning
       name: 'Neuanfang',
       objectives: {
         // Was: Hand over any found in raid PMC figurine
@@ -400,8 +400,8 @@
       },
     },
 
-    // Was: New Beginning
     '6848100b00afffa81f09e365': {
+      // Was: New Beginning
       name: 'Neuanfang',
       objectives: {
         // Was: Hand over any found in raid PMC figurine
@@ -439,8 +439,8 @@
       },
     },
 
-    // Was: New Beginning
     '68481881f43abfdda2058369': {
+      // Was: New Beginning
       name: 'Neuanfang',
       objectives: {
         // Was: Survive and extract from Interchange
