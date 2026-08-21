@@ -8475,7 +8475,7 @@
         "5a03153686f77442d90e2171": {
           "objectives": {
             "5c9a17c686f7747dbe2da3c1": {
-              "description": "Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt"
+              "description": "Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine Steyr AUG auf Factory benutzt"
             }
           }
         },
@@ -8991,7 +8991,7 @@
   },
   "$meta": {
     "version": "1.69",
-    "generated": "2026-08-21T14:26:24.072Z",
-    "sha256": "9b4f72ee05a4f5f6ae8965dfff81bb8cde96c9abc881d522cd4c0abf84224d82"
+    "generated": "2026-08-21T14:49:19.006Z",
+    "sha256": "f1a0cb011285d2df5bf66639ca87f6087654bef8e5e3dd7f9fc9ed38fba0a742"
   }
 }
