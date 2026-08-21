@@ -20,16 +20,44 @@ Der Fork löst das: wir bauen **eine** Datei, die Upstream-Korrekturen **und** u
 
 ---
 
-## Unsere einzige Abweichung
+## Unsere Abweichungen
 
-| Datei                            | Art            | Kosten pro Upstream-Merge                                   |
-| -------------------------------- | -------------- | ----------------------------------------------------------- |
-| `src/overrides/locales/de.json5` | **neue Datei** | **null** — existiert upstream nicht, kann nie konfliktieren |
-| `FORK.md`                        | neue Datei     | null                                                        |
+### Neue Dateien — kosten beim Merge nichts
 
-Das ist alles. Keine Änderung an einer einzigen Upstream-Datei.
+| Datei                            | Zweck                                                               | Ziel        |
+| -------------------------------- | ------------------------------------------------------------------- | ----------- |
+| `src/overrides/locales/de.json5` | die deutschen Korrekturen                                           | → upstream  |
+| `scripts/status-locale.ts`       | Übersetzungsstand je Händler, `// Was:`-Drift, wirkungslose Patches | → upstream  |
+| `tests/status-locale.test.ts`    | Tests dazu                                                          | → upstream  |
+| `tests/duplicate-keys.test.ts`   | doppelte Schlüssel in den Override-Quellen                          | → upstream  |
+| `FORK.md`                        | dieses Dokument                                                     | bleibt hier |
 
-Der Build (`scripts/build.ts`) lädt **alle** JSON5-Dateien aus `src/overrides/locales/` — es gibt keine Sprach-Allowlist, `de.json5` wird automatisch eingesammelt. Bestätigt im Build-Log: `Locales: de(tasks: 0), en(tasks: 3)`.
+Der Build (`scripts/build.ts`) lädt **alle** JSON5-Dateien aus `src/overrides/locales/` — es gibt keine Sprach-Allowlist, `de.json5` wird automatisch eingesammelt.
+
+### Geänderte Upstream-Dateien — kosten bei jedem Merge
+
+| Datei                       | Was                                                                  | Ziel                                       |
+| --------------------------- | -------------------------------------------------------------------- | ------------------------------------------ |
+| `package.json`              | eine Zeile: `"status:locale": "tsx scripts/status-locale.ts"`        | verschwindet, wenn das Skript upstream ist |
+| `tests/file-loader.test.ts` | prüft die `package.json` am Wurzelverzeichnis statt des Ordnernamens | → upstream, hilft jedem Fork               |
+| `dist/overlay.json`         | eingecheckter Build — siehe unten                                    | bleibt, konstruktionsbedingt               |
+
+### ⚠️ `dist/overlay.json` konfliktiert bei **jedem** Merge
+
+Upstreams CI schreibt die Datei nach jedem Push selbst neu (`chore: build overlay [skip ci]`). Wir checken sie ebenfalls ein, weil der stammdev-Deploy sie per Git zieht. Damit ist der Konflikt kein Unfall, sondern der Normalfall — am 2026-08-21 dreimal in einer Sitzung.
+
+**Ein Build-Artefakt wird nicht von Hand zusammengeführt.** Es wird neu gebaut:
+
+```bash
+git pull                    # Konflikt nur in dist/overlay.json
+npm run validate            # die Quelle ist sauber zusammengeführt
+npm run build               # erzeugt dist/ aus der zusammengeführten Quelle
+git add dist/overlay.json && git commit --no-edit
+```
+
+Auf dem Server gilt dasselbe in umgekehrter Richtung: dort ist `dist/` lokal gebaut und weicht immer ab, deshalb **vor** jedem Pull `git checkout -- dist/`.
+
+Wer stattdessen die Konfliktmarker in der JSON-Datei von Hand auflöst, rät — bei 250 000 Zeilen erzeugter Ausgabe fällt ein Fehler erst im Tracker auf.
 
 ---
 
@@ -70,10 +98,14 @@ So bleibt diese Datei dauerhaft klein — sie enthält idealerweise nur, was ger
 
 ```bash
 git fetch upstream
-git merge upstream/main      # unsere de.json5 ist neu -> kein Konflikt möglich
-npm run build
+git merge upstream/main      # de.json5 ist neu -> dort kein Konflikt möglich
+npm run validate             # Quelle sauber?
+npm run build                # dist/ neu erzeugen, NICHT von Hand mergen
+git add dist/overlay.json && git commit --no-edit
 git push origin main
 ```
+
+`dist/overlay.json` konfliktiert dabei so gut wie immer — warum und wie, steht oben unter „Unsere Abweichungen".
 
 ### Ausliefern
 
