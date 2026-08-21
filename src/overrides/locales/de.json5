@@ -448,22 +448,6 @@
       },
     },
 
-    // ---------------------------------------------------------------
-    // Ragman — 15 Quest-Namen und 71 Ziele.
-    //
-    // Gegenstaende werden benannt und dekliniert, nicht als "der Gegenstand"
-    // umschrieben: upstream schreibt "Finde Salewa Erste-Hilfe-Kits im Raid",
-    // nicht "Finde den Gegenstand". Genus am Grundwort des Kompositums.
-    //
-    // Ziele mit mehreren zulaessigen Gegenstaenden bleiben generisch
-    // ("eine beliebige Uschanka-Muetze"), sonst geht das englische "any"
-    // verloren und der Text nennt eine von drei Varianten.
-    //
-    // Elf Ziele tragen einen englischen Gegenstandsnamen, weil items_de dort
-    // selbst keinen deutschen fuehrt - der deutsche Client zeigt ihn ebenso.
-    // ---------------------------------------------------------------
-
-    // Make ULTRA Great Again (Lv 0)
     // Was: Make ULTRA Great Again
     '5ae448bf86f7744d733e55ee': {
       name: 'Macht ULTRA wieder groß',
@@ -475,7 +459,6 @@
       },
     },
 
-    // Fuel Crisis (Lv 0)
     // Was: Fuel Crisis
     '5ae448f286f77448d73c0131': {
       name: 'Treibstoffkrise',
@@ -513,13 +496,11 @@
       },
     },
 
-    // Inventory Files (Lv 0)
     // Was: Inventory Files
     '5ae4493486f7744efa289417': {
       name: 'Bestandsakten',
     },
 
-    // A Big Loss (Lv 0)
     // Was: A Big Loss
     '5ae4493d86f7744b8e15aa8f': {
       name: 'Ein großer Verlust',
@@ -547,7 +528,6 @@
       },
     },
 
-    // Sew it Good - Part 3 (Lv 0)
     // Was: Sew it Good - Part 3
     '5ae4495c86f7744e87761355': {
       name: 'Gut genäht – Teil 3',
@@ -571,13 +551,11 @@
       },
     },
 
-    // Sew it Good - Part 4 (Lv 0)
     // Was: Sew it Good - Part 4
     '5ae4496986f774459e77beb6': {
       name: 'Gut genäht – Teil 4',
     },
 
-    // Sew it Good - Part 2 (Lv 0)
     // Was: Sew it Good - Part 2
     '5ae4497b86f7744cf402ed00': {
       name: 'Gut genäht – Teil 2',
@@ -601,7 +579,6 @@
       },
     },
 
-    // Pathfinder (Lv 0)
     // Was: Pathfinder
     '5ae449c386f7744bde357697': {
       name: 'Ortskundig',
@@ -647,7 +624,6 @@
       },
     },
 
-    // Living High is Not a Crime (Lv 0)
     // Was: Living High is Not a Crime
     '5b47891f86f7744d1b23c571': {
       name: 'Luxus ist kein Verbrechen',
@@ -703,7 +679,6 @@
       },
     },
 
-    // Small Things, Big Help (Lv 0)
     // Was: Small Things, Big Help
     '5c10f94386f774227172c572': {
       name: 'Kleine Dinge, große Hilfe',
@@ -735,7 +710,6 @@
       },
     },
 
-    // Reserve Expert (Lv 0)
     // Was: Reserve Expert
     '608974af4b05530f55550c21': {
       name: 'Reserve-Experte',
@@ -777,7 +751,6 @@
       },
     },
 
-    // Fresh Stock (Lv 0)
     // Was: Fresh Stock
     '69ce21e990144e437802b1e0': {
       name: 'Frische Ware',
@@ -793,7 +766,6 @@
       },
     },
 
-    // New Beginning (Lv 25)
     // Was: New Beginning
     '6761f28a022f60bb320f3e95': {
       name: 'Neuanfang',
@@ -883,7 +855,6 @@
       },
     },
 
-    // Antique Enthusiast (Lv 42)
     // Was: Antique Enthusiast
     '5c1141f386f77430ff393792': {
       name: 'Antiquitätenliebhaber',
