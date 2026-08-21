@@ -67,6 +67,72 @@
       },
     },
 
+    // Dosenschießen / Shooting Cans (Lv 1)
+    '657315df034d76585f032e01': {
+      objectives: {
+        '6a54a310b22ea41cf1c54a20': {
+          // Was: Eliminate any target on Ground Zero
+          description: 'Eliminiere ein beliebiges Ziel auf Ground Zero',
+        },
+      },
+    },
+
+    // Grenadier (Lv 6)
+    '5c0d190cd09282029f5390d8': {
+      objectives: {
+        '5c1b760686f77412780211a3': {
+          // Was: Eliminate any target with hand grenades or grenade launchers
+          description: 'Eliminiere ein beliebiges Ziel mit Handgranaten oder Granatwerfern',
+        },
+      },
+    },
+
+    // Angelausrüstung / Fishing Gear (Lv 8)
+    '5a27b75b86f7742e97191958': {
+      objectives: {
+        '5a27d81a86f774472a6e0456': {
+          // Was: Stash an MF-UNTAR body armor in the boat
+          description: 'Verstaue eine MF-UNTAR-Schutzweste im Boot',
+        },
+      },
+    },
+
+    // Feuchte Angelegenheit – Teil 1 / A Shooting Position (Lv 8)
+    '5a27bb8386f7741c770d2d0a': {
+      objectives: {
+        '5c9de99286f7741ced54c902': {
+          // Was: Eliminate Scavs with an M4A1, M16, ADAR, or TX-15 on Shoreline
+          description: 'Eliminiere Scavs mit einer M4A1, M16, ADAR oder TX-15 auf Shoreline',
+        },
+      },
+    },
+
+    // One-Way Ticket (Lv 8)
+    '5a03153686f77442d90e2171': {
+      objectives: {
+        '5c9a17c686f7747dbe2da3c1': {
+          // Was: Eliminate 15 targets with headshots while using an AUG on Factory
+          description: 'Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt',
+        },
+      },
+    },
+
+    // Der Tarkov Schütze – Teil 2 / The Tarkov Shooter - Part 2 (Lv 9)
+    '5bc479e586f7747f376c7da3': {
+      objectives: {
+        '5bd983d886f7747ba73fc246': {
+          // Was: Shoot any target in the legs from over 40 meters away with a bolt-action rifle
+          description:
+            'Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in die Beine',
+        },
+        '5bd9944f86f774035c4877f3': {
+          // Was: Shoot any target in the head from over 40 meters away with a bolt-action rifle
+          description:
+            'Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in den Kopf',
+        },
+      },
+    },
+
     // Glory to CPSU (Lv 6) / Glory to CPSU
     // One objective of this task has a German entry, the neighbouring one does
     // not — the German bundle resolves per string, so a single missing entry

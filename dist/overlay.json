@@ -8444,6 +8444,51 @@
             }
           }
         },
+        "657315df034d76585f032e01": {
+          "objectives": {
+            "6a54a310b22ea41cf1c54a20": {
+              "description": "Eliminiere ein beliebiges Ziel auf Ground Zero"
+            }
+          }
+        },
+        "5c0d190cd09282029f5390d8": {
+          "objectives": {
+            "5c1b760686f77412780211a3": {
+              "description": "Eliminiere ein beliebiges Ziel mit Handgranaten oder Granatwerfern"
+            }
+          }
+        },
+        "5a27b75b86f7742e97191958": {
+          "objectives": {
+            "5a27d81a86f774472a6e0456": {
+              "description": "Verstaue eine MF-UNTAR-Schutzweste im Boot"
+            }
+          }
+        },
+        "5a27bb8386f7741c770d2d0a": {
+          "objectives": {
+            "5c9de99286f7741ced54c902": {
+              "description": "Eliminiere Scavs mit einer M4A1, M16, ADAR oder TX-15 auf Shoreline"
+            }
+          }
+        },
+        "5a03153686f77442d90e2171": {
+          "objectives": {
+            "5c9a17c686f7747dbe2da3c1": {
+              "description": "Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt"
+            }
+          }
+        },
+        "5bc479e586f7747f376c7da3": {
+          "objectives": {
+            "5bd983d886f7747ba73fc246": {
+              "description": "Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in die Beine"
+            },
+            "5bd9944f86f774035c4877f3": {
+              "description": "Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in den Kopf"
+            }
+          }
+        },
         "64f5aac4b63b74469b6c14c2": {
           "objectives": {
             "6a26943d55478d73e6b4fadf": {
@@ -8478,8 +8523,8 @@
     }
   },
   "$meta": {
-    "version": "1.67",
-    "generated": "2026-08-21T10:12:54.095Z",
-    "sha256": "272fb993f9a6c40531622f9365f568c8174ee2a193aa94ba928836ecfd84c753"
+    "version": "1.68",
+    "generated": "2026-08-21T10:16:30.392Z",
+    "sha256": "fdbaced07a8d93f82972e4b98979372fa32fc22c857e8cbca1cd45feb35c7737"
   }
 }
