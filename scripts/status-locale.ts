@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * German translation status.
+ * Translation status for one locale, measured against the English source.
  *
  * Answers the three questions that otherwise get re-derived by hand every
  * session, and answered slightly differently each time:
@@ -42,7 +42,7 @@ interface TraderRow {
   covered: number;
 }
 
-const NO_TRADER = '(kein Händler)';
+const NO_TRADER = '(no trader)';
 
 /**
  * What this overlay patches, keyed the way the translation bundle keys it:
@@ -121,7 +121,7 @@ function traderName(bundle: Awaited<ReturnType<typeof fetchLocaleBundle>>, id: u
   return typeof nickname === 'string' && nickname ? nickname : id;
 }
 
-export async function statusDe(locale = 'de'): Promise<number> {
+export async function statusLocale(locale: string): Promise<number> {
   const { srcDir } = getProjectPaths();
   const overrideFile = join(srcDir, 'overrides', 'locales', `${locale}.json5`);
 
@@ -201,7 +201,7 @@ export async function statusDe(locale = 'de'): Promise<number> {
     return typeof current === 'string' && current !== was;
   });
 
-  printHeader(`GERMAN TRANSLATION STATUS (${locale})`);
+  printHeader(`TRANSLATION STATUS (${locale})`);
   const sorted = [...rows.values()].sort(
     (a, b) => b.openNames + b.openObjectives - (a.openNames + a.openObjectives)
   );
@@ -255,10 +255,18 @@ export async function statusDe(locale = 'de'): Promise<number> {
 }
 
 if (isDirectExecution(import.meta.url)) {
-  statusDe(process.argv[2] ?? 'de')
+  const locale = process.argv[2];
+  if (!locale || locale === 'en') {
+    printError(
+      'Pass the locale to report on, e.g. `status-locale de`. ' +
+        'Comparing en against itself yields nothing.'
+    );
+    process.exit(2);
+  }
+  statusLocale(locale)
     .then((code) => process.exit(code))
     .catch((error: unknown) => {
-      printError('status-de failed', error instanceof Error ? error : new Error(String(error)));
+      printError('status-locale failed', error instanceof Error ? error : new Error(String(error)));
       process.exit(2);
     });
 }

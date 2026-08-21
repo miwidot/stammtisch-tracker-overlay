@@ -11,7 +11,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { readCoverage, readWasComments } from '../scripts/status-de.js';
+import { readCoverage, readWasComments } from '../scripts/status-locale.js';
 
 let dir: string;
 const write = (body: string) => {
