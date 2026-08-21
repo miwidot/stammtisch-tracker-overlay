@@ -8577,6 +8577,95 @@
               "description": "Übergib den Gegenstand: Dogtag BEAR oder Dogtag USEC"
             }
           }
+        },
+        "6a5ccda873f06065630d61b0": {
+          "objectives": {
+            "6a5ccda873f06065630d61b2": {
+              "description": "Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine 12ga-Schrotflinte auf Streets of Tarkov benutzt"
+            }
+          }
+        },
+        "5c1234c286f77406fa13baeb": {
+          "objectives": {
+            "5c1fa9c986f7740de474cb3d": {
+              "description": "Eliminiere PMCs mit gängigen Scav-Waffen auf Customs, während du die angegebene Ausrüstung trägst"
+            }
+          }
+        },
+        "59689ee586f7740d1570bbd5": {
+          "objectives": {
+            "6a576ccec23300f0309ab511": {
+              "description": "Verstaue ein Gasanalysegerät im Labor auf Factory zur Tageszeit"
+            }
+          }
+        },
+        "5a68667486f7742607157d28": {
+          "objectives": {
+            "6a606eb43eb95a13ff6aa1f3": {
+              "description": "Überlebe für 8 Minuten, während du unter Erschöpfung leidest (durch Aufbrauchen der Bein-Ausdauer)"
+            }
+          }
+        },
+        "66058cc5bb83da7ba474aba9": {
+          "objectives": {
+            "662ba61d3ed61b6b78187b71": {
+              "description": "Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena"
+            }
+          }
+        },
+        "6761ff17cdc36bd66102e9d0": {
+          "name": "Neuanfang",
+          "objectives": {
+            "6761ff17cdc36bd66102e9d8": {
+              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "6761ff17cdc36bd66102e9d9": {
+              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "6761ff17cdc36bd66102e9da": {
+              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "6761ff17cdc36bd66102e9e1": {
+              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+            }
+          }
+        },
+        "6848100b00afffa81f09e365": {
+          "name": "Neuanfang",
+          "objectives": {
+            "6848100b00afffa81f09e36d": {
+              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "6848100b00afffa81f09e36e": {
+              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "6848100b00afffa81f09e36f": {
+              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "6848100b00afffa81f09e376": {
+              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+            }
+          }
+        },
+        "68481881f43abfdda2058369": {
+          "name": "Neuanfang",
+          "objectives": {
+            "68486a0eda4828c0772e337b": {
+              "description": "Überlebe und entkomme aus Interchange"
+            },
+            "68481881f43abfdda2058371": {
+              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "68481881f43abfdda2058372": {
+              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "68481881f43abfdda2058373": {
+              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "68481881f43abfdda205837a": {
+              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+            }
+          }
         }
       }
     },
@@ -8599,7 +8688,7 @@
   },
   "$meta": {
     "version": "1.68",
-    "generated": "2026-08-21T10:28:44.802Z",
-    "sha256": "0030dea95a900d9d4d06eab9e60d00dacd584cc96fc46d436be82ad269745185"
+    "generated": "2026-08-21T11:14:13.319Z",
+    "sha256": "8d976dd4a8acd47f5fb088f4d274f224bee7729275d13c6b08221214b730622b"
   }
 }

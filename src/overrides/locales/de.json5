@@ -15,6 +15,20 @@
   //   "Sniper Scavs"      -> "Scav-Scharfschützen"
   //   "body armor"        -> "Körperschutz"
   //   "Eliminate ..."     -> "Eliminiere ..."
+  //   "figurine"          -> "-Figur"
+  //   "equipment/gear"    -> "Ausrüstung"
+  //   "Fatigue"           -> "Erschöpfung"
+  //   "Survive and extract from X" -> "Überlebe und entkomme aus X"
+  //   "Win a match in X mode in Arena" -> "Gewinne ein Match im X-Modus in Arena"
+  //   "daytime Factory"   -> "Factory zur Tageszeit"
+  //
+  // Some of these entries are not plain German-missing gaps: the German
+  // bundle can hold an OLDER English string that upstream has since reworded
+  // (stale-English drift), a single wrong letter (casing), or — for the
+  // "New Beginning" prestige tasks — a swapped language field where the
+  // German bundle resolves to English while the English bundle resolves to
+  // German (see src/overrides/locales/en.json5 for the mirrored fix). Each
+  // affected block below explains which of these applies.
   //
   // Every entry carries the English source it replaces, so a reviewer can
   // judge the translation without looking anything up, and so
@@ -274,6 +288,162 @@
         // Was: Hand over the item: Dogtag BEAR or Dogtag USEC
         '5b0548e686f7740306753506': {
           description: 'Übergib den Gegenstand: Dogtag BEAR oder Dogtag USEC',
+        },
+      },
+    },
+
+    // Secret Message / Geheime Nachricht
+    // Objective was left in English in the German bundle.
+    '6a5ccda873f06065630d61b0': {
+      objectives: {
+        // Was: Eliminate any target with headshots using a 12ga shotgun on Streets of Tarkov
+        '6a5ccda873f06065630d61b2': {
+          description: 'Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine 12ga-Schrotflinte auf Streets of Tarkov benutzt',
+        },
+      },
+    },
+
+    // Setup / Vorbereitung
+    // Objective was left in English in the German bundle.
+    '5c1234c286f77406fa13baeb': {
+      objectives: {
+        // Was: Eliminate PMC operatives with common Scav weapons while wearing the specified gear on Customs
+        '5c1fa9c986f7740de474cb3d': {
+          description: 'Eliminiere PMCs mit gängigen Scav-Waffen auf Customs, während du die angegebene Ausrüstung trägst',
+        },
+      },
+    },
+
+    // Sanitary Standards / Hygienevorschriften
+    // Objective was left in English in the German bundle.
+    '59689ee586f7740d1570bbd5': {
+      objectives: {
+        // Was: Stash a Gas analyzer in the med lab on Daytime Factory
+        '6a576ccec23300f0309ab511': {
+          description: 'Verstaue ein Gasanalysegerät im Labor auf Factory zur Tageszeit',
+        },
+      },
+    },
+
+    // Health Care Privacy - Part 4 / Datenschutz im Gesundheitswesen – Teil 4
+    // Objective was left in English in the German bundle.
+    '5a68667486f7742607157d28': {
+      objectives: {
+        // Was: Gain the Fatigue status effect (by exhausting leg stamina) and maintain it for 8 minutes
+        '6a606eb43eb95a13ff6aa1f3': {
+          description: 'Überlebe für 8 Minuten, während du unter Erschöpfung leidest (durch Aufbrauchen der Bein-Ausdauer)',
+        },
+      },
+    },
+
+    // To Great Heights! - Part 3 / Zu neuen Höhen! – Teil 3
+    // Objective was left in English in the German bundle.
+    '66058cc5bb83da7ba474aba9': {
+      objectives: {
+        // Was: Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
+        '662ba61d3ed61b6b78187b71': {
+          description: 'Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena',
+        },
+      },
+    },
+
+    // New Beginning (Prestige 2, 3, 4) / Neuanfang
+    //
+    // Two distinct problems collapse into these three tasks:
+    //
+    // 1. Swapped language fields: the German bundle currently resolves these
+    //    task names to the English string "New Beginning" instead of
+    //    "Neuanfang". src/overrides/locales/en.json5 already fixes the
+    //    mirror-image bug on the English side (that bundle resolves to the
+    //    German "Neuanfang"). See that file's header for the full context and
+    //    proof link (https://json.tarkov.dev/regular/tasks_en).
+    //
+    // 2. Stale English in the figurine handover objectives: the German
+    //    bundle held an OLDER English phrasing of these objectives. Upstream
+    //    has since reworded the English side to "any ... figurine"; the
+    //    German bundle never picked up either the translation or the reword,
+    //    so it still reads plain English throughout.
+    //    Proof: https://json.tarkov.dev/regular/tasks_en
+    //
+    // Terminology: "figurine" -> "-Figur", matching the existing translated
+    // string "Finde eine Killa-Figur im Raid" elsewhere in this bundle.
+    // "Trader" -> "Händler" has no direct precedent in the data reviewed for
+    // this bundle; flagging for reviewer sign-off.
+    '6761ff17cdc36bd66102e9d0': {
+      // Was: New Beginning
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Hand over any found in raid PMC figurine
+        '6761ff17cdc36bd66102e9d8': {
+          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+        },
+        // Was: Hand over any found in raid Scav figurine
+        '6761ff17cdc36bd66102e9d9': {
+          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+        },
+        // Was: Hand over any found in raid Boss figurine
+        '6761ff17cdc36bd66102e9da': {
+          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+        },
+        // Was: Hand over any found in raid Trader figurine
+        '6761ff17cdc36bd66102e9e1': {
+          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+        },
+      },
+    },
+
+    '6848100b00afffa81f09e365': {
+      // Was: New Beginning
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Hand over any found in raid PMC figurine
+        '6848100b00afffa81f09e36d': {
+          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+        },
+        // Was: Hand over any found in raid Scav figurine
+        '6848100b00afffa81f09e36e': {
+          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+        },
+        // Was: Hand over any found in raid Boss figurine
+        '6848100b00afffa81f09e36f': {
+          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+        },
+        // Was: Hand over any found in raid Trader figurine
+        '6848100b00afffa81f09e376': {
+          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+        },
+      },
+    },
+
+    '68481881f43abfdda2058369': {
+      // Was: New Beginning
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Survive and extract from Interchange
+        //
+        // Data error, not a translation gap: the German bundle held an
+        // entirely different objective here ("Hand over any of the found in
+        // raid limited Labyrinth figurines"), not an older/mistranslated
+        // version of this one. Fixed here; also needs reporting upstream as
+        // a data bug, not a locale bug.
+        '68486a0eda4828c0772e337b': {
+          description: 'Überlebe und entkomme aus Interchange',
+        },
+        // Was: Hand over any found in raid PMC figurine
+        '68481881f43abfdda2058371': {
+          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+        },
+        // Was: Hand over any found in raid Scav figurine
+        '68481881f43abfdda2058372': {
+          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+        },
+        // Was: Hand over any found in raid Boss figurine
+        '68481881f43abfdda2058373': {
+          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+        },
+        // Was: Hand over any found in raid Trader figurine
+        '68481881f43abfdda205837a': {
+          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
         },
       },
     },
