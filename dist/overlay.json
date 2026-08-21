@@ -8502,6 +8502,81 @@
               "description": "Eliminiere PMCs, ohne Körperschutz oder Plattenträger zu tragen"
             }
           }
+        },
+        "59c512ad86f7741f0d09de9b": {
+          "name": "Der Peiniger – Teil 1",
+          "objectives": {
+            "59674d5186f77446b852d5f7": {
+              "description": "Eliminiere Scavs mit einer AKS-74U auf Customs"
+            }
+          }
+        },
+        "59c50a9e86f7745fef66f4ff": {
+          "name": "Der Peiniger – Teil 2",
+          "objectives": {
+            "59674d5186f00443b872d5f7": {
+              "description": "Eliminiere Scavs mit Waffen der AKM-Serie auf Shoreline"
+            }
+          }
+        },
+        "59c50c8886f7745fed3193bf": {
+          "name": "Der Peiniger – Teil 3",
+          "objectives": {
+            "59624d5386f77446b872d5f7": {
+              "description": "Eliminiere Scavs mit Waffen im Kaliber 9x39 auf Reserve"
+            },
+            "5cb5e2ff86f7746ef64c979b": {
+              "description": "Finde Halbmasken im Raid"
+            },
+            "59c50f1686f77412ef2c01e7": {
+              "description": "Übergebe die Halbmasken"
+            }
+          }
+        },
+        "59ca264786f77445a80ed044": {
+          "objectives": {
+            "59674d5986f77446b872d5f7": {
+              "description": "Eliminiere Scavs mit einer SVDS oder TKPD auf Lighthouse"
+            },
+            "59ca27f786f77445aa0ddc14": {
+              "description": "Eliminiere Scavs auf Lighthouse, während du eine Scav Weste trägst"
+            },
+            "59ca293c86f91445a80ed047": {
+              "description": "Finde Bars A-2607 95Kh18 Messer im Raid"
+            },
+            "59ca29ab86f77445ab431c86": {
+              "description": "Übergebe die Messer"
+            }
+          }
+        },
+        "59ca29fb86f77445ab465c87": {
+          "objectives": {
+            "59ca2bdc86f77445a80ed148": {
+              "description": "Finde ein Colt M4A1-Sturmgewehr im Raid"
+            },
+            "59ca2c9e86f77428ea721232": {
+              "description": "Finde PM „Makarov“-Pistolen im Raid"
+            },
+            "5c922dde86f77438500a0fec": {
+              "description": "Eliminiere PMCs mit leichten Maschinengewehren"
+            },
+            "6a57a51fe5c2c08b474109fb": {
+              "description": "Eliminiere Scavs mit leichten Maschinengewehren"
+            }
+          }
+        },
+        "59ca2eb686f77445a80ed049": {
+          "objectives": {
+            "59ca2fba86f77445e4732b25": {
+              "description": "Eliminiere PMCs mit den angegebenen Waffen auf Lighthouse, Shoreline, Reserve, Ground Zero oder The Lab"
+            },
+            "6a57a60057699da0521e1c7b": {
+              "description": "Finde und eliminiere einen beliebigen Boss"
+            },
+            "5b0548e686f7740306753506": {
+              "description": "Übergib den Gegenstand: Dogtag BEAR oder Dogtag USEC"
+            }
+          }
         }
       }
     },
@@ -8524,7 +8599,7 @@
   },
   "$meta": {
     "version": "1.68",
-    "generated": "2026-08-21T10:16:30.392Z",
-    "sha256": "fdbaced07a8d93f82972e4b98979372fa32fc22c857e8cbca1cd45feb35c7737"
+    "generated": "2026-08-21T10:28:44.802Z",
+    "sha256": "0030dea95a900d9d4d06eab9e60d00dacd584cc96fc46d436be82ad269745185"
   }
 }
