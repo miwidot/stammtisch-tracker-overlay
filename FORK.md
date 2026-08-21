@@ -33,15 +33,27 @@ Der Build (`scripts/build.ts`) lädt **alle** JSON5-Dateien aus `src/overrides/l
 
 ---
 
-## Was wo hingehört
+## Was wo hingehört — und wohin es am Ende soll
 
-**In unsere `de.json5`:** Korrekturen am *deutschen* Bundle von tarkov.dev. Fehlende, falsche oder unverständliche Übersetzungen.
+**Grundhaltung: Deutsche Korrekturen gehören upstream.** Der `locales`-Mechanismus ist genau dafür gebaut — deren `en.json5` korrigiert englische Strings, unsere `de.json5` korrigiert deutsche. Dieselbe Struktur, dasselbe Schema. Deutsch fehlt dort nur, weil es bisher niemand beigetragen hat.
 
-**NICHT in unsere `de.json5`, sondern als PR an Upstream:** sachliche Datenfehler (falsches Level, falsche Map, falscher Händler). Die sind sprachunabhängig und betreffen alle Nutzer des Overlays — die gehören in `src/overrides/tasks.json5` **upstream**, nicht in unseren Fork.
+Drei Gründe:
+1. **Fair.** Wir leben von 211 Korrekturen, die andere gepflegt haben. Deutschsprachige Nutzer von tarkovtracker.org hätten denselben Nutzen.
+2. **Billiger für uns.** Was upstream landet, pflegen wir nicht mehr. Jeder Eintrag, der hier liegen bleibt, ist Ballast bei jedem Merge.
+3. **MIT-Lizenz**, also geringe Hürde.
 
-Faustregel: *„Der deutsche Text ist falsch"* → unser Fork. *„Die Daten sind falsch"* → Upstream-PR.
+### Dieses Repo ist die Vorstufe, nicht das Endlager
 
-MIT-Lizenz macht Rückgaben hier unkomplizierter als beim App-Fork (GPL-3).
+| Fall | Weg |
+|---|---|
+| Deutsche Übersetzung objektiv falsch/fehlend | hier eintragen, testen, **dann als PR upstream** |
+| Sachlicher Datenfehler (Level, Map, Händler) | **direkt** Upstream-PR gegen `src/overrides/tasks.json5` — nie hier |
+| Stammtisch-spezifische Formulierung | bleibt hier |
+| Upstream lehnt ab / PR hängt | bleibt hier, bis geklärt |
+
+**Ablauf:** Eintrag hier → bauen → im Tracker prüfen, dass die Übersetzung ankommt → PR an Upstream. Wird er gemerged, **Eintrag hier wieder entfernen** (der nächste `git merge upstream/main` bringt ihn dann von dort mit). `npm run check-overrides` hilft dabei: es meldet, was Upstream inzwischen selbst abdeckt.
+
+So bleibt diese Datei dauerhaft klein — sie enthält idealerweise nur, was gerade unterwegs oder bewusst unser ist.
 
 ---
 
