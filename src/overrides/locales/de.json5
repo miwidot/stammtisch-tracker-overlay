@@ -18,7 +18,7 @@
   //
   // Every entry carries the English source it replaces, so a reviewer can
   // judge the translation without looking anything up, and so
-  // `npm run check-overrides` can flag it once upstream fixes it itself.
+  // `npm run check-overrides` can flag it once tarkov.dev fixes it itself.
 
   tasks: {
     // Burning Rubber / Heiße Reifen
