@@ -225,7 +225,7 @@
         },
         // Was: Hand over the items
         '59c50f1686f77412ef2c01e7': {
-          description: 'Übergebe die Halbmasken',
+          description: 'Übergib die Halbmasken',
         },
       },
     },
@@ -247,7 +247,7 @@
         },
         // Was: Hand over the items
         '59ca29ab86f77445ab431c86': {
-          description: 'Übergebe die Messer',
+          description: 'Übergib die Messer',
         },
       },
     },

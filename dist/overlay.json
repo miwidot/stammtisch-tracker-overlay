@@ -8529,7 +8529,7 @@
               "description": "Finde Halbmasken im Raid"
             },
             "59c50f1686f77412ef2c01e7": {
-              "description": "Übergebe die Halbmasken"
+              "description": "Übergib die Halbmasken"
             }
           }
         },
@@ -8545,7 +8545,7 @@
               "description": "Finde Bars A-2607 95Kh18 Messer im Raid"
             },
             "59ca29ab86f77445ab431c86": {
-              "description": "Übergebe die Messer"
+              "description": "Übergib die Messer"
             }
           }
         },
@@ -8990,8 +8990,8 @@
     }
   },
   "$meta": {
-    "version": "1.68",
-    "generated": "2026-08-21T14:23:56.117Z",
-    "sha256": "205ea9a9610e5780dbc24bfe7526c83973e4cbc5e660d29a49a3b93a681ea29b"
+    "version": "1.69",
+    "generated": "2026-08-21T14:26:24.072Z",
+    "sha256": "9b4f72ee05a4f5f6ae8965dfff81bb8cde96c9abc881d522cd4c0abf84224d82"
   }
 }
