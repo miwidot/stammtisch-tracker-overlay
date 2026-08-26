@@ -935,5 +935,25 @@
         },
       },
     },
+
+    // Hot Wheels (BTR-Fahrer)
+    //
+    // Only the optional objective is English; the required one next to it
+    // reads German, which is what makes the task look half-translated. The
+    // bundle resolves per string, so one missing entry is enough.
+    //
+    // No attested source for this wording: the bundle has no "main objective"
+    // and no "as soon as possible" anywhere. "Schliesse ... ab" follows the
+    // attested "Complete the task X" -> "Schliesse die Aufgabe X ab"; the rest
+    // is composed. Revisit if BSG ships its own German for it.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (673f4e956f1b89c7bc0f56ef)
+    '673f4e956f1b89c7bc0f56ef': {
+      objectives: {
+        // Was: Complete the main objective as soon as possible
+        '673f5065cdfe082966842575': {
+          description: 'Schließe das Hauptziel so schnell wie möglich ab',
+        },
+      },
+    },
   },
 }
