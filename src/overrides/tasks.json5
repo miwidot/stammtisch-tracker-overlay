@@ -993,6 +993,22 @@
   // Entries below are ACTIVE corrections; `npm run check-overrides` verifies
   // them against the live API.
 
+  // A Helping Hand - minimum player level to start
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Helping_Hand
+  //
+  // The wiki's Requirements section states "Must be level 20 to start this
+  // quest." tarkov.dev serves minPlayerLevel 0 (no requirement) in every mode.
+  '6752f6d83038f7df520c83e8': {
+    minPlayerLevel: 20, // Was: 0
+  },
+
+  // Sew it Good - Part 1 - minimum player level to start
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sew_it_Good_-_Part_1
+  //
+  '5ae4495086f77443c122bc40': {
+    minPlayerLevel: 25, // Was: 0 (all modes, no level requirement served)
+  },
+
   // Debut - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debut
   //
@@ -1972,6 +1988,13 @@
         value: 3,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
+    objectives: {
+      // 2026-08-25: objective text reworded (any map, not the listed four)
+      '5d2701b586f77469f1599fe2': {
+        description: 'Eliminate 50 Scavs all over the Tarkov territory', // Was: Eliminate Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline
+        maps: [], // Was: Streets of Tarkov, Reserve, Lighthouse, Shoreline (now any map)
+      },
+    },
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Woods_Keeper
   //
@@ -3008,7 +3031,34 @@
         compareMethod: '>=',
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 4,
-      }, // Was: [] (player level requirement, minPlayerLevel 29)
-    ],
+        }, // Was: [] (player level requirement, minPlayerLevel 29)
+      ],
+  },
+
+  // The Tarkov Shooter - Part 5 - Rewards corrected
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_5
+  // Exp 13100 (was 28000); Roubles 85000 (was 275000); the Mosin Archangel
+  // chassis reward + its Jaeger LL3 barter are replaced by the ATI Monte Carlo
+  // stock (which is also barter-unlocked at Jaeger LL3), plus a Ski hat; Jaeger
+  // reputation +0.02.
+  '5bc4836986f7740c0152911c': {
+    experience: 13100, // Was: 28000
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.02 }, // Was: none
+      ],
+      items: [
+        { count: 85000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 275000
+        { count: 1, item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' } }, // Was: Mosin Archangel chassis x1
+        { count: 1, item: { id: '5ab8f20c86f7745cdb629fb2', name: 'Ski hat with holes for eyes' } },
+      ],
+      offerUnlock: [
+        {
+          level: 3,
+          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
+          trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        }, // Was: Jaeger LL3 barter for Mosin Archangel chassis
+      ],
+    },
   },
 }
