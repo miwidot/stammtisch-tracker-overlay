@@ -944,5 +944,21 @@
         },
       },
     },
+
+    // Demonstration Model
+    //
+    // Not a missing translation - BSG's own German bundle serves the English
+    // string as the German value for this task's name. Only the name exists
+    // for this task in the bundle; there is no description or objective text
+    // to compare against.
+    //
+    // No attested source for a German rendering of this name. "Vorführmodell"
+    // is a composed, idiomatic proposal, not a BSG term. Revisit if BSG ships
+    // its own German for it.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a5cd2178fd7c2b201032f3f)
+    '6a5cd2178fd7c2b201032f3f': {
+      // Was: Demonstration Model
+      name: 'Vorführmodell',
+    },
   },
 }
