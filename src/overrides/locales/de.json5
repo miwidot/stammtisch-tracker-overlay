@@ -1240,6 +1240,342 @@
         },
       },
     },
+
+    // PVE-exclusive Arena task chain ("[PVE ZONE]" suffix)
+    //
+    // These tasks only exist in the PVE game mode (json.tarkov.dev/pve/tasks);
+    // they have no id in the regular bundle at all. The German bundle left
+    // both the task names and several objective descriptions in plain
+    // English. The "[PVE ZONE]" suffix is kept in every translated name:
+    // BSG's own German localization drops the suffix entirely, which would
+    // make the PVE and PVP variants of these tasks display identically and
+    // become indistinguishable in the tracker.
+    //
+    // 16 of the 21 names below have an attested PVP-mode twin (same name
+    // minus "[PVE ZONE]" replaced by "[PVP ZONE]"); those names are copied
+    // verbatim from the PVP twin's translated German name, including
+    // whichever hyphen variant that bundle already uses. The remaining 5
+    // (both "Professional Fitness" parts, "Arena Business", "Hold the
+    // Lead", and "To Great Heights! - Part 6") have no translated twin
+    // anywhere in the bundle; "To Great Heights! - Part 6" is derived from
+    // the "Teil 1"-"Teil 5" naming already used by its own chain, the other
+    // 4 are original translations.
+    //
+    // Proof: https://json.tarkov.dev/pve/tasks_de
+
+    // Easy Money - Part 1 / Leicht verdientes Geld - Teil 1
+    // Name twin: 66058cb22cee99303f1ba067 ("Easy Money - Part 1 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (6834145ebc1f443d7603c8a7)
+    '6834145ebc1f443d7603c8a7': {
+      // Was: Easy Money - Part 1 [PVE ZONE]
+      name: 'Leicht verdientes Geld - Teil 1 [PVE ZONE]',
+    },
+
+    // Easy Money - Part 2 / Leicht verdientes Geld - Teil 2
+    // Name twin: 66058cb5ae4719735349b9e8 ("Easy Money - Part 2 [PVP ZONE]").
+    // The Food-category objective has no twin; it mirrors the sibling
+    // Drinks-category objective on this same task, which is already
+    // translated ("aus der Getränke-Kategorie").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (6834158f2f0e2a7eb90b62c8)
+    '6834158f2f0e2a7eb90b62c8': {
+      // Was: Easy Money - Part 2 [PVE ZONE]
+      name: 'Leicht verdientes Geld - Teil 2 [PVE ZONE]',
+      objectives: {
+        // Was: Hand over the found in raid items from the Food category
+        '6834158f2f0e2a7eb90b62cc': {
+          description: 'Übergib im Raid gefundene Gegenstände aus der Lebensmittel-Kategorie',
+        },
+      },
+    },
+
+    // Balancing - Part 1
+    // Name twin: 66058cb7c7f3584787181476 ("Balancing - Part 1 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341846186efa3c5b07f989)
+    '68341846186efa3c5b07f989': {
+      // Was: Balancing - Part 1 [PVE ZONE]
+      name: 'Balancing - Teil 1 [PVE ZONE]',
+    },
+
+    // Balancing - Part 2
+    // Name twin: 66058cb9e8e4f17985230805 ("Balancing - Part 2 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341a0b2f0e2a7eb90b62d4)
+    '68341a0b2f0e2a7eb90b62d4': {
+      // Was: Balancing - Part 2 [PVE ZONE]
+      name: 'Balancing - Teil 2 [PVE ZONE]',
+    },
+
+    // Surprise / Überraschung
+    // Name twin: 66058cbb06ef1d50a60c1f46 ("Surprise [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341b407559f4e6d50bc0ce)
+    '68341b407559f4e6d50bc0ce': {
+      // Was: Surprise [PVE ZONE]
+      name: 'Überraschung [PVE ZONE]',
+    },
+
+    // Create a Distraction - Part 1 / Ablenkungsmanöver - Teil 1
+    // Name twin: 66058cbd9f59e625462acc8e ("Create a Distraction - Part 1 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341c4babec72d95d0c1260)
+    '68341c4babec72d95d0c1260': {
+      // Was: Create a Distraction - Part 1 [PVE ZONE]
+      name: 'Ablenkungsmanöver - Teil 1 [PVE ZONE]',
+    },
+
+    // Create a Distraction - Part 2 / Ablenkungsmanöver - Teil 2
+    // Name twin: 66058cbf2f19c31a5a1337ec ("Create a Distraction - Part 2 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341d7d7559f4e6d50bc0db)
+    '68341d7d7559f4e6d50bc0db': {
+      // Was: Create a Distraction - Part 2 [PVE ZONE]
+      name: 'Ablenkungsmanöver - Teil 2 [PVE ZONE]',
+    },
+
+    // To Great Heights! - Part 1 / Auf zu großen Höhen! - Teil 1
+    // Name twin: 66058cc1da30b620a34e6e86 ("To Great Heights! - Part 1 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341eb25619c8e2a9031501)
+    '68341eb25619c8e2a9031501': {
+      // Was: To Great Heights! - Part 1 [PVE ZONE]
+      name: 'Auf zu großen Höhen! - Teil 1 [PVE ZONE]',
+    },
+
+    // To Great Heights! - Part 2 / Auf zu großen Höhen! - Teil 2
+    // Name twin: 66058cc208308761cf390993 ("To Great Heights! - Part 2 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68341f6fe2e7ef70a3060a0a)
+    '68341f6fe2e7ef70a3060a0a': {
+      // Was: To Great Heights! - Part 2 [PVE ZONE]
+      name: 'Auf zu großen Höhen! - Teil 2 [PVE ZONE]',
+    },
+
+    // To Great Heights! - Part 3 / Auf zu großen Höhen! - Teil 3
+    // Name twin: 66058cc5bb83da7ba474aba9 ("To Great Heights! - Part 3 [PVP ZONE]").
+    // The objective description is also stale English in the German bundle
+    // ("Win a match..." instead of the current "Win 2 matches..."); the
+    // regular-mode twin of this exact same task/objective wording is already
+    // fixed further up in this file (see 66058cc5bb83da7ba474aba9 above),
+    // reused verbatim here.
+    // Proof: https://json.tarkov.dev/pve/tasks_de (6834202a186efa3c5b07f9a2)
+    '6834202a186efa3c5b07f9a2': {
+      // Was: To Great Heights! - Part 3 [PVE ZONE]
+      name: 'Auf zu großen Höhen! - Teil 3 [PVE ZONE]',
+      objectives: {
+        // Was: Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
+        '6834202a186efa3c5b07f9a5': {
+          description:
+            'Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena',
+        },
+      },
+    },
+
+    // To Great Heights! - Part 4 / Auf zu großen Höhen! - Teil 4
+    // Name twin: 66058cc72cee99303f1ba069 ("To Great Heights! - Part 4 [PVP ZONE]").
+    // "Hand over Roubles" translation is attested verbatim elsewhere in this
+    // bundle (objective 6633a85e347a2a2b4051a26b).
+    // Proof: https://json.tarkov.dev/pve/tasks_de (683421515619c8e2a9031511)
+    '683421515619c8e2a9031511': {
+      // Was: To Great Heights! - Part 4 [PVE ZONE]
+      name: 'Auf zu großen Höhen! - Teil 4 [PVE ZONE]',
+      objectives: {
+        // Was: Hand over Roubles
+        '683421515619c8e2a9031514': {
+          description: 'Übergebe Rubel aus deinem EFT-Versteck',
+        },
+      },
+    },
+
+    // To Great Heights! - Part 5 / Auf zu großen Höhen! - Teil 5
+    // Name twin: 66058cc9ae4719735349b9ea ("To Great Heights! - Part 5 [PVP ZONE]"),
+    // but that twin's own objective is untranslated too, so there is no
+    // attested translation of "claiming at least 2nd place in the team"
+    // anywhere in the bundle. The description below adapts the attested
+    // "Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz ..."
+    // pattern used for To Great Heights - Part 3 (see above), changed to a
+    // single match, the 2nd place, and "im Team" for "in the team".
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68342265a8d674b5740b31f0)
+    '68342265a8d674b5740b31f0': {
+      // Was: To Great Heights! - Part 5 [PVE ZONE]
+      name: 'Auf zu großen Höhen! - Teil 5 [PVE ZONE]',
+      objectives: {
+        // Was: Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode
+        '6978a3305f21afb01d7e0c53': {
+          description:
+            'Gewinne ein Match und erreiche dabei mindestens den 2. Platz im Team im TeamFight-, BlastGang- oder CheckPoint-Modus',
+        },
+      },
+    },
+
+    // Against the Conscience - Part 1 / Entgegen jeglichen Gewissens - Teil 1
+    // Name twin: 66058ccbc7f3584787181478 ("Against the Conscience - Part 1 [PVP ZONE]").
+    // "Find out what happened to the champion" and "Survive and extract
+    // from the location" are both attested verbatim elsewhere in this
+    // bundle (e.g. "Finde heraus, was mit dem Wächter passiert ist" and the
+    // many "Überlebe und entkomme aus dem Bereich" objectives).
+    // Proof: https://json.tarkov.dev/pve/tasks_de (6834233fecd5cf3a440d855b)
+    '6834233fecd5cf3a440d855b': {
+      // Was: Against the Conscience - Part 1 [PVE ZONE]
+      name: 'Entgegen jeglichen Gewissens - Teil 1 [PVE ZONE]',
+      objectives: {
+        // Was: Find out what happened to the champion
+        '6834233fecd5cf3a440d8561': {
+          description: 'Finde heraus, was mit dem Champion passiert ist',
+        },
+        // Was: Survive and extract from the location
+        '6834233fecd5cf3a440d8564': {
+          description: 'Überlebe und entkomme aus dem Bereich',
+        },
+      },
+    },
+
+    // Against the Conscience - Part 2 / Entgegen jeglichen Gewissens - Teil 2
+    // Name twin: 66058ccde8e4f17985230807 ("Against the Conscience - Part 2 [PVP ZONE]").
+    // Proof: https://json.tarkov.dev/pve/tasks_de (68342446a8d674b5740b31fc)
+    '68342446a8d674b5740b31fc': {
+      // Was: Against the Conscience - Part 2 [PVE ZONE]
+      name: 'Entgegen jeglichen Gewissens - Teil 2 [PVE ZONE]',
+    },
+
+    // Decisions, Decisions / Entscheidungen, Entscheidungen
+    // Name twin: 66058cd19f59e625462acc90 ("Decisions, Decisions [PVP ZONE]").
+    // "Hand over the found info" is attested verbatim on the Surprise Gift
+    // task further down this bundle (683427418f5b18d29a05d9e9).
+    // Proof: https://json.tarkov.dev/pve/tasks_de (6834254f2f0e2a7eb90b62ef)
+    '6834254f2f0e2a7eb90b62ef': {
+      // Was: Decisions, Decisions [PVE ZONE]
+      name: 'Entscheidungen, Entscheidungen [PVE ZONE]',
+      objectives: {
+        // Was: Hand over the found info
+        '6834254f2f0e2a7eb90b62f2': {
+          description: 'Übergib die gefundenen Informationen',
+        },
+      },
+    },
+
+    // Between Two Fires / Zwischen Zwei Feuern
+    // Name twin: 66058ccf06ef1d50a60c1f48 ("Between Two Fires [PVP ZONE]").
+    // All three objectives are attested verbatim elsewhere on this same PVE
+    // Arena task chain: "Return to the old champion's hideout on Customs"
+    // and "Hand over the found info" on the Surprise Gift task
+    // (683427418f5b18d29a05d9e5, 683427418f5b18d29a05d9e9); "Locate and
+    // obtain the compromising information on Ref" on the Decisions,
+    // Decisions task above (6834254f2f0e2a7eb90b62f1).
+    // Proof: https://json.tarkov.dev/pve/tasks_de (683425dd8f5b18d29a05d9d1)
+    '683425dd8f5b18d29a05d9d1': {
+      // Was: Between Two Fires [PVE ZONE]
+      name: 'Zwischen Zwei Feuern [PVE ZONE]',
+      objectives: {
+        // Was: Return to the old champion's hideout on Customs
+        '683425dd8f5b18d29a05d9d4': {
+          description: 'Kehre zum Versteck des alten Champions auf Customs zurück',
+        },
+        // Was: Locate and obtain the compromising information on Ref
+        '683425dd8f5b18d29a05d9d6': {
+          description: 'Finde kompromittierende Informationen über Ref',
+        },
+        // Was: Hand over the found info
+        '683425dd8f5b18d29a05d9d8': {
+          description: 'Übergib die gefundenen Informationen',
+        },
+      },
+    },
+
+    // Professional Fitness - Part 1 / Professionelle Fitness - Teil 1
+    // No PVP-mode twin (its own PVP name, 69788c2bac719606e40b4e77, is
+    // untranslated too, and so is its objective - no attested translation
+    // of "Play a match" exists anywhere in the bundle). "Spiele ein Match
+    // im X- oder Y-Modus" mirrors the attested "Gewinne ein Match im X-
+    // oder Y-Modus in Arena" sentence structure used elsewhere on this task
+    // chain, only swapping the verb for "Play".
+    // Proof: https://json.tarkov.dev/pve/tasks_de (69788d4e963f08d9140bce19)
+    '69788d4e963f08d9140bce19': {
+      // Was: Professional Fitness - Part 1 [PVE ZONE]
+      name: 'Professionelle Fitness - Teil 1 [PVE ZONE]',
+      objectives: {
+        // Was: Play a match in CheckPoint or Last Hero mode
+        '69788d4e963f08d9140bce1c': {
+          description: 'Spiele ein Match im CheckPoint- oder Last Hero-Modus',
+        },
+      },
+    },
+
+    // Arena Business / Arena-Geschäfte
+    // No PVP-mode twin. All three objectives follow the attested
+    // "Complete the task X" -> "Schließe die Aufgabe X ab" pattern used
+    // throughout this bundle; the referenced task names are plain English
+    // in the objective text itself (BSG's own source strings do not carry
+    // the "[PVE ZONE]" suffix here), so the German task names below also
+    // omit it.
+    // Proof: https://json.tarkov.dev/pve/tasks_de (697878057aa1273126030fb0)
+    '697878057aa1273126030fb0': {
+      // Was: Arena Business [PVE ZONE]
+      name: 'Arena-Geschäfte [PVE ZONE]',
+      objectives: {
+        // Was: Complete the task Professional Fitness - Part 2
+        '69789903c30426685c9f3080': {
+          description: 'Schließe die Aufgabe Professionelle Fitness - Teil 2 ab',
+        },
+        // Was: Complete the task To Great Heights! - Part 6
+        '6978990cbe971818240c2d7f': {
+          description: 'Schließe die Aufgabe Auf zu großen Höhen! - Teil 6 ab',
+        },
+        // Was: Complete the task Hold the Lead
+        '697899167ed646e5d6187fea': {
+          description: 'Schließe die Aufgabe Halte die Führung ab',
+        },
+      },
+    },
+
+    // Hold the Lead / Halte die Führung
+    // No PVP-mode twin (its own PVP name, 697895b6c639962b2e0cf268, is
+    // untranslated too). "Eliminiere Gegner in Arena" mirrors the attested
+    // "Eliminiere Gegner in einem beliebigen Spielmodus in Arena" objective
+    // on Against the Conscience - Part 2 above, without the "any game mode"
+    // qualifier this objective's English text does not have.
+    // Proof: https://json.tarkov.dev/pve/tasks_de (69789660b2187365e70bb94a)
+    '69789660b2187365e70bb94a': {
+      // Was: Hold the Lead [PVE ZONE]
+      name: 'Halte die Führung [PVE ZONE]',
+      objectives: {
+        // Was: Eliminate enemies in Arena
+        '69789660b2187365e70bb94d': {
+          description: 'Eliminiere Gegner in Arena',
+        },
+      },
+    },
+
+    // Professional Fitness - Part 2 / Professionelle Fitness - Teil 2
+    // No PVP-mode twin (its own PVP name, 69788db3878a4385d10c0718, is
+    // untranslated too). Same "Eliminiere Gegner in Arena" objective as
+    // Hold the Lead above.
+    // Proof: https://json.tarkov.dev/pve/tasks_de (6978907718bd6d7cbd0e8b8e)
+    '6978907718bd6d7cbd0e8b8e': {
+      // Was: Professional Fitness - Part 2 [PVE ZONE]
+      name: 'Professionelle Fitness - Teil 2 [PVE ZONE]',
+      objectives: {
+        // Was: Eliminate enemies in Arena
+        '6978907718bd6d7cbd0e8b91': {
+          description: 'Eliminiere Gegner in Arena',
+        },
+      },
+    },
+
+    // To Great Heights! - Part 6 / Auf zu großen Höhen! - Teil 6
+    // No PVP-mode twin; the name is derived from "Teil 1" through "Teil 5"
+    // in this same chain above. The objective's exact English wording
+    // ("Win two matches in a row in TeamFight, BlastGang, or CheckPoint
+    // mode") has an attested German translation orphaned in this same
+    // locale bundle under a stale, no-longer-referenced objective id
+    // (662ba87106e44407b79e9ab2 / 68342265a8d674b5740b31f3 - a previous
+    // revision of the To Great Heights - Part 5 objective before BSG
+    // reworded it to the "claiming at least 2nd place" text used above),
+    // reused verbatim here since the English sentence is identical.
+    // Proof: https://json.tarkov.dev/pve/tasks_de (697895277d31587eab080266)
+    '697895277d31587eab080266': {
+      // Was: To Great Heights! - Part 6 [PVE ZONE]
+      name: 'Auf zu großen Höhen! - Teil 6 [PVE ZONE]',
+      objectives: {
+        // Was: Win two matches in a row in TeamFight, BlastGang, or CheckPoint mode
+        '6978a2bc18130b67d9156d7a': {
+          description: 'Gewinne zwei Matches in Folge im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena',
+        },
+      },
+    },
   },
 
   storyChapters: {
