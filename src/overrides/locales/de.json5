@@ -1265,10 +1265,29 @@
 
     // Easy Money - Part 1 / Leicht verdientes Geld - Teil 1
     // Name twin: 66058cb22cee99303f1ba067 ("Easy Money - Part 1 [PVP ZONE]").
+    // The single objective is left in stale English by the bundle, and it
+    // is stale in two ways, not just untranslated: the objective id
+    // (6606b709f7ce34bb26221cab) is shared with the PVP twin task, and that
+    // twin's German bundle entry exists but is itself broken. It reads
+    // "Platziere die „Bison VS Undertaker"-Plakate in den Wohnquartiere der
+    // Scavbasis in Customs" - a grammatically wrong dative plural ("den
+    // Wohnquartiere" needs the "-n": "Wohnquartieren"), naming an old poster
+    // ("Bison VS Undertaker", plural) that BSG has since swapped for a
+    // different, singular one. The current English text for this PVE task
+    // confirms the swap: "the Arena advertisement poster" (singular). This
+    // translation follows the current English content and reuses the PVP
+    // twin's established structure and terms ("Platziere ...", "Scavbasis",
+    // "in Customs") while fixing the grammar and the item name.
     // Proof: https://json.tarkov.dev/pve/tasks_de (6834145ebc1f443d7603c8a7)
     '6834145ebc1f443d7603c8a7': {
       // Was: Easy Money - Part 1 [PVE ZONE]
       name: 'Leicht verdientes Geld - Teil 1 [PVE ZONE]',
+      objectives: {
+        // Was: Plant the Arena advertisement poster in the living quarters at the Scav base on Customs
+        '6834145ebc1f443d7603c8ab': {
+          description: 'Platziere das Arena-Werbeplakat in den Wohnquartieren der Scavbasis in Customs',
+        },
+      },
     },
 
     // Easy Money - Part 2 / Leicht verdientes Geld - Teil 2
