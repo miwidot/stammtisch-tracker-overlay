@@ -1169,5 +1169,107 @@
         },
       },
     },
+
+    // "Locate and neutralize X" boss-hunt objectives left in English in the
+    // German bundle. Base template "Finde und eliminiere X" is attested
+    // sixfold elsewhere (Killa, Shturman, Glukhar, Sanitar, Tagilla); the
+    // "(in one raid)" suffix -> "(in einem Raid)" is attested fourfold on
+    // Transit/Ground Zero objectives. Parent tasks confirmed via the live
+    // tarkov.dev task list (objective -> owning task), not ID prefix.
+    //
+    // Streunende Hunde / Stray Dogs
+    // Proof: https://json.tarkov.dev/regular/tasks_de (626c317e05f287031503c7fd / 626c318147ea7f506e5493c7 / 626c3183af14a41d9a1f4ea7)
+    '626bdcc3a371ee3a7a3514c5': {
+      objectives: {
+        // EN: Locate and neutralize Knight (in one raid)
+        '626c317e05f287031503c7fd': {
+          description: 'Finde und eliminiere Knight (in einem Raid)',
+        },
+        // EN: Locate and neutralize Big Pipe (in one raid)
+        '626c318147ea7f506e5493c7': {
+          description: 'Finde und eliminiere Big Pipe (in einem Raid)',
+        },
+        // EN: Locate and neutralize Birdeye (in one raid)
+        '626c3183af14a41d9a1f4ea7': {
+          description: 'Finde und eliminiere Birdeye (in einem Raid)',
+        },
+      },
+    },
+
+    // Pfad des Jägers - Trophäe / The Huntsman Path - Trophy
+    // "Finde und eliminiere Reshala" is BSG's own wording, already attested
+    // verbatim in the German bundle under a different (older) Reshala
+    // objective ID.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5d26fd8886f77469f0445745)
+    '5d25e2c386f77443e7549029': {
+      objectives: {
+        // EN: Locate and neutralize Reshala
+        '5d26fd8886f77469f0445745': {
+          description: 'Finde und eliminiere Reshala',
+        },
+      },
+    },
+
+    // Nachtreinigung / Night Sweep
+    // "the hooded men" -> "die vermummten Männer" is attested verbatim in
+    // the German bundle on another objective in the same task chain.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a5abd63b45ef5b1a87b8273)
+    '60e71c11d54b755a3b53eb65': {
+      objectives: {
+        // EN: Locate and neutralize the hooded men
+        '6a5abd63b45ef5b1a87b8273': {
+          description: 'Finde und eliminiere die vermummten Männer',
+        },
+      },
+    },
+
+    // A Wedge Between Us
+    // "The Wedge" is kept as a proper name: BSG's own German bundle
+    // translates "The Wedge (Labs) Guard" to a broken " Wache" (leading
+    // space, name dropped, key followerWedgeLab), so it is not usable as a
+    // model here.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (69ce1cfb298a6529b30d712d)
+    '69ce1cfb298a6529b30d712b': {
+      objectives: {
+        // EN: Locate and neutralize The Wedge's squad
+        '69ce1cfb298a6529b30d712d': {
+          description: 'Finde und eliminiere den Trupp von The Wedge',
+        },
+      },
+    },
+  },
+
+  storyChapters: {
+    // Accidental Witness (Edge of Darkness storyline chapter)
+    // This objective is a story-chapter sub-quest, not a standalone
+    // tarkov.dev task (its owning task ID has no separate name in the live
+    // bundle - the display name lives on the chapter). Patched under
+    // storyChapters, keyed by the chapter slug and the objective's own
+    // stable ID from src/additions/storyChapters.json5. Same
+    // "Finde und eliminiere Reshala" wording as the Huntsman Path - Trophy
+    // entry above.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (68f3c51a829dc8fbee1f3651)
+    'accidental-witness': {
+      objectives: {
+        // EN: Locate and neutralize Reshala
+        '68f3c51a829dc8fbee1f3651': {
+          description: 'Finde und eliminiere Reshala',
+        },
+      },
+    },
+
+    // They Are Already Here (Edge of Darkness storyline chapter)
+    // Same story-chapter mechanism as Accidental Witness above. "Cultist
+    // Priest" -> "Kultisten-Priester" is attested in the German bundle
+    // (trait key sectantPriest).
+    // Proof: https://json.tarkov.dev/regular/tasks_de (68589307a77e480f775134e1)
+    'they-are-already-here': {
+      objectives: {
+        // EN: Locate and neutralize Cultist Priest
+        '68589307a77e480f775134e1': {
+          description: 'Finde und eliminiere den Kultisten-Priester',
+        },
+      },
+    },
   },
 }
