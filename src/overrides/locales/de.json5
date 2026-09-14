@@ -984,9 +984,49 @@
     // task, that is cause to compare it against this entry, not to
     // automatically replace this entry with it.
     // Proof: https://json.tarkov.dev/regular/tasks_de (5ede55112c95834b583f052a)
+    //
+    // Five objectives of this task are English in the German bundle. Not
+    // missing German: BSG recreated these five objectives under NEW ids and
+    // the old ids still hold the German text, which the new ids never
+    // inherited (old -> new): 5ee8ec5ed72d953f5d2aabd1 -> 6a5f419a91369c05ae763827,
+    // 5ee8ecd75eb3205dae135d17 -> 6a5f419cca7ba5dbb6dfec49,
+    // 5ee8ed18d72d953f5d2aabd4 -> 6a5f419eae9bbeb8ca0c46d0,
+    // 5ee8eddde932d53763761b2c -> 6a5f41a021f78bafb63c3d47,
+    // 5ee8edf1500391756d7498a7 -> 6a5f41bf54a91e0d977db806.
+    //
+    // BSG's old wording is not copied verbatim: it has two grammar errors -
+    // "eine der zwei hermetische Türen" (wrong declension, should be
+    // "hermetischen") and "... Türen, welche zur Baracke #1 führt" (number
+    // mismatch, "Türen" needs "führen"). "welche" is also replaced by "die"
+    // for a more natural read. "Hermetische Tür" itself is kept as-is - it
+    // has five attested hits in the German bundle, while "Drucktür",
+    // "Schleuse" and "Sicherheitstür" have none.
+    // Proof: https://json.tarkov.dev/regular/tasks_de
     '5ede55112c95834b583f052a': {
       // Was: The Bunker
       name: 'Der Bunker',
+      objectives: {
+        // EN: Locate the hermetic door leading to the hospital (White Bishop) on Reserve
+        '6a5f419a91369c05ae763827': {
+          description: 'Lokalisiere die hermetische Tür, die zum Krankenhaus führt (Weißer Läufer)',
+        },
+        // EN: Locate one of the two hermetic doors leading to the academy building (Black Bishop) on Reserve
+        '6a5f419cca7ba5dbb6dfec49': {
+          description: 'Lokalisiere eine der beiden hermetischen Türen, die zum Gebäude der Akademie führen (Schwarzer Läufer)',
+        },
+        // EN: Locate one of the two hermetic doors leading to barracks #1 (Black Pawn) on Reserve
+        '6a5f419eae9bbeb8ca0c46d0': {
+          description: 'Lokalisiere eine der beiden hermetischen Türen, die zur Baracke #1 führen (Schwarzer Bauer)',
+        },
+        // EN: Locate one of the two hermetic doors leading to barracks #2 (White Pawn) on Reserve
+        '6a5f41a021f78bafb63c3d47': {
+          description: 'Lokalisiere eine der beiden hermetischen Türen, die zur Baracke #2 führen (Weißer Bauer)',
+        },
+        // EN: Locate the hermetic door leading to the air control center building (King) on Reserve
+        '6a5f41bf54a91e0d977db806': {
+          description: 'Lokalisiere die hermetische Tür, die zum Gebäude des Luftkontrollzentrums führt (König)',
+        },
+      },
     },
   },
 }
