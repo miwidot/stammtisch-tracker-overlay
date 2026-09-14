@@ -936,7 +936,9 @@
     // No attested source for this wording: the bundle has no "main objective"
     // and no "as soon as possible" anywhere. "Schliesse ... ab" follows the
     // attested "Complete the task X" -> "Schliesse die Aufgabe X ab"; the rest
-    // is composed. Revisit if BSG ships its own German for it.
+    // is composed. Good German is the standard here, BSG wording is only a
+    // hint, not an authority - a later BSG translation does not automatically
+    // replace this entry, it only invites a comparison.
     // Proof: https://json.tarkov.dev/regular/tasks_de (673f4e956f1b89c7bc0f56ef)
     '673f4e956f1b89c7bc0f56ef': {
       objectives: {
@@ -1122,14 +1124,15 @@
 
     // Pfad des Jägers - Sadist / The Huntsman Path - Sadist
     // Objective was left in English in the German bundle. "Sanitar's bag" has
-    // no item translation to compare against; the possessive follows the
-    // attested "Tagillas Schweißermaske" pattern (possessive 's dropped).
+    // no item translation to compare against; a definite article plus a
+    // preposed genitive possessive don't coexist in German, so the
+    // possessive is resolved into a "von" construction instead.
     // Proof: https://json.tarkov.dev/regular/tasks_de (5edab4b1218d181e29451435)
     '5edab4b1218d181e29451435': {
       objectives: {
         // EN: Hand over the found in raid Sanitar's bag
         '6a5ffd702c6091f279537d66': {
-          description: 'Übergebe die im Raid gefundene Sanitars Tasche',
+          description: 'Übergib die im Raid gefundene Tasche von Sanitar',
         },
       },
     },
