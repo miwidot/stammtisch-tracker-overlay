@@ -952,9 +952,12 @@
     // for this task in the bundle; there is no description or objective text
     // to compare against.
     //
-    // No attested source for a German rendering of this name. "Vorführmodell"
-    // is a composed, idiomatic proposal, not a BSG term. Revisit if BSG ships
-    // its own German for it.
+    // Chosen for readable German: "Vorführmodell" is the idiomatic term for a
+    // demonstration/display unit. BSG has no German rendering for this name,
+    // so there is nothing to compare against - but note that BSG wording is a
+    // hint here, not the standard. This entry stands on its own; a later BSG
+    // translation does not automatically replace it, it only invites a
+    // comparison.
     // Proof: https://json.tarkov.dev/regular/tasks_de (6a5cd2178fd7c2b201032f3f)
     '6a5cd2178fd7c2b201032f3f': {
       // Was: Demonstration Model
