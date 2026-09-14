@@ -960,5 +960,30 @@
       // Was: Demonstration Model
       name: 'Vorführmodell',
     },
+
+    // The Bunker
+    //
+    // Not a missing translation - BSG's own German bundle serves the English
+    // string as the German value for this task's name. Only the name exists
+    // for this task in the bundle; there is no description or objective text
+    // to compare against.
+    //
+    // "Der Bunker" is the plain, idiomatic German rendering of "The Bunker"
+    // and is chosen on that basis. It additionally lines up with BSG's own
+    // translation of the sibling task "The Bunker - Part 2"
+    // (5ede567cfa6dc072ce15d6e3), which the same bundle renders as
+    // "Der Bunker – Teil 2" — a confirming data point, not the reason for
+    // the choice. (That sibling uses an en dash "–"; this task has no part
+    // suffix, so the dash does not apply here.)
+    //
+    // This entry is deliberate, not a placeholder: it does not defer to a
+    // future BSG string. If BSG later ships its own German name for this
+    // task, that is cause to compare it against this entry, not to
+    // automatically replace this entry with it.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ede55112c95834b583f052a)
+    '5ede55112c95834b583f052a': {
+      // Was: The Bunker
+      name: 'Der Bunker',
+    },
   },
 }
