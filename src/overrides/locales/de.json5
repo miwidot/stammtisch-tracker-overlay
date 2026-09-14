@@ -309,9 +309,11 @@
     },
 
     // Secret Message / Geheime Nachricht
-    // Objective was left in English in the German bundle.
+    // Name and objective were both left in English in the German bundle.
     // Proof: https://json.tarkov.dev/regular/tasks_de (6a5ccda873f06065630d61b0)
     '6a5ccda873f06065630d61b0': {
+      // Was: Secret Message
+      name: 'Geheime Nachricht',
       objectives: {
         // Was: Eliminate any target with headshots using a 12ga shotgun on Streets of Tarkov
         '6a5ccda873f06065630d61b2': {
@@ -959,9 +961,18 @@
     // translation does not automatically replace it, it only invites a
     // comparison.
     // Proof: https://json.tarkov.dev/regular/tasks_de (6a5cd2178fd7c2b201032f3f)
+    //
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a5cd2178fd7c2b201032f41)
     '6a5cd2178fd7c2b201032f3f': {
       // Was: Demonstration Model
       name: 'Vorführmodell',
+      objectives: {
+        // EN: Eliminate any target with headshots with 7.62x51 assault rifles or DMRs on Reserve
+        '6a5cd2178fd7c2b201032f41': {
+          description: 'Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du 7,62x51-Sturmgewehre oder Präzisionsgewehre auf Reserve benutzt',
+        },
+      },
     },
 
     // The Bunker
@@ -1025,6 +1036,136 @@
         // EN: Locate the hermetic door leading to the air control center building (King) on Reserve
         '6a5f41bf54a91e0d977db806': {
           description: 'Lokalisiere die hermetische Tür, die zum Gebäude des Luftkontrollzentrums führt (König)',
+        },
+      },
+    },
+
+    // Hiking
+    // Name was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a5c1578f2689567c30eb0f3)
+    '6a5c1578f2689567c30eb0f3': {
+      // Was: Hiking
+      name: 'Wandern',
+    },
+
+    // Ironclad Proof
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59ca1a6286f774509a270942)
+    '59ca1a6286f774509a270942': {
+      objectives: {
+        // EN: Eliminate any target with a GP-25 grenade launcher
+        '6a5f44d815430d6a5b5161b1': {
+          description: 'Eliminiere ein beliebiges Ziel mit einem GP-25-Granatwerfer',
+        },
+      },
+    },
+
+    // Gifts from Tarkov
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (61958c366726521dd96828ec)
+    '61958c366726521dd96828ec': {
+      objectives: {
+        // EN: Eliminate any target with an M203 grenade launcher on Lighthouse or Reserve
+        '6a5cd57d36c4fb654692787c': {
+          description: 'Eliminiere ein beliebiges Ziel mit einem M203-Granatwerfer auf Lighthouse oder Reserve',
+        },
+      },
+    },
+
+    // Feuchte Angelegenheit – Teil 6 / Wet Job - Part 6
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a27bc8586f7741b543d8ea4)
+    '5a27bc8586f7741b543d8ea4': {
+      objectives: {
+        // EN: Eliminate any target with any 7.62x51 DMR from over 50 meters away on Shoreline or Lighthouse
+        '6a5dea83a4dd339f77be89eb': {
+          description: 'Eliminiere ein beliebiges Ziel mit einem beliebigen 7,62x51-Präzisionsgewehr aus über 50 Meter Entfernung auf Shoreline oder Lighthouse',
+        },
+      },
+    },
+
+    // Der Fremdenführer / The Guide
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5c0d4e61d09282029f53920e)
+    '5c0d4e61d09282029f53920e': {
+      objectives: {
+        // EN: Eliminate any target
+        '6a5cdc97790159682d2bc19e': {
+          description: 'Eliminiere ein beliebiges Ziel',
+        },
+      },
+    },
+
+    // I Need More Power
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a03296886f774569778596a)
+    '5a03296886f774569778596a': {
+      objectives: {
+        // EN: Hand over the found in raid item: Metal fuel tank or Expeditionary fuel tank
+        '6a5cd11e5cf929b0f5d76816': {
+          description: 'Übergib den im Raid gefundenen Gegenstand: Metall-Kraftstofftank oder Kraftstoffbehälter für Expeditionen',
+        },
+      },
+    },
+
+    // Überbevölkerung / Overpopulation
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6179aff8f57fb279792c60a1)
+    '6179aff8f57fb279792c60a1': {
+      objectives: {
+        // EN: Hand over the found in raid item: Topographic survey maps, Intelligence folder, or TerraGroup "Blue Folders" materials
+        '6a5cd4d03a5504087ed636d3': {
+          description: 'Übergib den im Raid gefundenen Gegenstand: Topographische Übersichtskarten, Ordner mit Informationen oder TerraGroups „Blaue Ordner“',
+        },
+      },
+    },
+
+    // Pfad des Jägers - Sadist / The Huntsman Path - Sadist
+    // Objective was left in English in the German bundle. "Sanitar's bag" has
+    // no item translation to compare against; the possessive follows the
+    // attested "Tagillas Schweißermaske" pattern (possessive 's dropped).
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5edab4b1218d181e29451435)
+    '5edab4b1218d181e29451435': {
+      objectives: {
+        // EN: Hand over the found in raid Sanitar's bag
+        '6a5ffd702c6091f279537d66': {
+          description: 'Übergebe die im Raid gefundene Sanitars Tasche',
+        },
+      },
+    },
+
+    // Chemical Experiments
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a27bafb86f7741c73584017)
+    '5a27bafb86f7741c73584017': {
+      objectives: {
+        // EN: Stash a Corrugated hose in the med lab on Customs
+        '6a5c10e883a51e292d11b976': {
+          description: 'Verstaue einen Wellschlauch im Labor in Customs',
+        },
+      },
+    },
+
+    // Tracker
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a27bb3d86f77411ea361a21)
+    '5a27bb3d86f77411ea361a21': {
+      objectives: {
+        // EN: Locate the hidden TerraGroup cargo in the Health Resort on Shoreline
+        '6a5cd1942858d1ede4317068': {
+          description: 'Lokalisiere die versteckte TerraGroup-Fracht im Resort auf Shoreline',
+        },
+      },
+    },
+
+    // Feuchte Angelegenheit – Teil 3 / Wet Job - Part 3
+    // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a27bc1586f7741f6d40fa2f)
+    '5a27bc1586f7741f6d40fa2f': {
+      objectives: {
+        // EN: Mark Artyom's car with an MS2000 Marker
+        '6a5de9b9fee6abb95244f018': {
+          description: 'Markiere Artyoms Auto mit einem MS2000 Marker',
         },
       },
     },
