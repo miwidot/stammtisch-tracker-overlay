@@ -3,12 +3,18 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
+  loadReferenceQuestIds,
   normalizeWikiLink,
   checkTaskAdditions,
   checkEditionTaskReferences,
   countRequirementTypes,
+  getValidationExitCode,
 } from '../scripts/check-overrides.js';
+import { countTraderRequirementIds } from '../src/lib/index.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
 
 function createTaskAddition(overrides: Partial<TaskAddition> = {}): TaskAddition {
@@ -72,6 +78,120 @@ describe('countRequirementTypes', () => {
 
   it('returns zeros for tasks without trader requirements', () => {
     expect(countRequirementTypes([createApiTask()])).toEqual({ level: 0, reputation: 0 });
+  });
+});
+
+describe('countTraderRequirementIds', () => {
+  it('counts missing IDs from the raw payload before adapter normalization', () => {
+    const counts = countTraderRequirementIds({
+      tasks: {
+        taskA: {
+          traderRequirements: [{ id: 'upstream-id' }, { id: '' }, {}],
+        },
+        taskB: {
+          traderRequirements: [{ id: '  ' }],
+        },
+      },
+    });
+
+    expect(counts).toEqual({ total: 4, missing: 3 });
+  });
+
+  it('ignores tasks without a trader requirement collection', () => {
+    expect(countTraderRequirementIds({ tasks: { task: {} } })).toEqual({
+      total: 0,
+      missing: 0,
+    });
+  });
+
+  it('counts a defined non-array collection as the single requirement the adapter emits', () => {
+    // adaptTask() runs traderRequirements through mapOptionalArray, which wraps a
+    // defined non-array value into one entry. Skipping it here would let a
+    // malformed upstream payload pass the diagnostic unreported.
+    expect(countTraderRequirementIds({ tasks: { task: { traderRequirements: {} } } })).toEqual({
+      total: 1,
+      missing: 1,
+    });
+    expect(
+      countTraderRequirementIds({ tasks: { task: { traderRequirements: { id: 'upstream-id' } } } })
+    ).toEqual({ total: 1, missing: 0 });
+  });
+
+  it('treats every non-string id shape as missing, matching the adapter', () => {
+    // The upstream contract is a string id. A nested record, a number, blank
+    // whitespace and an absent field all leave the requirement without a merge
+    // identity, which is precisely when adaptTraderRequirement() synthesizes an
+    // `overlay.*` id. tests/tarkov-api.test.ts pins the adapter side.
+    const idShapes = [{ id: { id: 'upstream-id' } }, { id: 123 }, { id: '   ' }, {}];
+
+    expect(
+      countTraderRequirementIds({ tasks: { task: { traderRequirements: idShapes } } })
+    ).toEqual({ total: 4, missing: 4 });
+  });
+});
+
+describe('getValidationExitCode', () => {
+  const base = {
+    strict: false,
+    failOnStale: false,
+    failOnUpstream: false,
+    actionable: 0,
+    staleProblems: 0,
+    upstreamProblems: 0,
+  };
+
+  it('returns zero when no enabled gate has a problem', () => {
+    expect(getValidationExitCode({ ...base, upstreamProblems: 1 })).toBe(0);
+  });
+
+  it('returns the strict code for actionable problems', () => {
+    expect(getValidationExitCode({ ...base, strict: true, actionable: 1 })).toBe(2);
+  });
+
+  it('returns the stale code for stale problems', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, staleProblems: 1 })).toBe(3);
+  });
+
+  it('gates upstream problems only under their own opt-in flag', () => {
+    expect(getValidationExitCode({ ...base, failOnUpstream: true, upstreamProblems: 1 })).toBe(4);
+  });
+
+  /**
+   * The CI gate must not fail on a problem originating in tarkov.dev's data:
+   * nobody working in this repo can fix one, so it would block every PR.
+   */
+  it('does not fail the CI gate on an upstream-only regression', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, upstreamProblems: 1 })).toBe(0);
+    expect(getValidationExitCode({ ...base, strict: true, upstreamProblems: 1 })).toBe(0);
+    expect(
+      getValidationExitCode({ ...base, strict: true, failOnStale: true, upstreamProblems: 1 })
+    ).toBe(0);
+  });
+
+  it('prioritizes upstream problems over both downstream gates when opted in', () => {
+    expect(
+      getValidationExitCode({
+        ...base,
+        strict: true,
+        failOnStale: true,
+        failOnUpstream: true,
+        actionable: 1,
+        staleProblems: 1,
+        upstreamProblems: 1,
+      })
+    ).toBe(4);
+  });
+
+  it('prefers the strict code over the stale code', () => {
+    expect(
+      getValidationExitCode({
+        ...base,
+        strict: true,
+        failOnStale: true,
+        actionable: 1,
+        staleProblems: 1,
+      })
+    ).toBe(2);
   });
 });
 
@@ -250,5 +370,111 @@ describe('checkEditionTaskReferences', () => {
       taskId: 'task-missing-excluded',
       kind: 'excluded',
     });
+  });
+});
+
+describe('loadReferenceQuestIds', () => {
+  it('retains usable mode references when another mode has an invalid capture', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const id = '6895bbb0e7dac53c7c08797b';
+      writeFileSync(
+        join(dir, 'quest_list.pve.json'),
+        JSON.stringify({
+          request: { url: 'https://gw-pve.escapefromtarkov.com/client/quest/list' },
+          response: { decoded_response: { data: [{ _id: `[${id}] Story quest` }] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'quest_list.regular.json'),
+        JSON.stringify({
+          request: { url: 'https://prod.escapefromtarkov.com/client/quest/list' },
+          response: { decoded_response: { data: {} } },
+        })
+      );
+      expect(loadReferenceQuestIds(dir)?.has(id)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('combines nested partial captures and both decoded formats without accepting mere references', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      mkdirSync(join(dir, 'capture'));
+      const first = '6895bbb0e7dac53c7c08797b';
+      const second = '69bbfae89ce356593c0e2f35';
+      const mentioned = '678fa1463977eb69290a3a06';
+      const chapter = '68cbd33676fe74b1e80bfd91';
+      writeFileSync(
+        join(dir, 'quest_list.old.json'),
+        JSON.stringify({
+          response: { decoded_response: { data: [{ _id: first }] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'capture', 'quest_list.new.json'),
+        JSON.stringify({
+          response: { body_response: { data: [{ _id: second, target: mentioned }] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'capture', 'quest_getMainQuestsList.json'),
+        JSON.stringify({
+          response: { body_response: { data: { chapters: [{ ChapterId: chapter }] } } },
+        })
+      );
+      const ids = loadReferenceQuestIds(dir);
+      expect(ids).toEqual(new Set([first, second, chapter]));
+      expect(ids?.has(mentioned)).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('treats directory scan failures as an unavailable optional reference', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const file = join(dir, 'not-a-directory');
+      writeFileSync(file, '');
+      expect(loadReferenceQuestIds(file)).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps usable chapter definitions when another chapter capture is invalid', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const quest = '6895bbb0e7dac53c7c08797b';
+      const chapter = '68cbd33676fe74b1e80bfd91';
+      writeFileSync(
+        join(dir, 'quest_list.json'),
+        JSON.stringify({ response: { decoded_response: { data: [{ _id: quest }] } } })
+      );
+      writeFileSync(join(dir, 'quest_getMainQuestsList.broken.json'), '{ not json');
+      writeFileSync(
+        join(dir, 'quest_getMainQuestsList.good.json'),
+        JSON.stringify({ data: { chapters: [{ ChapterId: chapter }] } })
+      );
+      expect(loadReferenceQuestIds(dir)).toEqual(new Set([quest, chapter]));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not treat a chapter-only capture as a complete quest reference', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      writeFileSync(
+        join(dir, 'quest_getMainQuestsList.json'),
+        JSON.stringify({
+          data: { chapters: [{ ChapterId: '6895bbb0e7dac53c7c08797b' }] },
+        })
+      );
+      expect(loadReferenceQuestIds(dir)).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

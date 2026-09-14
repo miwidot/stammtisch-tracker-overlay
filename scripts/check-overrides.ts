@@ -8,10 +8,33 @@
  *
  * Usage:
  *   npm run check-overrides
+ *   npm run check-overrides -- --fail-on-stale
+ *   npm run check-overrides -- --strict --fail-on-upstream
+ *
+ * Flags (all off by default; without them the script only reports):
+ *   --strict            Fail when the overlay is inconsistent or data is being
+ *                       served incorrectly (see `actionable` in main()).
+ *   --fail-on-stale     Fail when the overlay carries data tarkov.dev now
+ *                       supplies itself. This is what CI runs.
+ *   --fail-on-upstream  Fail on upstream data-quality regressions. Off by
+ *                       default and deliberately NOT part of the CI gate: these
+ *                       problems originate in tarkov.dev's data, so no
+ *                       contributor can fix one, and gating PRs on it would
+ *                       block every merge until upstream repaired their data.
+ *                       Intended for the scheduled monitoring job, which opens
+ *                       an issue instead of failing a PR. The diagnostic is
+ *                       always printed regardless of this flag.
  *
  * Exit codes:
- *   0 - All overrides validated successfully
- *   1 - Error occurred during validation
+ *   0 - Ran to completion with no problem that an enabled gate fails on
+ *   1 - Error occurred during validation (network, parse, unexpected throw)
+ *   2 - Overlay inconsistency / data served incorrectly  (--strict)
+ *   3 - Overlay carries data now supplied upstream       (--fail-on-stale)
+ *   4 - Upstream data-quality regression                 (--fail-on-upstream)
+ *
+ * When more than one gate would fail, every applicable summary is printed and
+ * the most specific classification wins: 4 (upstream's problem) before
+ * 2 (our overlay is wrong) before 3 (our overlay is merely redundant).
  */
 
 import { join } from 'path';
@@ -31,7 +54,7 @@ import {
   printError,
   formatCountLabel,
   printCountSection,
-  fetchTasks,
+  fetchTasksWithRequirementCounts,
   fetchLocaleBundle,
   fetchRawEntities,
   SUPPORTED_GAME_MODES,
@@ -49,6 +72,7 @@ import {
   type TaskOverride,
   type TaskAddition,
   type TaskData,
+  type TaskDataWithRequirementCounts,
   type GameMode,
   type ValidationResult,
   type ValidationDetail,
@@ -66,8 +90,6 @@ import {
   loadEftTasks,
   detectReferenceMode,
   crossCheckOverrides,
-  findReferenceFile,
-  readQuestArray,
   type CrossCheckEntry,
 } from './eft-compare.js';
 
@@ -258,6 +280,41 @@ export function countRequirementTypes(tasks: TaskData[]): RequirementTypeCounts 
     }
   }
   return counts;
+}
+
+export type ValidationExitCode = 0 | 2 | 3 | 4;
+
+export type ValidationGateCounts = {
+  strict: boolean;
+  failOnStale: boolean;
+  /** Opt-in; see the `--fail-on-upstream` note in this file's header. */
+  failOnUpstream: boolean;
+  actionable: number;
+  staleProblems: number;
+  upstreamProblems: number;
+};
+
+/**
+ * Select the exit code for the validation gates.
+ *
+ * Upstream data-quality regressions take precedence because they are distinct
+ * from overlay inconsistencies and stale overlay fields: they describe a problem
+ * in tarkov.dev's data rather than in ours. They are gated behind their own
+ * opt-in flag so that a regression nobody here can fix cannot block every PR;
+ * the caller prints the diagnostic either way.
+ */
+export function getValidationExitCode({
+  strict,
+  failOnStale,
+  failOnUpstream,
+  actionable,
+  staleProblems,
+  upstreamProblems,
+}: ValidationGateCounts): ValidationExitCode {
+  if (failOnUpstream && upstreamProblems > 0) return 4;
+  if (strict && actionable > 0) return 2;
+  if (failOnStale && staleProblems > 0) return 3;
+  return 0;
 }
 
 function buildApiIndexes(apiTasks: TaskData[]) {
@@ -721,17 +778,49 @@ function printReferenceCrossCheck(
  * Report upstream trader-requirement counts by semantic type and mode.
  *
  * Surfaces the level/reputation split so a consumer's requirement evaluation
- * can be kept in sync with the discriminated upstream schema.
+ * can be kept in sync with the discriminated upstream schema, and reports how
+ * many requirements arrive without a merge identity (issue #276).
+ *
+ * Takes one snapshot per mode rather than parallel task/count maps so a mode
+ * cannot be present in one and absent from the other.
+ *
+ * @returns the number of upstream requirements lacking a merge ID, summed across
+ *   modes. The adapter mints a synthetic `overlay.*` ID for these, which keeps
+ *   consumers working but is the same shape our own additions use, so a silent
+ *   collision is possible. The caller always prints the diagnostic and gates on
+ *   it only under the opt-in `--fail-on-upstream` (exit 4), because nothing in
+ *   this repository can fix an upstream data problem.
  */
-function printRequirementTypeCounts(apiTasksByMode: Partial<Record<GameMode, TaskData[]>>): void {
+function printRequirementTypeCounts(
+  snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>>
+): { missingRequirementIds: number } {
   printHeader('TRADER REQUIREMENT TYPE COUNTS (UPSTREAM)');
+  const missing: string[] = [];
+  let missingRequirementIds = 0;
+
   for (const mode of SUPPORTED_GAME_MODES) {
-    const tasks = apiTasksByMode[mode];
-    if (!tasks) continue;
-    const counts = countRequirementTypes(tasks);
-    console.log(`  ${mode}: ${counts.level} level, ${counts.reputation} reputation`);
+    const snapshot = snapshotsByMode[mode];
+    if (!snapshot) continue;
+    const counts = countRequirementTypes(snapshot.tasks);
+    const ids = snapshot.traderRequirementIds;
+    console.log(
+      `  ${mode}: ${counts.level} level, ${counts.reputation} reputation, ` +
+        `${ids.missing} missing ID(s) of ${ids.total}`
+    );
+    if (ids.missing > 0) {
+      missingRequirementIds += ids.missing;
+      missing.push(`${mode}: ${ids.missing} trader requirement(s) lack an upstream id`);
+    }
+  }
+
+  if (missing.length > 0) {
+    console.log(
+      `${colors.yellow}WARNING: upstream trader requirements lack merge IDs${colors.reset}`
+    );
+    for (const line of missing) console.log(`  ${line}`);
   }
   console.log();
+  return { missingRequirementIds };
 }
 
 /**
@@ -1009,6 +1098,53 @@ function printStoryChapterIssues(
 }
 
 /**
+ * Parse each capture whose name matches `pattern`, yielding the raw document and
+ * its unwrapped response envelope (captures use either decoded format).
+ *
+ * Reading lazily keeps per-file isolation for unreadable or unparsable captures:
+ * one bad optional file is skipped without invalidating the definitions found in
+ * the others. Note the isolation covers parsing only - a consumer that throws
+ * while extracting abandons the remaining captures rather than skipping one, so
+ * consumers guard their own field access.
+ *
+ * `pattern` must not carry the `g` or `y` flag: `test` is stateful with either,
+ * which would silently skip alternating files.
+ */
+function* readReferenceCaptures(eftDir: string, files: string[], pattern: RegExp) {
+  for (const file of files) {
+    if (!pattern.test(file)) continue;
+    try {
+      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
+      yield { raw, envelope: raw?.response?.body_response ?? raw?.response?.decoded_response };
+    } catch {
+      // Unusable optional captures do not invalidate definitions in other files.
+    }
+  }
+}
+
+/**
+ * Quest definition IDs from every `quest_list` capture.
+ *
+ * Profile captures may contain only a subset of story sub-quests, so every
+ * capture contributes. An ID merely mentioned by another quest is not a
+ * definition, which is why only `_id` is read.
+ */
+function loadReferenceTaskIds(eftDir: string, files: string[]): string[] {
+  const ids = new Set<string>();
+  for (const { raw, envelope } of readReferenceCaptures(eftDir, files, /quest[_-]list.*\.json$/i)) {
+    const quests = envelope?.data ?? raw?.data ?? raw;
+    if (!Array.isArray(quests)) continue;
+    for (const quest of quests) {
+      const rawId = quest?._id;
+      if (typeof rawId !== 'string') continue;
+      const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
+      if (bare) ids.add(bare);
+    }
+  }
+  return [...ids];
+}
+
+/**
  * Quest IDs from the local EFT reference, or null when no reference is present.
  *
  * Story-chapter quests are absent from tarkov.dev, so this is the only source
@@ -1019,67 +1155,48 @@ function printStoryChapterIssues(
  * - `quest_getMainQuestsList` carries the story chapters themselves, which is
  *   what `chapterQuestId` points at. Chapter IDs are NOT in `quest_list`, so
  *   without this file every chapter would look unresolvable.
+ *
+ * This checks provenance, not current unlock values.
  */
-function loadReferenceQuestIds(): Set<string> | null {
-  const eftDir = join(rootDir, 'eft');
+export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string> | null {
   if (!existsSync(eftDir)) return null;
 
-  const ids = new Set<string>();
-
+  let files: string[];
   try {
-    for (const quest of readQuestArray(findReferenceFile(eftDir))) {
-      const rawId = (quest as { _id?: unknown })._id;
-      if (typeof rawId === 'string') {
-        // EFT reference _id values are wrapped, e.g. "[60e71dc0...] Long Line".
-        // Extract the first 24-hex token so hex letters in the quest name
-        // (the 'e' in "Line") don't corrupt the id. Mirrors eft-compare bareId.
-        const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
-        if (bare) ids.add(bare);
-      }
-    }
+    files = readdirSync(eftDir, { recursive: true }).map(String);
   } catch {
-    // No quest_list reference, or an unexpected shape.
+    return null; // Optional references may be unreadable or disappear during a run.
   }
 
-  for (const chapterId of loadReferenceChapterIds(eftDir)) ids.add(chapterId);
+  // Profile captures may contain only a subset of story sub-quests, so
+  // definitions are collected from every capture. An ID merely mentioned by
+  // another quest is not a definition.
+  const ids = new Set(loadReferenceTaskIds(eftDir, files));
 
-  return ids.size > 0 ? ids : null;
+  // Chapter IDs alone cannot adjudicate whether sub-quest IDs are missing.
+  if (ids.size === 0) return null;
+
+  for (const chapterId of loadReferenceChapterIds(eftDir, files)) ids.add(chapterId);
+
+  return ids;
 }
 
 /** Story chapter IDs from a `quest_getMainQuestsList` capture, if present. */
-function loadReferenceChapterIds(eftDir: string): string[] {
-  let files: string[];
-  try {
-    files = readdirSync(eftDir);
-  } catch {
-    return [];
+function loadReferenceChapterIds(eftDir: string, files: string[]): string[] {
+  const ids = new Set<string>();
+  for (const { raw, envelope } of readReferenceCaptures(
+    eftDir,
+    files,
+    /getmainquestslist.*\.json$/i
+  )) {
+    const decoded = envelope ?? raw;
+    const data = decoded?.data ?? decoded;
+    if (!Array.isArray(data?.chapters)) continue;
+    for (const chapter of data.chapters) {
+      if (typeof chapter?.ChapterId === 'string') ids.add(chapter.ChapterId);
+    }
   }
-
-  const mainQuestFile = files.find(
-    (file) => /getmainquestslist/i.test(file) && file.endsWith('.json')
-  );
-  if (!mainQuestFile) return [];
-
-  try {
-    const raw = JSON.parse(readFileSync(join(eftDir, mainQuestFile), 'utf-8')) as unknown;
-    const envelope = raw as {
-      response?: { decoded_response?: unknown };
-      data?: unknown;
-    };
-    const decoded = (envelope.response?.decoded_response ?? raw) as { data?: unknown };
-    const data = (decoded.data ?? decoded) as { chapters?: unknown };
-    if (!Array.isArray(data.chapters)) return [];
-
-    return data.chapters
-      .map((chapter) =>
-        chapter && typeof chapter === 'object'
-          ? (chapter as Record<string, unknown>).ChapterId
-          : undefined
-      )
-      .filter((id): id is string => typeof id === 'string');
-  } catch {
-    return [];
-  }
+  return [...ids];
 }
 
 /** Report suppressions that no longer suppress anything. */
@@ -1110,12 +1227,12 @@ function printSuppressionResults(results: SuppressionStaleness[]): { stale: numb
  * regular-mode data; without memoization the (large) regular-mode payloads
  * would be downloaded twice in a single run.
  */
-function createTaskFetcher(): (mode?: GameMode) => Promise<TaskData[]> {
-  const cache = new Map<GameMode, Promise<TaskData[]>>();
+function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequirementCounts> {
+  const cache = new Map<GameMode, Promise<TaskDataWithRequirementCounts>>();
   return (mode: GameMode = 'regular') => {
     let tasks = cache.get(mode);
     if (!tasks) {
-      tasks = fetchTasks(mode).catch((error) => {
+      tasks = fetchTasksWithRequirementCounts(mode).catch((error) => {
         cache.delete(mode);
         throw error;
       });
@@ -1131,11 +1248,24 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskData[]> {
 async function main(): Promise<void> {
   const strict = process.argv.includes('--strict');
   const failOnStale = process.argv.includes('--fail-on-stale');
+  const failOnUpstream = process.argv.includes('--fail-on-upstream');
   const getTasksForMode = createTaskFetcher();
   /** Problems that mean data is being served wrong or the overlay is inconsistent. */
   let actionable = 0;
   /** Overlay entries or fields now supplied upstream and safe to remove. */
   let staleProblems = 0;
+  /**
+   * Upstream data-quality regressions, currently trader requirements arriving
+   * without a merge identity (issue #276). Deliberately kept out of
+   * `actionable` and `staleProblems`: it is neither an overlay inconsistency nor
+   * a stale overlay field, and it gets its own exit code so automation can tell
+   * "our overlay is out of date" from "upstream regressed".
+   *
+   * Always reported; gated only under the opt-in `--fail-on-upstream`. Nobody
+   * working in this repo can fix an upstream data problem, so wiring it into the
+   * CI gate would block every PR for the duration of someone else's outage.
+   */
+  let upstreamProblems = 0;
 
   try {
     printProgress('Loading task overrides...');
@@ -1151,7 +1281,7 @@ async function main(): Promise<void> {
     printSuccess(`Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`);
 
     printProgress('Fetching current data from tarkov.dev API...');
-    const apiTasks = await getTasksForMode();
+    const { tasks: apiTasks } = await getTasksForMode();
     printSuccess(`Fetched ${apiTasks.length} tasks from API\n`);
 
     printProgress('Validating overrides...\n');
@@ -1177,6 +1307,9 @@ async function main(): Promise<void> {
     // cross-mode passes so nothing is fetched twice.
     const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
     const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
+    // Keyed snapshots keep each mode's tasks and its raw trader-requirement ID
+    // counts together, so the diagnostic cannot see one without the other.
+    const snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>> = {};
 
     // Validate mode-specific overrides and additions
     for (const mode of SUPPORTED_GAME_MODES) {
@@ -1185,8 +1318,10 @@ async function main(): Promise<void> {
       modeOverridesByMode[mode] = modeOverrides;
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const modeApiTasks = await getTasksForMode(mode);
+      const modeSnapshot = await getTasksForMode(mode);
+      const modeApiTasks = modeSnapshot.tasks;
       apiTasksByMode[mode] = modeApiTasks;
+      snapshotsByMode[mode] = modeSnapshot;
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
       const modeOverrideCount = Object.keys(modeOverrides).length;
@@ -1222,7 +1357,9 @@ async function main(): Promise<void> {
     }
     staleProblems += staleSharedAdditionKeys.size;
 
-    printRequirementTypeCounts(apiTasksByMode);
+    // The mode loop covers `regular` too, so every supported mode's raw
+    // diagnostic is already recorded here.
+    upstreamProblems += printRequirementTypeCounts(snapshotsByMode).missingRequirementIds;
 
     // Base overrides apply to every mode, so validate them against every mode.
     const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};
@@ -1399,23 +1536,49 @@ async function main(): Promise<void> {
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();
 
-    if (strict && actionable > 0) {
+    // Every problem that has a count gets its summary printed, so enabling one
+    // gate never hides another's findings in a multi-thousand-line log. Only the
+    // exit code is exclusive, and the most specific classification wins: an
+    // upstream regression (4) is neither an overlay inconsistency (2) nor a
+    // stale overlay field (3).
+    const exitCode = getValidationExitCode({
+      strict,
+      failOnStale,
+      failOnUpstream,
+      actionable,
+      staleProblems,
+      upstreamProblems,
+    });
+
+    // Printed whenever the count is non-zero, gate or no gate: the whole point
+    // of issue #276 is that this must not pass silently. Only the exit code is
+    // opt-in.
+    if (upstreamProblems > 0) {
+      printError(
+        `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
+          'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
+          'an overlay.* id for them - the same shape our own additions use. An overlay ' +
+          'addition can therefore collide with a real upstream requirement instead of ' +
+          'being added alongside it. Nothing here can fix it; report it upstream.' +
+          (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
+      );
+    }
+
+    if (actionable > 0 && strict) {
       printError(
         `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
           'Data is being served incorrectly or the overlay is inconsistent.'
       );
-      process.exit(2);
     }
 
-    if (failOnStale && staleProblems > 0) {
+    if (staleProblems > 0 && failOnStale) {
       printError(
         `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
           'Remove data now supplied upstream or scope it to the modes where it is still missing.'
       );
-      process.exit(3);
     }
 
-    process.exit(0);
+    process.exit(exitCode);
   } catch (error) {
     printError('Error during validation:', error as Error);
     process.exit(1);

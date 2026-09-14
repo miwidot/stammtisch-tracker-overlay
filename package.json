@@ -6,12 +6,15 @@
   "scripts": {
     "validate": "tsx scripts/validate.ts",
     "build": "tsx scripts/build.ts",
+    "build:check": "tsx scripts/build.ts --check",
+    "next-overlay-tag": "node scripts/next-overlay-tag.cjs",
     "check-overrides": "tsx scripts/check-overrides.ts",
     "eft:compare": "tsx scripts/eft-compare.ts",
     "eft:audit": "tsx scripts/eft-audit.ts",
     "eft:wiki": "tsx scripts/eft-wiki-crosscheck.ts",
     "eft:normalize": "tsx scripts/eft-normalize.ts",
     "eft:story": "mkdir -p data/eft && tsx scripts/eft-story-wiki.ts && tsx scripts/eft-story-generate.ts > data/eft/story-final.json && tsx scripts/eft-story-write.ts",
+    "tasks:availability": "tsx scripts/task-availability.ts",
     "wiki:compare": "tsx scripts/wiki-compare.ts",
     "monitor": "node monitor/server.js",
     "check:monitor": "node --check monitor/server.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
@@ -20,7 +23,7 @@
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
     "fallow:security": "fallow security",
-    "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#dist\"",
+    "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#dist\" \"#data\" \"#eft\"",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,cts,json,json5,md}\"",
     "format:check": "prettier --check \"**/*.{ts,cts,json,json5,md}\"",
@@ -39,17 +42,20 @@
   "author": "Lab",
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
-    "ajv": "^8.18.0",
-    "fallow": "^3.16.0",
+    "@types/node": "^24.13.4",
+    "ajv": "^8.20.0",
+    "fallow": "^3.22.0",
     "json5": "^2.2.3",
     "markdownlint-cli2": "^0.23.2",
-    "prettier": "^3.6.2",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  },
+  "overrides": {
+    "smol-toml": "^1.7.2"
   }
 }

@@ -19,7 +19,12 @@ export interface TaskOverride {
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
+  taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
+  otherRequirements?: TaskOtherRequirement[];
+  neededKeys?: TaskKeyRequirement[];
+  availableDelaySecondsMin?: number;
+  availableDelaySecondsMax?: number;
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -40,7 +45,12 @@ export interface TaskRewards {
     level: number;
     skill?: { id: string; name: string; imageLink?: string };
   }>;
-  traderUnlock?: { id: string; name: string };
+  /** Traders unlocked by the task. json.tarkov.dev serves this as an array. */
+  traderUnlock?: Array<{ id: string; name: string }>;
+  /** Trader dialogue made available by the task. */
+  traderDialogueUnlock?: Array<{ id: string; name: string }>;
+  /** Maps/locations unlocked by the task. */
+  locationUnlock?: Array<{ id: string; name: string }>;
   achievement?: TaskAchievementReward[];
   customization?: TaskCustomizationReward[];
 }
@@ -148,7 +158,64 @@ export interface ObjectiveAdd extends Omit<
 export interface TaskRequirement {
   task: { id: string; name: string };
   status?: string[];
+  /** Optional upstream explanation/provenance for the requirement. */
+  notes?: string;
 }
+
+/**
+ * An OR group of task requirements. Entries in the normal `taskRequirements`
+ * array are ANDed; a group is used when one of several task IDs satisfies the
+ * same slot in an unlock path. The status array on each entry is itself an OR
+ * over the accepted statuses for that task.
+ */
+export type TaskRequirementGroup = TaskRequirement[];
+
+/** A map/key pair needed to enter a raid for a task objective. */
+export interface TaskKeyRequirement {
+  map: { id: string; name: string };
+  keys: TaskItemRef[];
+}
+
+/** A task's dialogue flag requirement as served by json.tarkov.dev. */
+export interface TaskDialogueRequirement {
+  id: string;
+  type: 'dialogue';
+  traders: Array<{ id: string; name: string }>;
+}
+
+/** An overlay start gate tied to a specific story objective, not chapter completion. */
+export interface TaskStoryObjectiveRequirement {
+  id: string;
+  type: 'storyObjective';
+  storyChapter: { id: string; name: string };
+  objective: { id: string; name: string };
+}
+
+/** A task's persistent numeric global-variable requirement. */
+export interface TaskGlobalVariableRequirement {
+  id: string;
+  type: 'globalVariable';
+  variableId: string;
+  compareMethod: TraderRequirementCompareMethod | '==';
+  value: number;
+}
+
+/**
+ * Future/unknown upstream requirement types are retained instead of being
+ * silently discarded. The unlock evaluator treats them as unknown until a
+ * consumer supplies a state adapter for that type.
+ */
+export interface TaskUnknownOtherRequirement {
+  id: string;
+  type: string;
+  [key: string]: unknown;
+}
+
+export type TaskOtherRequirement =
+  | TaskDialogueRequirement
+  | TaskGlobalVariableRequirement
+  | TaskStoryObjectiveRequirement
+  | TaskUnknownOtherRequirement;
 
 /**
  * Comparison methods json.tarkov.dev serves for trader requirements. Loyalty
@@ -214,7 +281,12 @@ export interface TaskAddition {
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives: TaskObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
+  taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
+  otherRequirements?: TaskOtherRequirement[];
+  neededKeys?: TaskKeyRequirement[];
+  availableDelaySecondsMin?: number;
+  availableDelaySecondsMax?: number;
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -238,6 +310,8 @@ export interface TaskObjectiveAdd extends Omit<
 export interface TaskData {
   id: string;
   name: string;
+  /** Trader that offers the task. */
+  trader?: { id: string; name: string };
   minPlayerLevel?: number;
   wikiLink?: string;
   map?: { id: string; name: string } | null;
@@ -246,7 +320,15 @@ export interface TaskData {
   factionName?: string;
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   taskRequirements?: TaskRequirement[];
+  taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
+  /** Hidden start conditions (dialogue flags and global variables). */
+  otherRequirements?: TaskOtherRequirement[];
+  /** Keys needed for the task's raid/objective, not a task-unlock condition. */
+  neededKeys?: TaskKeyRequirement[];
+  /** Timing metadata for delayed availability after the start gate is met. */
+  availableDelaySecondsMin?: number;
+  availableDelaySecondsMax?: number;
   objectives?: TaskObjective[];
   experience?: number;
   startRewards?: TaskRewards;
@@ -371,6 +453,37 @@ export interface StoryChapter {
   rewards?: StoryRewards | null;
 }
 
+/** Entry rules exposed by json.tarkov.dev for one map. */
+export interface MapAccessData {
+  id: string;
+  name: string;
+  minPlayerLevel?: number;
+  maxPlayerLevel?: number;
+  accessKeys?: string[];
+  accessKeysMinPlayerLevel?: number;
+}
+
+/** Loyalty-level thresholds exposed by json.tarkov.dev for one trader. */
+export interface TraderAccessLevel {
+  level: number;
+  requiredPlayerLevel?: number;
+  requiredReputation?: number;
+  requiredCommerce?: number;
+}
+
+/** Static trader data; account-specific unlock state is intentionally absent. */
+export interface TraderAccessData {
+  id: string;
+  name: string;
+  levels: TraderAccessLevel[];
+}
+
+/** Mode-scoped map/trader entry metadata used by the availability report. */
+export interface ModeAccessData {
+  maps: Record<string, MapAccessData>;
+  traders: Record<string, TraderAccessData>;
+}
+
 /**
  * Game modes tarkov.dev serves upstream data for.
  *
@@ -397,6 +510,78 @@ export const DIVERGENCE_MODES = SUPPORTED_GAME_MODES;
 
 /** A game mode the divergence registry records per-mode values for. */
 export type DivergenceMode = GameMode;
+
+/**
+ * Canonical tarkov.dev map IDs mapped to their English names.
+ *
+ * Map references in overrides and additions are `{ id, name }` pairs, but only
+ * `id` is the join key a consumer resolves. A pair whose name reads correctly
+ * while its ID points at a different map is therefore silently wrong: the schema
+ * only type-checks both as strings, so nothing else catches it.
+ * `tests/entity-references.test.ts` validates every map reference in `src/`
+ * against this registry, which is why a corrected map must be looked up rather
+ * than copied from a nearby entry.
+ *
+ * Captured from `json.tarkov.dev/regular/maps` + `/regular/maps_en` (v1.81).
+ * When upstream adds a map the guard fails with the unknown ID; verify the new
+ * ID against those endpoints and add it here.
+ *
+ * Typed `Partial` so indexing an unknown ID yields `string | undefined` rather
+ * than a bare `string`. Prefer looking up through a `Map` built from these
+ * entries when the key is data-derived, so an inherited key like `constructor`
+ * cannot resolve to a prototype value.
+ */
+export const TARKOV_MAP_NAMES_BY_ID: Readonly<Partial<Record<string, string>>> = {
+  '56f40101d2720b2a4d8b45d6': 'Customs',
+  '55f2d3fd4bdc2d5f408b4567': 'Factory',
+  '653e6760052c01c1c805532f': 'Ground Zero',
+  '65b8d6f5cdde2479cb2a3125': 'Ground Zero 21+',
+  '68236e8153654e8c1200798a': 'Ground Zero Tutorial',
+  '69af492a4819ea4ba10a69c5': 'Icebreaker',
+  '5714dbc024597771384a510d': 'Interchange',
+  '5704e4dad2720bb55b8b4567': 'Lighthouse',
+  '59fc81d786f774390775787e': 'Night Factory',
+  '5704e5fad2720bc05b8b4567': 'Reserve',
+  '5704e554d2720bac5b8b456e': 'Shoreline',
+  '5714dc692459777137212e12': 'Streets of Tarkov',
+  '65cc8f81a9aac3e77d0cfd3e': 'Terminal',
+  '5b0fc42d86f7744a585f9105': 'The Lab',
+  '6a294a5b5eb5f9a1700417b7': 'The Lab (Dark)',
+  '6733700029c367a3d40b02af': 'The Labyrinth',
+  '5704e3c2d2720bac5b8b4567': 'Woods',
+};
+
+/**
+ * Canonical tarkov.dev trader IDs mapped to their English names.
+ *
+ * Same hazard as `TARKOV_MAP_NAMES_BY_ID`: `trader: { id, name }` pairs appear
+ * throughout the task overrides (every `traderRequirements` entry carries one),
+ * consumers resolve them by `id`, and the schemas only type-check both as
+ * strings. A right-looking name beside the wrong ID would attribute a loyalty
+ * gate to the wrong trader. `tests/entity-references.test.ts` validates these.
+ *
+ * Captured from `json.tarkov.dev/regular/traders` + `/regular/traders_en`
+ * (v1.81). When upstream adds a trader the guard fails with the unknown ID;
+ * verify against those endpoints and add it here.
+ */
+export const TARKOV_TRADER_NAMES_BY_ID: Readonly<Partial<Record<string, string>>> = {
+  '656f0f98d80a697f855d34b1': 'BTR Driver',
+  '579dc571d53a0658a154fbec': 'Fence',
+  '5c0647fdd443bc2504c2d371': 'Jaeger',
+  '638f541a29ffd1183d187f57': 'Lightkeeper',
+  '5a7c2eca46aef81a7ca2145d': 'Mechanic',
+  '688246518448b05efd61d461': 'Mr. Kerman',
+  '5935c25fb3acc3127c3d8cd9': 'Peacekeeper',
+  '54cb50c76803fa8b248b4571': 'Prapor',
+  '68fe15990f29ba3fdbba9d55': 'Radio station',
+  '5ac3b934156ae10c4430e83c': 'Ragman',
+  '6617beeaa9cfa777ca915b7c': 'Ref',
+  '58330581ace78e27b8b10cee': 'Skier',
+  '69e0d6cc77b63940375b9173': 'Survivor',
+  '68fe15910f29ba3fdbba9d54': 'Taran',
+  '54cb57776803fa99248b456e': 'Therapist',
+  '688246958448b05efd61d462': 'Voevoda',
+};
 
 /** Mode-specific overlay data */
 export interface ModeOverlay {
@@ -592,7 +777,28 @@ export interface PrestigeOverride {
 }
 
 /** Built overlay output structure */
+/** Evidence-scoped mapping from a condition target to distinct task completions. */
+export interface ProgressionCounterDefinition {
+  /** Explicit compatibility revision; callers must select the same revision. */
+  revision: string;
+  verification: 'verified' | 'unresolved';
+  coverage: 'complete' | 'partial';
+  derivation: {
+    type: 'distinctTaskCompletions';
+    /** Candidates only unless verification and coverage permit evaluation. */
+    taskIds: string[];
+  };
+  /** Public evidence for the mapping, including contribution and reset semantics. */
+  proof: string[];
+}
+
+/** Mode -> condition variableId -> mapping. No cross-mode fallback. */
+export type ProgressionCounterRegistry = Partial<
+  Record<GameMode, Record<string, ProgressionCounterDefinition>>
+>;
+
 export interface OverlayOutput {
+  progressionCounters?: ProgressionCounterRegistry;
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
   items?: Record<string, unknown>;
@@ -710,6 +916,7 @@ export interface DivergenceResult {
 
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
+  { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },

@@ -17,7 +17,15 @@ Fetch the overlay from jsDelivr CDN:
 https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json
 ```
 
+The `@main` URL tracks the rolling repository state. Pin an immutable release tag or commit when
+using the overlay in production; the embedded digest detects corruption or stale data but does not
+prove the CDN response's authenticity.
+
 Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATION.md) for details.
+For accurate task visibility and unlock-state tracking, see
+[Task availability and unlock tracking](docs/TASK_AVAILABILITY.md).
+Use `evaluateTaskProgression` for verified progress-based counters and explicit
+unknown results; see the [counter data contract](docs/GLOBAL_VARIABLES.md).
 
 ## Monitor
 
@@ -28,18 +36,22 @@ npm run monitor
 ```
 
 The monitor is read-only by default. To enable its local “Update overlay” action,
-explicitly opt in when starting it:
+explicitly opt in with a rebuild token when starting it:
 
 ```bash
-ALLOW_REBUILD=true npm run monitor
+ALLOW_REBUILD=true REBUILD_TOKEN='choose-a-local-secret' npm run monitor
 ```
 
-Set `REBUILD_TOKEN` as well when exposing the rebuild API to another trusted
-service. Authenticated callers should pass it in an `Authorization: Bearer …`
-header. For backwards compatibility, `?token=` is also accepted; use that only
-for trusted local clients because query strings can appear in logs and browser
-history. Rebuilds target the default `dist/overlay.json` output; custom local
-and HTTP(S) overlay targets remain read-only.
+The server binds to `127.0.0.1` by default. Set `HOST` only when a trusted
+reverse proxy or network boundary is configured; a non-empty token is always
+required for rebuilds, and callers must pass it in an `Authorization: Bearer …`
+header. When `HOST` is not loopback, set `TRUSTED_HTTPS_PROXY=true` only when
+HTTPS is terminated by a trusted reverse proxy; otherwise rebuilds remain
+disabled. In that mode the monitor also uses the first valid `X-Forwarded-For`
+address for per-client SSE quotas, so the proxy must overwrite that header.
+Without the trusted-proxy setting, quotas use the direct socket address.
+Rebuilds target the default `dist/overlay.json` output; custom local and HTTP(S)
+overlay targets remain read-only.
 
 ## Maintenance
 
@@ -54,8 +66,24 @@ This command compares all overrides against current API data and reports:
 - ✅ Overrides that are still needed
 - 🔄 Corrections that have been fixed upstream (can be removed)
 - 🗑️ Tasks that have been removed from the API (can be deleted)
+- ⚠️ Upstream data-quality regressions (reported for escalation, not actionable here)
 
 Run this periodically to keep the overlay lean and accurate.
+
+By default the command only reports. Each gate is opt-in:
+
+| Flag                 | Fails on                                                            | Exit code |
+| -------------------- | ------------------------------------------------------------------- | --------- |
+| `--strict`           | Overlay inconsistency, or data served incorrectly                   | 2         |
+| `--fail-on-stale`    | Overlay carries data tarkov.dev now supplies (this is what CI runs) | 3         |
+| `--fail-on-upstream` | Upstream data-quality regression                                    | 4         |
+
+Exit `0` means no enabled gate found a problem; exit `1` is a script or network
+error. `--fail-on-upstream` is intentionally excluded from CI: those problems
+originate in tarkov.dev's data, so no change in this repository can clear one and
+gating pull requests on it would block every merge until upstream recovered. The
+diagnostic is printed either way. When several gates would fail, every summary is
+printed and the most specific code wins (4, then 2, then 3).
 
 For local checks:
 
@@ -68,6 +96,7 @@ npm test
 ## Contributing
 
 Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).
+For issue requirements and maintainer triage, see the [Issue Triage Guide](docs/TRIAGE.md).
 
 ## Data Governance
 

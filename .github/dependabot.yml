@@ -1,0 +1,31 @@
+# Dependabot configuration.
+#
+# Keeps the npm devDependencies and the SHA-pinned GitHub Actions up to date.
+# Security updates are always opened as individual PRs by GitHub, regardless of
+# the grouping below; the group only bundles routine (non-security) npm version
+# bumps into a single weekly PR to keep noise down.
+
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+    ignore:
+      # @types/node must track the Node major this project supports
+      # (engines.node and .nvmrc), not the newest published types. Typechecking
+      # against a newer major accepts APIs the tested runtime does not have, so
+      # this moves deliberately alongside the supported Node LTS.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

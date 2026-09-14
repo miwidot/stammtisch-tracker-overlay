@@ -8,8 +8,22 @@ export * from './terminal.js';
 export * from './types.js';
 export * from './value-compare.js';
 export * from './tarkov-api.js';
+export {
+  getLatestTagVersion,
+  getNextTagVersion,
+  isVersionStale,
+  indexTaskAdditions,
+  mapOptionalArray,
+  mergeTaskOverride,
+  readResponseJson,
+  resolveDialogueTraderRefs,
+  selectTaskAdditions,
+  verifyOverlaySha256,
+} from './tarkov-api-shared.cjs';
 export * from './task-validator.js';
+export * from './task-unlocks.js';
 export * from './locale-validator.js';
 export * from './divergence-validator.js';
 export * from './entity-validator.js';
 export * from './json5-keys.js';
+export * from './task-progression.js';

@@ -1,53 +1,99 @@
 {
-  // ---------------------------------------------------------------------------
-  // Provenance notes for entries that were deliberately dropped or moved
-  // (recoverable from git history):
-  //
-  // Pathfinder - REMOVED: an objective description was mis-attributed to a
-  // nonexistent quest ("Sales Night"); it rewrote a correct type=visit
-  // objective ("Visit the Railway Exfil exit on Interchange", confirmed by both
-  // captures + tarkov.dev) into fabricated text.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
-  //
-  // Power of Persuasion (aka "Test Drive - Part 2") - MOVED to
-  // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
-  // (regular) = 20 PMCs on Streets/GZ/Interchange; 1.1-pve data = 5 on
-  // Woods/GZ/Interchange/Customs.
-  //
-  // Easy-Breezy (aka "Test Drive - Part 5") - MOVED to
-  // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
-  // (regular) = 50 targets on Factory; 1.1-pve data = 30 on
-  // Reserve/Lighthouse.
-  //
-  // Small Business - Part 3 - REMOVED: the two Woods objective descriptions
-  // were swapped, contradicting tarkov.dev, BOTH game captures, and the wiki
-  // guide. Re-add only with a fresh in-game marker screenshot.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
-  //
-  // Setup - REMOVED: the API serves the same 9 hat/vest combinations
-  // (verified: normalized item-id sets are identical; only ordering differed).
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
-  //
-  // Establish Contact, Collector, Is This a Reference? - REMOVED (issue #274):
-  // these were authored as "Fence LL1" but are actually Fence *reputation*
-  // (scav karma) gates. json.tarkov.dev now serves the correct discriminated
-  // requirement (reputation >= 4 / >= 3 / >= 1) and the wiki agrees, so the
-  // ambiguous LL1 entry would both mislabel the semantic and - under
-  // replace-array semantics - strip the upstream requirement. Proof:
-  //   https://escapefromtarkov.fandom.com/wiki/Establish_Contact (scav karma +4)
-  //   https://escapefromtarkov.fandom.com/wiki/Collector (scav karma +3 + 7x LL4)
-  //   https://escapefromtarkov.fandom.com/wiki/Is_This_a_Reference%3F (scav karma +1)
-  //
-  // minPlayerLevel overrides (A Fuel Matter, Inventory Check, Psycho Sniper,
-  // Bullshit, Chumming, ...) - REMOVED: the 1.1-pve data carries no Level
-  // conditions for these quests.
-  //
-  // The original Season 1 LL1-LL4 batch was removed after its requirement
-  // claims proved unreliable. The active traderRequirements later in this file
-  // are a separately re-audited set: entries already supplied upstream were
-  // retired, while the remaining corrections are verified against the current
-  // reference/API comparison and kept only where still load-bearing.
-  // ---------------------------------------------------------------------------
+  // Ironclad Proof - USEC counterpart of Our Own Land (issue #301).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof?oldid=357227
+  // Requirements updated 2026-08-31; retain upstream's independent global variable.
+  '59ca1a6286f774509a270942': {
+    factionName: 'USEC', // Was: Any
+    traderRequirements: [
+      // Was: []
+      {
+        id: 'overlay.59ca1a6286f774509a270942.54cb50c76803fa8b248b4571.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 3,
+      },
+    ],
+  },
+
+  // A Wedge Between Us - Boreas hard-drive hand-in (issue #331).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Wedge_Between_Us
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce1cfb298a6529b30d712b': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce1cfb298a6529b30d712b.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // War Never Changes - the same specific hand-in, not all of Boreas (issue #303).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/War_Never_Changes
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce204c8702b378f9091e4b': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce204c8702b378f9091e4b.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // Oil Change - Boreas hard-drive hand-in (issue #298).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Change
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce1de03e15cd80bd06f6c9': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce1de03e15cd80bd06f6c9.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // Fresh Stock - the fourth task the same hand-in unlocks. The Boreas guide
+  // names A Wedge Between Us, Fresh Stock, Oil Change and War Never Changes in
+  // one note, and this page carries the identical Requirements line, so it
+  // needs the same gate as its three siblings above.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fresh_Stock
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce21e990144e437802b1e0': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce21e990144e437802b1e0.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // Corrections that were tried and found wrong are recorded in
+  // docs/CONTRIBUTING.md ("Corrections Deliberately Not Made") so the bar for
+  // re-adding one stays visible. Dropped entries are recoverable from git history.
 
   // District Patrol - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/District_Patrol
@@ -72,13 +118,17 @@
     experience: 10000, // Was: 8300 (all modes, stale pre-1.1 value)
   },
 
-  // Glory to CPSU (old: Glory to CPSU - Part 1) - Renamed
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU
-  // The old "Glory to CPSU - Part 1" page is historical; the S1 quest is a
-  // single "Glory to CPSU" (dropped "- Part 1") with reworked optional
-  // objectives.
+  // Glory to CPSU - Part 1 (obsolete duplicate; issues #302 PvE, #350 seasonal)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU_-_Part_1
+  //        ({{Historical content}}; the live quest is 64f5aac4b63b74469b6c14c2)
+  // Removed in 1.1 yet still served by regular, pve AND pvp-season - the two
+  // reports above are the same duplicate seen from different modes. This entry
+  // lives in the shared section precisely so it disables the task in every
+  // mode; tests/task-corrections.test.ts pins that across SUPPORTED_GAME_MODES.
+  // The surviving quest gets its Prapor LL2 requirement from upstream now, so
+  // no requirement override is retained for it.
   '639135b04ed9512be67647d7': {
-    name: 'Glory to CPSU', // Was: Glory to CPSU - Part 1
+    disabled: true, // Was: active (served by all 3 upstream modes)
   },
 
   // Escort - quest XP reworked in 1.1.0.0
@@ -95,26 +145,6 @@
       }, // Was: [] (player level requirement, minPlayerLevel 46)
     ],
     experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
-    objectives: {
-      // The wiki lists eight objectives, one per map, each for 2 PMCs. The API
-      // serves nine: this one duplicates 65e19abadf39d26751b3bb1e, which
-      // already covers Ground Zero and Ground Zero 21+ with a count of 2.
-      //
-      // It is not game data. tarkov-data-manager adds it by hand in
-      // data/changed_quests.json under objectivesAdded - one of only four in
-      // that file - alongside the same stale pre-1.1 experience value
-      // corrected above. Removing it there is the real fix; until then this
-      // keeps it out of the completion count instead of asking for four kills
-      // the quest never wanted.
-      //
-      // Marked optional rather than given count 2: the objective should not
-      // exist at all, and a plausible count would make it indistinguishable
-      // from the eight real ones.
-      // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
-      '65e09b343458a36a766837c7': {
-        optional: true, // Was: false
-      },
-    },
   },
 
   // Decontamination Service - quest XP reworked in 1.1.0.0
@@ -122,6 +152,33 @@
   // Verified: the 1.1-pve data; wiki agrees.
   '5c0d1c4cd0928202a02a6f5c': {
     experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
+  },
+
+  // Gendarmerie - Mall Cop (historical task removed from EFT; issue #325)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Mall_Cop
+  //        ({{Historical content}})
+  '64e7b99017ab941a6f7bf9d7': {
+    disabled: true, // Was: active
+  },
+
+  // Gendarmerie - Tickets, Please (historical task removed from EFT; issue #349)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Tickets%2C_Please
+  //        ({{Historical content}})
+  // Its only prerequisite is Mall Cop above, so disabling both leaves no
+  // dangling prerequisite edge in the unlock graph.
+  '64e7b9a4aac4cd0a726562cb': {
+    disabled: true, // Was: active
+  },
+
+  // The Tarkov Shooter - Part 5 (obsolete duplicate; issue #322)
+  // Proof: https://json.tarkov.dev/regular/tasks - regular, pve and pvp-season
+  // each serve two tasks named "The Tarkov Shooter - Part 5". Part 6
+  // (5bc4856986f77454c317bea7) requires 5bc4836986f7740c0152911c, so this ID is
+  // an orphaned dead end and the wiki page documents the surviving task.
+  // Keep the comparison suppression in src/suppressions/tasks.json5; this
+  // disabled marker controls consumer visibility independently.
+  '5bc4826c86f774106d22d88b': {
+    disabled: true, // Was: active
   },
 
   // -------------------------------------------------------------------------
@@ -291,8 +348,30 @@
   // tarkov.dev serves the stale pre-1.1 figure (42) in every mode. The wiki
   // lists no player level for Collector (only Scav karma + trader loyalties),
   // so it cannot adjudicate. Previously shipped as a PvE-only correction.
+  // The same client capture also requires Chemical - Part 4, Shooter Born in
+  // Heaven, The Tarkov Shooter - Part 4, and Sew it Good - Part 2. The live API
+  // has Chemical - Part 3 and an extra Postman Pat - Part 2 edge in all modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
     minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
+    taskRequirements: [
+      {
+        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
+        status: ['complete', 'failed'],
+      },
+      {
+        task: { id: '5c0bde0986f77479cf22c2f8', name: 'Shooter Born in Heaven' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5bc480a686f7741af0342e29', name: 'The Tarkov Shooter - Part 4' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5ae4497b86f7744cf402ed00', name: 'Sew it Good - Part 2' },
+        status: ['complete'],
+      },
+    ], // Was: Chemical - Part 3 + Postman Pat - Part 2 (and the three shared edges)
   },
 
   // Long Road - Scav kill count reworked in 1.1.0.0 (wiki lags)
@@ -346,7 +425,10 @@
   // Debtor - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
   // Verified: the 1.1-pve data; wiki agrees.
+  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
+  // BEAR PMCs." (issues #288, #291)
   '639dbaf17c898a131e1cffff': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2',
@@ -396,9 +478,6 @@
   //
   // The northern-territory fuel-tank objective ships with empty zones
   // upstream; this patch supplies its zone (in-game verified, issue #246).
-  // tarkov.dev dropped the third/fourth tank objectives entirely in the
-  // 1.1.0.0 sync (matching the 1.1-pve data); the former fourth-tank zone patch
-  // (6926fcc872a6499d1fa29327) was removed with them.
   '5ae448f286f77448d73c0131': {
     traderRequirements: [
       {
@@ -509,26 +588,6 @@
       },
     },
   },
-
-  // New Beginning (Prestige 1)
-  //
-  // REMOVED: this override was a no-op targeting the wrong task's
-  // objective. Objective 6848100b00afffa81f09e36b does not exist on Prestige 1
-  // (6761f28a022f60bb320f3e95) - it belongs to Prestige 3
-  // (6848100b00afffa81f09e365), where upstream reads exactly the "Was:" text
-  // the comment recorded ("Use the transit from The Lab to Streets of Tarkov"),
-  // confirming the ID was copied from Prestige 3.
-  //
-  // The override's intent is already satisfied: Prestige 1's own equivalent
-  // objective (6761f9d718fa62aac3264ff2) already reads "Survive and extract
-  // from The Lab" upstream.
-  //
-  // It was NOT retargeted to Prestige 3 because Prestige 3's wording is correct.
-  // Upstream shows a deliberate escalating chain: P1/P2 extract from The Lab;
-  // P3 transits Lab -> Streets then extracts from Streets; P4 adds Streets ->
-  // Interchange then extracts from Interchange.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
 
   // New Beginning (Prestige 3) - Reputation reward and objective exit status incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
@@ -696,6 +755,17 @@
   // S1: hand over 1 (Was: 2) Red Rebel ice pick (upstream now serves the S1
   // objective); exp 65000, +1.5, 400,000 Roubles + TKPD Assault + 2x FMJ ammo packs.
   '68ee1c18b4e5bc9a68018cd7': {
+    // Requirements section: Prapor LL4. Preserve the separate global-variable gate.
+    traderRequirements: [
+      // Was: []
+      {
+        id: 'overlay.68ee1c18b4e5bc9a68018cd7.54cb50c76803fa8b248b4571.level.>=.4',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 4,
+      },
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 1.5 }, // Was: 0 (upstream now serves 1.5)
@@ -847,21 +917,9 @@
     disabled: true,
   },
 
-  // Mechanic - Capacity Check (remove from EFT in Season 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Capacity_Check
-  '669fa3a1c26f13bd04030f37': {
-    disabled: true,
-  },
-
   // Mechanic - Farming - Part 2 (remove from EFT in Season 1)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Farming_-_Part_2
   '5ac3460c86f7742880308185': {
-    disabled: true,
-  },
-
-  // Mechanic - Forklift Certified (remove from EFT in Season 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Forklift_Certified
-  '669fa394e0c9f9fafa082897': {
     disabled: true,
   },
 
@@ -924,74 +982,6 @@
   '5d25e2a986f77409dd5cdf2a': {
     disabled: true,
   },
-  // Network Provider - Part 1 - missing task prerequisites
-  //
-  // tarkov.dev serves taskRequirements: [] (empty), so the quest appears
-  // available before any of its in-game prerequisites are met (issue #254).
-  // The wiki's Requirements section lists a Scav karma +2 gate (already
-  // correctly served as a traderRequirements reputation >= 2) plus a
-  // quest-completion unlock path:
-  //
-  //   A Big Loss, A Fuel Matter, Broadcast - Part 2,
-  //   Chemical - Part 4 *or* Out of Curiosity *or* Big Customer,
-  //   Courtesy Visit, Gifts from Tarkov, Gunsmith - AK-105, House Arrest,
-  //   Lost Contact, Seaside Vacation, The Cult,
-  //   The Huntsman Path - Forest Cleaning, The Punisher - Part 4
-  //
-  // The story-chapter unlock paths (Batya / The Ticket) are wired separately
-  // as storyChapters[].questUnlocks; consumers evaluate those as an
-  // ALTERNATIVE to this taskRequirements list (OR between the two paths).
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1
-  '625d6ff5ddc94657c21a1625': {
-    taskRequirements: [
-      { task: { id: '5ae4493d86f7744b8e15aa8f', name: 'A Big Loss' }, status: ['complete'] },
-      { task: { id: '608974d01a66564e74191fc0', name: 'A Fuel Matter' }, status: ['complete'] },
-      {
-        task: { id: '63913715f8e5dd32bf4e3aaa', name: 'Broadcast - Part 2' },
-        status: ['complete'],
-      },
-      // Chemical chain: wiki lists "Chemical - Part 4 or Out of Curiosity or
-      // Big Customer" (any one of the three). Modeled like tarkov.dev's
-      // Collector, which uses ['complete', 'failed'] on Chemical - Part 4 to
-      // mean "chain resolved to a terminal state".
-      {
-        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
-        status: ['complete', 'failed'],
-      },
-      { task: { id: '5d25e48186f77443e625e386', name: 'Courtesy Visit' }, status: ['complete'] },
-      { task: { id: '61958c366726521dd96828ec', name: 'Gifts from Tarkov' }, status: ['complete'] },
-      { task: { id: '5ae327c886f7745c7b3f2f3f', name: 'Gunsmith - AK-105' }, status: ['complete'] },
-      { task: { id: '639135c3744e452011470807', name: 'House Arrest' }, status: ['complete'] },
-      { task: { id: '6179afd0bca27a099552e040', name: 'Lost Contact' }, status: ['complete'] },
-      { task: { id: '6179ad56c760af5ad2053587', name: 'Seaside Vacation' }, status: ['complete'] },
-      { task: { id: '5a27b9de86f77464e5044585', name: 'The Cult' }, status: ['complete'] },
-      {
-        task: { id: '5d25e2cc86f77443e47ae019', name: 'The Huntsman Path - Forest Cleaning' },
-        status: ['complete'],
-      },
-      {
-        task: { id: '59ca264786f77445a80ed044', name: 'The Punisher - Part 4' },
-        status: ['complete'],
-      },
-    ], // Was: []
-  },
-  //
-  // S1 (patch 1.1.0.0) trader-loyalty requirements + renames, ported from the
-  // s1 branch and re-expressed in the refactor branch's discriminated syntax.
-  //
-  // 2026-08-15: tarkov.dev ingested most of the S1 batch upstream (renames,
-  // trader LL requirements, XP reworks), so the 239 absorbed items were removed
-  // from this file (85 whole entries, 154 individual fields). What remains
-  // below still diverges from the live API and is load-bearing: 189
-  // still-needed corrections, 0 stale (`npm run check-overrides -- --fail-on-stale`).
-  //
-  // Power of Persuasion / Easy-Breezy / Setup keep only their shared name
-  // and/or traderRequirements here; regular-mode objective variants live in
-  // modes/regular/tasks.json5. Pathfinder's name is now supplied upstream,
-  // while its PvE-only objective rewrite lives in modes/pve/tasks.json5.
-  //
-  // Entries below are ACTIVE corrections; `npm run check-overrides` verifies
-  // them against the live API.
 
   // A Helping Hand - minimum player level to start
   // Proof: https://escapefromtarkov.fandom.com/wiki/A_Helping_Hand
@@ -1097,7 +1087,10 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Shaking_Up_the_Teller
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level (was LL2)
+  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
+  // USEC PMCs." (issues #288, #291)
   '5967725e86f774601a446662': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       // Was: [{ id: "59a9280b86f77477925e27cb", requirementType: "level", compareMethod: ">=", value: 2, trader: Prapor }]
       {
@@ -1266,10 +1259,16 @@
       }, // Was: [] (player level requirement, minPlayerLevel 8)
     ],
   },
+  // What's on the Flash Drive? - S1 (2026-08-10) replaced the player-level gate
+  // with Skier LL1; upstream still serves U+2019 in the name (issue #335).
+  // Note the wiki's own canonical title also uses U+2019 (the ASCII-apostrophe
+  // title is a redirect), so the link below is not the proof for the character.
+  // The straight quote follows the report in #335 plus upstream's own
+  // convention: every other apostrophe in tarkov.dev task names is U+0027, and
+  // this task is the single U+2019 outlier.
   // Proof: https://escapefromtarkov.fandom.com/wiki/What%27s_on_the_Flash_Drive
-  //
-  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
   '5979ed3886f77431307dc512': {
+    name: "What's on the Flash Drive?", // Was: What’s on the Flash Drive?
     traderRequirements: [
       {
         id: 'overlay.5979ed3886f77431307dc512.58330581ace78e27b8b10cee.level.>=.1',
@@ -1311,7 +1310,10 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  // BEAR-only quest (issue #291): wiki Requirements - "This quest is only
+  // obtainable by BEAR PMCs."
   '59c124d686f774189b3c843f': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1',
@@ -1322,10 +1324,13 @@
       }, // Was: [] (player level requirement, minPlayerLevel 5)
     ],
   },
+  // Tigr Safari - S1 (2026-08-10) replaced the player-level gate with
+  // Peacekeeper LL1, and the quest is USEC-only (issue #320). No
+  // `taskRequirements`: the wiki names Fishing Gear as `previous`, but that is
+  // narrative order - the client's only start condition is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
-  //
-  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
   '5a27b7a786f774579c3eb376': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5a27b7a786f774579c3eb376.5935c25fb3acc3127c3d8cd9.level.>=.1',
@@ -1340,6 +1345,8 @@
   //
   // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
   '5a27b7d686f77460d847e6a6': {
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal?oldid=357252
+    factionName: 'BEAR', // Was: Any (Requirements updated 2026-08-31; issue #308)
     traderRequirements: [
       {
         id: 'overlay.5a27b7d686f77460d847e6a6.5935c25fb3acc3127c3d8cd9.level.>=.2',
@@ -1792,7 +1799,10 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
+  // BEAR PMCs." (issues #288, #291)
   '5b478eca86f7744642012254': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2',
@@ -1803,11 +1813,13 @@
       }, // Was: [] (player level requirement, minPlayerLevel 22)
     ],
   },
+  // Supplements - renamed in S1 (2026-08-10), which also replaced the
+  // player-level gate with Skier LL2. USEC-only per wiki Requirements ("This
+  // quest is only obtainable by USEC PMCs.") (issues #288, #291). The chemical
+  // vial objective is on Customs, matching the objective text (issue #321).
   // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
-  //
-  // 2026-08-10: renamed in S1
-  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
   '5b478ff486f7744d184ecbbf': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2',
@@ -1817,6 +1829,12 @@
         value: 2,
       }, // Was: [] (player level requirement, minPlayerLevel 22)
     ],
+    objectives: {
+      '6a5ab1920a2a6d86771ee14a': {
+        maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }], // Was: Interchange
+        possibleLocations: [], // Was: Interchange coordinates (unverified)
+      },
+    },
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Informed_Means_Armed
   //
@@ -1875,10 +1893,31 @@
       }, // Was: [] (player level requirement, minPlayerLevel 30)
     ],
   },
+  // The Guide
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
   //
-  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  // 2026-08-10 - S1: requires Peacekeeper LL4 instead of a player level. The
+  // wiki Requirements section lists exactly "Must be Loyalty Level 4 to start
+  // this quest" and no player level.
+  //
+  // Patch 1.1.0.0 expresses trader-loyalty gates as GlobalVariableValue start
+  // conditions rather than TraderLoyalty conditions, which is why upstream serves
+  // this as an opaque `otherRequirements` globalVariable entry and why the
+  // loyalty level has to be restored here, exactly as the other 150+ entries in
+  // this file do. The variable this task is gated on also gates six other
+  // Peacekeeper quests, and every one of them is Peacekeeper LL4.
+  //
+  // minPlayerLevel 0 rather than a number: upstream's 32 is neither an explicit
+  // client `Level` condition (the task has none) nor the LL4 tier floor
+  // (Peacekeeper LL4 requires level 37), so it is a stale pre-S1 leftover rather
+  // than the derived floor upstream computes for loyalty-gated tasks. The
+  // Peacekeeper LL4 requirement below carries the real gate.
+  //
+  // No `taskRequirements` entry: the wiki's `previous = Wet Job - Part 6` is
+  // narrative order, and this task's only start condition is the loyalty
+  // variable, not a Quest condition.
   '5c0d4e61d09282029f53920e': {
+    minPlayerLevel: 0, // Was: 32 (stale pre-S1 player-level gate)
     traderRequirements: [
       {
         id: 'overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4',
@@ -1961,9 +2000,11 @@
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
   },
+  // The Huntsman Path - Trophy - S1 (2026-08-10) replaced the player-level gate
+  // with Jaeger LL1 (issue #286). No `taskRequirements`: the wiki names Secured
+  // Perimeter as `previous`, but that is narrative order - the client's only
+  // start condition is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Trophy
-  //
-  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
   '5d25e2c386f77443e7549029': {
     traderRequirements: [
       {
@@ -2365,10 +2406,13 @@
       }, // Was: [] (player level requirement, minPlayerLevel 45)
     ],
   },
+  // The Huntsman Path - Relentless - S1 (2026-08-10) replaced the player-level
+  // gate with Jaeger LL4; wiki Requirements list only "Obtain level 4 loyalty
+  // with Jaeger", so the level 55 gate upstream still serves is stale and hides
+  // the task from players who already meet the loyalty requirement (issue #339)
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
-  //
-  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
   '60e71e8ed54b755a3b53eb67': {
+    minPlayerLevel: 0, // Was: 55 (stale player-level gate)
     traderRequirements: [
       {
         id: 'overlay.60e71e8ed54b755a3b53eb67.5c0647fdd443bc2504c2d371.level.>=.4',
@@ -2553,7 +2597,10 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
+  // USEC PMCs." (issues #288, #291)
   '639135c3744e452011470807': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2',
@@ -2864,9 +2911,11 @@
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
   },
+  // The Walls Have Eyes - S1 (2026-08-10) replaced the player-level gate with
+  // Skier LL2 (issue #330). No `taskRequirements`: the wiki names Exit Here as
+  // `previous`, but that is narrative order - the client's only start condition
+  // is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Walls_Have_Eyes
-  //
-  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
   '669fa39c64ea11e84c0642a6': {
     traderRequirements: [
       {
@@ -3031,34 +3080,163 @@
         compareMethod: '>=',
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 4,
-        }, // Was: [] (player level requirement, minPlayerLevel 29)
-      ],
+      }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
   },
 
-  // The Tarkov Shooter - Part 5 - Rewards corrected
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_5
-  // Exp 13100 (was 28000); Roubles 85000 (was 275000); the Mosin Archangel
-  // chassis reward + its Jaeger LL3 barter are replaced by the ATI Monte Carlo
-  // stock (which is also barter-unlocked at Jaeger LL3), plus a Ski hat; Jaeger
-  // reputation +0.02.
-  '5bc4836986f7740c0152911c': {
-    experience: 13100, // Was: 28000
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.02 }, // Was: none
-      ],
-      items: [
-        { count: 85000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 275000
-        { count: 1, item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' } }, // Was: Mosin Archangel chassis x1
-        { count: 1, item: { id: '5ab8f20c86f7745cdb629fb2', name: 'Ski hat with holes for eyes' } },
-      ],
-      offerUnlock: [
-        {
-          level: 3,
-          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
-          trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
-        }, // Was: Jaeger LL3 barter for Mosin Archangel chassis
-      ],
-    },
+  // ---------------------------------------------------------------------------
+  // TASK AVAILABILITY CORRECTIONS
+  //
+  // These prerequisite/level/map fields are required for consumers that build
+  // the task unlock graph from tarkov.dev. The API omits or misstates some of
+  // the links even though the corresponding quest pages document them.
+  // ---------------------------------------------------------------------------
+
+  // The Good Times - Part 1 - requires level 27. Issue #343 reports its successor
+  // Quality Standard (666314b696a9349baa021bac) appearing at level 21; the
+  // successor's own gate is right, so the fix belongs on this predecessor whose
+  // level 27 gate upstream understates as 12. No `taskRequirements`: the client
+  // gates this task with five TraderLoyalty LL2 conditions that upstream already
+  // serves, not with a Quest condition on Shooting Cans.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
+  '666314b4d7f171c4c20226c3': {
+    minPlayerLevel: 27, // Was: 12
+  },
+
+  // The Hermit - the client has no Quest AvailableForStart condition, while
+  // the API incorrectly adds Tough Guy in all three modes. Keep the explicit
+  // empty array so the upstream edge is cleared.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '61904daa7d0d857927447b9c': {
+    taskRequirements: [], // Was: The Survivalist Path - Tough Guy
+  },
+
+  // Offensive Reconnaissance - the client has no Quest AvailableForStart
+  // condition, while the API incorrectly adds Hidden Layer in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '67a0970744893b9f3f0d9b68': {
+    taskRequirements: [], // Was: Hidden Layer
+  },
+
+  // Hot Wheels - the client roots this task at A Helping Hand; the API instead
+  // points at Shipping Delay - Part 1 in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f4e956f1b89c7bc0f56ef': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Shipping Delay - Part 1
+  },
+
+  // Building Foundations - the client roots this task at A Helping Hand; the
+  // API instead points at Swift Retribution in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f629c5b555b53460cf827': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Swift Retribution
+  },
+
+  // The Higher They Fly - the client roots this task at A Helping Hand; the
+  // API instead points at Building Foundations in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '6745fae369a58fceba10343d': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Building Foundations
+  },
+
+  // ---------------------------------------------------------------------------
+  // FACTION-LOCKED QUESTS (issues #288, #291)
+  //
+  // Upstream models faction exclusivity with the task-level factionName field
+  // ("Any" | "BEAR" | "USEC"): faction variants of one quest are separate task
+  // IDs (Textile - Part 1/2, Drip-Out - Part 1/2, Our Own Land / Counteraction,
+  // Green Corridor / Road Closed, The Huntsman Path - Administrator), while
+  // single-faction quests carry a single ID. The overlay stays on that same
+  // field - a factionName override in this file - rather than a parallel
+  // faction split: the lock is identical in every game mode (regular, PvE,
+  // pvp-season), so nothing here belongs under modes/.
+  //
+  // The entries below correct quests tarkov.dev serves as factionName "Any"
+  // even though they are faction-locked in-game. Faction-locked quests that
+  // already had an entry in this file (Oil Run, Shaking Up the Teller,
+  // Vitamins, Supplements, Debtor, House Arrest) carry their factionName there
+  // instead - duplicate keys are rejected by the duplicate-key test
+  // (tests/duplicate-keys.test.ts). Quests whose
+  // factionName upstream already serves correctly (Textile - Part 1/2,
+  // Drip-Out - Part 1/2, Our Own Land / Counteraction, Green Corridor /
+  // Road Closed) need no override. Each lock is proven by the wiki
+  // Requirements section ("This quest is only obtainable by BEAR/USEC PMCs")
+  // or, for The Huntsman Path - Administrator, the wiki's BEAR/USEC Exclusive
+  // objective lists.
+  // ---------------------------------------------------------------------------
+
+  // The Huntsman Path - Administrator (BEAR variant) - faction-locked pair
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
+  // Issue #288: this quest is two faction variants sharing one name. The wiki
+  // lists the Reserve objectives (this ID) as BEAR Exclusive and the
+  // Lighthouse objectives (6a45208043b8d7604d00b8d5, below) as USEC Exclusive.
+  '639136df4b15ca31f76bc31f': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // The Huntsman Path - Administrator (USEC variant) - faction-locked pair
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
+  // Issue #288: Lighthouse objectives ("Launch a yellow signal flare at the
+  // train station on Lighthouse", "Eliminate any 6 targets at the train
+  // station territory on Lighthouse") are USEC Exclusive.
+  '6a45208043b8d7604d00b8d5': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // A Life Lesson - BEAR-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Life_Lesson
+  // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."
+  '67af4c1cc0e59d55e2010b97': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // Profit Retention - BEAR-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Profit_Retention
+  // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."
+  '67af4c1a6c3ebfd8e6034916': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // Safety Guarantee - BEAR-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Safety_Guarantee
+  // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."
+  '67af4c169d95ad16e004fd86': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // Get a Foothold - USEC-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Get_a_Foothold
+  // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
+  '67af4c1991ee75c6d7060a16': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // Profitable Venture - USEC-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Profitable_Venture
+  // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
+  '67af4c1405c58dc6f7056667': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // Never Too Late To Learn - USEC-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Never_Too_Late_To_Learn
+  // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
+  '67af4c17f4f1fb58a907f8f6': {
+    factionName: 'USEC', // Was: Any
   },
 }

@@ -209,6 +209,85 @@
     "pvp-season": {}
   },
   "tasks": {
+    "59ca1a6286f774509a270942": {
+      "factionName": "USEC",
+      "traderRequirements": [
+        {
+          "id": "overlay.59ca1a6286f774509a270942.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "69ce1cfb298a6529b30d712b": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce1cfb298a6529b30d712b.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
+    "69ce204c8702b378f9091e4b": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce204c8702b378f9091e4b.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
+    "69ce1de03e15cd80bd06f6c9": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce1de03e15cd80bd06f6c9.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
+    "69ce21e990144e437802b1e0": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce21e990144e437802b1e0.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
     "64e7b9bffd30422ed03dad38": {
       "traderRequirements": [
         {
@@ -225,7 +304,7 @@
       "experience": 10000
     },
     "639135b04ed9512be67647d7": {
-      "name": "Glory to CPSU"
+      "disabled": true
     },
     "60e71b62a0beca400d69efc4": {
       "traderRequirements": [
@@ -240,15 +319,19 @@
           "value": 4
         }
       ],
-      "experience": 65000,
-      "objectives": {
-        "65e09b343458a36a766837c7": {
-          "optional": true
-        }
-      }
+      "experience": 65000
     },
     "5c0d1c4cd0928202a02a6f5c": {
       "experience": 65000
+    },
+    "64e7b99017ab941a6f7bf9d7": {
+      "disabled": true
+    },
+    "64e7b9a4aac4cd0a726562cb": {
+      "disabled": true
+    },
+    "5bc4826c86f774106d22d88b": {
+      "disabled": true
     },
     "639135e8c115f907b14700aa": {
       "traderRequirements": [
@@ -368,7 +451,46 @@
       "experience": 10000
     },
     "5c51aac186f77432ea65c552": {
-      "minPlayerLevel": 40
+      "minPlayerLevel": 40,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "597a0f5686f774273b74f676",
+            "name": "Chemical - Part 4"
+          },
+          "status": [
+            "complete",
+            "failed"
+          ]
+        },
+        {
+          "task": {
+            "id": "5c0bde0986f77479cf22c2f8",
+            "name": "Shooter Born in Heaven"
+          },
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "task": {
+            "id": "5bc480a686f7741af0342e29",
+            "name": "The Tarkov Shooter - Part 4"
+          },
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "task": {
+            "id": "5ae4497b86f7744cf402ed00",
+            "name": "Sew it Good - Part 2"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
     },
     "6193850f60b34236ee0483de": {
       "traderRequirements": [
@@ -408,6 +530,7 @@
       "experience": 3000
     },
     "639dbaf17c898a131e1cffff": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2",
@@ -756,6 +879,18 @@
       }
     },
     "68ee1c18b4e5bc9a68018cd7": {
+      "traderRequirements": [
+        {
+          "id": "overlay.68ee1c18b4e5bc9a68018cd7.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -851,13 +986,7 @@
     "5a27ba9586f7741b543d8e85": {
       "disabled": true
     },
-    "669fa3a1c26f13bd04030f37": {
-      "disabled": true
-    },
     "5ac3460c86f7742880308185": {
-      "disabled": true
-    },
-    "669fa394e0c9f9fafa082897": {
       "disabled": true
     },
     "5ac3479086f7742880308199": {
@@ -889,128 +1018,6 @@
     },
     "5d25e2a986f77409dd5cdf2a": {
       "disabled": true
-    },
-    "625d6ff5ddc94657c21a1625": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5ae4493d86f7744b8e15aa8f",
-            "name": "A Big Loss"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "608974d01a66564e74191fc0",
-            "name": "A Fuel Matter"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "63913715f8e5dd32bf4e3aaa",
-            "name": "Broadcast - Part 2"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "597a0f5686f774273b74f676",
-            "name": "Chemical - Part 4"
-          },
-          "status": [
-            "complete",
-            "failed"
-          ]
-        },
-        {
-          "task": {
-            "id": "5d25e48186f77443e625e386",
-            "name": "Courtesy Visit"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "61958c366726521dd96828ec",
-            "name": "Gifts from Tarkov"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "5ae327c886f7745c7b3f2f3f",
-            "name": "Gunsmith - AK-105"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "639135c3744e452011470807",
-            "name": "House Arrest"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "6179afd0bca27a099552e040",
-            "name": "Lost Contact"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "6179ad56c760af5ad2053587",
-            "name": "Seaside Vacation"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "5a27b9de86f77464e5044585",
-            "name": "The Cult"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "5d25e2cc86f77443e47ae019",
-            "name": "The Huntsman Path - Forest Cleaning"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "59ca264786f77445a80ed044",
-            "name": "The Punisher - Part 4"
-          },
-          "status": [
-            "complete"
-          ]
-        }
-      ]
     },
     "6752f6d83038f7df520c83e8": {
       "minPlayerLevel": 20
@@ -1103,6 +1110,7 @@
       ]
     },
     "5967725e86f774601a446662": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5967725e86f774601a446662.54cb50c76803fa8b248b4571.level.>=.1",
@@ -1271,6 +1279,7 @@
       ]
     },
     "5979ed3886f77431307dc512": {
+      "name": "What's on the Flash Drive?",
       "traderRequirements": [
         {
           "id": "overlay.5979ed3886f77431307dc512.58330581ace78e27b8b10cee.level.>=.1",
@@ -1313,6 +1322,7 @@
       ]
     },
     "59c124d686f774189b3c843f": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1",
@@ -1327,6 +1337,7 @@
       ]
     },
     "5a27b7a786f774579c3eb376": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5a27b7a786f774579c3eb376.5935c25fb3acc3127c3d8cd9.level.>=.1",
@@ -1341,6 +1352,7 @@
       ]
     },
     "5a27b7d686f77460d847e6a6": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.5a27b7d686f77460d847e6a6.5935c25fb3acc3127c3d8cd9.level.>=.2",
@@ -1775,6 +1787,7 @@
       ]
     },
     "5b478eca86f7744642012254": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2",
@@ -1789,6 +1802,7 @@
       ]
     },
     "5b478ff486f7744d184ecbbf": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2",
@@ -1800,7 +1814,18 @@
           },
           "value": 2
         }
-      ]
+      ],
+      "objectives": {
+        "6a5ab1920a2a6d86771ee14a": {
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "possibleLocations": []
+        }
+      }
     },
     "5b47926a86f7747ccc057c15": {
       "traderRequirements": [
@@ -1859,6 +1884,7 @@
       ]
     },
     "5c0d4e61d09282029f53920e": {
+      "minPlayerLevel": 0,
       "traderRequirements": [
         {
           "id": "overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4",
@@ -2341,6 +2367,7 @@
       ]
     },
     "60e71e8ed54b755a3b53eb67": {
+      "minPlayerLevel": 0,
       "traderRequirements": [
         {
           "id": "overlay.60e71e8ed54b755a3b53eb67.5c0647fdd443bc2504c2d371.level.>=.4",
@@ -2523,6 +2550,7 @@
       ]
     },
     "639135c3744e452011470807": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2",
@@ -2998,56 +3026,77 @@
         }
       ]
     },
-    "5bc4836986f7740c0152911c": {
-      "experience": 13100,
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5c0647fdd443bc2504c2d371",
-              "name": "Jaeger"
-            },
-            "standing": 0.02
-          }
-        ],
-        "items": [
-          {
-            "count": 85000,
-            "item": {
-              "id": "5449016a4bdc2d6f028b456f",
-              "name": "Roubles",
-              "shortName": "RUB"
-            }
+    "666314b4d7f171c4c20226c3": {
+      "minPlayerLevel": 27
+    },
+    "61904daa7d0d857927447b9c": {
+      "taskRequirements": []
+    },
+    "67a0970744893b9f3f0d9b68": {
+      "taskRequirements": []
+    },
+    "673f4e956f1b89c7bc0f56ef": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
           },
-          {
-            "count": 1,
-            "item": {
-              "id": "5bbdb870d4351e00367fb67d",
-              "name": "Mosin Rifle ATI Monte Carlo stock"
-            }
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "673f629c5b555b53460cf827": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
           },
-          {
-            "count": 1,
-            "item": {
-              "id": "5ab8f20c86f7745cdb629fb2",
-              "name": "Ski hat with holes for eyes"
-            }
-          }
-        ],
-        "offerUnlock": [
-          {
-            "level": 3,
-            "item": {
-              "id": "5bbdb870d4351e00367fb67d",
-              "name": "Mosin Rifle ATI Monte Carlo stock"
-            },
-            "trader": {
-              "id": "5c0647fdd443bc2504c2d371",
-              "name": "Jaeger"
-            }
-          }
-        ]
-      }
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "6745fae369a58fceba10343d": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "639136df4b15ca31f76bc31f": {
+      "factionName": "BEAR"
+    },
+    "6a45208043b8d7604d00b8d5": {
+      "factionName": "USEC"
+    },
+    "67af4c1cc0e59d55e2010b97": {
+      "factionName": "BEAR"
+    },
+    "67af4c1a6c3ebfd8e6034916": {
+      "factionName": "BEAR"
+    },
+    "67af4c169d95ad16e004fd86": {
+      "factionName": "BEAR"
+    },
+    "67af4c1991ee75c6d7060a16": {
+      "factionName": "USEC"
+    },
+    "67af4c1405c58dc6f7056667": {
+      "factionName": "USEC"
+    },
+    "67af4c17f4f1fb58a907f8f6": {
+      "factionName": "USEC"
     }
   },
   "craftsAdd": {
@@ -4076,6 +4125,7 @@
       "shortName": "USEC"
     }
   },
+  "progressionCounters": {},
   "seasonalPerks": {
     "69c41a19cd28c936320a7523": {
       "id": "69c41a19cd28c936320a7523",
@@ -9042,9 +9092,6 @@
           "objectives": {
             "60ec07bcd7b7cb55e94c1760": {
               "description": "Eliminiere PMCs auf Factory zur Tageszeit"
-            },
-            "65e09b343458a36a766837c7": {
-              "description": "Eliminiere PMCs auf Ground Zero"
             }
           }
         }
@@ -9068,8 +9115,8 @@
     }
   },
   "$meta": {
-    "version": "1.69",
-    "generated": "2026-08-26T02:40:36.066Z",
-    "sha256": "69cd9a5c0612d53b8cefe04ee127b6db14fa08da9cc22329f280970674f4f378"
+    "version": "1.92",
+    "generated": "2026-09-10T10:52:41.280Z",
+    "sha256": "8c80102e9f0e1e731cc7030e4eddc3ac5ff43e6cc6b59f5e5feff8e05626c368"
   }
 }

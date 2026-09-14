@@ -75,7 +75,14 @@ scans recursively and auto-detects the most recently captured `quest_list`
 reference, so a fresh dump supersedes an older one without touching the tooling
 call sites (pass an explicit `eftDir` to pin a specific capture).
 Never commit the reference or anything derived from it; PRs carry only the
-resulting JSON5 corrections plus proof links.
+resulting JSON5 corrections plus proof links. That prohibition covers the raw
+capture and the field-by-field diffs these tools emit — not every artifact
+informed by the reference. Deliberate, documented exceptions exist and are called
+out where they apply: `src/additions/storyChapters.json5` (below) and
+`docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates plus a few per-task
+observations, using only publicly published identifiers and no reference field
+values. Anything new in that category needs the same explicit rationale and must
+name what it does and does not reproduce.
 
 - `npm run eft:normalize` distills the local reference into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
@@ -86,9 +93,41 @@ resulting JSON5 corrections plus proof links.
 - `npm run eft:audit` is the three-way `reference -> API -> overrides` check.
   Per field it reports GAP (API wrong, no override — add one), STALE (API fixed
   upstream, override redundant — remove it), CONFLICT (override disagrees with
-  the reference — fix it), or OK (override correct and still needed). The
+  the reference — fix it), or OK (override correct and still needed). It covers
+  `experience`, `minPlayerLevel`, objective counts, and `taskRequirements`. The
   reference is mode-specific; the audit auto-detects its mode and refuses a
   mismatched `--mode` to avoid false positives.
+
+  Field authority differs, and getting this wrong has shipped regressions.
+  Patch 1.1.0.0 expresses most trader-loyalty gates as `GlobalVariableValue`
+  start conditions against opaque per-tier variables rather than as
+  `TraderLoyalty` conditions, and tarkov.dev serves those as
+  `otherRequirements` `globalVariable` entries. A `GlobalVariableValue` is a
+  numeric state gate, though — not automatically a loyalty condition or a task
+  prerequisite list. See `docs/GLOBAL_VARIABLES.md` for counter evidence
+  requirements. That distinction drives all three rules below:
+  - `taskRequirements` — preserve explicit `Quest` start conditions and their
+    accepted statuses. The wiki's infobox `previous` field is narrative order,
+    **not** proof of an unlock edge. Distinguish a present template carrying no
+    `Quest` condition from a task missing from the capture entirely; only the
+    former licenses `taskRequirements: []`.
+  - `minPlayerLevel` — absence of an explicit `Level` condition does **not**
+    authorize `0`. Template status values alone do not prove capture
+    completeness, so treat the explicit-gate list as a floor on what exists
+    rather than a closed set. Upstream also _derives_ `minPlayerLevel` from the
+    loyalty tier's `requiredPlayerLevel` when a task is loyalty-gated, so a
+    missing `Level` condition means "no explicit gate", not "no gate", and
+    zeroing those would discard a correct derived floor. Check trader and
+    predecessor-derived floors plus the wiki Requirements section, and only
+    correct the field when upstream's value matches none of them.
+  - `traderRequirements` — **not** auditable against the reference, which is why
+    `eft:audit` deliberately does not cover it. Because the gate lives in a
+    global variable, the client shows no `TraderLoyalty` condition even for tasks
+    that do have a loyalty gate; treating absence as "no gate" would falsely
+    condemn 150+ correct overrides. Use explicit loyalty conditions and the
+    corroborated wiki Requirements section. A candidate cohort tier must not
+    automatically become an extra runtime gate.
+
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the
   numeric `eft:*` tools this one produces committed additions, not a gitignored
@@ -113,15 +152,116 @@ Vitest is the only test framework. Tests should be named `*.test.ts` under `test
 
 Fix fallow findings at their root whenever the code can be safely consolidated, simplified, removed, or covered by tests. Do not add `fallow-ignore` suppressions for resolvable findings; suppressions must be reserved for genuinely unavoidable tool false positives or external/runtime constraints, include a specific reason, and receive explicit reviewer approval.
 
+`npm run fallow:security` reports candidates rather than confirmed vulnerabilities and
+exits 0; CI checks only newly introduced ones (`--gate new --changed-since <base>`), and
+because `main` is not branch-protected a red result reports rather than blocks. The 30
+candidates standing on `main` were triaged and are all tool false positives. Re-check a
+category only if the guard named below stops holding, and prefer fixing a guard over
+suppressing an item:
+
+- **Path traversal, 16 items** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Every path
+  is `path.join(process.cwd(), …)` over literal segments except the mode segment in
+  `taskOverlayFiles`, which is either a member of the module-local `WIKI_COMPARE_MODES`
+  constant or a `SuppressionScope` argument threaded down from a caller. That type is a
+  compile-time bound only, so the guard that matters is at the input boundary: the sole
+  external source is the `--gameMode`/`-g` flag, and `cli.ts` accepts it only when it equals
+  `regular`, `pve`, or `both`, discarding anything else so the `'both'` default applies. A new
+  entry point that reaches these helpers without passing through that check needs its own
+  validation. User-derived cache stems go through `assertSafeCacheFileStem`
+  (`/^[A-Za-z0-9_-]{1,128}$/`). `resolveOutputFilePath` returns the operator's own `--output`
+  argument, which is intended CLI behaviour.
+- **Dynamic regular expression, 11 items** (`normalize.ts`, `wiki.ts`). Every
+  interpolation is wrapped in `escapeRegExp`, so wiki text cannot inject metacharacters.
+  The two that are not (`normalize.ts` around the count-word replacements) interpolate
+  module-local word lists, not input.
+- **SSRF, 3 items** (`monitor/server.js`, `src/lib/tarkov-api.ts`,
+  `monitor/public/app.js`). Both server-side calls append to a hardcoded
+  `https://json.tarkov.dev` base, so the host cannot be redirected, and the request-derived
+  mode segment passes `normalizeMode` (allowlist with fallback) plus `isSafeModeName`
+  (`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`, no separators). The third is a same-origin `fetch` in
+  browser code.
+
+CodeQL alerts dismissed as false positives should state the reason that actually holds. For
+wiki-derived text the operative reason is that `eft-story-generate.ts` consumes the scraped
+file only through `sequenceRatio()` as a fuzzy-match key and never copies the text itself.
+Two nearby claims are _not_ supportable: `eft-story-wiki.ts` does persist that text, to the
+gitignored `data/eft/story-wiki-objectives.json`, and the wiki does influence committed
+output — `matchOptional` returns a coerced `boolean` that becomes an objective's
+optional/required marker in `src/additions/storyChapters.json5`. A boolean cannot carry
+markup, which is why the sanitization argument survives; free-form wiki text reaching the
+overlay would not.
+
 ## Commit & Pull Request Guidelines
 
 Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). If you updated generated output, call that out explicitly.
+
+### PR review bots
+
+Three bots review pull requests here. cubic re-reviews automatically on every
+push. Codex reviews on open, on ready-for-review, and on a `@codex review`
+comment, but only because the Codex GitHub integration is enabled for this
+repository; that comment does nothing where it is not. CodeRabbit reviews on push
+and on `@coderabbitai review`, subject to the allowance below.
+
+Never idle waiting for CodeRabbit's GitHub review allowance to reopen. That
+allowance is metered from recent usage (CodeRabbit has reported it as one review
+per hour here), and when it is exhausted the bot answers a review request with
+`Review rate limited` while still reporting its own check as **passing**. It also
+"does not re-review already reviewed commits", so a green CodeRabbit check is not
+evidence that the head commit was reviewed. Get the coverage another way:
+
+- Run a supplemental local CodeRabbit review. It is not the same artifact as a PR
+  review — different context, and no PR threads come out of it — but it surfaces
+  findings while the PR allowance is closed: `coderabbit review --base main --agent`
+  for structured findings, with `--committed` / `--uncommitted` to scope which
+  changes are considered, `coderabbit review findings` to re-read the last local
+  run, and `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit
+  already posted on a PR. Subcommands and their flags vary by CLI version, so
+  confirm against `coderabbit review --help` and `coderabbit pullrequest --help`
+  before relying on one; the top-level `coderabbit --help` lists subcommands and
+  global options only. A local run has completed a full
+  review while the GitHub PR allowance was exhausted, so the two are metered
+  separately in practice — but CLI runs are still review events counted against the
+  account's limits and can draw on usage-based billing, so treat them as costed
+  rather than free. The CLI has its own small included pool and reports
+  `errorType: rate_limit` with a wait time when it is spent; when that happens fall
+  through to the bots below rather than waiting for it either.
+- Comment `@codex review` for a fresh pass on the current head commit.
+
+Reply to each review thread naming the commit that fixed it and what changed, then
+resolve the thread; the reply is what makes the trail auditable later.
+
+A `CHANGES_REQUESTED` review stays attached to the commit it was written against,
+so it survives the push that fixes it and leaves `reviewDecision` misleading. It
+does not block merging here: `main` is not branch-protected, and GitHub has
+reported `mergeStateStatus: CLEAN` alongside a stale `CHANGES_REQUESTED`. Dismiss
+such a review only after confirming its findings are genuinely fixed, its threads
+are resolved, and you hold permission to dismiss; cite the fixing commit and the
+replacement review evidence in the dismissal message. If branch protection is ever
+enabled and requires approval of the most recent push, dismissal alone will not
+satisfy that rule and a fresh approving review will be needed.
 
 ## Data Contribution Quick Checklist
 
 - Edit the correct JSON5 file in `src/overrides/` or `src/additions/`.
 - Provide proof (wiki link, screenshot, or patch notes).
+- For map and trader references, look the ID up in `TARKOV_MAP_NAMES_BY_ID` /
+  `TARKOV_TRADER_NAMES_BY_ID` (`src/lib/types.ts`) rather than copying a nearby
+  entry. Consumers resolve these by `id`, so a correct `name` beside the wrong
+  `id` silently points at another map or trader;
+  `tests/entity-references.test.ts` enforces the pairing.
 - Run `npm run validate` and `npm run build` before submitting.
+
+## Issue Triage
+
+Use [docs/TRIAGE.md](docs/TRIAGE.md) when reviewing GitHub issues. Verify
+reports against the latest `main`, the applicable live tarkov.dev mode(s), and
+the field-appropriate proof before marking them confirmed, fixed, duplicate,
+or won't fix. Fail closed: missing or conflicting evidence gets
+`status:needs-info` or `status:needs-investigation`, not a guessed verdict.
+Record the checked commit, modes, evidence, and next action in the triage
+comment. Keep only one lifecycle label and use the `type:*` / `status:*`
+taxonomy defined in the guide.
 
 ## Fetching Wiki Data
 
