@@ -1444,10 +1444,12 @@
 
     // Against the Conscience - Part 1 / Entgegen jeglichen Gewissens - Teil 1
     // Name twin: 66058ccbc7f3584787181478 ("Against the Conscience - Part 1 [PVP ZONE]").
-    // "Find out what happened to the champion" and "Survive and extract
-    // from the location" are both attested verbatim elsewhere in this
-    // bundle (e.g. "Finde heraus, was mit dem Wächter passiert ist" and the
-    // many "Überlebe und entkomme aus dem Bereich" objectives).
+    // Both objectives are attested verbatim elsewhere in this bundle:
+    // "Find out what happened to the champion" -> "Finde heraus, was mit dem
+    // Champion passiert ist" (664ef37c4c1e8a2e6c4b1e9a), and "Survive and
+    // extract from the location" -> "Überlebe und entkomme aus dem Bereich"
+    // (many objectives). Note the near-miss: 63a7dbefee7b4d0d5507baf8 renders
+    // the *warden* variant as "Wächter" - a different objective, not this one.
     // Proof: https://json.tarkov.dev/pve/tasks_de (6834233fecd5cf3a440d855b)
     '6834233fecd5cf3a440d855b': {
       // Was: Against the Conscience - Part 1 [PVE ZONE]
