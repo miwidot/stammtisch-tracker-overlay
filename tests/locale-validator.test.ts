@@ -36,7 +36,7 @@ function byField(results: LocaleValidationResult[]): Record<string, LocaleValida
 
 describe('validateLocaleOverrides', () => {
   it('returns no results for an empty overlay', () => {
-    expect(validateLocaleOverrides('en', {}, makeBundle())).toEqual([]);
+    expect(validateLocaleOverrides('en', {}, [makeBundle()])).toEqual([]);
   });
 
   it('marks a task name STALE when the bundle now matches the override', () => {
@@ -48,7 +48,7 @@ describe('validateLocaleOverrides', () => {
       tasks: { t1: { name: 'New Beginning' } },
     };
 
-    const [result] = validateLocaleOverrides('en', overrides, bundle);
+    const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
     expect(result.verdict).toBe('STALE');
     expect(result.bundleValue).toBe('New Beginning');
@@ -65,7 +65,7 @@ describe('validateLocaleOverrides', () => {
       tasks: { t1: { name: 'New Beginning' } },
     };
 
-    const [result] = validateLocaleOverrides('en', overrides, bundle);
+    const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
     expect(result.verdict).toBe('NEEDED');
     expect(result.bundleValue).toBe('Neuanfang');
@@ -80,7 +80,7 @@ describe('validateLocaleOverrides', () => {
       tasks: { t1: { name: 'New Beginning' } },
     };
 
-    const [result] = validateLocaleOverrides('en', overrides, bundle);
+    const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
     expect(result.verdict).toBe('NEEDED');
     expect(result.bundleValue).toBeUndefined();
@@ -98,7 +98,7 @@ describe('validateLocaleOverrides', () => {
       },
     };
 
-    const results = validateLocaleOverrides('en', overrides, makeBundle());
+    const results = validateLocaleOverrides('en', overrides, [makeBundle()]);
 
     expect(results).toHaveLength(3);
     expect(results.every((r) => r.verdict === 'REMOVED')).toBe(true);
@@ -125,7 +125,7 @@ describe('validateLocaleOverrides', () => {
       },
     };
 
-    const results = byField(validateLocaleOverrides('en', overrides, bundle));
+    const results = byField(validateLocaleOverrides('en', overrides, [bundle]));
 
     expect(results['tasks/fixed/wikiLink'].verdict).toBe('STALE');
     expect(results['tasks/broken/wikiLink'].verdict).toBe('NEEDED');
@@ -161,7 +161,7 @@ describe('validateLocaleOverrides', () => {
       },
     };
 
-    const results = byField(validateLocaleOverrides('en', overrides, bundle));
+    const results = byField(validateLocaleOverrides('en', overrides, [bundle]));
 
     expect(results['tasks/t1/objectives[o1].description'].verdict).toBe('STALE');
     expect(results['tasks/t1/objectives[o2].description'].verdict).toBe('NEEDED');
@@ -199,7 +199,7 @@ describe('validateLocaleOverrides', () => {
       },
     };
 
-    const results = byField(validateLocaleOverrides('en', overrides, bundle));
+    const results = byField(validateLocaleOverrides('en', overrides, [bundle]));
 
     expect(results['items/i1/name'].verdict).toBe('STALE');
     expect(results['items/i1/shortName'].verdict).toBe('STALE');
@@ -219,7 +219,7 @@ describe('validateLocaleOverrides', () => {
       maps: { m1: { name: 'Factory' } },
     };
 
-    const results = byField(validateLocaleOverrides('en', overrides, bundle));
+    const results = byField(validateLocaleOverrides('en', overrides, [bundle]));
 
     expect(results['traders/tr1/name'].verdict).toBe('STALE');
     expect(results['maps/m1/name'].verdict).toBe('NEEDED');
@@ -235,7 +235,7 @@ describe('validateLocaleOverrides', () => {
       prestige: { p1: { name: 'Prestige 1' } },
     };
 
-    const [result] = validateLocaleOverrides('en', overrides, bundle);
+    const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
     expect(result.entityType).toBe('prestige');
     expect(result.verdict).toBe('STALE');
@@ -248,7 +248,7 @@ describe('validateLocaleOverrides', () => {
       },
     };
 
-    const results = validateLocaleOverrides('en', overrides, makeBundle());
+    const results = validateLocaleOverrides('en', overrides, [makeBundle()]);
 
     expect(results).toHaveLength(1);
     expect(results[0].verdict).toBe('UNVERIFIABLE');
@@ -265,10 +265,111 @@ describe('validateLocaleOverrides', () => {
       tasks: { t1: { name: 'Anything' } },
     };
 
-    const [result] = validateLocaleOverrides('en', overrides, bundle);
+    const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
     // Object.prototype.toString must not leak in as a resolved translation.
     expect(result.verdict).toBe('NEEDED');
     expect(result.bundleValue).toBeUndefined();
+  });
+
+  it('checks a mode-exclusive entity against the bundle that carries it', () => {
+    // A PvE-only task is absent from the regular bundle but present in pve.
+    const regular = makeBundle();
+    const pve = makeBundle({
+      tasksById: new Map([['pve-task', { id: 'pve-task', name: 'pve-task name' }]]),
+      tasksLocale: { 'pve-task name': 'Leicht verdientes Geld - Teil 1 [PVE ZONE]' },
+    });
+    const overrides: LocaleOverlay = {
+      tasks: { 'pve-task': { name: 'Leicht verdientes Geld - Teil 1 [PVE ZONE]' } },
+    };
+
+    const [result] = validateLocaleOverrides('en', overrides, [regular, pve]);
+
+    expect(result.verdict).toBe('STALE');
+  });
+
+  it('still reports a mode-exclusive entity as REMOVED when no bundle carries it', () => {
+    const overrides: LocaleOverlay = {
+      tasks: { 'gone-task': { name: 'Ghost Task' } },
+    };
+
+    const [result] = validateLocaleOverrides('en', overrides, [makeBundle(), makeBundle()]);
+
+    expect(result.verdict).toBe('REMOVED');
+  });
+
+  it('keeps the override when mode bundles disagree', () => {
+    const regular = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
+      tasksLocale: { 't1 name': 'Fixed upstream' },
+    });
+    const pve = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
+      tasksLocale: { 't1 name': 'Still broken' },
+    });
+    const overrides: LocaleOverlay = {
+      tasks: { t1: { name: 'Fixed upstream' } },
+    };
+
+    const [result] = validateLocaleOverrides('en', overrides, [regular, pve]);
+
+    // Only one mode supplies the override value, so removing it would regress
+    // the other mode.
+    expect(result.verdict).toBe('NEEDED');
+    expect(result.message).toContain('disagree');
+  });
+
+  it('only marks a field STALE when every carrying bundle agrees', () => {
+    const regular = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
+      tasksLocale: { 't1 name': 'Fixed upstream' },
+    });
+    const pve = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
+      tasksLocale: { 't1 name': 'Fixed upstream' },
+    });
+    const overrides: LocaleOverlay = {
+      tasks: { t1: { name: 'Fixed upstream' } },
+    };
+
+    const [result] = validateLocaleOverrides('en', overrides, [regular, pve]);
+
+    expect(result.verdict).toBe('STALE');
+  });
+
+  it('resolves a mode-exclusive objective from a later bundle', () => {
+    const regular = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
+      tasksLocale: { o1: 'Wrong text' },
+    });
+    const pve = makeBundle({
+      tasksById: new Map([
+        [
+          't1',
+          {
+            id: 't1',
+            name: 't1 name',
+            objectives: [{ id: 'pve-only', description: 'o1' }],
+          },
+        ],
+      ]),
+      tasksLocale: { o1: 'Eliminate Scavs' },
+    });
+    const overrides: LocaleOverlay = {
+      tasks: {
+        t1: { objectives: { 'pve-only': { description: 'Eliminate Scavs' } } },
+      },
+    };
+
+    const [result] = validateLocaleOverrides('en', overrides, [regular, pve]);
+
+    expect(result.verdict).toBe('STALE');
+    expect(result.field).toBe('objectives[pve-only].description');
+  });
+
+  it('rejects an empty bundle list rather than reporting everything REMOVED', () => {
+    expect(() => validateLocaleOverrides('en', { tasks: { t1: { name: 'X' } } }, [])).toThrow(
+      /at least one locale bundle/
+    );
   });
 });

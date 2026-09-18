@@ -538,10 +538,11 @@ Notes and caveats:
 ## Applying Locale Overrides
 
 Sometimes a specific tarkov.dev locale bundle is broken — for example, the
-English bundle currently returns the German string "Neuanfang" for the New
-Beginning prestige quest names. The overlay's `locales` section carries
-fixes for exactly these cases, keyed by locale code
-(`locales[localeCode][entityType][entityId][fieldName]`).
+English bundle used to return the German string "Neuanfang" for the New
+Beginning prestige quest names until tarkov.dev fixed it upstream. The
+overlay's `locales` section carries fixes for exactly these cases, keyed by
+locale code (`locales[localeCode][entityType][entityId][fieldName]`). A locale
+with no open fixes is simply absent from the section.
 
 Locale overrides are different from data overrides:
 
@@ -698,6 +699,71 @@ should treat these as new tasks and append them to the API task list.
 const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
 const allTasks = [...tasksFromApi, ...addedTasks];
 ```
+
+### Story Chapters
+
+Story chapters are an addition — tarkov.dev serves no storyline data — so read
+`overlay.storyChapters` directly rather than merging it into an API response.
+
+> **Breaking change in overlay v1.93:** story chapter objectives are now keyed by
+> the real client objective id from the pinned source capture. Previously The
+> Ticket's objectives carried generated positional ids (`the-ticket-main-1` and
+> similar); all 44 were replaced, and none of the old ids survives. Related
+> changes landing with it:
+>
+> - `StoryObjective.sourceQuestId` is now present on every objective, naming the
+>   sub-quest it came from. Before it was missing only from The Ticket's 44
+>   curated objectives; the other 344 already carried it, so only persisted
+>   Ticket objective records need re-keying.
+> - Objective `endingId` now holds a real `client/ending_list` id instead of a
+>   descriptive slug. The old values were `savior`, `fallen`, `survivor` and
+>   `debtor`, so `StoryEndingId` is a different set of values.
+> - Only the ending that the pinned capture resolved objectives for is tagged, so
+>   objectives currently carry one `endingId` value rather than four. The other
+>   three branches are still described, at chapter level.
+> - `the-ticket.endings` is now populated with all four real ending ids (with
+>   per-ending `objectiveCount`). No chapter previously carried a non-empty
+>   `endings` array.
+> - The Ticket grew from 44 to 86 objectives as more of the chapter resolved, and
+>   the split shifted from 31 `main` / 13 `optional` to 26 `main` / 60 `optional`.
+>   A consumer that measures chapter completion over `type: 'main'` objectives
+>   gets a different denominator, not just a longer list.
+> - The prestige `storyObjectiveStatus` requirement for The Ticket moves with the
+>   re-key: it now names `68e2ecfeb88d405a420774f8`, so a consumer that evaluates
+>   that gate against stored progress reads it as unmet until the objective is
+>   recorded again under the new id.
+>
+> **Migration:** consumers that persist story progress keyed by objective id will
+> not find The Ticket's stored ids after upgrading, and that progress will read as
+> incomplete rather than failing loudly. There is no mapping from the old ids to
+> the real ones, because the old ids encoded position rather than identity —
+> matching on objective text does not recover one either: of the 44 old
+> descriptions only 6 have exactly one identical match among the 86 new
+> objectives, 3 match several (`Talk to Mr. Kerman` alone occurs five times), and
+> 35 match none. Either reset stored story progress for that chapter, or pin the
+> overlay to `v1.92` or earlier until you are ready to migrate. Progress keyed by
+> chapter id is unaffected. Consumers matching on the old ending slugs must switch
+> to the real ids.
+>
+> `mutuallyExclusiveQuestPairs` replaces the objective-level exclusions The Ticket
+> used to carry, and it constrains completed sub-quests only. Partial objective
+> progress on both sides of a pair is legal, so a consumer must not expand a pair
+> into objective exclusions or disable an objective toggle because the opposing
+> route has progress.
+>
+> `referenceCoverage.partial` is also worth reading before treating a chapter as
+> complete: the client only returns a story sub-quest template once the player has
+> reached it, so a missing objective is not evidence that none exists. The same
+> applies to an ending whose `objectiveCount` is 0 — the branch is real, but this
+> capture holds no objective-level evidence for it.
+>
+> **Detecting the change:** do not gate on `$meta.version` if you read the
+> `@main` URL. The committed artifact is stamped with the latest existing tag, and
+> only the release build stamps the new one, so `@main` serves this payload as
+> `1.92` until the release commit lands (and jsDelivr may cache a branch URL for
+> hours after that). Released `v1.93` and later carry `1.93`. A shape check is
+> reliable either way: every chapter gains `referenceCoverage`, every objective
+> gains `sourceQuestId`, and `the-ticket.endings` becomes non-empty.
 
 ---
 
@@ -956,6 +1022,110 @@ interface StoryChapter {
   id: string;
   name: string;
   normalizedName: string;
+  wikiLink: string;
+  order: number;
+  /** EFT/tarkov.dev story quest id this chapter maps to (source traceability) */
+  chapterQuestId: string;
+  /** How much of the chapter the pinned reference capture resolved */
+  referenceCoverage: StoryReferenceCoverage;
+  autoStart?: boolean;
+  chapterRequirements?: Array<{ id: string; name: string }>;
+  activation?: StoryChapterActivation;
+  mapUnlocks?: Array<{ id: string; name: string }>;
+  traderUnlocks?: Array<{ id: string; name: string }>;
+  questUnlocks?: Array<{ id: string; name: string }>;
+  description?: string | null;
+  notes?: string | null;
+  objectives?: StoryObjective[];
+  /** Endings this chapter branches into, keyed by the real `client/ending_list` id */
+  endings?: StoryChapterEnding[];
+  /**
+   * Unordered sub-quest id pairs that cannot both be completed. Partial
+   * objective progress on both quests is legal; do not expand a pair into
+   * objective exclusions.
+   */
+  mutuallyExclusiveQuestPairs?: Array<[string, string]>;
+  rewards?: { description: string } | null;
+}
+
+interface StoryReferenceCoverage {
+  /** Sub-quests the chapter quest references (distinct ids) */
+  referencedSubquests: number;
+  /** Referenced sub-quests whose templates the capture resolved */
+  resolvedSubquests: number;
+  /** Finish conditions omitted because English objective text was unavailable */
+  missingObjectiveTexts?: number;
+  /** True when the objective list is a projection of the capture, not the whole chapter */
+  partial: boolean;
+}
+
+interface StoryChapterEnding {
+  id: StoryEndingId;
+  systemName: string;
+  /** Sub-quest whose completion gates this ending */
+  gateQuestId: string;
+  /** Objectives in this chapter attributed to the gate sub-quest */
+  objectiveCount: number;
+  /** Whether the pinned reference resolved the gate sub-quest's template */
+  resolvedInReference: boolean;
+}
+
+// Real `client/ending_list` id; mirrors STORY_ENDINGS in src/lib/types.ts
+type StoryEndingId =
+  | '68a6e8f1a7455e5e23099ad8'
+  | '68a6e8c834a37e244710d516'
+  | '68a6e8e4a8d0bee0b5324d96'
+  | '68a6028ef4c23ebbbc49da4b';
+
+interface StoryChapterActivation {
+  summary: string;
+  locations?: Array<{ map: string; detail: string }>;
+}
+
+interface StoryObjective {
+  id: string;
+  type: 'main' | 'optional';
+  description: string;
+  /** EFT sub-quest id backing this objective (source traceability) */
+  sourceQuestId: string;
+  notes?: string | null;
+  mutuallyExclusiveWith?: string[];
+  endingId?: StoryEndingId;
+  unlocks?: Array<{
+    type: 'achievement' | 'barter' | 'map' | 'quest' | 'trader' | 'other';
+    id?: string;
+    name: string;
+    note?: string;
+  }>;
+  maps?: Array<{ id: string; name: string }>;
+  count?: number;
+  foundInRaid?: boolean;
+  item?: { id: string; name: string; shortName?: string };
+  items?: Array<{ id: string; name: string; shortName?: string }>;
+  markerItem?: { id: string; name: string; shortName?: string };
+  questItem?: { id: string; name: string; shortName?: string };
+  requiredKeys?: Array<Array<{ id: string; name: string; shortName?: string }>>;
+  zones?: StoryObjectiveZone[];
+  possibleLocations?: StoryObjectiveLocation[];
+}
+
+interface StoryObjectiveMapPosition {
+  x: number;
+  y?: number;
+  z: number;
+}
+
+interface StoryObjectiveZone {
+  map: { id: string; name: string };
+  outline?: StoryObjectiveMapPosition[];
+  position?: StoryObjectiveMapPosition;
+  top?: number;
+  bottom?: number;
+}
+
+interface StoryObjectiveLocation {
+  map: { id: string; name: string };
+  positions: StoryObjectiveMapPosition[];
 }
 
 interface PrestigeOverride {
@@ -991,3 +1161,7 @@ interface PrestigeOverride {
   >;
 }
 ```
+
+The interfaces above mirror the canonical declarations in
+[`src/lib/types.ts`](https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/lib/types.ts);
+that file is the source of truth if they ever disagree.

@@ -651,9 +651,11 @@ export function printLocaleResults(locale: string, results: LocaleValidationResu
 }
 
 /**
- * Check every locale override file against the live tarkov.dev bundle for the
- * same locale. Locale bundles are shared across game modes, so 'regular' is
- * fetched once per locale.
+ * Check every locale override file against the live tarkov.dev bundles for the
+ * same locale. Locale bundles are shared across game modes, but the entities
+ * they translate are not: a PvE ZONE task exists only in the `pve` bundle. Every
+ * supported mode is therefore fetched and consulted before a patch is reported
+ * as removed.
  */
 async function checkLocaleOverrides(): Promise<number> {
   const localesDir = join(srcDir, 'overrides', 'locales');
@@ -663,14 +665,16 @@ async function checkLocaleOverrides(): Promise<number> {
 
   let stale = 0;
   for (const locale of locales) {
-    printProgress(`Fetching ${locale} locale bundle from tarkov.dev...`);
-    const bundle = await fetchLocaleBundle('regular', locale);
-    printSuccess(`Fetched ${locale} bundle\n`);
+    printProgress(`Fetching ${locale} locale bundles from tarkov.dev...`);
+    const bundles = await Promise.all(
+      SUPPORTED_GAME_MODES.map((mode) => fetchLocaleBundle(mode, locale))
+    );
+    printSuccess(`Fetched ${locale} bundle for ${SUPPORTED_GAME_MODES.length} mode(s)\n`);
 
     const results = validateLocaleOverrides(
       locale,
       localeOverrides[locale] as LocaleOverlay,
-      bundle
+      bundles
     );
     printLocaleResults(locale, results);
     stale += results.filter(

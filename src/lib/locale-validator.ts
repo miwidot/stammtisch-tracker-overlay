@@ -16,7 +16,7 @@
  * Verdicts:
  * - STALE:        bundle now matches the override — fixed upstream, remove it
  * - NEEDED:       bundle still differs (or can't be confirmed) — keep it
- * - REMOVED:      entity (or objective) no longer exists in the API — delete it
+ * - REMOVED:      entity (or objective) no longer exists in any mode's API — delete it
  * - UNVERIFIABLE: overlay-authored entity (storyChapters) absent from
  *                 tarkov.dev — cannot be checked, skip
  */
@@ -130,8 +130,10 @@ function listPatchedFields(patch: JsonRecord): string[] {
 /** Per-entity-type validation config. */
 type EntityCheck = {
   entityType: Exclude<LocaleEntityType, 'storyChapters'>;
-  lookup: Map<string, JsonRecord>;
-  translations: TranslationMap;
+  /** Core records of this entity type in one mode bundle (entity presence) */
+  coreOf: (bundle: LocaleBundle) => Map<string, JsonRecord>;
+  /** Locale map that resolves this entity type's translated fields */
+  translationsOf: (bundle: LocaleBundle) => TranslationMap;
   /** Fields whose core value is a translation key resolved via `translations` */
   translatedFields: string[];
   /** Fields stored directly on the core endpoint (URL strings, not keys) */
@@ -140,21 +142,89 @@ type EntityCheck = {
   hasObjectives?: boolean;
 };
 
+/** Core record plus the locale map of one bundle that carries the entity. */
+type EntityView = { core: JsonRecord; translations: TranslationMap };
+
+/** Collect the bundles that carry an entity, preserving mode preference order. */
+function collectViews(check: EntityCheck, bundles: LocaleBundle[], entityId: string): EntityView[] {
+  const views: EntityView[] = [];
+  for (const bundle of bundles) {
+    const core = check.coreOf(bundle).get(entityId);
+    if (core) views.push({ core, translations: check.translationsOf(bundle) });
+  }
+  return views;
+}
+
+/** Objective record and translation map when the bundle carries the objective. */
+function findObjectiveView(
+  view: EntityView,
+  objectiveId: string
+): { objective: JsonRecord; translations: TranslationMap } | undefined {
+  const coreObjectives = Array.isArray(view.core.objectives)
+    ? view.core.objectives.filter(isRecord)
+    : [];
+  const objective = coreObjectives.find((entry) => entry.id === objectiveId);
+  return objective ? { objective, translations: view.translations } : undefined;
+}
+
+/**
+ * Compare one patched field across every bundle that carries the entity.
+ *
+ * A single bundle keeps the plain comparison. With several mode bundles, the
+ * override is only stale when each one agrees with it: a field that just one
+ * mode still supplies upstream would otherwise be dropped for the others. A
+ * bundle that cannot resolve the translation, or two bundles that disagree,
+ * keeps the override in place.
+ */
+function compareViews(
+  base: ResultBase,
+  field: string,
+  overrideValue: string,
+  bundleValues: Array<string | undefined>
+): LocaleValidationResult {
+  if (bundleValues.length === 1) {
+    return compareValues(base, field, overrideValue, bundleValues[0]);
+  }
+
+  const resolved = bundleValues.filter((value): value is string => value !== undefined);
+  if (resolved.length !== bundleValues.length) {
+    return {
+      ...base,
+      field,
+      overrideValue,
+      bundleValue: resolved[0],
+      verdict: 'NEEDED',
+      message: `translation not found in ${base.locale} bundle - cannot confirm upstream fix, keep override`,
+    };
+  }
+  if (new Set(resolved).size > 1) {
+    return {
+      ...base,
+      field,
+      overrideValue,
+      bundleValue: resolved[0],
+      verdict: 'NEEDED',
+      message: 'game-mode bundles disagree - keep override',
+    };
+  }
+  return compareValues(base, field, overrideValue, resolved[0]);
+}
+
 function checkObjectivePatches(
   base: ResultBase,
-  core: JsonRecord,
-  objectives: Record<string, ObjectiveLocaleOverride>,
-  translations: TranslationMap
+  views: EntityView[],
+  objectives: Record<string, ObjectiveLocaleOverride>
 ): LocaleValidationResult[] {
   const results: LocaleValidationResult[] = [];
-  const coreObjectives = Array.isArray(core.objectives) ? core.objectives.filter(isRecord) : [];
 
   for (const [objectiveId, patch] of Object.entries(objectives)) {
     const field = `objectives[${objectiveId}].description`;
     if (typeof patch.description !== 'string') continue;
 
-    const coreObjective = coreObjectives.find((entry) => entry.id === objectiveId);
-    if (!coreObjective) {
+    const objectiveViews = views
+      .map((view) => findObjectiveView(view, objectiveId))
+      .filter((view): view is NonNullable<typeof view> => view !== undefined);
+    if (objectiveViews.length === 0) {
       results.push({
         ...base,
         field,
@@ -165,8 +235,16 @@ function checkObjectivePatches(
       continue;
     }
 
-    const bundleValue = resolveTranslation(coreObjective.description, translations);
-    results.push(compareValues(base, field, patch.description, bundleValue));
+    results.push(
+      compareViews(
+        base,
+        field,
+        patch.description,
+        objectiveViews.map((view) =>
+          resolveTranslation(view.objective.description, view.translations)
+        )
+      )
+    );
   }
 
   return results;
@@ -175,16 +253,17 @@ function checkObjectivePatches(
 function checkEntityPatches(
   locale: string,
   check: EntityCheck,
-  patches: Record<string, JsonRecord>
+  patches: Record<string, JsonRecord>,
+  bundles: LocaleBundle[]
 ): LocaleValidationResult[] {
   const results: LocaleValidationResult[] = [];
 
   for (const [entityId, patch] of Object.entries(patches)) {
     if (!isRecord(patch)) continue;
     const base: ResultBase = { locale, entityType: check.entityType, entityId };
-    const core = check.lookup.get(entityId);
+    const views = collectViews(check, bundles, entityId);
 
-    if (!core) {
+    if (views.length === 0) {
       for (const field of listPatchedFields(patch)) {
         const overrideValue = field.startsWith('objectives[')
           ? undefined
@@ -197,24 +276,37 @@ function checkEntityPatches(
     for (const field of check.translatedFields) {
       const overrideValue = patch[field];
       if (typeof overrideValue !== 'string') continue;
-      const bundleValue = resolveTranslation(core[field], check.translations);
-      results.push(compareValues(base, field, overrideValue, bundleValue));
+      results.push(
+        compareViews(
+          base,
+          field,
+          overrideValue,
+          views.map((view) => resolveTranslation(view.core[field], view.translations))
+        )
+      );
     }
 
     for (const field of check.directFields ?? []) {
       const overrideValue = patch[field];
       if (typeof overrideValue !== 'string') continue;
-      const bundleValue = typeof core[field] === 'string' ? (core[field] as string) : undefined;
-      results.push(compareValues(base, field, overrideValue, bundleValue));
+      results.push(
+        compareViews(
+          base,
+          field,
+          overrideValue,
+          views.map((view) =>
+            typeof view.core[field] === 'string' ? (view.core[field] as string) : undefined
+          )
+        )
+      );
     }
 
     if (check.hasObjectives && isRecord(patch.objectives)) {
       results.push(
         ...checkObjectivePatches(
           base,
-          core,
-          patch.objectives as Record<string, ObjectiveLocaleOverride>,
-          check.translations
+          views,
+          patch.objectives as Record<string, ObjectiveLocaleOverride>
         )
       );
     }
@@ -224,50 +316,57 @@ function checkEntityPatches(
 }
 
 /**
- * Validate one locale's overrides against the live tarkov.dev bundle for the
- * same locale, producing a per-field verdict for every patch.
+ * Validate one locale's overrides against the live tarkov.dev bundles for the
+ * same locale, producing a per-field verdict for every patch. Every supported
+ * mode's bundle is consulted: locale overrides are shared across modes, but the
+ * entity they patch can be mode-exclusive (a PvE ZONE task exists only in the
+ * `pve` bundle), so an entity missing from one bundle is not necessarily gone.
  */
 export function validateLocaleOverrides(
   locale: string,
   overrides: LocaleOverlay,
-  bundle: LocaleBundle
+  bundles: LocaleBundle[]
 ): LocaleValidationResult[] {
+  if (bundles.length === 0) {
+    throw new Error('validateLocaleOverrides requires at least one locale bundle');
+  }
+
   const results: LocaleValidationResult[] = [];
 
   const checks: EntityCheck[] = [
     {
       entityType: 'tasks',
-      lookup: bundle.tasksById,
-      translations: bundle.tasksLocale,
+      coreOf: (bundle) => bundle.tasksById,
+      translationsOf: (bundle) => bundle.tasksLocale,
       translatedFields: ['name'],
       directFields: ['wikiLink'],
       hasObjectives: true,
     },
     {
       entityType: 'items',
-      lookup: bundle.itemsById,
-      translations: bundle.itemsLocale,
+      coreOf: (bundle) => bundle.itemsById,
+      translationsOf: (bundle) => bundle.itemsLocale,
       translatedFields: ['name', 'shortName', 'description'],
       directFields: ['wikiLink'],
     },
     {
       entityType: 'traders',
-      lookup: bundle.tradersById,
-      translations: bundle.tradersLocale,
+      coreOf: (bundle) => bundle.tradersById,
+      translationsOf: (bundle) => bundle.tradersLocale,
       translatedFields: ['name', 'description'],
     },
     {
       entityType: 'maps',
-      lookup: bundle.mapsById,
-      translations: bundle.mapsLocale,
+      coreOf: (bundle) => bundle.mapsById,
+      translationsOf: (bundle) => bundle.mapsLocale,
       translatedFields: ['name', 'description'],
     },
     {
       // Prestige records live in the tasks payload; their names resolve via
       // the tasks translation map.
       entityType: 'prestige',
-      lookup: bundle.prestigeById,
-      translations: bundle.tasksLocale,
+      coreOf: (bundle) => bundle.prestigeById,
+      translationsOf: (bundle) => bundle.tasksLocale,
       translatedFields: ['name'],
     },
   ];
@@ -275,7 +374,9 @@ export function validateLocaleOverrides(
   for (const check of checks) {
     const patches = overrides[check.entityType];
     if (!patches) continue;
-    results.push(...checkEntityPatches(locale, check, patches as Record<string, JsonRecord>));
+    results.push(
+      ...checkEntityPatches(locale, check, patches as Record<string, JsonRecord>, bundles)
+    );
   }
 
   // Story chapters are overlay-authored additions with no tarkov.dev

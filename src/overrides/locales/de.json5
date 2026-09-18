@@ -748,17 +748,6 @@
       },
     },
 
-    // Minibus (Lv 0)
-    // Proof: https://json.tarkov.dev/regular/tasks_de (5b478d0f86f7744d190d91b5)
-    '5b478d0f86f7744d190d91b5': {
-      objectives: {
-        // Was: Hand over any found in raid items from the Tools category
-        '6a60b0d2b5ca989d33e5b7e0': {
-          description: 'Übergib im Raid gefundene Werkzeuge',
-        },
-      },
-    },
-
     // Was: Small Things, Big Help
     // Proof: https://json.tarkov.dev/regular/tasks_de (5c10f94386f774227172c572)
     '5c10f94386f774227172c572': {
@@ -1288,9 +1277,9 @@
     // Easy Money - Part 1 / Leicht verdientes Geld - Teil 1
     // Name twin: 66058cb22cee99303f1ba067 ("Easy Money - Part 1 [PVP ZONE]").
     // The single objective is left in stale English by the bundle, and it
-    // is stale in two ways, not just untranslated: the objective id
-    // (6606b709f7ce34bb26221cab) is shared with the PVP twin task, and that
-    // twin's German bundle entry exists but is itself broken. It reads
+    // is stale in two ways, not just untranslated: its English text
+    // duplicates the PVP twin task's objective (6606b709f7ce34bb26221cab),
+    // whose German bundle entry exists but is itself broken. It reads
     // "Platziere die „Bison VS Undertaker"-Plakate in den Wohnquartiere der
     // Scavbasis in Customs" - a grammatically wrong dative plural ("den
     // Wohnquartiere" needs the "-n": "Wohnquartieren"), naming an old poster
@@ -1399,8 +1388,7 @@
       objectives: {
         // Was: Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
         '6834202a186efa3c5b07f9a5': {
-          description:
-            'Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena',
+          description: 'Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena',
         },
       },
     },
@@ -1428,7 +1416,8 @@
     // anywhere in the bundle. The description below adapts the attested
     // "Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz ..."
     // pattern used for To Great Heights - Part 3 (see above), changed to a
-    // single match, the 2nd place, and "im Team" for "in the team".
+    // single match and the 2nd place, and renders the English "in the team"
+    // as "mit deinem Team" so it cannot read as a placement within the team.
     // Proof: https://json.tarkov.dev/pve/tasks_de (68342265a8d674b5740b31f0)
     '68342265a8d674b5740b31f0': {
       // Was: To Great Heights! - Part 5 [PVE ZONE]
@@ -1436,8 +1425,7 @@
       objectives: {
         // Was: Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode
         '6978a3305f21afb01d7e0c53': {
-          description:
-            'Gewinne ein Match und erreiche dabei mindestens den 2. Platz im Team im TeamFight-, BlastGang- oder CheckPoint-Modus',
+          description: 'Gewinne ein Match und erreiche dabei mit deinem Team mindestens den 2. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus',
         },
       },
     },
