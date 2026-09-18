@@ -82,6 +82,22 @@
       },
     },
 
+    // The Tarkov Shooter - Part 6 / Der Tarkov Schütze – Teil 6
+    // The task name was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc4856986f77454c317bea7)
+    '5bc4856986f77454c317bea7': {
+      // Was: The Tarkov Shooter - Part 6
+      name: 'Der Tarkov Schütze – Teil 6',
+    },
+
+    // The Tarkov Shooter - Part 7 / Der Tarkov Schütze – Teil 7
+    // The task name was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc4893c86f774626f5ebf3e)
+    '5bc4893c86f774626f5ebf3e': {
+      // Was: The Tarkov Shooter - Part 7
+      name: 'Der Tarkov Schütze – Teil 7',
+    },
+
     // Dosenschießen / Shooting Cans (Lv 1)
     // Proof: https://json.tarkov.dev/regular/tasks_de (657315df034d76585f032e01)
     '657315df034d76585f032e01': {
@@ -1124,6 +1140,18 @@
           description: 'Übergib die im Raid gefundene Tasche von Sanitar',
         },
       },
+    },
+
+    // The Huntsman Path - Control / Pfad des Jägers - Kontrolle
+    // The task name was left in English in the German bundle. Task
+    // 5d25e2d886f77442734d335e (The Huntsman Path - Controller) already
+    // occupies "Pfad des Jägers - Kontrolle behalten" in the German bundle,
+    // so this one is named "Kontrolle" to avoid a name collision between
+    // two distinct tasks.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a4532e48e82d8ffea0c3eae)
+    '6a4532e48e82d8ffea0c3eae': {
+      // Was: The Huntsman Path - Control
+      name: 'Pfad des Jägers - Kontrolle',
     },
 
     // Chemical Experiments
