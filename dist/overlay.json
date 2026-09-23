@@ -9954,8 +9954,8 @@
     }
   },
   "$meta": {
-    "version": "1.100",
-    "generated": "2026-09-23T20:42:19.254Z",
-    "sha256": "3216b7a23efe9a9902ceb3474376f59c284c7a8e3d58e48d310ffed60c48070a"
+    "version": "1.101",
+    "generated": "2026-09-23T20:47:02.701Z",
+    "sha256": "7c9cd0c1b50d821975e68942e026b6acbfcfc250e3036caef2aca597dc67cf48"
   }
 }
