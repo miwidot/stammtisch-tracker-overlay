@@ -133,13 +133,6 @@
             }
           }
         },
-        "66058cc9ae4719735349b9ea": {
-          "objectives": {
-            "662ba87106e44407b79e9ab2": {
-              "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
-            }
-          }
-        },
         "675c15fbf7da9792a4059871": {
           "taskRequirements": []
         }
@@ -759,12 +752,7 @@
           },
           "value": 3
         }
-      ],
-      "objectives": {
-        "6194fbf785a6d62c481a7aee": {
-          "foundInRaid": true
-        }
-      }
+      ]
     },
     "67a096577e86e067eb045733": {
       "objectives": {
@@ -1890,12 +1878,6 @@
       ],
       "objectives": {
         "6a5ab1920a2a6d86771ee14a": {
-          "maps": [
-            {
-              "id": "56f40101d2720b2a4d8b45d6",
-              "name": "Customs"
-            }
-          ],
           "possibleLocations": []
         }
       }
@@ -9973,7 +9955,7 @@
   },
   "$meta": {
     "version": "1.97",
-    "generated": "2026-09-18T02:58:52.785Z",
-    "sha256": "c2a5abd8a9feea79a23ab7ce1899b7cbdc923ec1b0f2bfc22fb89ca011fcbc39"
+    "generated": "2026-09-24T02:25:21.264Z",
+    "sha256": "388a45457a37665744121a77a358db6095de156fdfdecb2486a0ac8698a47cbc"
   }
 }

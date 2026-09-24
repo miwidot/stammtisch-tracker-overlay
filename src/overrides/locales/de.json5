@@ -1092,15 +1092,16 @@
     },
 
     // Der Fremdenführer / The Guide
-    // These objective ids carry no "<id> description" entry in either locale
-    // bundle - not in tasks_de and not in tasks_en - so consumers fall back to
-    // the English text the tarkov.dev API serves at runtime, and the German UI
-    // shows English. Map names stay English because maps_de itself lists them
-    // that way (the sole exception, "Factory bei Nacht", does not occur here).
-    // The exit status is kept; other German bundle entries drop it ("Überlebe
-    // und entkomme von Shoreline"), which loses information.
-    // Proof: https://json.tarkov.dev/regular/tasks (5c0d4e61d09282029f53920e)
-    //        for the objective ids and their maps, cross-checked against
+    // tasks_de and tasks_en both carry these "<id> description" entries, but
+    // tasks_de holds the untranslated English text in each one, so the German
+    // UI shows English. Map names stay English because maps_de itself lists
+    // them that way (the sole exception, "Factory bei Nacht", does not occur
+    // here). The exit status is kept; other German bundle entries drop it
+    // ("Überlebe und entkomme von Shoreline"), which loses information.
+    // Proof: https://json.tarkov.dev/regular/tasks_de and tasks_en
+    //        (5c0d4e61d09282029f53920e) - the untranslated English values are
+    //        the "Was:" strings below - with the objective ids and their maps
+    //        from https://json.tarkov.dev/regular/tasks, cross-checked against
     //        https://json.tarkov.dev/regular/maps_en and maps_de
     '5c0d4e61d09282029f53920e': {
       objectives: {

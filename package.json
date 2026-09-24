@@ -18,7 +18,7 @@
     "wiki:compare": "tsx scripts/wiki-compare.ts",
     "monitor": "node monitor/server.js",
     "check:monitor": "node --check monitor/server.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
-    "audit:dependencies": "npm audit --audit-level=high",
+    "audit:dependencies": "node scripts/audit-dependencies.cjs",
     "fallow:check": "fallow dead-code",
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
@@ -45,15 +45,15 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.4",
+    "@types/node": "^24.13.5",
     "ajv": "^8.20.0",
-    "fallow": "^3.23.0",
+    "fallow": "^3.26.0",
     "json5": "^2.2.3",
     "markdownlint-cli2": "^0.23.2",
     "prettier": "^3.9.6",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   },
   "overrides": {
     "smol-toml": "^1.7.2"
