@@ -43,7 +43,7 @@
     // Proof: https://json.tarkov.dev/regular/tasks_en (objective 65733e571b7e7ed95fcd2f0c)
     '657315e270bb0b8dba00cc48': {
       objectives: {
-        // Was: Use the paid vehicle extraction on Ground Zero
+        // EN: Use the paid vehicle extraction on Ground Zero
         '65733e571b7e7ed95fcd2f0c': {
           description: 'Nutze die kostenpflichtige Fahrzeug-Extraktion auf Ground Zero',
         },
@@ -55,7 +55,7 @@
     // Proof: https://json.tarkov.dev/regular/tasks_de (5bc47dbf86f7741ee74e93b9)
     '5bc47dbf86f7741ee74e93b9': {
       objectives: {
-        // Was: Eliminate PMC operatives from less than 25 meters away with a bolt-action rifle
+        // EN: Eliminate PMC operatives from less than 25 meters away with a bolt-action rifle
         '5bc47e3e86f7741e6b2f3332': {
           description: 'Eliminiere PMCs aus weniger als 25 Meter Entfernung mit einem Repetiergewehr',
         },
@@ -72,10 +72,10 @@
     // simply mirrors the English as-is.
     // Proof: https://json.tarkov.dev/regular/tasks_de (5bc4836986f7740c0152911c)
     '5bc4836986f7740c0152911c': {
-      // Was: The Tarkov Shooter - Part 5
+      // EN: The Tarkov Shooter - Part 5
       name: 'Der Tarkov Schütze – Teil 5',
       objectives: {
-        // Was: Eliminate Sniper Scavs with a bolt-action rifle
+        // EN: Eliminate Sniper Scavs with a bolt-action rifle
         '5bc483ba86f77415034ba8d0': {
           description: 'Eliminiere Scav-Scharfschützen mit einem Repetiergewehr',
         },
@@ -181,7 +181,7 @@
     // Proof: https://json.tarkov.dev/regular/tasks_de (64f5aac4b63b74469b6c14c2)
     '64f5aac4b63b74469b6c14c2': {
       objectives: {
-        // Was: Locate the apartment of Prapor's friend on Streets of Tarkov
+        // EN: Locate the apartment of Prapor's friend on Streets of Tarkov
         '6a26943d55478d73e6b4fadf': {
           description: 'Finde die Wohnung von Prapors Freund in Streets of Tarkov',
         },
@@ -194,7 +194,7 @@
     // Proof: https://json.tarkov.dev/regular/tasks_de (5d25aed386f77442734d25d2)
     '5d25aed386f77442734d25d2': {
       objectives: {
-        // Was: Eliminate PMC operatives without wearing any body armor or plate carriers
+        // EN: Eliminate PMC operatives without wearing any body armor or plate carriers
         '5d25af3c86f77443ff46b9e7': {
           description: 'Eliminiere PMCs, ohne Körperschutz oder Plattenträger zu tragen',
         },
