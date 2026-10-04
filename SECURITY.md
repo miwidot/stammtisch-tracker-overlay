@@ -65,7 +65,9 @@ latest for corrections.
 
 The `Validate & Build` workflow runs on pull requests targeting `main` and on pushes to
 `main` — that is the trigger in `ci.yml`, so a pull request between two topic branches is not
-covered — and checks `npm run audit:dependencies` (fails at high severity) and
+covered — and checks `npm run audit:dependencies` (fails at high severity across all
+dependencies, except advisories reviewed and accepted with an expiry date in
+`scripts/audit-dependencies.cjs`) and
 `fallow security --gate new` for newly introduced findings. CodeQL runs for
 `javascript-typescript` and `actions` through GitHub's default code-scanning setup, which is
 configured on the repository rather than by a workflow in this tree. `main` is not
