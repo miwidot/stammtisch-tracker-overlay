@@ -253,44 +253,25 @@ overlay would not.
 
 ## Commit & Pull Request Guidelines
 
-Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). Never commit `dist/overlay.json` in a PR: the release workflow is its only writer and commits it after each merge, and CI rejects PRs that change it.
+Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. PRs should include proof links for data changes and the commands you ran (at least `npm run validate`), plus the checked commit, worktree state, checks, and any missing review evidence. Never commit `dist/overlay.json` in a PR: the release workflow is its only writer and commits it after each merge, and CI rejects PRs that change it.
 
 ### PR review bots
 
 Automatic Codex reviews are intended to be off, but the checked-in repository
 files do not establish the current dashboard or integration settings. Push-triggered
 reviews depend on those settings; do not assume a push will or will not trigger a
-review. Check the PR's actual base branch and current review state when planning a
-review. Never use a stale local `main` as the review base.
+review.
 
-Commit locally as often as useful, then push stabilized batches after relevant
-checks. Address a whole PR review round before the next correction push rather
-than pushing per finding. For each stabilized executable change, run one local
-CodeRabbit review when available against a freshly fetched ref for the actual PR base. Follow the installed CLI's help for supported options. Review
-the findings and fix validated, in-scope issues in a batch; do not apply every
-suggestion blindly. Docs, translations and mechanical formatting need self-review
-and deterministic checks only. Record the checked commit, worktree state, checks,
-and any missing review evidence in the PR summary.
+Repo overrides to the global review rules:
 
-Rate limits do not stop useful implementation. Continue validated work, commits
-and pushes in useful batches when a review channel is limited, and record missing
-review evidence. Required independent review still must be complete before merge.
-CLI and PR reviews have separate limited allowances; do not enable paid over-limit
-reviews without authorization or retry in a loop. Reuse review evidence when the
-relevant changes are unchanged. Rerun a review only for substantial new behavior
-or unresolved significant findings. A substantial follow-up needs a manual
-`@coderabbitai review` before merge unless recorded local or independent review
-evidence covers the final changes.
-
-Use `@codex review` only as an exceptional fallback when both CodeRabbit review
-channels are limited, or for a final review of a risky change. Do not run Codex
-reviews locally. Auth, billing, migrations and concurrency changes require an
-independent review before merge; use CodeRabbit or another independent reviewer
-as appropriate and record the evidence. A rate-limited or incomplete review does
-not count as that required review.
-
-Reply to each review thread naming the commit that fixed it and what changed, then
-resolve the thread; the reply is what makes the trail auditable later.
+- A substantial follow-up needs a manual `@coderabbitai review` before merge
+  unless recorded local or independent review evidence covers the final changes.
+- Use `@codex review` only as an exceptional fallback when both CodeRabbit review
+  channels (CLI and PR) are limited, or for a final review of a risky change. Do
+  not run Codex reviews locally.
+- Auth, billing, migrations and concurrency changes require an independent review
+  before merge; use CodeRabbit or another independent reviewer and record the
+  evidence.
 
 A `CHANGES_REQUESTED` review stays attached to the commit it was written against,
 so it survives the push that fixes it and leaves `reviewDecision` misleading. It
