@@ -12073,8 +12073,8 @@
     }
   },
   "$meta": {
-    "version": "1.121",
-    "generated": "2026-10-02T15:25:17.873Z",
-    "sha256": "e6718894198f7ea08be3c2b40c196b49f7bdd8c04babc3d8f196ffcd2ec4053e"
+    "version": "1.122",
+    "generated": "2026-10-04T06:53:44.455Z",
+    "sha256": "b02ef27f99453a6b0ed999982d17b4f2b8bc59ae8982e411b1931be565a2020b"
   }
 }
