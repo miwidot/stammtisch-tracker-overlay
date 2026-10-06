@@ -633,6 +633,20 @@ function applyExtractAdditions(map: { extracts?: Extract[]; extractsAdd?: Extrac
 }
 ```
 
+`npm run check-overrides -- --strict --fail-on-stale` audits the effective map
+patches in every supported mode, after merging shared and mode-specific fields.
+It compares ordinary corrections with upstream map data and checks `extractsAdd`
+against the map's `extracts`, resolving names through `maps_en`. An upstream ID,
+raw name, or translated name match retires an addition even if the published
+coordinates differ. If only one mode supplies an extract, scope the addition to
+the modes where it is still missing rather than deleting it everywhere.
+An empty mode-specific `extractsAdd: []` remains necessary while it suppresses
+a nonempty shared list; the audit preserves that replacement instead of marking
+it stale. The same applies to mode fields that match upstream but replace a
+different shared correction.
+Malformed upstream map or extract collections fail the audit instead of being
+interpreted as missing extracts.
+
 ---
 
 ## Applying Prestige Corrections

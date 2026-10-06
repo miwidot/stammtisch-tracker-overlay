@@ -526,6 +526,44 @@ export async function fetchRawEntities(
   );
 }
 
+/** Reject records that the general-purpose lookup would otherwise omit. */
+function validatedMapLookup(collection: unknown, mode: GameMode): Map<string, JsonRecord> {
+  if (!isRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/maps: expected data.maps collection`
+    );
+  }
+  const entries = Object.values(collection);
+  if (
+    entries.some((entry) => !isRecord(entry) || typeof entry.id !== 'string' || !entry.id.trim())
+  ) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/maps: expected map records with nonempty IDs`
+    );
+  }
+  return toLookup(collection, `${mode}/maps`);
+}
+
+/** Map audit inputs: retain raw IDs/coordinates and resolve names through maps_en. */
+export async function fetchMapValidationData(mode: GameMode): Promise<{
+  maps: Map<string, Record<string, unknown>>;
+  translations: TranslationMap;
+}> {
+  const cache: EndpointCache = new Map();
+  const [envelope, translations] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/maps`),
+    fetchTranslations(cache, mode, 'maps'),
+  ]);
+  const collection = isRecord(envelope.data) ? envelope.data.maps : undefined;
+  const maps = validatedMapLookup(collection, mode);
+  if (Object.values(translations).some((value) => typeof value !== 'string')) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/maps_en: expected string translations`
+    );
+  }
+  return { maps, translations };
+}
+
 /** Read an optional finite numeric field from an endpoint record. */
 function numberField(record: JsonRecord, key: string): number | undefined {
   const value = record[key];

@@ -57,6 +57,9 @@ import {
   fetchTasksWithRequirementCounts,
   fetchLocaleBundle,
   fetchRawEntities,
+  fetchMapValidationData,
+  validateMapOverrides,
+  mergeMapOverrides,
   SUPPORTED_GAME_MODES,
   validateAllOverrides,
   validateLocaleOverrides,
@@ -1249,6 +1252,37 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequireme
 type GateCounts = Pick<ValidationGateCounts, 'actionable' | 'staleProblems' | 'upstreamProblems'>;
 type TasksByMode = Partial<Record<GameMode, TaskData[]>>;
 
+/** Audit the effective map patches after shared/mode merging (arrays replace). */
+export async function checkMapData(
+  sourceDir = srcDir,
+  fetchData = fetchMapValidationData
+): Promise<GateCounts> {
+  const sharedPath = join(sourceDir, 'overrides', 'maps.json5');
+  const shared = existsSync(sharedPath)
+    ? loadJson5File<Record<string, Record<string, unknown>>>(sharedPath)
+    : {};
+  let actionable = 0;
+  let staleProblems = 0;
+  for (const mode of SUPPORTED_GAME_MODES) {
+    const modePath = join(sourceDir, 'overrides', 'modes', mode, 'maps.json5');
+    const modeOverrides = existsSync(modePath)
+      ? loadJson5File<Record<string, Record<string, unknown>>>(modePath)
+      : {};
+    const effective = mergeMapOverrides(shared, modeOverrides);
+    if (Object.keys(effective).length === 0) continue;
+    printProgress(`Fetching ${mode} maps from tarkov.dev API...`);
+    const { maps, translations } = await fetchData(mode);
+    const report = printEntityResults(
+      `${mode} maps`,
+      `shared maps + modes/${mode}/maps`,
+      validateMapOverrides(effective, maps, translations, shared)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+  return { actionable, staleProblems, upstreamProblems: 0 };
+}
+
 async function checkEntityData(): Promise<GateCounts> {
   let actionable = 0;
   let staleProblems = 0;
@@ -1626,9 +1660,10 @@ async function main(): Promise<void> {
     actionable += checkModeDivergences(overrides, apiTasksByMode, modeOverridesByMode);
 
     const entityCounts = await checkEntityData();
+    const mapCounts = await checkMapData();
     const storyCounts = checkStoryData(apiTasksByMode, additions);
     const suppressionCounts = checkSuppressions(apiTasks, apiTasksByMode);
-    for (const counts of [entityCounts, storyCounts, suppressionCounts]) {
+    for (const counts of [entityCounts, mapCounts, storyCounts, suppressionCounts]) {
       actionable += counts.actionable;
       staleProblems += counts.staleProblems;
       upstreamProblems += counts.upstreamProblems;
