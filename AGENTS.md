@@ -272,6 +272,15 @@ Repo overrides to the global review rules:
 - Auth, billing, migrations and concurrency changes require an independent review
   before merge; use CodeRabbit or another independent reviewer and record the
   evidence.
+- Merge class: dependency bumps that keep `npm run validate` and CI green, docs,
+  tests, and proof-backed data corrections are low risk and may merge once checks
+  pass. Confirm before merging changes to workflows or release automation, the
+  overlay output schema or `dist/` contract consumers rely on, secrets, or any
+  weakened security control.
+- Dependencies: Dependabot npm version updates wait out a cooldown (major 30
+  days, minor 7, patch 3) and GitHub Actions updates wait 7 days; security
+  updates open immediately. Socket's pull request
+  alerts and `npm run audit:dependencies` findings must be resolved or reviewed before merge.
 
 A `CHANGES_REQUESTED` review stays attached to the commit it was written against,
 so it survives the push that fixes it and leaves `reviewDecision` misleading. It
