@@ -2126,8 +2126,12 @@
   // Issue #433: upstream still includes obsolete Shoreline maps/locations in
   // regular, pve and pvp-season. The wiki confirms Factory; Factory and Night
   // Factory coordinates below are retained from all three upstream records,
-  // rather than independently re-measured. Key requirements need separate
-  // evidence: the key's wiki page still claims it is needed for Vitamins.
+  // rather than independently re-measured.
+  // Issue #433 keys: upstream still lists the Health Resort west wing office
+  // room 112 key in all three modes, but current map lock data places that
+  // lock only on Shoreline, and the reworked wiki guide (rev 353224) removed
+  // the old key rows. The key's own wiki page keeps an unchanged pre-rework
+  // claim. No replacement key is known.
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
@@ -2135,8 +2139,10 @@
   // BEAR PMCs." (issues #288, #291)
   '5b478eca86f7744642012254': {
     factionName: 'BEAR', // Was: Any
+    neededKeys: [], // Was: [W112 key 5a0dc95c86f77452440fc675 on Factory]
     objectives: {
       '5b478f6886f774464201225a': {
+        requiredKeys: [], // Was: [[5a0dc95c86f77452440fc675]] (W112 key)
         maps: [
           { id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' },
           { id: '59fc81d786f774390775787e', name: 'Night Factory' },
