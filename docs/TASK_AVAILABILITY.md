@@ -288,18 +288,16 @@ overlays that do not contain a valid build digest.
 **Retired.** This task was part of the pre-1.1 Lightkeeper access chain, which
 the wiki marked `{{Historical content}}` and which the
 ["To the Light - ..."](https://escapefromtarkov.fandom.com/wiki/Lightkeeper)
-series replaced. The overlay now ships it as `disabled: true`, so an integrator
-that honours `disabled` filters it out and no unlock evaluation applies to it.
-tarkov.dev still serves the task, which is why the override exists. See
+series replaced. tarkov.dev has since removed all seven legacy access-chain
+quests and the old Getting Acquainted ID from regular, PvE and seasonal PvP
+[task data](https://json.tarkov.dev/regular/tasks). Their eight overlay patches
+have been removed because they no longer match upstream tasks. See
 [issue #365](https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365).
 
-The whole chain is disabled together, not just this task: Network Provider -
-Part 1 and Part 2, Assessment - Part 1 through Part 3, Key to the Tower, and
-Knock-Knock. An integrator that honours `disabled` therefore loses seven tasks at
-once. Knock-Knock stays an upstream prerequisite of the active "To the Light -
-Getting Acquainted" and Information Source, so a consumer that resolves
-prerequisites strictly will see those gated behind a task it filters out; that
-edge needs a newer client capture to rewire and is not invented here.
+Current upstream tasks no longer reference those IDs as prerequisites. Consumers
+with older cached task data should still treat a prerequisite with no recorded
+status as unknown rather than inventing a replacement edge or treating it as
+complete.
 
 The chapter-level `questUnlocks` entries that previously pointed at this task
 were removed from `src/additions/storyChapters.json5` along with it, so the

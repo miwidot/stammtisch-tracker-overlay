@@ -140,6 +140,31 @@ describe('task correction data', () => {
 });
 
 describe('mode-specific task correction consumption', () => {
+  it('retires Lightkeeper patches whose IDs disappeared from every upstream mode', () => {
+    // Verified against /{regular,pve,pvp-season}/tasks: none of these IDs
+    // remains upstream. The shared and mode patches must not retain dead edits.
+    const removedIds = [
+      '625d6ff5ddc94657c21a1625',
+      '625d6ffaf7308432be1d44c5',
+      '625d6ffcaa168e51321d69d7',
+      '625d6fff4149f1149b5b12c9',
+      '625d7001c4874104f230c0c5',
+      '625d70031ed3bb5bcc5bd9e5',
+      '625d7005a4eb80027c4f2e09',
+      '625d700cc48e6c62a440fab5',
+    ];
+    for (const overrides of [
+      loadTaskOverrides(),
+      ...SUPPORTED_GAME_MODES.map((mode) =>
+        loadJson5File<Record<string, TaskOverride>>(
+          join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+        )
+      ),
+    ]) {
+      for (const id of removedIds) expect(overrides).not.toHaveProperty(id);
+    }
+  });
+
   it.each(SUPPORTED_GAME_MODES)(
     "preserves Collector's upstream loyalty-derived level floor in %s",
     (mode) => {
@@ -184,17 +209,16 @@ describe('mode-specific task correction consumption', () => {
     }
   );
 
-  it('keeps active Lightkeeper successors fail-closed when their retired prerequisite is filtered', () => {
-    // Explicit exception: missing replacement wiring is unknown, not available
-    // and not proof that these surviving quests have themselves been retired.
+  it('keeps Information Source fail-closed if a consumer supplies an unresolved legacy prerequisite', () => {
+    // Older cached task data can still reference Knock-Knock. Missing status
+    // remains unknown even after its obsolete overlay patch is removed.
     const tasks = loadTaskOverrides();
     const retiredId = '625d7005a4eb80027c4f2e09';
-    expect(tasks[retiredId]?.disabled).toBe(true);
     for (const mode of SUPPORTED_GAME_MODES) {
       const modeTasks = loadJson5File<Record<string, TaskOverride>>(
         join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
       );
-      for (const id of ['625d700cc48e6c62a440fab5', '63966faeea19ac7ed845db2c']) {
+      for (const id of ['63966faeea19ac7ed845db2c']) {
         const task = {
           id,
           name: id,

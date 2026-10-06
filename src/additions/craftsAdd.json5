@@ -291,7 +291,7 @@
   // Radio repeater  (level 1) [quest-gated]
   // Unlock: a pre-replacement 1.1 capture grants this recipe as a `Started`
   // ProductionScheme reward of Network Provider - Part 2
-  // (625d6ffaf7308432be1d44c5), but that task is disabled here: the pre-1.1
+  // (625d6ffaf7308432be1d44c5), but that task is now absent upstream: the pre-1.1
   // Lightkeeper chain was replaced by the "To the Light" series on 2026-09-08,
   // whose task ids are not yet known. taskUnlock stays null until a
   // post-replacement capture shows the current unlocking task.
