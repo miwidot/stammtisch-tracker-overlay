@@ -233,22 +233,6 @@
       }
     }
   },
-  "maps": {
-    "5704e4dad2720bb55b8b4567": {
-      "extractsAdd": [
-        {
-          "id": "SCAV_Underboat_Hideout",
-          "name": "Hideout Under the Landing Stage",
-          "faction": "scav",
-          "position": {
-            "x": 143.13,
-            "y": 0.73,
-            "z": -159.34
-          }
-        }
-      ]
-    }
-  },
   "tasks": {
     "59ca1a6286f774509a270942": {
       "factionName": "USEC",
@@ -3540,31 +3524,6 @@
           "value": 1
         }
       ]
-    },
-    "625d6ff5ddc94657c21a1625": {
-      "disabled": true
-    },
-    "625d6ffaf7308432be1d44c5": {
-      "disabled": true
-    },
-    "625d6ffcaa168e51321d69d7": {
-      "disabled": true
-    },
-    "625d6fff4149f1149b5b12c9": {
-      "disabled": true
-    },
-    "625d7001c4874104f230c0c5": {
-      "disabled": true
-    },
-    "625d70031ed3bb5bcc5bd9e5": {
-      "disabled": true
-    },
-    "625d7005a4eb80027c4f2e09": {
-      "disabled": true
-    },
-    "625d700cc48e6c62a440fab5": {
-      "name": "To the Light - Getting Acquainted",
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted"
     }
   },
   "craftsAdd": {
@@ -12075,8 +12034,8 @@
     }
   },
   "$meta": {
-    "version": "1.128",
-    "generated": "2026-10-06T05:20:06.570Z",
-    "sha256": "9f255bf960ded197d2cdea27aa37649755d7d012ac7a75db0aafb305b1af4e5c"
+    "version": "1.129",
+    "generated": "2026-10-06T17:06:47.238Z",
+    "sha256": "1fde6d6ed1e2cd70b2e5c9a588645ff72af3c556cc23ba5e8e59f40398ec2921"
   }
 }
