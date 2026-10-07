@@ -38,6 +38,30 @@ const A = 'a'.repeat(24);
 const B = 'b'.repeat(24);
 
 describe('readWasComments', () => {
+  it.each(['\n', '\r\n'])('pairs task and objective sources with %j line endings', (eol) => {
+    const file = write(
+      [
+        '{',
+        '  tasks: {',
+        '    // Was: Original task',
+        `    '${A}': {`,
+        "      name: 'Task',",
+        '      objectives: {',
+        `        '${B}': {`,
+        '          // Was: Original objective',
+        "          description: 'Objective',",
+        '        },',
+        '      },',
+        '    },',
+        '  },',
+        '}',
+      ].join(eol)
+    );
+    expect(readWasComments(file)).toEqual([
+      { id: `${A} name`, was: 'Original task' },
+      { id: B, was: 'Original objective' },
+    ]);
+  });
   it('pairs a comment placed above the objective id', () => {
     const file = write(
       [

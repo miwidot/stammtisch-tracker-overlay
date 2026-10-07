@@ -10,6 +10,46 @@ permissions:
   contents: read
 
 jobs:
+  windows-validation:
+    name: Windows validation (CRLF checkout)
+    runs-on: windows-latest
+    steps:
+      - name: Exercise a CRLF checkout
+        run: git config --global core.autocrlf true
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify CRLF coverage
+        run: node -e "if (!require('node:fs').readFileSync('docs/MASTER_SAMPLES.md', 'utf8').includes('\r\n')) throw new Error('Expected a CRLF checkout')"
+
+      - name: Audit dependencies
+        run: npm run audit:dependencies
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Validate overlay
+        run: npm run validate
+
+      - name: Check deterministic build
+        run: npm run build:check
+
+      - name: Test
+        run: npm test
+
   validate:
     name: Validate & Build
     runs-on: ubuntu-latest

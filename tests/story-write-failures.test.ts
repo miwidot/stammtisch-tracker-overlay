@@ -15,7 +15,7 @@ import {
   writeFileSync,
 } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { writeFileAtomicSync, writeFileExclusiveSync } from '../scripts/lib/atomic-write.js';
 import { pendingLockSidecar } from '../scripts/eft-story-generate.js';
@@ -71,6 +71,8 @@ function runWriter(dir: string, input: string, inject: string) {
   const bootstrap = `
     import fs from 'node:fs';
     import { syncBuiltinESMExports } from 'node:module';
+    import { resolve } from 'node:path';
+    const isArtifact = (file) => resolve(String(file)) === resolve('src', 'additions', 'storyChapters.json5');
     const write = fs.writeFileSync;
     ${inject}
     syncBuiltinESMExports();
@@ -104,13 +106,13 @@ function recoveryState(dir: string, artifactIsPublished = true) {
   const metadata = JSON.parse(json);
   expect(metadata).toEqual({
     version: 1,
-    artifact: 'src/additions/storyChapters.json5',
+    artifact: join('src', 'additions', 'storyChapters.json5'),
     snapshot: expect.anything(),
     artifactSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
     previousArtifactSha256: createHash('sha256').update(PREVIOUS_ARTIFACT).digest('hex'),
     previousPinSha256: createHash('sha256').update(PREVIOUS_LOCK).digest('hex'),
   });
-  expect(metadata.snapshot).toMatch(
+  expect(metadata.snapshot.split(sep).join('/')).toMatch(
     /^src\/additions\/\.storyChapters\.json5-rollback-[^/]+\/previous$/
   );
   expect(readFileSync(join(dir, metadata.snapshot), 'utf8')).toBe(PREVIOUS_ARTIFACT);
@@ -216,7 +218,7 @@ describe('story artifact and provenance write failures', () => {
           `
           const rename = fs.renameSync;
           fs.renameSync = (source, destination) => {
-            if (String(destination) === 'src/additions/storyChapters.json5') {
+            if (isArtifact(destination)) {
               if (fs.readFileSync(destination, 'utf8') !== ${JSON.stringify(PREVIOUS_ARTIFACT)}) {
                 throw new Error('artifact missing or changed before atomic replacement');
               }
@@ -397,7 +399,7 @@ describe('story artifact and provenance write failures', () => {
               return rename(source, destination);
             }
             const result = rename(source, destination);
-            if (String(destination) === 'src/additions/storyChapters.json5') {
+            if (isArtifact(destination)) {
               fs.rmSync(${JSON.stringify(sidecar)});
             }
             return result;
@@ -464,7 +466,7 @@ describe('story artifact and provenance write failures', () => {
           `
         const remove = fs.rmSync;
         fs.rmSync = (file, ...args) => {
-          if (String(file) === 'src/additions/storyChapters.json5') {
+          if (isArtifact(file)) {
             throw new Error('EACCES: simulated removal failure');
           }
           return remove(file, ...args);
@@ -509,7 +511,7 @@ describe('story artifact and provenance write failures', () => {
         const read = fs.readFileSync;
         let failedPromotion = false;
         fs.readFileSync = (file, ...args) => {
-          if (failedPromotion && String(file) === 'src/additions/storyChapters.json5') {
+          if (failedPromotion && isArtifact(file)) {
             throw new Error('EACCES: simulated destination read failure');
           }
           return read(file, ...args);

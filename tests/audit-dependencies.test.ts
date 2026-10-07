@@ -40,6 +40,21 @@ function temporaryDirectory() {
   return directory;
 }
 
+// Windows worker environments can enumerate npm's keys in uppercase. Node
+// chooses the first case-insensitive duplicate when spawning on Windows.
+function launcherEnvironment(overrides: Record<string, string> = {}) {
+  const replaced = new Set([
+    'npm_execpath',
+    ...Object.keys(overrides).map((key) => key.toLowerCase()),
+  ]);
+  return {
+    ...Object.fromEntries(
+      Object.entries(process.env).filter(([key]) => !replaced.has(key.toLowerCase()))
+    ),
+    ...overrides,
+  };
+}
+
 function runLauncher({ stdout = cleanReport, exitCode = 0 } = {}) {
   const directory = temporaryDirectory();
   const npmPath = join(directory, 'npm cli.cjs');
@@ -63,15 +78,14 @@ function runLauncher({ stdout = cleanReport, exitCode = 0 } = {}) {
   );
   const result = spawnSync(process.execPath, [launcher, '--loglevel=warn'], {
     encoding: 'utf8',
-    env: {
-      ...process.env,
+    env: launcherEnvironment({
       npm_execpath: npmPath,
       npm_config_allow_scripts: '@stripe/cli',
       NPM_CONFIG_ALLOW_SCRIPTS: 'another-package',
       npm_config_registry: 'https://registry.npmjs.org/',
       npm_config_userconfig: join(directory, 'user npmrc'),
       npm_config_ignore_scripts: 'true',
-    },
+    }),
   });
   return { result, invocationPath };
 }
@@ -107,8 +121,7 @@ describe('dependency audit launcher', () => {
   });
 
   it('fails closed when not launched by npm', () => {
-    const env = { ...process.env };
-    delete env.npm_execpath;
+    const env = launcherEnvironment();
     const result = spawnSync(process.execPath, [launcher], { encoding: 'utf8', env });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('npm run audit:dependencies');
@@ -117,7 +130,7 @@ describe('dependency audit launcher', () => {
   it('fails closed when the npm entry point cannot run', () => {
     const result = spawnSync(process.execPath, [launcher], {
       encoding: 'utf8',
-      env: { ...process.env, npm_execpath: join(temporaryDirectory(), 'missing.cjs') },
+      env: launcherEnvironment({ npm_execpath: join(temporaryDirectory(), 'missing.cjs') }),
     });
     expect(result.status).toBe(1);
   });
@@ -128,9 +141,13 @@ describe('dependency audit launcher', () => {
     writeFileSync(npmPath, `process.kill(process.pid, 'SIGTERM');`);
     const result = spawnSync(process.execPath, [launcher], {
       encoding: 'utf8',
-      env: { ...process.env, npm_execpath: npmPath },
+      env: launcherEnvironment({ npm_execpath: npmPath }),
     });
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain('SIGTERM');
+    // Windows reports self-termination as an exit code rather than a signal.
+    // Both must fail closed; the policy's signal branch is unit-tested separately.
+    expect(result.stderr).toContain(
+      process.platform === 'win32' ? 'did not produce a JSON report' : 'SIGTERM'
+    );
   });
 });
