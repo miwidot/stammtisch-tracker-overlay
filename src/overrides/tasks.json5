@@ -3583,6 +3583,15 @@
     factionName: 'USEC', // Was: Any
   },
 
+  // Gunsmith - AKM - BEAR-only per the wiki Requirements section (issue #443).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKM?oldid=362706
+  // Best-effort correction: the wiki added this restriction on 2026-09-30;
+  // regular, pve and pvp-season still serve "Any". Older 1.1 PvE template
+  // evidence predates this wiki update; current client eligibility is unverified.
+  '5ae3270f86f77445ba41d4dd': {
+    factionName: 'BEAR', // Was: Any
+  },
+
   // A Life Lesson - BEAR-only quest
   // Proof: https://escapefromtarkov.fandom.com/wiki/A_Life_Lesson
   // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."

@@ -19,6 +19,7 @@ const TASK_IDS = {
   duplicateShooter: '5bc4826c86f774106d22d88b',
   theGuide: '5c0d4e61d09282029f53920e',
   tigrSafari: '5a27b7a786f774579c3eb376',
+  gunsmithAkm: '5ae3270f86f77445ba41d4dd',
   supplements: '5b478ff486f7744d184ecbbf',
   relentless: '60e71e8ed54b755a3b53eb67',
   flashDrive: '5979ed3886f77431307dc512',
@@ -93,6 +94,56 @@ describe('task correction data', () => {
    */
   it('keeps the faction lock on faction-restricted tasks', () => {
     expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({ factionName: 'USEC' });
+  });
+
+  it.each(SUPPORTED_GAME_MODES)('restricts Gunsmith - AKM to BEAR in %s', (mode) => {
+    const overlay = {
+      tasks: overrides,
+      modes: {
+        [mode]: {
+          tasks: loadJson5File<Record<string, TaskOverride>>(
+            join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+          ),
+        },
+      },
+    };
+    const mechanic = { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' };
+    const upstream = {
+      id: TASK_IDS.gunsmithAkm,
+      name: 'Gunsmith - AKM',
+      factionName: 'Any',
+      minPlayerLevel: 26,
+      trader: mechanic,
+      traderRequirements: [
+        {
+          id: '6a3cfb55342c8e533a22b71d',
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 3,
+          trader: mechanic,
+        },
+      ],
+      objectives: [],
+    };
+    const effective = applyTaskOverride(
+      upstream,
+      getTaskOverrideForMode(TASK_IDS.gunsmithAkm, overlay as never, mode)
+    ) as TaskData;
+    const definition = deriveTaskUnlockDefinition(effective);
+    const eligible = {
+      playerLevel: 30,
+      traderLevels: { [mechanic.id]: 3 },
+      traderUnlocked: { [mechanic.id]: true },
+    };
+
+    expect(effective.minPlayerLevel).toBe(upstream.minPlayerLevel);
+    expect(effective.traderRequirements).toEqual(upstream.traderRequirements);
+    expect(evaluateTaskUnlock(effective, definition, { ...eligible, faction: 'BEAR' }).status).toBe(
+      'available'
+    );
+    expect(evaluateTaskUnlock(effective, definition, { ...eligible, faction: 'USEC' }).status).toBe(
+      'blocked'
+    );
   });
 
   it('applies the level, name, and objective corrections', () => {
