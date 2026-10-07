@@ -46,7 +46,7 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
-    "@types/node": "24.19.0",
+    "@types/node": "24.19.1",
     "ajv": "^8.20.0",
     "fallow": "3.30.0",
     "json5": "^2.2.3",
@@ -54,7 +54,7 @@
     "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "5.0.2"
+    "vitest": "5.0.3"
   },
   "overrides": {
     "katex": "0.18.9",
