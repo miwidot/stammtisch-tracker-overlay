@@ -3423,6 +3423,9 @@
     "5ac244eb86f7741356335af1": {
       "factionName": "USEC"
     },
+    "5ae3270f86f77445ba41d4dd": {
+      "factionName": "BEAR"
+    },
     "67af4c1cc0e59d55e2010b97": {
       "factionName": "BEAR"
     },
@@ -12034,8 +12037,8 @@
     }
   },
   "$meta": {
-    "version": "1.131",
-    "generated": "2026-10-07T02:43:44.629Z",
-    "sha256": "f87e09bdf0cff87aafad6d252cbeb53d21dbb1740589dec5c417b9a23eb2a29a"
+    "version": "1.132",
+    "generated": "2026-10-07T02:56:33.943Z",
+    "sha256": "8256bd514de0d076b2ca536ea5ba6736a28ca8c69009bb68b5debc45dd3b4ddd"
   }
 }
