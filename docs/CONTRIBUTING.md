@@ -471,6 +471,14 @@ See `docs/MASTER_SAMPLES.md` for the comprehensive, copy-paste JSON5 master refe
 
 ---
 
+## Licensing of Contributions
+
+Data contributions (anything under `src/overrides/`, `src/additions/`, `src/divergences/`, or
+`src/suppressions/`) are licensed under [CC BY-NC 4.0](../LICENSE-DATA). Code contributions are
+licensed under [MIT](../LICENSE). Submitting a pull request means you agree to these terms.
+
+---
+
 ## Questions?
 
 Open an issue or reach out on [Discord](https://discord.gg/PpdDwd2M6V).

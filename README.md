@@ -107,4 +107,18 @@ For issue requirements and maintainer triage, see the [Issue Triage Guide](docs/
 
 ## License
 
-See [LICENSE](LICENSE).
+This repository is dual-licensed:
+
+- **Code** (`scripts/`, `src/lib/`, `src/schemas/`, `examples/`, `monitor/`, `tests/`, and
+  tooling): [MIT](LICENSE).
+- **Data** (`src/overrides/`, `src/additions/`, `src/divergences/`, `src/suppressions/`, and the
+  built `dist/overlay.json`): [CC BY-NC 4.0](LICENSE-DATA).
+
+Using the data requires visible attribution, for example:
+
+> Data corrections from [tarkov-data-overlay](https://github.com/tarkovtracker-org/tarkov-data-overlay)
+> by TarkovTracker.org, licensed under CC BY-NC 4.0.
+
+Commercial use of the data needs written permission from TarkovTracker.org. Open an issue to ask.
+
+Data published before this change remains available under the MIT terms it was released with.
