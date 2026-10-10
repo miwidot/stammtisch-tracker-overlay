@@ -106,29 +106,4 @@
       },
     ],
   },
-
-  // New Beginning - prestige track, and PvE has no prestige.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/362
-  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/319
-  //        https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-  //
-  // This task is not an ordinary trader quest: it is the Quest start condition
-  // on prestige element 672df12f97f0469cea52f55e (Prestige 1), returned by
-  // `client/prestige/list`. Upstream itself agrees PvE has no prestige -
-  // `json.tarkov.dev/pve/tasks` serves `prestige: []` while
-  // `json.tarkov.dev/regular/tasks` serves all six prestige elements - yet it
-  // still lists the quest whose only purpose is to gate Prestige 1. The local
-  // captures agree: no PvE session is served `client/prestige/list`, and this
-  // repository already scopes every prestige correction to
-  // src/overrides/modes/regular/prestige.json5.
-  //
-  // Two independent reporters at levels 35 and 36 (both above the wiki's level-25
-  // requirement) confirm the quest never appears in PvE.
-  //
-  // Note the PvE capture is build 1.1.0.1.46699 rather than the 46911 used for
-  // the other modes, so the endpoint evidence alone would carry a version
-  // caveat; the empty upstream `prestige` array for PvE is what removes it.
-  '6761f28a022f60bb320f3e95': {
-    disabled: true, // Was: active (pve has no prestige track)
-  },
 }

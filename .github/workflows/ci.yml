@@ -44,8 +44,10 @@ jobs:
       - name: Validate overlay
         run: npm run validate
 
-      - name: Check deterministic build
-        run: npm run build:check
+      # dist/overlay.json is rebuilt by the release workflow after merge, so a PR
+      # that changes source data never matches the committed copy; build it here.
+      - name: Build overlay
+        run: npm run build
 
       - name: Test
         run: npm test
