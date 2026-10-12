@@ -133,9 +133,12 @@ jobs:
       - name: Compute next overlay version
         id: version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git fetch --tags --force
+          git_auth=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)")
+          git "${git_auth[@]}" fetch --tags --force
           next_tag="$(npm run --silent next-overlay-tag)"
           if [[ ! "$next_tag" =~ ^v[0-9]+\.[0-9]+$ ]]; then
             echo "Unexpected next overlay tag: '$next_tag'" >&2

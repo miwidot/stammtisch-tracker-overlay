@@ -33,9 +33,12 @@ jobs:
           persist-credentials: false
 
       - name: Sync trusted main branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git fetch origin main --no-tags
+          git_auth=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)")
+          git "${git_auth[@]}" fetch origin main --no-tags
           git checkout --detach origin/main
 
       - name: Setup Node.js
@@ -132,15 +135,17 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
           ARTIFACT_TAG: ${{ steps.artifact.outputs.artifact_tag }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git fetch origin main --no-tags
+          git_auth=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)")
+          git "${git_auth[@]}" fetch origin main --no-tags
           current_sha="$(git rev-parse HEAD)"
           remote_sha="$(git rev-parse origin/main)"
           if [[ "$current_sha" != "$remote_sha" ]]; then
             echo "main advanced during release preparation; refusing to release" >&2
             exit 1
           fi
-          git fetch --tags --force
+          git "${git_auth[@]}" fetch --tags --force
 
           if [[ "$current_sha" == "$EXPECTED_SHA" ]]; then
             next_tag="$(npm run --silent next-overlay-tag)"
@@ -223,7 +228,8 @@ jobs:
             exit 0
           fi
 
-          git fetch --tags --force
+          git_auth=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)")
+          git "${git_auth[@]}" fetch --tags --force
           if git rev-parse --verify "$NEXT_TAG^{commit}" >/dev/null 2>&1; then
             if [[ "$(git rev-parse "$NEXT_TAG^{commit}")" != "$(git rev-parse HEAD)" ]]; then
               echo "Tag $NEXT_TAG already exists at a different commit; refusing to release" >&2
