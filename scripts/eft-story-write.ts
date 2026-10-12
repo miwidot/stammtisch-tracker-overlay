@@ -52,12 +52,12 @@ const HEADER =
   '  // fabricated id; endingId and the chapter-level `endings` list use the real\n' +
   '  // client/ending_list ids.\n' +
   '  //\n' +
-  '  // `referenceCoverage` reports how much of each chapter the capture resolved. The\n' +
+  '  // `referenceCoverage` reports how much of each chapter the locked references resolve. The\n' +
   '  // client only returns a story sub-quest template once the player has reached it,\n' +
   '  // so `partial: true` means these objectives are what the capture could see, not a\n' +
   '  // complete chapter - a missing objective is not evidence that none exists. For the\n' +
   '  // same reason an ending can appear in `endings` with objectiveCount 0: the branch\n' +
-  '  // is real (the chapter quest references its gate sub-quest) but this capture holds\n' +
+  '  // is real (the chapter quest references its gate sub-quest) but the references hold\n' +
   '  // no objective-level evidence for it.\n' +
   '  //\n' +
   '  // `mutuallyExclusiveQuestPairs` contains unordered pairs of resolved chapter\n' +
@@ -66,7 +66,7 @@ const HEADER =
   '  // progress on both quests is allowed: these are NOT objective exclusions. Cascade\n' +
   '  // failure and counterparts outside the resolved chapter sub-quests are excluded.\n' +
   '  //\n' +
-  '  // Regenerate with `npm run eft:story`; the exact source capture is pinned by\n' +
+  '  // Regenerate with `npm run eft:story`; the primary and supplemental captures are pinned by\n' +
   '  // scripts/story-reference.lock.json.\n' +
   '  // The storyline is shared between PVP and PVE.\n' +
   '  //\n' +

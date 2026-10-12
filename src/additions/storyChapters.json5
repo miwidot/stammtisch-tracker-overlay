@@ -11,12 +11,12 @@
   // fabricated id; endingId and the chapter-level `endings` list use the real
   // client/ending_list ids.
   //
-  // `referenceCoverage` reports how much of each chapter the capture resolved. The
+  // `referenceCoverage` reports how much of each chapter the locked references resolve. The
   // client only returns a story sub-quest template once the player has reached it,
   // so `partial: true` means these objectives are what the capture could see, not a
   // complete chapter - a missing objective is not evidence that none exists. For the
   // same reason an ending can appear in `endings` with objectiveCount 0: the branch
-  // is real (the chapter quest references its gate sub-quest) but this capture holds
+  // is real (the chapter quest references its gate sub-quest) but the references hold
   // no objective-level evidence for it.
   //
   // `mutuallyExclusiveQuestPairs` contains unordered pairs of resolved chapter
@@ -25,7 +25,7 @@
   // progress on both quests is allowed: these are NOT objective exclusions. Cascade
   // failure and counterparts outside the resolved chapter sub-quests are excluded.
   //
-  // Regenerate with `npm run eft:story`; the exact source capture is pinned by
+  // Regenerate with `npm run eft:story`; the primary and supplemental captures are pinned by
   // scripts/story-reference.lock.json.
   // The storyline is shared between PVP and PVE.
   //
@@ -387,8 +387,8 @@
       chapterQuestId: '68cbcdc4c964ab83cc0c928e',
       referenceCoverage: {
           referencedSubquests: 15,
-          resolvedSubquests: 12,
-          partial: true,
+          resolvedSubquests: 15,
+          partial: false,
       },
       autoStart: false,
       chapterRequirements: [
@@ -403,6 +403,12 @@
       description: 'Investigate the crashed aircraft operation and decide what to do with the armored case.',
       notes: 'Keeping the armored case results in -0.3 Prapor reputation and changes The Ticket routes.',
       objectives: [
+          {
+              id: '68dfa85efdedf14d640a6ee2',
+              type: 'main',
+              description: 'Locate the fallen plane',
+              sourceQuestId: '68dfa85efdedf14d640a6ee0',
+          },
           {
               id: '68b83ecbe7204965a7265865',
               type: 'main',
@@ -456,6 +462,18 @@
               type: 'main',
               description: 'Ask Prapor about the fallen plane',
               sourceQuestId: '68f3de9e6ca382c0d101a5ea',
+          },
+          {
+              id: '68c022c7b06f776945b14276',
+              type: 'main',
+              description: 'Wait for information from Therapist',
+              sourceQuestId: '68c02056b4000f84a4026e06',
+          },
+          {
+              id: '68b6e156f2290057a11add08',
+              type: 'main',
+              description: 'Gather information from Therapist',
+              sourceQuestId: '68b58c2745550ec0f408ee56',
           },
           {
               id: '68bdb2dca55fc9decb4551a2',
@@ -1336,7 +1354,7 @@
       chapterQuestId: '6903d779fdfc4078740a4bd0',
       referenceCoverage: {
           referencedSubquests: 19,
-          resolvedSubquests: 15,
+          resolvedSubquests: 16,
           partial: true,
       },
       autoStart: false,
@@ -1347,6 +1365,12 @@
       description: 'Follow the Eye of the World trail through cultist sites, Sordi infrastructure, and ARRS Station 14-4 KORD.',
       notes: null,
       objectives: [
+          {
+              id: '68e79e9c013734664b218cb3',
+              type: 'main',
+              description: 'Learn more about the people leaving strange symbols in Tarkov',
+              sourceQuestId: '68e79a92aded99fd1a06023c',
+          },
           {
               id: '68bc19ad0be47ffe301db8a0',
               type: 'main',
@@ -2560,7 +2584,7 @@
       chapterQuestId: '69d38381cea4b428690ea1d9',
       referenceCoverage: {
           referencedSubquests: 38,
-          resolvedSubquests: 20,
+          resolvedSubquests: 22,
           missingObjectiveTexts: 2,
           partial: true,
       },
@@ -2577,6 +2601,12 @@
               type: 'main',
               description: 'Find out from traders more about the connection between TerraGroup and Paradigm Shipping',
               sourceQuestId: '69a05d3ae6778aebac085ca5',
+          },
+          {
+              id: '69aae6524f48cb483e735bba',
+              type: 'main',
+              description: 'Ask Mechanic where the distress signal came from',
+              sourceQuestId: '69aae3aa97c076d9b503bceb',
           },
           {
               id: '69e7706fa8d4414fc6625f92',
@@ -2649,6 +2679,18 @@
               type: 'main',
               description: 'Return to the BTR driver',
               sourceQuestId: '69b41843dc22acbf90051e3f',
+          },
+          {
+              id: '69b2d6f684c22c8abf711981',
+              type: 'optional',
+              description: 'Eliminate any target at the smugglers\' territories',
+              sourceQuestId: '69b2c6beb8ae58006c084f73',
+          },
+          {
+              id: '69b2e0b13587211017eb7730',
+              type: 'optional',
+              description: 'Report back to the BTR driver',
+              sourceQuestId: '69b2c6beb8ae58006c084f73',
           },
           {
               id: '69ba8d651b499fbada0cd5ae',

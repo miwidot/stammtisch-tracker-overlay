@@ -167,7 +167,7 @@ interface WikiObjective {
 }
 
 /** Provenance for the capture that produced the committed output. */
-interface ReferenceLock {
+interface BasicReferenceLock {
   file: string;
   sha256: string;
   bytes: number;
@@ -177,6 +177,17 @@ interface ReferenceLock {
   quests: number;
   chapterQuests: number;
   objectiveTexts: number;
+}
+
+interface ReferenceCoverage {
+  quests: number;
+  chapterQuests: number;
+  objectiveTexts: number;
+}
+
+interface ReferenceLock extends BasicReferenceLock {
+  supplementalReferences?: BasicReferenceLock[];
+  combinedCoverage?: ReferenceCoverage;
 }
 
 type JsonRecord = Record<string, any>;
@@ -282,6 +293,24 @@ export function indexQuests(quests: JsonRecord[]): Map<string, JsonRecord> {
     if (id) byId.set(id, quest);
   }
   return byId;
+}
+
+/** Primary templates own overlaps; earlier supplements own newly supplied ids. */
+export function mergeStoryReferences(
+  primary: JsonRecord[],
+  supplements: readonly JsonRecord[][]
+): JsonRecord[] {
+  const merged = [...primary];
+  const seen = new Set(indexQuests(primary).keys());
+  for (const quests of supplements) {
+    for (const quest of quests) {
+      const id = bareId(quest._id);
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      merged.push(quest);
+    }
+  }
+  return merged;
 }
 
 /**
@@ -605,7 +634,7 @@ function canonicalRepinSource(file: string): string {
 }
 
 /** Fingerprint a capture: content hash plus the provenance in its envelope. */
-function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] } {
+function fingerprint(file: string): { lock: BasicReferenceLock; quests: JsonRecord[] } {
   const bytes = readFileSync(file);
   const envelope = parseReferenceEnvelope(file, bytes);
   const { chapters, texts } = scoreReference(envelope.quests);
@@ -810,25 +839,80 @@ export type StagedLockInspection =
  * and coverage counts, so promoting a partial record would silently drop the
  * evidence that makes the committed chapters auditable.
  */
-function isReferenceLock(value: unknown): value is ReferenceLock {
+function isBasicReferenceLock(value: unknown): value is BasicReferenceLock {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-  const lock = value as Partial<ReferenceLock>;
+  const lock = value as Partial<BasicReferenceLock>;
   const stringOrNull = (field: unknown): boolean => typeof field === 'string' || field === null;
   const count = (field: unknown): boolean =>
-    typeof field === 'number' && Number.isInteger(field) && field >= 0;
+    typeof field === 'number' && Number.isSafeInteger(field) && field >= 0;
   return (
     isSafeReferencePath(lock.file) &&
     // A digest, not merely a non-empty string: a hand-edited `"sha256": "x"` must
     // not be able to replace the committed provenance record.
     typeof lock.sha256 === 'string' &&
     /^[0-9a-f]{64}$/i.test(lock.sha256) &&
-    count(lock.bytes) &&
-    stringOrNull(lock.clientVersion) &&
-    stringOrNull(lock.gameMode) &&
-    stringOrNull(lock.capturedAt) &&
-    count(lock.quests) &&
-    count(lock.chapterQuests) &&
-    count(lock.objectiveTexts)
+    [lock.clientVersion, lock.gameMode, lock.capturedAt].every(stringOrNull) &&
+    [lock.bytes, lock.quests, lock.chapterQuests, lock.objectiveTexts].every(count)
+  );
+}
+
+function isReferenceCoverage(value: unknown): value is ReferenceCoverage {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const coverage = value as Partial<ReferenceCoverage>;
+  return (
+    Object.keys(coverage).length === 3 &&
+    [coverage.quests, coverage.chapterQuests, coverage.objectiveTexts].every(
+      (count) => typeof count === 'number' && Number.isSafeInteger(count) && count >= 0
+    ) &&
+    coverage.chapterQuests! <= coverage.quests! &&
+    coverage.chapterQuests! <= Object.keys(CHAPTER_QUEST_ID).length
+  );
+}
+
+/** Supplements are basic pins, never recursively nested provenance manifests. */
+function isReferenceLock(value: unknown): value is ReferenceLock {
+  if (!isBasicReferenceLock(value)) return false;
+  const lock = value as ReferenceLock;
+  return (
+    (!Object.hasOwn(lock, 'supplementalReferences') ||
+      (Array.isArray(lock.supplementalReferences) &&
+        lock.supplementalReferences.every(
+          (supplement) =>
+            isBasicReferenceLock(supplement) &&
+            !Object.hasOwn(supplement, 'supplementalReferences') &&
+            !Object.hasOwn(supplement, 'combinedCoverage') &&
+            supplement.gameMode !== null &&
+            STORY_SHARED_MODES.includes(supplement.gameMode)
+        ))) &&
+    (!Object.hasOwn(lock, 'combinedCoverage') || isReferenceCoverage(lock.combinedCoverage)) &&
+    (!Object.hasOwn(lock, 'supplementalReferences') || Object.hasOwn(lock, 'combinedCoverage'))
+  );
+}
+
+function assertMatchingReference(current: BasicReferenceLock, pinned: BasicReferenceLock): void {
+  if (current.sha256 !== pinned.sha256) {
+    throw new Error(
+      `story reference does not match ${LOCK}\n` +
+        `  pinned:   ${pinned.file} sha256=${pinned.sha256}\n` +
+        `  selected: ${current.file} sha256=${current.sha256}\n` +
+        'Re-verify the capture, then re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+    );
+  }
+  for (const key of Object.keys(current) as Array<keyof BasicReferenceLock>) {
+    if (key !== 'file' && current[key] !== pinned[key]) {
+      throw new Error(
+        `story reference provenance mismatch for ${key} in ${LOCK}; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
+      );
+    }
+  }
+}
+
+function assertSharedMode(lock: BasicReferenceLock): void {
+  if (lock.gameMode !== null && STORY_SHARED_MODES.includes(lock.gameMode)) return;
+  throw new Error(
+    `story reference ${lock.file} reports game mode '${lock.gameMode ?? 'unknown'}'; the ` +
+      `committed storyline is shared between ${STORY_SHARED_MODES.join(' and ')} only. Pin a ` +
+      'capture whose request URL identifies it as one of those modes.'
   );
 }
 
@@ -936,8 +1020,30 @@ export function promoteStoryReferenceLock(outputSha256: string): boolean {
 }
 
 export function loadReference(): JsonRecord[] {
+  pendingLock = undefined;
   const explicit = process.env.STORY_REFERENCE;
   const updating = process.env.STORY_REFERENCE_UPDATE_LOCK === '1';
+  const supplementInput = process.env.STORY_REFERENCE_SUPPLEMENTS;
+  let supplementFiles: string[] | undefined;
+  if (supplementInput !== undefined) {
+    if (!updating) {
+      throw new Error('STORY_REFERENCE_SUPPLEMENTS requires STORY_REFERENCE_UPDATE_LOCK=1.');
+    }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(supplementInput);
+    } catch {
+      throw new Error(
+        'STORY_REFERENCE_SUPPLEMENTS must be a JSON array of project-relative files.'
+      );
+    }
+    if (!Array.isArray(parsed) || !parsed.every(isSafeReferencePath)) {
+      throw new Error(
+        'STORY_REFERENCE_SUPPLEMENTS must be a JSON array of project-relative files.'
+      );
+    }
+    supplementFiles = parsed;
+  }
   const lock = readLock();
 
   if (!lock && !updating && explicit) {
@@ -987,34 +1093,49 @@ export function loadReference(): JsonRecord[] {
   // and treating "unknown" as acceptable would reopen the same hole. Only
   // checked when re-pinning - an already-pinned capture is identified by hash
   // and must keep validating even if this list later changes.
-  if (updating && !(current.gameMode !== null && STORY_SHARED_MODES.includes(current.gameMode))) {
-    throw new Error(
-      `story reference ${file} reports game mode '${current.gameMode ?? 'unknown'}'; the ` +
-        `committed storyline is shared between ${STORY_SHARED_MODES.join(' and ')} only. Pin a ` +
-        'capture whose request URL identifies it as one of those modes.'
-    );
-  }
+  if (updating) assertSharedMode(current);
 
   if (lock && !updating) {
-    // The hash is the identity; the path may differ when STORY_REFERENCE points
-    // at a copy of the pinned capture.
-    if (current.sha256 !== lock.sha256) {
-      throw new Error(
-        `story reference does not match ${LOCK}\n` +
-          `  pinned:   ${lock.file} sha256=${lock.sha256}\n` +
-          `  selected: ${current.file} sha256=${current.sha256}\n` +
-          'Re-verify the capture, then re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
-      );
-    }
-    for (const key of Object.keys(current) as Array<keyof ReferenceLock>) {
-      if (key !== 'file' && current[key] !== lock[key]) {
-        throw new Error(
-          `story reference provenance mismatch for ${key} in ${LOCK}; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
-        );
-      }
-    }
+    // The hash is the identity; STORY_REFERENCE may relocate the primary bytes.
+    assertMatchingReference(current, lock);
     if (current.file !== lock.file) {
       console.error(`note: reading the pinned capture from ${current.file} (lock: ${lock.file})`);
+    }
+  }
+
+  const supplementalReferences: BasicReferenceLock[] = [];
+  const supplementQuests: JsonRecord[][] = [];
+  const selectedSupplements =
+    supplementFiles ?? lock?.supplementalReferences?.map((pin) => pin.file);
+  for (const [index, selected] of (selectedSupplements ?? []).entries()) {
+    if (!existsSync(selected)) {
+      throw new Error(`pinned supplemental story reference is missing: ${selected}`);
+    }
+    const source = canonicalRepinSource(selected);
+    const supplement = fingerprint(source);
+    assertSharedMode(supplement.lock);
+    // Only an explicit replacement manifest can change supplement fingerprints.
+    // A primary re-pin alone must not silently refresh other sources.
+    const pinned =
+      supplementFiles === undefined ? lock?.supplementalReferences?.[index] : undefined;
+    if (pinned) assertMatchingReference(supplement.lock, pinned);
+    supplementalReferences.push(pinned ?? supplement.lock);
+    supplementQuests.push(supplement.quests);
+  }
+  const merged = mergeStoryReferences(quests, supplementQuests);
+  const { chapters, texts } = scoreReference(merged);
+  const combinedCoverage: ReferenceCoverage = {
+    quests: merged.length,
+    chapterQuests: chapters,
+    objectiveTexts: texts,
+  };
+  if (lock?.combinedCoverage && !updating) {
+    for (const key of Object.keys(combinedCoverage) as Array<keyof ReferenceCoverage>) {
+      if (combinedCoverage[key] !== lock.combinedCoverage[key]) {
+        throw new Error(
+          `story reference combinedCoverage mismatch for ${key} in ${LOCK}; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
+        );
+      }
     }
   }
 
@@ -1025,6 +1146,13 @@ export function loadReference(): JsonRecord[] {
   // (or drops wiki matching below MIN_MATCH_PCT) can neither re-pin the lock nor
   // get different data published under the current pin.
   pendingLock = updating ? current : (lock ?? undefined);
+  if (pendingLock && (selectedSupplements !== undefined || lock?.combinedCoverage !== undefined)) {
+    pendingLock = {
+      ...pendingLock,
+      ...(selectedSupplements !== undefined ? { supplementalReferences } : {}),
+      combinedCoverage,
+    };
+  }
   console.error(
     updating
       ? `staged re-pin of ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…); ` +
@@ -1042,7 +1170,7 @@ export function loadReference(): JsonRecord[] {
       `${current.chapterQuests}/${Object.keys(CHAPTER_QUEST_ID).length} chapter quests, ` +
       `${current.objectiveTexts} objective texts)`
   );
-  return quests;
+  return merged;
 }
 
 function main(): void {

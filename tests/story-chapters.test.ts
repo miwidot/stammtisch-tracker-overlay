@@ -246,6 +246,8 @@ describe('story chapters (EFT-sourced)', () => {
       quests: number;
       chapterQuests: number;
       objectiveTexts: number;
+      supplementalReferences?: Array<{ file: string; sha256: string; quests: number }>;
+      combinedCoverage?: { quests: number; chapterQuests: number; objectiveTexts: number };
     };
     expect(lock.file).toMatch(/^eft\/.+\.json$/);
     expect(lock.sha256).toMatch(/^[0-9a-f]{64}$/);
@@ -256,20 +258,28 @@ describe('story chapters (EFT-sourced)', () => {
     expect(lock.clientVersion, 'lock clientVersion').toMatch(/\d+\.\d+\.\d+/);
     expect(['regular', 'pve', 'pvp-season']).toContain(lock.gameMode);
     expect(Number.isNaN(Date.parse(lock.capturedAt ?? '')), 'lock capturedAt').toBe(false);
-    expect(lock.chapterQuests).toBe(Object.keys(chapters).length);
-    // Every objective in the committed data came from that capture's texts.
+    const coverage = lock.combinedCoverage ?? lock;
+    expect(coverage.chapterQuests).toBe(Object.keys(chapters).length);
+    expect(lock.supplementalReferences, 'committed supplemental source pins').toHaveLength(2);
+    expect(lock.combinedCoverage, 'combined source coverage').toBeDefined();
+    for (const supplement of lock.supplementalReferences ?? []) {
+      expect(supplement.file).toMatch(/^eft\/.+\.json$/);
+      expect(supplement.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(supplement.quests).toBeGreaterThan(0);
+    }
+    // Every objective comes from the hash-locked reference union.
     const objectives = Object.values(chapters).reduce(
       (total, ch) => total + (ch.objectives ?? []).length,
       0
     );
-    expect(lock.objectiveTexts).toBe(objectives);
+    expect(coverage.objectiveTexts).toBe(objectives);
     // Sub-quest coverage has to add up to the capture too, so a hand-edited lock
     // or hand-edited chapters disagree.
     const resolved = Object.values(chapters).reduce(
       (total, ch) => total + (ch.referenceCoverage?.resolvedSubquests ?? 0),
       0
     );
-    expect(resolved).toBeLessThanOrEqual(lock.quests);
+    expect(resolved).toBeLessThanOrEqual(coverage.quests);
   });
 
   it('keeps canonical chapter-local quest completion exclusions', () => {
