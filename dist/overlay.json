@@ -6402,11 +6402,6 @@
   "seasonalPerks": {
     "69c41a19cd28c936320a7523": {
       "id": "69c41a19cd28c936320a7523",
-      "type": "common",
-      "name": "No Insurance",
-      "description": "• Cannot insure items before raid",
-      "points": null,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "effectId": "insurance_disabled"
@@ -6415,11 +6410,6 @@
     },
     "69c41a86383fc5c9ad03f3d5": {
       "id": "69c41a86383fc5c9ad03f3d5",
-      "type": "common",
-      "name": "Handyman",
-      "description": "• Item crafting time is reduced by 50%\n• Crafting skill starts at level 51",
-      "points": null,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "skillIds": [
@@ -6436,11 +6426,6 @@
     },
     "69c41adf883efd5e3b09ccae": {
       "id": "69c41adf883efd5e3b09ccae",
-      "type": "common",
-      "name": "Seasoned PMCs",
-      "description": "• Your character gains 25% more experience",
-      "points": null,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "multiplicator": 1.25,
@@ -6448,31 +6433,8 @@
         }
       ]
     },
-    "69ce5d9296f3b267fa08f137": {
-      "id": "69ce5d9296f3b267fa08f137",
-      "type": "common",
-      "name": "Armor Shortage",
-      "description": "• Traders across Tarkov are experiencing an armor shortage",
-      "points": null,
-      "mutuallyExclusiveSeasonalPerkIds": [],
-      "effects": []
-    },
-    "69ce5e104e0a1c7ca20781c9": {
-      "id": "69ce5e104e0a1c7ca20781c9",
-      "type": "common",
-      "name": "Black Division",
-      "description": "• Black Division operatives can be encountered on specific locations",
-      "points": null,
-      "mutuallyExclusiveSeasonalPerkIds": [],
-      "effects": []
-    },
     "69ce5eb3e4b79de94a0d78c8": {
       "id": "69ce5eb3e4b79de94a0d78c8",
-      "type": "common",
-      "name": "No FiR for Hideout",
-      "description": "• Hideout zones don't require the Found in Raid status",
-      "points": null,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "mode": "not_require",
@@ -6482,13 +6444,6 @@
     },
     "69c3cd003ffdba4e68086bd7": {
       "id": "69c3cd003ffdba4e68086bd7",
-      "type": "personal",
-      "name": "Hemophilia",
-      "description": "• Bleeding chance is increased by 25%",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c4116a383fc5c9ad03f3d1"
-      ],
       "effects": [
         {
           "multiplicator": 1.25,
@@ -6498,13 +6453,6 @@
     },
     "69c3cddcfb79911cf20022d6": {
       "id": "69c3cddcfb79911cf20022d6",
-      "type": "personal",
-      "name": "Osteoporosis",
-      "description": "• Limb fracture chance is increased by 25%\n• Falling from heights deals 20% more damage",
-      "points": 3,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c41632d7a7b2ca660e0c59"
-      ],
       "effects": [
         {
           "multiplicator": 1.25,
@@ -6518,11 +6466,6 @@
     },
     "69c3d036042c81ad9209eeae": {
       "id": "69c3d036042c81ad9209eeae",
-      "type": "personal",
-      "name": "Well That Hurt!",
-      "description": "• All medkit uses consume 25% more resource",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "itemFilter": {
@@ -6545,14 +6488,6 @@
     },
     "69c3d21749d7d7c520026425": {
       "id": "69c3d21749d7d7c520026425",
-      "type": "personal",
-      "name": "Incompetent",
-      "description": "• All character skills are leveled 25% slower (Excluding Bolt-action Rifles)\n• All character skills can only be increased up to level 30 (Excluding Crafting)",
-      "points": 10,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69ce64064e0a1c7ca20781d3",
-        "6a578102e7737aa469066518"
-      ],
       "effects": [
         {
           "skillIds": [
@@ -6638,13 +6573,6 @@
     },
     "69c3d2acfe3c5632e4045fe8": {
       "id": "69c3d2acfe3c5632e4045fe8",
-      "type": "personal",
-      "name": "Polydipsia",
-      "description": "• Hydration is consumed 15% faster",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c411d8883efd5e3b09ccab"
-      ],
       "effects": [
         {
           "multiplicator": 1.2,
@@ -6654,14 +6582,6 @@
     },
     "69c3d35feaf97663fb0bb367": {
       "id": "69c3d35feaf97663fb0bb367",
-      "type": "personal",
-      "name": "Chronic Fatigue Syndrome",
-      "description": "• Energy is consumed 20% faster",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c412519b5263783d0fe520",
-        "69c40c0f5e9ce5a8970f6be9"
-      ],
       "effects": [
         {
           "multiplicator": 1.2,
@@ -6671,13 +6591,6 @@
     },
     "69c3d43030f896ebef0ed357": {
       "id": "69c3d43030f896ebef0ed357",
-      "type": "personal",
-      "name": "Personality Vacuum",
-      "description": "• Charisma skill cannot be increased\n• All trader items cost 20% more",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69ce62886e199f4bbe0ab19b"
-      ],
       "effects": [
         {
           "skillIds": [
@@ -6704,11 +6617,6 @@
     },
     "69c3d4e949d7d7c52002642a": {
       "id": "69c3d4e949d7d7c52002642a",
-      "type": "personal",
-      "name": "Dr. Jekyll",
-      "description": "• After gaining the Fresh Wound status, it cannot be removed until the end of the raid",
-      "points": 1,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "effectId": "fresh_wounds_until_raid_end"
@@ -6717,11 +6625,6 @@
     },
     "69c3d6a9af28f094100fe128": {
       "id": "69c3d6a9af28f094100fe128",
-      "type": "personal",
-      "name": "Allergic",
-      "description": "• Become allergic to 3 random items from the Provisions or Medication category",
-      "points": 3,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "itemFilter": {
@@ -6775,11 +6678,6 @@
     },
     "69c3da13eaf97663fb0bb36d": {
       "id": "69c3da13eaf97663fb0bb36d",
-      "type": "personal",
-      "name": "Broken Secure Container",
-      "description": "• Secure container can only be filled with cash, keys, dogtags, special equipment, certain containers and Battle Pass documents",
-      "points": 6,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "itemFilter": {
@@ -6878,11 +6776,6 @@
     },
     "69c3da8fc0e4deb02605f3c9": {
       "id": "69c3da8fc0e4deb02605f3c9",
-      "type": "personal",
-      "name": "No Flea Market",
-      "description": "• Trading with players on the Flea Market is disabled",
-      "points": 10,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "effectId": "flea_market_npc_only"
@@ -6891,14 +6784,6 @@
     },
     "69c3e8d8af28f094100fe130": {
       "id": "69c3e8d8af28f094100fe130",
-      "type": "personal",
-      "name": "Marathon Runner",
-      "description": "• Arm and leg stamina is consumed 20% slower",
-      "points": -3,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3ce913ffdba4e68086bdb",
-        "69c41111cd28c936320a7520"
-      ],
       "effects": [
         {
           "bodyPartTypes": [
@@ -6912,11 +6797,6 @@
     },
     "69c405a9d7a7b2ca660e0c56": {
       "id": "69c405a9d7a7b2ca660e0c56",
-      "type": "personal",
-      "name": "Bushborne",
-      "description": "• Walking in vegetation generates 75% less noise and movement slowdown",
-      "points": -5,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "multiplicatorPrimary": 0.25,
@@ -6927,11 +6807,6 @@
     },
     "69c406731d8aec4a2b0551bd": {
       "id": "69c406731d8aec4a2b0551bd",
-      "type": "personal",
-      "name": "Juice Time",
-      "description": "• Consuming a juice drink grants the Painkiller effect for 60 seconds",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "itemFilter": {
@@ -6986,11 +6861,6 @@
     },
     "69c40cb782362c4aff041510": {
       "id": "69c40cb782362c4aff041510",
-      "type": "personal",
-      "name": "Street Tax",
-      "description": "• Once per week, some Scavs pay you protection money",
-      "points": -1,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "periodUnixSeconds": 604800,
@@ -7001,13 +6871,6 @@
     },
     "69c40e131f8903ce7a06984c": {
       "id": "69c40e131f8903ce7a06984c",
-      "type": "personal",
-      "name": "The Tarkov Shooter",
-      "description": "• Bolt-action Rifles skill leveling speed is increased by 100%\n• Bolt-action Rifles skill starts at level 25",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69ce64064e0a1c7ca20781d3"
-      ],
       "effects": [
         {
           "skillIds": [
@@ -7027,11 +6890,6 @@
     },
     "69c40f9f9b5263783d0fe51d": {
       "id": "69c40f9f9b5263783d0fe51d",
-      "type": "personal",
-      "name": "Diet",
-      "description": "• All provisions consume 50% less resource",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "itemFilter": {
@@ -7049,13 +6907,6 @@
     },
     "69c4116a383fc5c9ad03f3d1": {
       "id": "69c4116a383fc5c9ad03f3d1",
-      "type": "personal",
-      "name": "Thrombophilia",
-      "description": "• Bleeding chance is decreased by 25%",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3cd003ffdba4e68086bd7"
-      ],
       "effects": [
         {
           "multiplicator": 0.75,
@@ -7065,13 +6916,6 @@
     },
     "69c411d8883efd5e3b09ccab": {
       "id": "69c411d8883efd5e3b09ccab",
-      "type": "personal",
-      "name": "Hypodipsia",
-      "description": "• Hydration is consumed 20% slower",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3d2acfe3c5632e4045fe8"
-      ],
       "effects": [
         {
           "multiplicator": 0.8,
@@ -7081,14 +6925,6 @@
     },
     "69c412519b5263783d0fe520": {
       "id": "69c412519b5263783d0fe520",
-      "type": "personal",
-      "name": "Polyphagia",
-      "description": "• Energy is consumed 20% slower",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3d35feaf97663fb0bb367",
-        "69c40c0f5e9ce5a8970f6be9"
-      ],
       "effects": [
         {
           "multiplicator": 0.8,
@@ -7098,13 +6934,6 @@
     },
     "69c41632d7a7b2ca660e0c59": {
       "id": "69c41632d7a7b2ca660e0c59",
-      "type": "personal",
-      "name": "Sturdy Bones",
-      "description": "• Limb fracture chance is decreased by 25%\n• Falling from heights deals 20% less damage",
-      "points": -3,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3cddcfb79911cf20022d6"
-      ],
       "effects": [
         {
           "multiplicator": 0.75,
@@ -7118,14 +6947,6 @@
     },
     "69ce62886e199f4bbe0ab19b": {
       "id": "69ce62886e199f4bbe0ab19b",
-      "type": "personal",
-      "name": "Third Leg",
-      "description": "• Movement speed is decreased by 1%\n• Buying items at Therapist is 5% cheaper",
-      "points": 1,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c41111cd28c936320a7520",
-        "69c3d43030f896ebef0ed357"
-      ],
       "effects": [
         {
           "multiplicator": 0.99,
@@ -7143,16 +6964,6 @@
     },
     "69ce64064e0a1c7ca20781d3": {
       "id": "69ce64064e0a1c7ca20781d3",
-      "type": "personal",
-      "name": "Average",
-      "description": "• All character skills are set to level 25 but cannot be leveled further (Excluding Crafting skill)",
-      "points": -12,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c40e131f8903ce7a06984c",
-        "69c410831f8903ce7a06984f",
-        "69c3d21749d7d7c520026425",
-        "6a578102e7737aa469066518"
-      ],
       "effects": [
         {
           "skillIds": [
@@ -7238,11 +7049,6 @@
     },
     "69ce64fe6e199f4bbe0ab1a1": {
       "id": "69ce64fe6e199f4bbe0ab1a1",
-      "type": "personal",
-      "name": "Kappa Protocol",
-      "description": "• Immediately receive Secure container Kappa",
-      "points": -12,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "periodUnixSeconds": 31556926,
@@ -7253,14 +7059,6 @@
     },
     "6a578102e7737aa469066518": {
       "id": "6a578102e7737aa469066518",
-      "type": "personal",
-      "name": "Prodigy",
-      "description": "• Skill experience gain is increased by 30%",
-      "points": -5,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69ce64064e0a1c7ca20781d3",
-        "69c3d21749d7d7c520026425"
-      ],
       "effects": [
         {
           "skillIds": [
@@ -7307,13 +7105,6 @@
     },
     "6a5789f713792e2c7c0d2a5b": {
       "id": "6a5789f713792e2c7c0d2a5b",
-      "type": "personal",
-      "name": "Lucky",
-      "description": "• Audentes fortuna iuvat!",
-      "points": -1,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "6a578ac032cea863f505beed"
-      ],
       "effects": [
         {
           "effectId": "lucky"
@@ -7322,13 +7113,6 @@
     },
     "6a578ac032cea863f505beed": {
       "id": "6a578ac032cea863f505beed",
-      "type": "personal",
-      "name": "Unlucky",
-      "description": "• Your bad luck can sometimes have dire consequences",
-      "points": 1,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "6a5789f713792e2c7c0d2a5b"
-      ],
       "effects": [
         {
           "effectId": "unlucky"
@@ -7337,14 +7121,6 @@
     },
     "69c3ce913ffdba4e68086bdb": {
       "id": "69c3ce913ffdba4e68086bdb",
-      "type": "personal",
-      "name": "Exhaustion",
-      "description": "• Arm and leg stamina recovers 20% slower\n• Arm and leg stamina is reduced by 10",
-      "points": 5,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3e8d8af28f094100fe130",
-        "69c40c0f5e9ce5a8970f6be9"
-      ],
       "effects": [
         {
           "bodyPartTypes": [
@@ -7366,11 +7142,6 @@
     },
     "69c405332f253132020be099": {
       "id": "69c405332f253132020be099",
-      "type": "personal",
-      "name": "Safecracker",
-      "description": "• Mechanical keys have a 25% chance not to lose durability when used",
-      "points": -5,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "keyTypes": [
@@ -7383,11 +7154,6 @@
     },
     "69c40ae21d8aec4a2b0551c2": {
       "id": "69c40ae21d8aec4a2b0551c2",
-      "type": "personal",
-      "name": "Sailor's Nostalgia",
-      "description": "• Consuming canned fish grants the Health Regeneration (+2) effect for 30 seconds",
-      "points": -2,
-      "mutuallyExclusiveSeasonalPerkIds": [],
       "effects": [
         {
           "itemFilter": {
@@ -7442,15 +7208,6 @@
     },
     "69c40c0f5e9ce5a8970f6be9": {
       "id": "69c40c0f5e9ce5a8970f6be9",
-      "type": "personal",
-      "name": "Youth",
-      "description": "• Energy is consumed 20% slower\n• Arm and leg stamina is increased by 10",
-      "points": -5,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3ce913ffdba4e68086bdb",
-        "69c3d35feaf97663fb0bb367",
-        "69c412519b5263783d0fe520"
-      ],
       "effects": [
         {
           "bodyPartTypes": [
@@ -7468,13 +7225,6 @@
     },
     "69c410831f8903ce7a06984f": {
       "id": "69c410831f8903ce7a06984f",
-      "type": "personal",
-      "name": "Hercules",
-      "description": "• Strength and Endurance skills start at level 15",
-      "points": -5,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69ce64064e0a1c7ca20781d3"
-      ],
       "effects": [
         {
           "skillIds": [
@@ -7488,31 +7238,10 @@
     },
     "69c41111cd28c936320a7520": {
       "id": "69c41111cd28c936320a7520",
-      "type": "personal",
-      "name": "Sprinter",
-      "description": "• Running speed is increased by 5%",
-      "points": -3,
-      "mutuallyExclusiveSeasonalPerkIds": [
-        "69c3e8d8af28f094100fe130",
-        "69ce62886e199f4bbe0ab19b"
-      ],
       "effects": [
         {
           "multiplicator": 1.05,
           "effectId": "sprint_speed_multiplicator"
-        }
-      ]
-    },
-    "6a578b8c5372fb646802e5fa": {
-      "id": "6a578b8c5372fb646802e5fa",
-      "type": "personal",
-      "name": "Underdog",
-      "description": "• You started the season later than everyone else, but it’s too early to count you out.\n• +4 additional Modifier Points.",
-      "points": 4,
-      "mutuallyExclusiveSeasonalPerkIds": [],
-      "effects": [
-        {
-          "effectId": "stub"
         }
       ]
     }
@@ -12115,8 +11844,8 @@
     }
   },
   "$meta": {
-    "version": "1.137",
-    "generated": "2026-10-12T16:49:10.969Z",
-    "sha256": "29a4a4557bbfd846f4b82ffd7f2265b7171203e85fffbef827ecf023a7e10cd0"
+    "version": "1.138",
+    "generated": "2026-10-12T16:59:34.090Z",
+    "sha256": "ee00dd7f0b0238208db8ffec7fe05a93bd46aa7aa88c953821b3ebcd64a77937"
   }
 }
