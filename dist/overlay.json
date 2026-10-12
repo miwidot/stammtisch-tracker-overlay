@@ -140,6 +140,48 @@
     },
     "pve": {
       "tasks": {
+        "666314b2a9290f9e0806cca3": {
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "666314b0acf8442f8b0531a1",
+                "name": "Hell on Earth - Part 1"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ]
+        },
+        "5bc480a686f7741af0342e29": {
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "5bc47dbf86f7741ee74e93b9",
+                "name": "The Tarkov Shooter - Part 3"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ]
+        },
+        "597a0e5786f77426d66c0636": {
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "597a0b2986f77426d66c0633",
+                "name": "Chemical - Part 2"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ]
+        },
         "673f629c5b555b53460cf827": {
           "taskRequirements": [
             {
@@ -6812,7 +6854,20 @@
               "6a31828557705071410ca00e",
               "6a3182b72fd891345e047eef",
               "6937ecc3dbdccab44605fcf0",
-              "697883474afb9f7de10380ba"
+              "697883474afb9f7de10380ba",
+              "619cbf9e0a7c3a1a2731940a",
+              "6aa2d537cfc9b36b300da067",
+              "6aa2d55e0b4e81daf20cd212",
+              "6aa2d585cfc9b36b300da06a",
+              "6aa2d5ee11d6c6361804dd57",
+              "6aa2d5d3667ebebca605d8f6",
+              "6aa2d5af0b4e81daf20cd215",
+              "6ab2d6031c7d617b290dd2b0",
+              "6ab2d68819b981e6870f35d3",
+              "6ab60a252bc101093f05029f",
+              "6ab60a4d5c0779ba1e0aabad",
+              "6ab60a57615ae75bdd0e39ce",
+              "6ab60a62d60e0dec3e04ff2c"
             ],
             "excludedCategories": [],
             "excludedItems": []
@@ -7141,28 +7196,14 @@
         },
         {
           "skillIds": [
-            "AdvancedModding",
             "AimDrills",
             "Assault",
             "AttachedLauncher",
             "Attention",
-            "Auctions",
-            "Barter",
-            "BearAksystems",
-            "BearAssaultoperations",
-            "BearAuthority",
-            "BearHeavycaliber",
-            "BearRawpower",
-            "BotReload",
-            "BotSound",
             "Charisma",
-            "Cleanoperations",
             "CovertMovement",
             "DMR",
             "Endurance",
-            "FieldMedicine",
-            "FirstAid",
-            "Freetrading",
             "HMG",
             "Health",
             "HeavyVests",
@@ -7172,37 +7213,22 @@
             "LMG",
             "Launcher",
             "LightVests",
-            "Lockpicking",
             "MagDrills",
             "Melee",
-            "Memory",
             "Metabolism",
-            "NightOps",
             "Perception",
             "Pistol",
-            "ProneMovement",
-            "RecoilControl",
             "Revolver",
             "SMG",
             "Search",
-            "Shadowconnections",
             "Shotgun",
-            "SilentOps",
             "Sniper",
-            "Sniping",
             "Strength",
             "StressResistance",
             "Surgery",
-            "Taskperformance",
             "Throwing",
             "TroubleShooting",
-            "UsecArsystems",
-            "UsecDeepweaponmodding",
-            "UsecLongrangeoptics",
-            "UsecNegotiations",
-            "UsecTactics",
             "Vitality",
-            "WeaponModding",
             "WeaponTreatment"
           ],
           "intValue": 25,
@@ -7474,6 +7500,19 @@
         {
           "multiplicator": 1.05,
           "effectId": "sprint_speed_multiplicator"
+        }
+      ]
+    },
+    "6a578b8c5372fb646802e5fa": {
+      "id": "6a578b8c5372fb646802e5fa",
+      "type": "personal",
+      "name": "Underdog",
+      "description": "• You started the season later than everyone else, but it’s too early to count you out.\n• +4 additional Modifier Points.",
+      "points": 4,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "effectId": "stub"
         }
       ]
     }
@@ -12034,8 +12073,8 @@
     }
   },
   "$meta": {
-    "version": "1.135",
-    "generated": "2026-10-12T09:34:57.394Z",
-    "sha256": "2efaf2672d16a3672144ee941dd6e77d644c62bd534715652eca9f7e72585b6a"
+    "version": "1.136",
+    "generated": "2026-10-12T16:24:28.112Z",
+    "sha256": "b6976fdb7792b6e2491140c017f93d657b3ecf36424bae905921bbda7b49d0a1"
   }
 }
