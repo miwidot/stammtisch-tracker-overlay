@@ -253,33 +253,10 @@ function buildLocaleSections(locales = {}, locale) {
 }
 
 function buildSeasonalPerkSections(perks = {}) {
-  const section = createSection("Seasonal Perks", ["Perk", "ID", "Type", "Points", "Effects"]);
-
+  const section = createSection("Seasonal Perk Effects", ["Perk ID", "Raw Effects"]);
   for (const [id, perk] of Object.entries(perks)) {
-    if (!perk || typeof perk !== "object") {
-      pushRow(section, [id, id, "-", "-", "-"]);
-      continue;
-    }
-    const effects = Array.isArray(perk.effects) ? perk.effects : [];
-    const effectSummary =
-      effects.length > 0
-        ? effects
-            .map((effect) =>
-              effect && typeof effect === "object" && !Array.isArray(effect)
-                ? effect.effectId || "?"
-                : "?"
-            )
-            .join(", ")
-        : "-";
-    pushRow(section, [
-      perk.name || id,
-      perk.id || id,
-      perk.type || "-",
-      perk.points ?? "-",
-      effectSummary,
-    ]);
+    pushRow(section, [perk?.id || id, JSON.stringify(perk?.effects || [])]);
   }
-
   return [section];
 }
 

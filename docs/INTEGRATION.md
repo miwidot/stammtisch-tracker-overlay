@@ -133,11 +133,6 @@ that a CDN response is authentic.
   "seasonalPerks": {
     "<perk-id>": {
       "id": "<perk-id>",
-      "type": "personal",
-      "name": "Hemophilia",
-      "description": "• Bleeding chance is increased by 25%",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": ["<other-perk-id>"],
       "effects": [
         { "effectId": "bleeding_chance_multiplicator", "multiplicator": 1.25 }
       ]
@@ -376,17 +371,19 @@ function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddi
 > is served by tarkov.dev like any other mode — `json.tarkov.dev/pvp-season/*`,
 > listed under `gameModes` at `json.tarkov.dev/endpoints`. Fetch and merge it
 > exactly as you would `regular` or `pve`. Note the hyphenated key requires
-> bracket access (`overlay.modes["pvp-season"]`). One thing tarkov.dev does
-> _not_ serve for this mode is seasonal perks — those are a separate top-level
-> addition (`seasonalPerks`, see below), not part of the `modes` section.
+> bracket access (`overlay.modes["pvp-season"]`). Seasonal perk metadata comes
+> from `pvp-season/season`; raw effect supplements live in the top-level
+> `seasonalPerks` section (see below).
 
 ---
 
 ## Applying Seasonal Perks
 
-`seasonalPerks` is a top-level addition (not a `modes` section) because
-tarkov.dev has no seasonal-perks endpoint for the `pvp-season` mode. It is an
-object keyed by the perk id:
+`seasonalPerks` is a top-level raw-effect supplement keyed by BSG perk id.
+Fetch metadata from [season](https://json.tarkov.dev/pvp-season/season) and its
+English dictionary from [season_en](https://json.tarkov.dev/pvp-season/season_en).
+Names, descriptions, points, exclusions (`exclusiveToPerks`) and images
+(`imageLink`) belong to upstream; the overlay supplies only `id` and `effects`.
 
 ```typescript
 interface SeasonalPerkEffect {
@@ -406,27 +403,46 @@ interface SeasonalPerkEffect {
 
 interface SeasonalPerk {
   id: string;
-  type: string; // tier: "common" | "personal"
-  name: string;
-  description?: string;
-  points?: number | null; // perk-point value; null = none
-  mutuallyExclusiveSeasonalPerkIds?: string[];
-  effects?: SeasonalPerkEffect[];
+  effects: SeasonalPerkEffect[];
+}
+
+interface UpstreamSeasonalPerk {
+  id: string;
+  name: string; // translation key
+  description: string; // translation key
+  points: number | null;
+  exclusiveToPerks: string[];
+  imageLink: string;
 }
 
 // Only meaningful when the player is on a Seasonal Character.
-const perks = Object.values(overlay.seasonalPerks ?? {});
+const [seasonResponse, localeResponse] = await Promise.all([
+  fetch('https://json.tarkov.dev/pvp-season/season').then((r) => r.json()),
+  fetch('https://json.tarkov.dev/pvp-season/season_en').then((r) => r.json()),
+]);
+const season = seasonResponse.data as { perks: Record<string, UpstreamSeasonalPerk[]> };
+const dictionary = localeResponse.data as Record<string, string>;
+const perks = Object.entries(season.perks).flatMap(([type, entries]) =>
+  entries.map((perk) => ({
+    ...perk, // preserves points, exclusiveToPerks and imageLink
+    type,
+    name: dictionary[perk.name] ?? perk.name,
+    description: dictionary[perk.description] ?? perk.description,
+    effects: overlay.seasonalPerks?.[perk.id]?.effects ?? [],
+  }))
+);
 const commonPerks = perks.filter((p) => p.type === 'common');
 ```
 
-Perks with a non-empty `mutuallyExclusiveSeasonalPerkIds` cannot be selected
-together; enforce that when presenting a perk picker. All references
-(`skillIds`, `itemFilter`, trader ids, etc.) are tarkov.dev ids — resolve their
-display names through tarkov.dev's own data/locale, do not expect names here.
-The perk `name`/`description` are the only inline strings (English), because the
-perks do not exist upstream to resolve against. One perk's `itemFilter`
-references an item tarkov.dev does not serve yet; resolve `itemFilter` ids
-against `itemsAdd` as a fallback (see [Resolving Added Items](#resolving-added-items)).
+Keep every upstream perk, including those without overlay effects. Perks with
+non-empty `exclusiveToPerks` cannot be selected together; use upstream exclusions
+when presenting a picker. Raw effects can disagree with upstream display text;
+preserve both rather than deriving multipliers from descriptions.
+
+Effect references (`skillIds`, `itemFilter`, trader ids, etc.) are tarkov.dev ids;
+resolve their display names through upstream data/locale. One `itemFilter`
+references an item upstream does not serve yet; resolve against `itemsAdd` as a
+fallback (see [Resolving Added Items](#resolving-added-items)).
 
 ---
 

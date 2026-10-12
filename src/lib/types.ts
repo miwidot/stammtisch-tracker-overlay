@@ -734,22 +734,10 @@ export interface SeasonalPerkEffect {
   [key: string]: unknown;
 }
 
-/**
- * A seasonal perk (BSG "Seasonal Character" mechanic, used by the `pvp-season`
- * mode). tarkov.dev serves the pvp-season mode but not its perks (there is no
- * perks endpoint), so this ships as an overlay addition keyed by the perk id.
- */
+/** Raw effects missing from upstream pvp-season/season, keyed by BSG perk id. */
 export interface SeasonalPerk {
   id: string;
-  /** Perk tier as reported in-game (e.g. "common", "personal"). */
-  type: string;
-  name: string;
-  description?: string;
-  /** Perk-point cost/refund; null when the perk has no point value. */
-  points?: number | null;
-  /** Perk ids that cannot be selected alongside this one. */
-  mutuallyExclusiveSeasonalPerkIds?: string[];
-  effects?: SeasonalPerkEffect[];
+  effects: SeasonalPerkEffect[];
 }
 
 /** An input or output item of a craft (tarkov.dev item id + count). */

@@ -31,7 +31,7 @@ Additions live in `src/additions/` and should include the full object.
 ## Project Data Layout
 
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
-- `src/additions/`: New entities not present in tarkov.dev (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
+- `src/additions/`: New entities and missing fields (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
 - `dist/overlay.json`: Generated output from `npm run build`. Only the release workflow commits it (after each merge to `main`); pull requests must leave it unchanged.
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
@@ -105,11 +105,13 @@ Edit the appropriate file in `src/overrides/`:
 - New editions → `src/additions/editions.json5` (schema `edition.schema.json`)
 - New story chapters → `src/additions/storyChapters.json5` (schema `story-chapter.schema.json`)
 - New items → `src/additions/itemsAdd.json5` (schema `item-additions.schema.json`)
-- New seasonal (`pvp-season`) perks → `src/additions/seasonalPerks.json5` (schema `seasonal-perk.schema.json`)
+- Raw seasonal (`pvp-season`) perk effects missing upstream → `src/additions/seasonalPerks.json5` (schema `seasonal-perk.schema.json`)
 - New hideout crafts missing from the API → `src/additions/craftsAdd.json5` (schema `craft-additions.schema.json`)
 
-`seasonalPerks` and `craftsAdd` cover `pvp-season` (Seasonal Character) data
-tarkov.dev does not serve. Keep every new data type in `src/additions/` with its
+`seasonalPerks` supplements raw effects absent from `pvp-season/season`; keep
+perk metadata and translations upstream (`season` and `season_en`). Omit
+empty or stub effects. `craftsAdd` covers crafts tarkov.dev does not serve.
+Keep every new data type in `src/additions/` with its
 schema in `src/schemas/`, and register the schema in `SCHEMA_CONFIGS`
 (`src/lib/types.ts`). Prove additions the same way as any other: patch notes
 and/or an in-game screenshot. Reference entities by tarkov.dev id where available

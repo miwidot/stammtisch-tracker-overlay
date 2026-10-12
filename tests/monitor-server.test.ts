@@ -429,7 +429,7 @@ describe('buildSummary', () => {
   });
 
   it('returns 1 section for "seasonalPerks" and "craftsAdd"', () => {
-    expect(buildSummary('seasonalPerks', '').sections[0].title).toBe('Seasonal Perks');
+    expect(buildSummary('seasonalPerks', '').sections[0].title).toBe('Seasonal Perk Effects');
     expect(buildSummary('craftsAdd', '').sections[0].title).toBe('Craft Additions');
   });
 });
@@ -599,28 +599,21 @@ describe('buildLocaleSections', () => {
 });
 
 describe('buildSeasonalPerkSections', () => {
-  it('renders perk metadata and effect ids', () => {
-    const [sec] = buildSeasonalPerkSections({
-      perk1: {
-        id: 'perk1',
-        name: 'Perk One',
-        type: 'common',
-        points: 5,
-        effects: [{ effectId: 'pmc_experience_multiplicator' }],
-      },
-    });
-    expect(sec.rows[0][0]).toBe('Perk One');
-    expect(sec.rows[0][3]).toBe(5);
-    expect(sec.rows[0][4]).toBe('pmc_experience_multiplicator');
+  it('renders perk ids and raw values without requiring upstream metadata', () => {
+    const effects = [{ effectId: 'pmc_experience_multiplicator', multiplicator: 1.25 }];
+    const [sec] = buildSeasonalPerkSections({ perk1: { id: 'perk1', effects } });
+    expect(sec.columns).toEqual(['Perk ID', 'Raw Effects']);
+    expect(sec.rows[0]).toEqual(['perk1', JSON.stringify(effects)]);
   });
 
-  it('handles perks without effects', () => {
-    const [sec] = buildSeasonalPerkSections({ p: { name: 'P' } });
-    expect(sec.rows[0][4]).toBe('-');
+  it('falls back to the keyed id and empty effects', () => {
+    const [sec] = buildSeasonalPerkSections({ p: {} });
+    expect(sec.rows[0]).toEqual(['p', '[]']);
   });
-  it('handles malformed effects', () => {
-    const [sec] = buildSeasonalPerkSections({ p: { name: 'P', effects: [null, 'bad'] } });
-    expect(sec.rows[0][4]).toBe('?, ?');
+
+  it('preserves malformed raw entries for inspection', () => {
+    const [sec] = buildSeasonalPerkSections({ p: { effects: [null, 'bad'] } });
+    expect(sec.rows[0][1]).toBe('[null,"bad"]');
   });
 });
 
@@ -990,7 +983,7 @@ describe('HTTP — real monitor/server.js handlers', () => {
       itemsAdd: {},
       tasksAdd: {},
       locales: { en: { tasks: { t1: { name: 'Renamed' } } } },
-      seasonalPerks: { perk1: { id: 'perk1', name: 'Perk One' } },
+      seasonalPerks: { perk1: { id: 'perk1', effects: [{ effectId: 'insurance_disabled' }] } },
       craftsAdd: {},
       modes: {
         regular: {
@@ -1201,8 +1194,8 @@ describe('HTTP — real monitor/server.js handlers', () => {
 
   it('GET /latest — view=seasonalPerks returns perk rows', async () => {
     const data = await (await fetch(`${baseUrl}/latest?view=seasonalPerks`)).json();
-    expect(data.sections[0].title).toBe('Seasonal Perks');
-    expect(data.sections[0].rows[0][0]).toBe('Perk One');
+    expect(data.sections[0].title).toBe('Seasonal Perk Effects');
+    expect(data.sections[0].rows[0]).toEqual(['perk1', '[{"effectId":"insurance_disabled"}]']);
   });
 
   it('GET /health — reports ok and mode api states', async () => {

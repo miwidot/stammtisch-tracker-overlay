@@ -13,8 +13,7 @@
   // fetching the pvp-season mode. Every correction must carry an entity-name
   // comment, a proof link, and an inline "Was:" note.
   //
-  // Seasonal-only mechanics tarkov.dev does not model at all (e.g. seasonal
-  // perks - there is no pvp-season/seasonal-perks endpoint) are NOT task
+  // Seasonal raw effects absent from upstream pvp-season/season are NOT task
   // overrides; they live in dedicated additions such as
   // src/additions/seasonalPerks.json5.
 

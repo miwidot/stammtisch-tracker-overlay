@@ -66,11 +66,10 @@ Two mode lists live in `src/lib/types.ts`:
   mode until its true value is independently verified; omission must not be
   interpreted as equality with another mode.
 
-Seasonal-only data types tarkov.dev does not model at all live in dedicated
-additions, e.g. `src/additions/seasonalPerks.json5` (schema
-`seasonal-perk.schema.json`): tarkov.dev serves the `pvp-season` mode but has no
-seasonal-perks endpoint, so the perks ship as an addition, following the same
-pattern as `editions.json5`.
+Seasonal perk metadata is served at `pvp-season/season`, with translations at
+`pvp-season/season_en`. `src/additions/seasonalPerks.json5` (schema
+`seasonal-perk.schema.json`) supplements only raw effects missing upstream,
+keyed by BSG perk id. Keep metadata upstream and omit empty or stub effects.
 
 ## Build, Test, and Development Commands
 

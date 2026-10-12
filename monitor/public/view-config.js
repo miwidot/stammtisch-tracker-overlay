@@ -70,7 +70,7 @@
     },
     seasonalPerks: {
       title: "Seasonal Perks",
-      lede: "Seasonal (pvp-season) perks defined by the overlay.",
+      lede: "Raw seasonal (pvp-season) effect supplements; perk metadata comes from upstream.",
       requiresMode: false,
     },
     craftsAdd: {
