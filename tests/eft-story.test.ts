@@ -90,7 +90,8 @@ function makeStoryCapture(): string {
   });
 }
 
-describe('story reference provenance enforcement', () => {
+// Each case spawns fresh tsx processes; Windows runners take ~5x as long as Linux.
+describe('story reference provenance enforcement', { timeout: 30_000 }, () => {
   it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-'));
     const capture = JSON.stringify({
