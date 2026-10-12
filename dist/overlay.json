@@ -12034,8 +12034,8 @@
     }
   },
   "$meta": {
-    "version": "1.134",
-    "generated": "2026-10-12T09:28:58.199Z",
-    "sha256": "9be1707b8ecd2cd65bba1be01aa87163b082e800f48e15a8b40985fb688c6410"
+    "version": "1.135",
+    "generated": "2026-10-12T09:34:57.394Z",
+    "sha256": "2efaf2672d16a3672144ee941dd6e77d644c62bd534715652eca9f7e72585b6a"
   }
 }
