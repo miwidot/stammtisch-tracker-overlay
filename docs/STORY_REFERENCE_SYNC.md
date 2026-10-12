@@ -9,6 +9,15 @@ Supplemental references fill missing quest templates by their bare source ID.
 The primary owns overlapping templates; supplements are considered in explicit
 manifest order, with the first occurrence owning a previously missing template.
 They do not overwrite existing objectives or change primary field authority.
+When current in-game evidence contradicts an older capture's displayed requirement,
+`scripts/story-chapter-meta.json` can declare `objectiveDescriptionCorrections`
+keyed by stable objective ID, with a corrected `description` and its `evidence`.
+Generation applies these descriptions after matching the capture text against the
+wiki; optional flags stay wiki-derived, while objective IDs and source-subquest
+links stay capture-derived.
+Tour's Lighthouse cash objectives use 8,000 USD based on a 1.2.0 Seasonal
+in-game screenshot and a user confirmation covering all modes, superseding the
+20,000 USD in older PvP/PvE captures. No mode-specific difference is reported.
 Only regular and PvE captures can supplement the shared storyline. Seasonal
 captures can corroborate overlapping data but cannot define shared-mode content.
 

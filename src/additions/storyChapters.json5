@@ -211,13 +211,13 @@
           {
               id: '6895d2d18f186d19d54d102c',
               type: 'main',
-              description: 'Hand over the cash to Mechanic',
+              description: 'Hand over 8,000 USD to Mechanic',
               sourceQuestId: '6895bfa355ad4ab76001a1c9',
           },
           {
               id: '68cd005720baf6092be731c8',
               type: 'optional',
-              description: 'Collect the required amount in USD',
+              description: 'Collect the required 8,000 USD',
               sourceQuestId: '6895bfa355ad4ab76001a1c9',
           },
           {

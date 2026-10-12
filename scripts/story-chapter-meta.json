@@ -10,6 +10,16 @@
     "activation": null,
     "description": "Starting quest - automatically unlocked at the beginning of the storyline",
     "notes": null,
+    "objectiveDescriptionCorrections": {
+      "6895d2d18f186d19d54d102c": {
+        "description": "Hand over 8,000 USD to Mechanic",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; 1.2.0 Seasonal in-game screenshot shows 0/8,000 USD; user confirms 8,000 across all modes. Was: 20,000 USD in older PvP/PvE captures; published description omitted the amount."
+      },
+      "68cd005720baf6092be731c8": {
+        "description": "Collect the required 8,000 USD",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; 1.2.0 Seasonal in-game screenshot shows the optional USD collection counter with an 8,000 target; user confirms 8,000 across all modes. Was: 20,000 USD in older PvP/PvE captures; published description omitted the amount."
+      }
+    },
     "rewards": {
       "description": "Unlocks achievement Pathfinder, traders (Skier, Mechanic, Prapor, Peacekeeper), and direct access to all locations"
     },

@@ -1209,7 +1209,8 @@ function main(): void {
       const emitted: JsonRecord = {
         id: objective.id,
         type: optional ? 'optional' : 'main',
-        description: objective.text,
+        description:
+          meta.objectiveDescriptionCorrections?.[objective.id]?.description ?? objective.text,
         sourceQuestId: objective.sourceQuestId,
       };
       if (objective.endingId) emitted.endingId = objective.endingId;
