@@ -4,6 +4,42 @@
   // Anything true of every mode belongs in src/overrides/tasks.json5, even when
   // the supporting capture came from PvE.
 
+  // Hell on Earth - Part 2 - the 1.1 PvE template accepts Part 1 while active
+  // as well as complete. No regular/Seasonal template verifies this status change.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2
+  '666314b2a9290f9e0806cca3': {
+    taskRequirements: [
+      {
+        task: { id: '666314b0acf8442f8b0531a1', name: 'Hell on Earth - Part 1' },
+        status: ['active', 'complete'], // Was: ['complete']
+      },
+    ],
+  },
+
+  // The Tarkov Shooter - Part 4 - explicit Quest start statuses in the 1.1 PvE
+  // template include active; do not infer this edge from narrative wiki order.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_4
+  '5bc480a686f7741af0342e29': {
+    taskRequirements: [
+      {
+        task: { id: '5bc47dbf86f7741ee74e93b9', name: 'The Tarkov Shooter - Part 3' },
+        status: ['active', 'complete'], // Was: ['complete']
+      },
+    ],
+  },
+
+  // Chemical - Part 3 - the 1.1 PvE template accepts Part 2 while active or
+  // complete. This capture does not establish the same statuses in other modes.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_-_Part_3
+  '597a0e5786f77426d66c0636': {
+    taskRequirements: [
+      {
+        task: { id: '597a0b2986f77426d66c0633', name: 'Chemical - Part 2' },
+        status: ['active', 'complete'], // Was: ['complete']
+      },
+    ],
+  },
+
   // Building Foundations - the PvE client roots this task at A Helping Hand,
   // while regular and pvp-season upstream require Swift Retribution (complete
   // or failed). The shared override had been forcing the PvE edge into every
