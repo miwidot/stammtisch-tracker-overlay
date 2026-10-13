@@ -10,6 +10,12 @@
     "activation": null,
     "description": "Starting quest - automatically unlocked at the beginning of the storyline",
     "notes": null,
+    "objectiveCompletionPolicies": {
+      "6895bc04162304804bdc056e": {
+        "policy": "tutorial",
+        "evidence": "User-confirmed gameplay policy: every character completes Escape Ground Zero during the mandatory tutorial, including leaving/disconnecting, PvP, PvE, Seasonal, older characters and after prestige. Therapist conversation remains independently required. Not independently established from captured quest templates. Was: manually tracked completion only."
+      }
+    },
     "objectiveDescriptionCorrections": {
       "6895d2d18f186d19d54d102c": {
         "description": "Hand over 8,000 USD to Mechanic",

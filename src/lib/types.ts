@@ -474,6 +474,8 @@ export interface StoryObjectiveLocation {
 
 export interface StoryObjective {
   id: string;
+  /** Guaranteed tutorial baseline in all modes; consumers derive it without saving a mark. */
+  completionPolicy?: 'tutorial';
   type: 'main' | 'optional';
   description: string;
   /**

@@ -1,5 +1,23 @@
 # Updating story coverage
 
+`completionPolicy: 'tutorial'` declares an effective completed baseline for the
+exact Escape Ground Zero objective `6895bc04162304804bdc056e` in Tour. The accepted
+gameplay report covers all characters in PvP, PvE and Seasonal, including older
+characters and after prestige: the mandatory tutorial grants completion even
+when leaving or disconnecting. This is user-confirmed evidence, not an inference
+or independent proof from the captured finish condition. Talk to Therapist
+(`68c81d6e82b7593afaa638e0`) remains separately required.
+
+Generation preserves this evidenced policy from `objectiveCompletionPolicies`
+in chapter metadata. Consumers derive a checked, read-only objective with a
+"Completed during tutorial" explanation, count it in effective progress, and do
+not create, clear or timestamp a saved mark. Raw backup marks stay faithful and
+can become visible again if the policy is corrected. The policy never completes
+a subquest, conversation or chapter. Missing/unknown policies must fall back to
+ordinary tracked completion; clients must not match objective wording or IDs to
+invent a baseline. All modes inherit this policy from the shared addition;
+Seasonal capture exclusion still applies to selecting shared quest templates.
+
 The storyline uses a hash-locked primary capture plus optional hash-locked
 supplemental captures. A newer login can contain fewer story templates because
 the client returns subquests according to character progress. Replacing a broad

@@ -226,6 +226,11 @@
           "type": "object",
           "required": ["id", "type", "description", "sourceQuestId"],
           "properties": {
+            "completionPolicy": {
+              "description": "Guaranteed effective completion baseline for every character in regular, pve and pvp-season, including prestige and older characters. tutorial means completed during the mandatory tutorial; consumers render read-only without creating or deleting saved marks. Absence means ordinary tracked completion. Never implies subquest, dialogue or chapter completion.",
+              "type": "string",
+              "enum": ["tutorial"]
+            },
             "id": {
               "description": "Objective ID: the stable source objective id from the client (24-hex). Every chapter is generated from the quest reference, so fabricated positional ids are not accepted.",
               "type": "string",

@@ -59,6 +59,7 @@
               id: '6895bc04162304804bdc056e',
               type: 'main',
               description: 'Escape Ground Zero',
+              completionPolicy: 'tutorial',
               sourceQuestId: '6895bbb0e7dac53c7c08797b',
               unlocks: [
                   {

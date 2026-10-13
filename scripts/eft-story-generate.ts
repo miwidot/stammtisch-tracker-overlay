@@ -1215,12 +1215,27 @@ export function attachStoryObjectiveParents(
   return { linked, unresolved };
 }
 
+export function objectiveCompletionPolicy(meta: JsonRecord, id: string): 'tutorial' | undefined {
+  const entry = meta.objectiveCompletionPolicies?.[id];
+  if (entry === undefined) return undefined;
+  if (
+    entry?.policy !== 'tutorial' ||
+    typeof entry.evidence !== 'string' ||
+    !entry.evidence.trim()
+  ) {
+    throw new Error(`Invalid evidenced completion policy for story objective ${id}`);
+  }
+  return entry.policy;
+}
+
 function attachObjectiveMetadata(
   emitted: JsonRecord,
   objective: ExpandedObjective,
   meta: JsonRecord
 ): void {
   if (objective.endingId) emitted.endingId = objective.endingId;
+  const completionPolicy = objectiveCompletionPolicy(meta, objective.id);
+  if (completionPolicy) emitted.completionPolicy = completionPolicy;
   const unlocks = meta.objectiveUnlocks?.[objective.id];
   if (unlocks) emitted.unlocks = unlocks;
 }
@@ -1235,6 +1250,7 @@ function warnUnresolvedCuratedObjectives(
     ...(meta.objectiveOrder ?? []),
     ...Object.keys(meta.objectiveUnlocks ?? {}),
     ...Object.keys(meta.objectiveOptionalCorrections ?? {}),
+    ...Object.keys(meta.objectiveCompletionPolicies ?? {}),
   ]);
   const missing = [...curated].filter((id) => !known.has(id));
   if (missing.length > 0) {
