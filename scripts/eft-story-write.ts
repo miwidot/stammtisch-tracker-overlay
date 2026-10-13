@@ -42,12 +42,13 @@ import {
 const HEADER =
   '  // Story chapters (Edge of Darkness storyline) - not present in the tarkov.dev API.\n' +
   '  //\n' +
-  '  // Source: local quest reference (structure/ordering) cross-referenced with the\n' +
+  '  // Source: local quest reference (structure and stable ids) cross-referenced with the\n' +
   '  // EFT wiki (objective text + optional/required flags). Chapters are the storyline\n' +
   '  // narrator-trader quests; objectives are the ordered sub-quest references. Optional\n' +
-  '  // flags come from the wiki. Chapter ordering, wikiLink, activation, and requirements\n' +
-  '  // are curated (scripts/story-chapter-meta.json). Each generated objective id is\n' +
-  '  // the stable source objective id, with sourceQuestId linking to its sub-quest.\n' +
+  '  // flags come from the wiki or evidence-backed optionality corrections keyed by stable\n' +
+  '  // objective id. Narrative ordering,\n' +
+  '  // stage unlocks and chapter metadata are curated (scripts/story-chapter-meta.json).\n' +
+  '  // Each objective uses its stable source id, with sourceQuestId linking to its sub-quest.\n' +
   '  // Every chapter is derived from the reference, so no objective carries a\n' +
   '  // fabricated id; endingId and the chapter-level `endings` list use the real\n' +
   '  // client/ending_list ids.\n' +

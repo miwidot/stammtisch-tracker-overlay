@@ -55,10 +55,30 @@
         "description": "Find 5 PMC dogtags in raid",
         "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. FindItem.value = 5; wiki marks collection optional and the hand-in does not require FIR. Was: generic PMC dogtag collection text without the count, incorrectly matched as required.",
         "wikiMatchText": "Find 5 PMC dogtags in raid"
+      },
+      "69bd75c3338353fb98d95b78": {
+        "description": "Visit Interchange 3 times",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; in-game quest conditions verify CounterCreator.value = 3, isNecessary = false and parentId links the survive/extract alternative. Was: Visit Interchange, without the counter quantity."
+      },
+      "69bd80ade532cba53e0ae707": {
+        "description": "Visit Customs 3 times",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; in-game quest conditions verify CounterCreator.value = 3, isNecessary = false and parentId links the survive/extract alternative. Was: Visit Customs, without the counter quantity."
+      },
+      "69bd8290da9b3f505b1baac9": {
+        "description": "Visit Factory 3 times",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; in-game quest conditions verify CounterCreator.value = 3, isNecessary = false and parentId links the survive/extract alternative. Was: Visit Factory, without the counter quantity."
+      },
+      "69bd84e421fa07eadaa652b5": {
+        "description": "Visit Woods 3 times",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; in-game quest conditions verify CounterCreator.value = 3, isNecessary = false and parentId links the survive/extract alternative. Was: Visit Woods, without the counter quantity."
+      },
+      "69bd87733dc0daa202d06cb9": {
+        "description": "Visit Shoreline 3 times",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; in-game quest conditions verify CounterCreator.value = 3, isNecessary = false and parentId links the survive/extract alternative. Was: Visit Shoreline, without the counter quantity."
       }
     },
     "rewards": {
-      "description": "Unlocks achievement Pathfinder, traders (Skier, Mechanic, Prapor, Peacekeeper), and direct access to all locations"
+      "description": "Unlocks achievement Pathfinder"
     },
     "mapUnlocks": [
       {
@@ -100,6 +120,10 @@
     ],
     "traderUnlocks": [
       {
+        "id": "54cb57776803fa99248b456e",
+        "name": "Therapist"
+      },
+      {
         "id": "5ac3b934156ae10c4430e83c",
         "name": "Ragman"
       },
@@ -119,7 +143,184 @@
         "id": "5935c25fb3acc3127c3d8cd9",
         "name": "Peacekeeper"
       }
-    ]
+    ],
+    "objectiveOrder": [
+      "6895bc04162304804bdc056e",
+      "68c81d6e82b7593afaa638e0",
+      "68c6a8ea578cb34230742497",
+      "68ccffb395ec3bc6eddfc3e3",
+      "6895c24ec097ed522295a05d",
+      "68c15e129c0090b717977bd4",
+      "69bd6bcb78ea678bd3d84907",
+      "69bd75c3338353fb98d95b78",
+      "68cc123af7f4373ce2365213",
+      "68c2c0907a45d1fc06b150a2",
+      "69bd7ff06c31a244742b1775",
+      "69bd80ade532cba53e0ae707",
+      "68cd000e66cfbf075021bbb4",
+      "6895c4a6b9a96237b73e15a1",
+      "68c41dde2ddd4581cfc7531c",
+      "69bd8255791d79ab057be056",
+      "69bd8290da9b3f505b1baac9",
+      "68cd03317ad9451d1d306448",
+      "6895daa6f935f3dbe1de0a9d",
+      "68c427c12529fc8fe8d2ded6",
+      "68c42742aba9a345346af424",
+      "69bd84d0e08ef0a8d3a85950",
+      "69bd84e421fa07eadaa652b5",
+      "68c6a5ed545269faf1c4b157",
+      "68dd032d41e6616f5303a146",
+      "68de73eb5084448b61a168df",
+      "6903530e3e35f80b678161fc",
+      "68c6a97215db207712d81624",
+      "69bd8757c588aa8f204f8ef8",
+      "69bd87733dc0daa202d06cb9",
+      "68cd008705dec39938e316d1",
+      "6896020e3af3adc94b263d60",
+      "68c6a969f7d6765264b9c44f",
+      "68cd005720baf6092be731c8",
+      "6895d2d18f186d19d54d102c",
+      "68c6b0a3cb1c5c519963e7af",
+      "68c6afd2e48214ee402ccc2a",
+      "68c6aaba5deca7d908404c63",
+      "68c7e87321acda56046a7f4f",
+      "68c7e86ff945792cfd97edfe",
+      "68c6aa469b0217ce22d6fb0b",
+      "68c6aa43498b4da977128b3c",
+      "68c6aa4040bb6d7ff66c0abb"
+    ],
+    "objectiveUnlocks": {
+      "6895bc04162304804bdc056e": [
+        {
+          "type": "trader",
+          "id": "54cb57776803fa99248b456e",
+          "name": "Therapist"
+        },
+        {
+          "type": "trader",
+          "id": "5ac3b934156ae10c4430e83c",
+          "name": "Ragman"
+        },
+        {
+          "type": "map",
+          "id": "5714dbc024597771384a510d",
+          "name": "Interchange"
+        }
+      ],
+      "6895c24ec097ed522295a05d": [
+        {
+          "type": "map",
+          "id": "5714dc692459777137212e12",
+          "name": "Streets of Tarkov",
+          "note": "Unlocked after completing the Therapist cash stage."
+        }
+      ],
+      "68cc123af7f4373ce2365213": [
+        {
+          "type": "trader",
+          "id": "58330581ace78e27b8b10cee",
+          "name": "Skier",
+          "note": "Unlocked after completing the Interchange recon stage."
+        },
+        {
+          "type": "map",
+          "id": "56f40101d2720b2a4d8b45d6",
+          "name": "Customs",
+          "note": "Unlocked after completing the Interchange recon stage."
+        }
+      ],
+      "6895c4a6b9a96237b73e15a1": [
+        {
+          "type": "trader",
+          "id": "5a7c2eca46aef81a7ca2145d",
+          "name": "Mechanic",
+          "note": "Unlocked after completing the Customs stage."
+        },
+        {
+          "type": "map",
+          "id": "55f2d3fd4bdc2d5f408b4567",
+          "name": "Factory",
+          "note": "Completing the Customs stage unlocks both daytime and nighttime Factory."
+        }
+      ],
+      "6895daa6f935f3dbe1de0a9d": [
+        {
+          "type": "trader",
+          "id": "54cb50c76803fa8b248b4571",
+          "name": "Prapor",
+          "note": "Unlocked after completing the Factory stage."
+        },
+        {
+          "type": "map",
+          "id": "5704e3c2d2720bac5b8b4567",
+          "name": "Woods",
+          "note": "Unlocked after completing the Factory stage."
+        }
+      ],
+      "69bd84d0e08ef0a8d3a85950": [
+        {
+          "type": "trader",
+          "id": "5935c25fb3acc3127c3d8cd9",
+          "name": "Peacekeeper",
+          "note": "Unlocked after completing the Woods stage, including the target eliminations."
+        },
+        {
+          "type": "map",
+          "id": "5704e554d2720bac5b8b456e",
+          "name": "Shoreline",
+          "note": "Unlocked after completing the Woods stage, including the target eliminations."
+        }
+      ],
+      "6896020e3af3adc94b263d60": [
+        {
+          "type": "map",
+          "id": "5704e5fad2720bc05b8b4567",
+          "name": "Reserve",
+          "note": "Unlocked after completing the Shoreline stage, including the dogtag hand-in."
+        }
+      ],
+      "6895d2d18f186d19d54d102c": [
+        {
+          "type": "map",
+          "id": "5704e4dad2720bb55b8b4567",
+          "name": "Lighthouse",
+          "note": "Unlocked after completing the Mechanic cash stage."
+        }
+      ],
+      "68c6aa4040bb6d7ff66c0abb": [
+        {
+          "type": "map",
+          "id": "5b0fc42d86f7744a585f9105",
+          "name": "The Lab",
+          "note": "Unlocked after completing the TerraGroup facility stage, including the offices, server room and drainage search."
+        }
+      ]
+    },
+    "objectiveOptionalCorrections": {
+      "69bd75c3338353fb98d95b78": {
+        "optional": true,
+        "evidence": "In-game quest conditions mark this visit counter isNecessary = false and parentId links it to the corresponding survive/extract objective; it is an alternative, not another required objective."
+      },
+      "69bd80ade532cba53e0ae707": {
+        "optional": true,
+        "evidence": "In-game quest conditions mark this visit counter isNecessary = false and parentId links it to the corresponding survive/extract objective; it is an alternative, not another required objective."
+      },
+      "69bd8290da9b3f505b1baac9": {
+        "optional": true,
+        "evidence": "In-game quest conditions mark this visit counter isNecessary = false and parentId links it to the corresponding survive/extract objective; it is an alternative, not another required objective."
+      },
+      "69bd84e421fa07eadaa652b5": {
+        "optional": true,
+        "evidence": "In-game quest conditions mark this visit counter isNecessary = false and parentId links it to the corresponding survive/extract objective; it is an alternative, not another required objective."
+      },
+      "69bd87733dc0daa202d06cb9": {
+        "optional": true,
+        "evidence": "In-game quest conditions mark this visit counter isNecessary = false and parentId links it to the corresponding survive/extract objective; it is an alternative, not another required objective. The Shoreline optional label is also corroborated by an in-game screenshot."
+      }
+    },
+    "objectiveOrderEvidence": "https://escapefromtarkov.fandom.com/wiki/Tour; cached wiki narrative sequence corroborated by in-game stage conversations and conditions. Existing stable objective IDs only. Was: raw condition order placed hand-ins before conversations and access checks at the chapter end. Collection objectives precede their paired hand-ins for logical player progression, per user-confirmed display requirement; this deliberately refines wiki bullet order without changing prerequisites or optionality.",
+    "objectiveUnlocksEvidence": "In-game stage reward records by source quest: 6895bbb0e7dac53c7c08797b -> Therapist, Ragman, Interchange; 6895bed8e7dac53c7c08797d -> Streets; 6895bf0872e2151e9e0a59fa -> Skier, Customs; 6895bf1ecfb48128340d5a89 -> Mechanic, Factory (including nighttime 59fc81d786f774390775787e); 6895bf42a3de8e8f1d0426a8 -> Prapor, Woods; 6895bf915bcf5c38e90b83d8 -> Peacekeeper, Shoreline; 6895bfd30cb3a157480db00a -> Reserve; 6895bfa355ad4ab76001a1c9 -> Lighthouse; 68c6aa0e2f0a1d31380ad618 -> The Lab. https://escapefromtarkov.fandom.com/wiki/Tour corroborates the narrative stages. Was: chapter-level summaries only, leaving consumers to guess individual stage rewards.",
+    "chapterRewardEvidence": "Tour completion quest 68cbd33676fe74b1e80bfd91 Success contains only Achievement target 691213956b60607135006811; Pathfinder name comes from the wiki-derived summary. Trader and location unlocks belong to individual source subquests. Was: aggregate prose implied chapter completion granted all stage unlocks."
   },
   "falling-skies": {
     "id": "falling-skies",
@@ -227,7 +428,39 @@
     "notes": null,
     "rewards": null,
     "mapUnlocks": [],
-    "traderUnlocks": []
+    "traderUnlocks": [],
+    "objectiveOrder": [
+      "68f0f7d9a3fa68269236e047",
+      "68f0f88d1684e5a7eecbac40",
+      "68f10c6d450cc4e461d7d95b",
+      "68f0ff6bb0c5f1c1e59ee772",
+      "68f1003a16005381985a06e5",
+      "68f10ca30e1534718d91279f",
+      "68f115c333e89b83374fe8c9",
+      "68f117d2c52671056c769396",
+      "68f118992b0bc88a2b4f1f61",
+      "68f1191a5344aa2765f03322",
+      "6907e6e7dfe4440eca8e7c4b",
+      "68f11ad800eefa59290cede0",
+      "68f11af4fdaaf4ef0473e514",
+      "68f3b826eece50a3d96ebb71",
+      "68f3c0757ce65108fed2f60d",
+      "68f3c0bd71c8131919a831b9",
+      "68f3c10b376fa4425ce02422",
+      "68f3c0fa5c45556144c8ae24",
+      "68f3c1a2c82e41734e534113",
+      "68f3c1cc71168ddd4c1889bc",
+      "68f3c383821de27bfba5655d",
+      "68f3c3b9840a2e65ebc7fee1",
+      "68f3c51a829dc8fbee1f3651",
+      "68f3c46286136e291b3decea",
+      "68f3c48fd6712209faa7b385",
+      "68f3c4a12ae2a7bb9c6a7c8a",
+      "6907f9955766c2f7c917f84e",
+      "68f3c5703dba2961fcf0fa76",
+      "68f3c5983d4d0d0bb462815c"
+    ],
+    "objectiveOrderEvidence": "https://escapefromtarkov.fandom.com/wiki/Accidental_Witness; all 29 cached wiki objectives map uniquely to existing stable source IDs. Narrative investigation precedes its room and document searches."
   },
   "the-labyrinth": {
     "id": "the-labyrinth",
@@ -249,7 +482,26 @@
         "name": "The Labyrinth"
       }
     ],
-    "traderUnlocks": []
+    "traderUnlocks": [],
+    "objectiveOrder": [
+      "68e3aa759490da153915d7bb",
+      "68e3aa7c8d0dd19dc845cbcc",
+      "68e4cf9b9faf030025469bef",
+      "694a79ac3b98590cfb8423b0",
+      "68e4dc6ce8f4a928b9c97683",
+      "6907cf0a8bade80b86f79c5d",
+      "68e4e3eca3ce127ce890ec2f",
+      "68e4e506dbb7abb1bc047018",
+      "68e4e5235f8c749cfca48679",
+      "68e4e546688ec98b13d6350a",
+      "68ffe508dcb52296aa8a4006",
+      "68e4e8b45fae2c907a1c4343",
+      "68e4e97ed2c83e861e65119c",
+      "68ffe3c1a2925d6e5d85cc40",
+      "68ffd68b52fa44fe7cb35762",
+      "68ffd719b3d6b70b0d469760"
+    ],
+    "objectiveOrderEvidence": "https://escapefromtarkov.fandom.com/wiki/The_Labyrinth; cached wiki places investigation of lab staff bodies before the locked office and office tape. Preserve existing obtain-before-read report sequence; wiki report ordering is internally inconsistent."
   },
   "the-ticket": {
     "id": "the-ticket",

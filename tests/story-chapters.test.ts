@@ -30,6 +30,21 @@ function loadStoryChapters(): Record<string, StoryChapter> {
 describe('story chapters (EFT-sourced)', () => {
   const chapters = loadStoryChapters();
 
+  it('places corroborated investigations before their follow-up searches', () => {
+    for (const [chapterId, earlier, later] of [
+      ['accidental-witness', '68f10c6d450cc4e461d7d95b', '68f0ff6bb0c5f1c1e59ee772'],
+      ['accidental-witness', '6907e6e7dfe4440eca8e7c4b', '68f11ad800eefa59290cede0'],
+      ['accidental-witness', '6907e6e7dfe4440eca8e7c4b', '68f11af4fdaaf4ef0473e514'],
+      ['the-labyrinth', '68ffe508dcb52296aa8a4006', '68e4e8b45fae2c907a1c4343'],
+      ['the-labyrinth', '68ffe508dcb52296aa8a4006', '68e4e97ed2c83e861e65119c'],
+    ]) {
+      const ids = (chapters[chapterId]!.objectives ?? []).map((objective) => objective.id);
+      expect(ids).toContain(earlier);
+      expect(ids).toContain(later);
+      expect(ids.indexOf(earlier)).toBeLessThan(ids.indexOf(later));
+    }
+  });
+
   it('includes the Boreas chapter with real objectives (issue #233)', () => {
     const boreas = chapters.boreas;
     expect(boreas).toBeDefined();

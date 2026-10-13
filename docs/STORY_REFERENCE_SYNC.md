@@ -16,7 +16,8 @@ Generation matches the capture text against the wiki to classify optional flags.
 A correction can also supply `wikiMatchText` when a generic capture label such as
 "Find the item in raid: PMC dogtag" fails to match its specific optional wiki
 objective. The match text controls classification without replacing the displayed
-description. Optional flags stay wiki-derived, while objective IDs and
+description. Optional flags default to the wiki; evidenced `objectiveOptionalCorrections`
+can override classification for specific stable IDs. Objective IDs and
 source-subquest links stay capture-derived.
 Tour's Lighthouse cash objectives use 8,000 USD based on a 1.2.0 Seasonal
 in-game screenshot and a user confirmation covering all modes, superseding the
@@ -24,6 +25,32 @@ in-game screenshot and a user confirmation covering all modes, superseding the
 Tour also records 250,000 RUB, 5 building materials or tools, 2 weapons, 3 Woods
 targets and 5 PMC dogtags from the pinned quest conditions. Materials and weapons
 must be found in raid for hand-in; the dogtag hand-in does not require that flag.
+Curated `objectiveOrder` lists existing stable IDs in player-facing narrative order,
+including access checks alongside the stages they introduce. Tour places each optional
+collection immediately before its paired hand-in, refining wiki bullet order into a
+logical progression without changing optional flags or quest prerequisites. Accidental
+Witness follows its complete uniquely matched cached wiki sequence. Labyrinth moves
+investigating the lab staff bodies before the locked office and tape, while preserving
+obtain-before-read for the research report where cached wiki order is inconsistent. Unlisted future objectives
+remain in capture order after the curated list; ordering never adds or removes an ID.
+Generation warns when curated ordering, unlock or optionality IDs are unresolved in the
+reference, allowing legitimate partial captures while making curation drift visible.
+`objectiveUnlocks` places explicit stage rewards on the last required narrative objective.
+These are stage-completion rewards, not rewards for that objective in isolation: notes
+explain the multi-objective requirement. In-game stage rewards establish Ground Zero's
+Therapist/Ragman/Interchange access, then Streets, Skier/Customs, Mechanic/Factory,
+Prapor/Woods, Peacekeeper/Shoreline, Reserve, Lighthouse and The Lab. Factory represents
+both daytime and nighttime access; it stays one chapter map entry. Chapter-level rewards
+and unlock summaries remain available to consumers. Tour completion itself grants only the
+Pathfinder achievement; trader and map rewards come from the preceding stages.
+
+All five separate Interchange, Customs, Factory, Woods and Shoreline Visit counters are
+optional alternatives with a count of 3: in-game conditions set `CounterCreator.value: 3`,
+`isNecessary: false` and link `parentId`
+to the corresponding survive/extract counter. Shoreline's optional display is also
+corroborated by an in-game screenshot. Corrections name only those five stable IDs;
+no general rule classifies other Visit objectives.
+
 Only regular and PvE captures can supplement the shared storyline. Seasonal
 captures can corroborate overlapping data but cannot define shared-mode content.
 

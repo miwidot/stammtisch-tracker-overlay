@@ -1,12 +1,13 @@
 {
   // Story chapters (Edge of Darkness storyline) - not present in the tarkov.dev API.
   //
-  // Source: local quest reference (structure/ordering) cross-referenced with the
+  // Source: local quest reference (structure and stable ids) cross-referenced with the
   // EFT wiki (objective text + optional/required flags). Chapters are the storyline
   // narrator-trader quests; objectives are the ordered sub-quest references. Optional
-  // flags come from the wiki. Chapter ordering, wikiLink, activation, and requirements
-  // are curated (scripts/story-chapter-meta.json). Each generated objective id is
-  // the stable source objective id, with sourceQuestId linking to its sub-quest.
+  // flags come from the wiki or evidence-backed optionality corrections keyed by stable
+  // objective id. Narrative ordering,
+  // stage unlocks and chapter metadata are curated (scripts/story-chapter-meta.json).
+  // Each objective uses its stable source id, with sourceQuestId linking to its sub-quest.
   // Every chapter is derived from the reference, so no objective carries a
   // fabricated id; endingId and the chapter-level `endings` list use the real
   // client/ending_list ids.
@@ -57,12 +58,23 @@
               type: 'main',
               description: 'Escape Ground Zero',
               sourceQuestId: '6895bbb0e7dac53c7c08797b',
-          },
-          {
-              id: '6895c24ec097ed522295a05d',
-              type: 'main',
-              description: 'Hand over 250,000 RUB to Therapist',
-              sourceQuestId: '6895bed8e7dac53c7c08797d',
+              unlocks: [
+                  {
+                      type: 'trader',
+                      id: '54cb57776803fa99248b456e',
+                      name: 'Therapist',
+                  },
+                  {
+                      type: 'trader',
+                      id: '5ac3b934156ae10c4430e83c',
+                      name: 'Ragman',
+                  },
+                  {
+                      type: 'map',
+                      id: '5714dbc024597771384a510d',
+                      name: 'Interchange',
+                  },
+              ],
           },
           {
               id: '68c81d6e82b7593afaa638e0',
@@ -71,10 +83,30 @@
               sourceQuestId: '6895bed8e7dac53c7c08797d',
           },
           {
+              id: '68c6a8ea578cb34230742497',
+              type: 'main',
+              description: 'Ensure access to Streets of Tarkov',
+              sourceQuestId: '68c6a8551dfbf3fb78018562',
+          },
+          {
               id: '68ccffb395ec3bc6eddfc3e3',
               type: 'optional',
               description: 'Collect the required 250,000 RUB',
               sourceQuestId: '6895bed8e7dac53c7c08797d',
+          },
+          {
+              id: '6895c24ec097ed522295a05d',
+              type: 'main',
+              description: 'Hand over 250,000 RUB to Therapist',
+              sourceQuestId: '6895bed8e7dac53c7c08797d',
+              unlocks: [
+                  {
+                      type: 'map',
+                      id: '5714dc692459777137212e12',
+                      name: 'Streets of Tarkov',
+                      note: 'Unlocked after completing the Therapist cash stage.',
+                  },
+              ],
           },
           {
               id: '68c15e129c0090b717977bd4',
@@ -89,21 +121,35 @@
               sourceQuestId: '6895bf0872e2151e9e0a59fa',
           },
           {
+              id: '69bd75c3338353fb98d95b78',
+              type: 'optional',
+              description: 'Visit Interchange 3 times',
+              sourceQuestId: '6895bf0872e2151e9e0a59fa',
+          },
+          {
               id: '68cc123af7f4373ce2365213',
               type: 'main',
               description: 'Tell Ragman what you found during the recon',
               sourceQuestId: '6895bf0872e2151e9e0a59fa',
+              unlocks: [
+                  {
+                      type: 'trader',
+                      id: '58330581ace78e27b8b10cee',
+                      name: 'Skier',
+                      note: 'Unlocked after completing the Interchange recon stage.',
+                  },
+                  {
+                      type: 'map',
+                      id: '56f40101d2720b2a4d8b45d6',
+                      name: 'Customs',
+                      note: 'Unlocked after completing the Interchange recon stage.',
+                  },
+              ],
           },
           {
-              id: '69bd75c3338353fb98d95b78',
+              id: '68c2c0907a45d1fc06b150a2',
               type: 'main',
-              description: 'Visit Interchange',
-              sourceQuestId: '6895bf0872e2151e9e0a59fa',
-          },
-          {
-              id: '6895c4a6b9a96237b73e15a1',
-              type: 'main',
-              description: 'Hand over any 5 building materials or tools found in raid to Skier',
+              description: 'Talk to Skier',
               sourceQuestId: '6895bf1ecfb48128340d5a89',
           },
           {
@@ -113,39 +159,41 @@
               sourceQuestId: '6895bf1ecfb48128340d5a89',
           },
           {
+              id: '69bd80ade532cba53e0ae707',
+              type: 'optional',
+              description: 'Visit Customs 3 times',
+              sourceQuestId: '6895bf1ecfb48128340d5a89',
+          },
+          {
               id: '68cd000e66cfbf075021bbb4',
               type: 'optional',
               description: 'Find any 5 building materials or tools in raid',
               sourceQuestId: '6895bf1ecfb48128340d5a89',
           },
           {
-              id: '69bd80ade532cba53e0ae707',
+              id: '6895c4a6b9a96237b73e15a1',
               type: 'main',
-              description: 'Visit Customs',
+              description: 'Hand over any 5 building materials or tools found in raid to Skier',
               sourceQuestId: '6895bf1ecfb48128340d5a89',
-          },
-          {
-              id: '68c2c0907a45d1fc06b150a2',
-              type: 'main',
-              description: 'Talk to Skier',
-              sourceQuestId: '6895bf1ecfb48128340d5a89',
-          },
-          {
-              id: '6895daa6f935f3dbe1de0a9d',
-              type: 'main',
-              description: 'Hand over any 2 weapons found in raid to Mechanic',
-              sourceQuestId: '6895bf42a3de8e8f1d0426a8',
+              unlocks: [
+                  {
+                      type: 'trader',
+                      id: '5a7c2eca46aef81a7ca2145d',
+                      name: 'Mechanic',
+                      note: 'Unlocked after completing the Customs stage.',
+                  },
+                  {
+                      type: 'map',
+                      id: '55f2d3fd4bdc2d5f408b4567',
+                      name: 'Factory',
+                      note: 'Completing the Customs stage unlocks both daytime and nighttime Factory.',
+                  },
+              ],
           },
           {
               id: '68c41dde2ddd4581cfc7531c',
               type: 'main',
               description: 'Talk to Mechanic',
-              sourceQuestId: '6895bf42a3de8e8f1d0426a8',
-          },
-          {
-              id: '68cd03317ad9451d1d306448',
-              type: 'optional',
-              description: 'Find any 2 weapons in raid',
               sourceQuestId: '6895bf42a3de8e8f1d0426a8',
           },
           {
@@ -156,9 +204,41 @@
           },
           {
               id: '69bd8290da9b3f505b1baac9',
-              type: 'main',
-              description: 'Visit Factory',
+              type: 'optional',
+              description: 'Visit Factory 3 times',
               sourceQuestId: '6895bf42a3de8e8f1d0426a8',
+          },
+          {
+              id: '68cd03317ad9451d1d306448',
+              type: 'optional',
+              description: 'Find any 2 weapons in raid',
+              sourceQuestId: '6895bf42a3de8e8f1d0426a8',
+          },
+          {
+              id: '6895daa6f935f3dbe1de0a9d',
+              type: 'main',
+              description: 'Hand over any 2 weapons found in raid to Mechanic',
+              sourceQuestId: '6895bf42a3de8e8f1d0426a8',
+              unlocks: [
+                  {
+                      type: 'trader',
+                      id: '54cb50c76803fa8b248b4571',
+                      name: 'Prapor',
+                      note: 'Unlocked after completing the Factory stage.',
+                  },
+                  {
+                      type: 'map',
+                      id: '5704e3c2d2720bac5b8b4567',
+                      name: 'Woods',
+                      note: 'Unlocked after completing the Factory stage.',
+                  },
+              ],
+          },
+          {
+              id: '68c427c12529fc8fe8d2ded6',
+              type: 'main',
+              description: 'Talk to Skier',
+              sourceQuestId: '6895bf915bcf5c38e90b83d8',
           },
           {
               id: '68c42742aba9a345346af424',
@@ -167,21 +247,29 @@
               sourceQuestId: '6895bf915bcf5c38e90b83d8',
           },
           {
-              id: '69bd84e421fa07eadaa652b5',
-              type: 'main',
-              description: 'Visit Woods',
-              sourceQuestId: '6895bf915bcf5c38e90b83d8',
-          },
-          {
               id: '69bd84d0e08ef0a8d3a85950',
               type: 'main',
               description: 'Survive and extract from Woods or visit Woods 3 times',
               sourceQuestId: '6895bf915bcf5c38e90b83d8',
+              unlocks: [
+                  {
+                      type: 'trader',
+                      id: '5935c25fb3acc3127c3d8cd9',
+                      name: 'Peacekeeper',
+                      note: 'Unlocked after completing the Woods stage, including the target eliminations.',
+                  },
+                  {
+                      type: 'map',
+                      id: '5704e554d2720bac5b8b456e',
+                      name: 'Shoreline',
+                      note: 'Unlocked after completing the Woods stage, including the target eliminations.',
+                  },
+              ],
           },
           {
-              id: '68c427c12529fc8fe8d2ded6',
-              type: 'main',
-              description: 'Talk to Skier',
+              id: '69bd84e421fa07eadaa652b5',
+              type: 'optional',
+              description: 'Visit Woods 3 times',
               sourceQuestId: '6895bf915bcf5c38e90b83d8',
           },
           {
@@ -209,28 +297,10 @@
               sourceQuestId: '69029e0aede95b6cf90c04f7',
           },
           {
-              id: '6895d2d18f186d19d54d102c',
+              id: '68c6a97215db207712d81624',
               type: 'main',
-              description: 'Hand over 8,000 USD to Mechanic',
-              sourceQuestId: '6895bfa355ad4ab76001a1c9',
-          },
-          {
-              id: '68cd005720baf6092be731c8',
-              type: 'optional',
-              description: 'Collect the required 8,000 USD',
-              sourceQuestId: '6895bfa355ad4ab76001a1c9',
-          },
-          {
-              id: '6896020e3af3adc94b263d60',
-              type: 'main',
-              description: 'Hand over 5 PMC dogtags to Prapor',
-              sourceQuestId: '6895bfd30cb3a157480db00a',
-          },
-          {
-              id: '68cd008705dec39938e316d1',
-              type: 'optional',
-              description: 'Find 5 PMC dogtags in raid',
-              sourceQuestId: '6895bfd30cb3a157480db00a',
+              description: 'Ensure access to Reserve',
+              sourceQuestId: '68c6a8551dfbf3fb78018562',
           },
           {
               id: '69bd8757c588aa8f204f8ef8',
@@ -240,26 +310,66 @@
           },
           {
               id: '69bd87733dc0daa202d06cb9',
-              type: 'main',
-              description: 'Visit Shoreline',
+              type: 'optional',
+              description: 'Visit Shoreline 3 times',
               sourceQuestId: '6895bfd30cb3a157480db00a',
           },
           {
-              id: '68c6aa4040bb6d7ff66c0abb',
-              type: 'main',
-              description: 'Locate the escape path through the drainage system in The Lab',
-              sourceQuestId: '68c6aa0e2f0a1d31380ad618',
+              id: '68cd008705dec39938e316d1',
+              type: 'optional',
+              description: 'Find 5 PMC dogtags in raid',
+              sourceQuestId: '6895bfd30cb3a157480db00a',
           },
           {
-              id: '68c6aa43498b4da977128b3c',
+              id: '6896020e3af3adc94b263d60',
               type: 'main',
-              description: 'Search the server room in The Lab',
-              sourceQuestId: '68c6aa0e2f0a1d31380ad618',
+              description: 'Hand over 5 PMC dogtags to Prapor',
+              sourceQuestId: '6895bfd30cb3a157480db00a',
+              unlocks: [
+                  {
+                      type: 'map',
+                      id: '5704e5fad2720bc05b8b4567',
+                      name: 'Reserve',
+                      note: 'Unlocked after completing the Shoreline stage, including the dogtag hand-in.',
+                  },
+              ],
           },
           {
-              id: '68c6aa469b0217ce22d6fb0b',
+              id: '68c6a969f7d6765264b9c44f',
               type: 'main',
-              description: 'Search the top management offices in The Lab',
+              description: 'Ensure access to Lighthouse',
+              sourceQuestId: '68c6a8551dfbf3fb78018562',
+          },
+          {
+              id: '68cd005720baf6092be731c8',
+              type: 'optional',
+              description: 'Collect the required 8,000 USD',
+              sourceQuestId: '6895bfa355ad4ab76001a1c9',
+          },
+          {
+              id: '6895d2d18f186d19d54d102c',
+              type: 'main',
+              description: 'Hand over 8,000 USD to Mechanic',
+              sourceQuestId: '6895bfa355ad4ab76001a1c9',
+              unlocks: [
+                  {
+                      type: 'map',
+                      id: '5704e4dad2720bb55b8b4567',
+                      name: 'Lighthouse',
+                      note: 'Unlocked after completing the Mechanic cash stage.',
+                  },
+              ],
+          },
+          {
+              id: '68c6b0a3cb1c5c519963e7af',
+              type: 'main',
+              description: 'Ensure access to The Lab',
+              sourceQuestId: '68c6a8551dfbf3fb78018562',
+          },
+          {
+              id: '68c6afd2e48214ee402ccc2a',
+              type: 'main',
+              description: 'Access the secret TerraGroup facility',
               sourceQuestId: '68c6aa0e2f0a1d31380ad618',
           },
           {
@@ -269,9 +379,9 @@
               sourceQuestId: '68c6aa0e2f0a1d31380ad618',
           },
           {
-              id: '68c6afd2e48214ee402ccc2a',
-              type: 'main',
-              description: 'Access the secret TerraGroup facility',
+              id: '68c7e87321acda56046a7f4f',
+              type: 'optional',
+              description: 'Locate the entrance to the facility on Factory',
               sourceQuestId: '68c6aa0e2f0a1d31380ad618',
           },
           {
@@ -281,38 +391,34 @@
               sourceQuestId: '68c6aa0e2f0a1d31380ad618',
           },
           {
-              id: '68c7e87321acda56046a7f4f',
-              type: 'optional',
-              description: 'Locate the entrance to the facility on Factory',
+              id: '68c6aa469b0217ce22d6fb0b',
+              type: 'main',
+              description: 'Search the top management offices in The Lab',
               sourceQuestId: '68c6aa0e2f0a1d31380ad618',
           },
           {
-              id: '68c6a8ea578cb34230742497',
+              id: '68c6aa43498b4da977128b3c',
               type: 'main',
-              description: 'Ensure access to Streets of Tarkov',
-              sourceQuestId: '68c6a8551dfbf3fb78018562',
+              description: 'Search the server room in The Lab',
+              sourceQuestId: '68c6aa0e2f0a1d31380ad618',
           },
           {
-              id: '68c6a969f7d6765264b9c44f',
+              id: '68c6aa4040bb6d7ff66c0abb',
               type: 'main',
-              description: 'Ensure access to Lighthouse',
-              sourceQuestId: '68c6a8551dfbf3fb78018562',
-          },
-          {
-              id: '68c6a97215db207712d81624',
-              type: 'main',
-              description: 'Ensure access to Reserve',
-              sourceQuestId: '68c6a8551dfbf3fb78018562',
-          },
-          {
-              id: '68c6b0a3cb1c5c519963e7af',
-              type: 'main',
-              description: 'Ensure access to The Lab',
-              sourceQuestId: '68c6a8551dfbf3fb78018562',
+              description: 'Locate the escape path through the drainage system in The Lab',
+              sourceQuestId: '68c6aa0e2f0a1d31380ad618',
+              unlocks: [
+                  {
+                      type: 'map',
+                      id: '5b0fc42d86f7744a585f9105',
+                      name: 'The Lab',
+                      note: 'Unlocked after completing the TerraGroup facility stage, including the offices, server room and drainage search.',
+                  },
+              ],
           },
       ],
       rewards: {
-          description: 'Unlocks achievement Pathfinder, traders (Skier, Mechanic, Prapor, Peacekeeper), and direct access to all locations',
+          description: 'Unlocks achievement Pathfinder',
       },
       mapUnlocks: [
           {
@@ -353,6 +459,10 @@
           },
       ],
       traderUnlocks: [
+          {
+              id: '54cb57776803fa99248b456e',
+              name: 'Therapist',
+          },
           {
               id: '5ac3b934156ae10c4430e83c',
               name: 'Ragman',
@@ -1656,6 +1766,12 @@
               sourceQuestId: '68f0f54bdae477041501acfc',
           },
           {
+              id: '68f10c6d450cc4e461d7d95b',
+              type: 'main',
+              description: 'Find out what Kozlov was involved in',
+              sourceQuestId: '68f0f54d0a378517c900226e',
+          },
+          {
               id: '68f0ff6bb0c5f1c1e59ee772',
               type: 'optional',
               description: 'Access Kozlov\'s room',
@@ -1665,12 +1781,6 @@
               id: '68f1003a16005381985a06e5',
               type: 'optional',
               description: 'Figure out where to get Kozlov\'s key',
-              sourceQuestId: '68f0f54d0a378517c900226e',
-          },
-          {
-              id: '68f10c6d450cc4e461d7d95b',
-              type: 'main',
-              description: 'Find out what Kozlov was involved in',
               sourceQuestId: '68f0f54d0a378517c900226e',
           },
           {
@@ -1704,6 +1814,12 @@
               sourceQuestId: '68f0f5516871d33422038cd2',
           },
           {
+              id: '6907e6e7dfe4440eca8e7c4b',
+              type: 'optional',
+              description: 'Investigate the apartment',
+              sourceQuestId: '68f0f5516871d33422038cd2',
+          },
+          {
               id: '68f11ad800eefa59290cede0',
               type: 'main',
               description: 'Read the documents in Skier\'s accomplice\'s apartment',
@@ -1713,12 +1829,6 @@
               id: '68f11af4fdaaf4ef0473e514',
               type: 'main',
               description: 'Survive and extract from Streets of Tarkov',
-              sourceQuestId: '68f0f5516871d33422038cd2',
-          },
-          {
-              id: '6907e6e7dfe4440eca8e7c4b',
-              type: 'optional',
-              description: 'Investigate the apartment',
               sourceQuestId: '68f0f5516871d33422038cd2',
           },
           {
@@ -1740,15 +1850,15 @@
               sourceQuestId: '68f0f556dae477041501acfe',
           },
           {
-              id: '68f3c0fa5c45556144c8ae24',
-              type: 'main',
-              description: 'Investigate the entrance to Anastasia\'s building',
-              sourceQuestId: '68f0f556dae477041501acfe',
-          },
-          {
               id: '68f3c10b376fa4425ce02422',
               type: 'main',
               description: 'Learn more about Anastasia',
+              sourceQuestId: '68f0f556dae477041501acfe',
+          },
+          {
+              id: '68f3c0fa5c45556144c8ae24',
+              type: 'main',
+              description: 'Investigate the entrance to Anastasia\'s building',
               sourceQuestId: '68f0f556dae477041501acfe',
           },
           {
@@ -1776,15 +1886,21 @@
               sourceQuestId: '68f0f55b6310272fc402e2dc',
           },
           {
+              id: '68f3c51a829dc8fbee1f3651',
+              type: 'optional',
+              description: 'Locate and neutralize Reshala',
+              sourceQuestId: '68f0f55b6310272fc402e2dc',
+          },
+          {
               id: '68f3c46286136e291b3decea',
               type: 'optional',
               description: 'Obtain the key to Reshala\'s stash',
               sourceQuestId: '68f0f55b6310272fc402e2dc',
           },
           {
-              id: '6907f9955766c2f7c917f84e',
-              type: 'optional',
-              description: 'Obtain courier Pasha\'s belongings',
+              id: '68f3c48fd6712209faa7b385',
+              type: 'main',
+              description: 'Investigate Reshala\'s bunkhouse',
               sourceQuestId: '68f0f55b6310272fc402e2dc',
           },
           {
@@ -1794,15 +1910,9 @@
               sourceQuestId: '68f0f55b6310272fc402e2dc',
           },
           {
-              id: '68f3c51a829dc8fbee1f3651',
+              id: '6907f9955766c2f7c917f84e',
               type: 'optional',
-              description: 'Locate and neutralize Reshala',
-              sourceQuestId: '68f0f55b6310272fc402e2dc',
-          },
-          {
-              id: '68f3c48fd6712209faa7b385',
-              type: 'main',
-              description: 'Investigate Reshala\'s bunkhouse',
+              description: 'Obtain courier Pasha\'s belongings',
               sourceQuestId: '68f0f55b6310272fc402e2dc',
           },
           {
@@ -1907,6 +2017,12 @@
               sourceQuestId: '68e3a3d2ff05916c250a898b',
           },
           {
+              id: '68ffe508dcb52296aa8a4006',
+              type: 'optional',
+              description: 'Investigate the lab staff bodies',
+              sourceQuestId: '68e3a3d2ff05916c250a898b',
+          },
+          {
               id: '68e4e8b45fae2c907a1c4343',
               type: 'optional',
               description: 'Access the locked office',
@@ -1916,12 +2032,6 @@
               id: '68e4e97ed2c83e861e65119c',
               type: 'main',
               description: 'Listen to the audio tape from the office',
-              sourceQuestId: '68e3a3d2ff05916c250a898b',
-          },
-          {
-              id: '68ffe508dcb52296aa8a4006',
-              type: 'optional',
-              description: 'Investigate the lab staff bodies',
               sourceQuestId: '68e3a3d2ff05916c250a898b',
           },
           {

@@ -5,7 +5,7 @@
  *
  * Sources (by authority):
  * - Local quest reference (pinned by scripts/story-reference.lock.json; see
- *   loadReference): objective existence, text, order, and stable ids. A chapter
+ *   loadReference): objective existence, text, and stable ids. A chapter
  *   is a named storyline quest on the narrator trader
  *   (67f7af56c117b6140af2a607); its objective conditions are ordered sub-quest
  *   refs whose own conditions carry the text. The objective condition id is used
@@ -14,7 +14,8 @@
  * - EFT wiki (data/eft/story-wiki-objectives.json via scripts/eft-story-wiki.ts):
  *   the player-facing optional/required distinction, matched by fuzzy text.
  * - Curated (scripts/story-chapter-meta.json): chapter id/name/order/wikiLink/
- *   activation/requirements the reference lacks. Objectives are NOT curated -
+ *   activation/requirements, stable-id narrative ordering, stage unlocks and
+ *   evidenced optional corrections. Objective existence is NOT curated -
  *   every chapter is derived from the reference so that no objective ships a
  *   fabricated id.
  *
@@ -1173,6 +1174,47 @@ export function loadReference(): JsonRecord[] {
   return merged;
 }
 
+function correctedObjectiveText(
+  meta: JsonRecord,
+  objective: ExpandedObjective,
+  field: 'description' | 'wikiMatchText'
+): string {
+  return meta.objectiveDescriptionCorrections?.[objective.id]?.[field] ?? objective.text;
+}
+
+function correctedObjectiveOptional(meta: JsonRecord, id: string, fallback: boolean): boolean {
+  return meta.objectiveOptionalCorrections?.[id]?.optional ?? fallback;
+}
+
+function attachObjectiveMetadata(
+  emitted: JsonRecord,
+  objective: ExpandedObjective,
+  meta: JsonRecord
+): void {
+  if (objective.endingId) emitted.endingId = objective.endingId;
+  const unlocks = meta.objectiveUnlocks?.[objective.id];
+  if (unlocks) emitted.unlocks = unlocks;
+}
+
+function warnUnresolvedCuratedObjectives(
+  chapterId: string,
+  meta: JsonRecord,
+  objectives: ExpandedObjective[]
+): void {
+  const known = new Set(objectives.map((objective) => objective.id));
+  const curated = new Set<string>([
+    ...(meta.objectiveOrder ?? []),
+    ...Object.keys(meta.objectiveUnlocks ?? {}),
+    ...Object.keys(meta.objectiveOptionalCorrections ?? {}),
+  ]);
+  const missing = [...curated].filter((id) => !known.has(id));
+  if (missing.length > 0) {
+    console.error(
+      `warning: ${chapterId} curated objective IDs unresolved in reference: ${missing.join(', ')}`
+    );
+  }
+}
+
 function main(): void {
   const quests = loadReference();
   const byId = indexQuests(quests);
@@ -1202,12 +1244,17 @@ function main(): void {
 
     let matched = 0;
     let optionalCount = 0;
-    const objectives = expansion.objectives.map((objective) => {
-      const description =
-        meta.objectiveDescriptionCorrections?.[objective.id]?.description ?? objective.text;
-      const wikiMatchText =
-        meta.objectiveDescriptionCorrections?.[objective.id]?.wikiMatchText ?? objective.text;
-      const { optional, ratio } = matchOptional(wikiMatchText, wikiObjectives);
+    warnUnresolvedCuratedObjectives(chapterId, meta, expansion.objectives);
+    const narrativeOrder: string[] = meta.objectiveOrder ?? [];
+    const rankById = new Map(narrativeOrder.map((id, index) => [id, index]));
+    const rank = (id: string): number => rankById.get(id) ?? narrativeOrder.length;
+    const orderedObjectives = expansion.objectives.slice().sort((a, b) => rank(a.id) - rank(b.id));
+    const objectives = orderedObjectives.map((objective) => {
+      const description = correctedObjectiveText(meta, objective, 'description');
+      const wikiMatchText = correctedObjectiveText(meta, objective, 'wikiMatchText');
+      const match = matchOptional(wikiMatchText, wikiObjectives);
+      const optional = correctedObjectiveOptional(meta, objective.id, match.optional);
+      const ratio = match.ratio;
       if (ratio >= MATCH_THRESHOLD) matched += 1;
       if (optional) optionalCount += 1;
       const emitted: JsonRecord = {
@@ -1216,7 +1263,7 @@ function main(): void {
         description,
         sourceQuestId: objective.sourceQuestId,
       };
-      if (objective.endingId) emitted.endingId = objective.endingId;
+      attachObjectiveMetadata(emitted, objective, meta);
       return emitted;
     });
     stats[chapterId] = {
