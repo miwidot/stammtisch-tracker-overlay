@@ -7303,7 +7303,8 @@
           "id": "68ccffb395ec3bc6eddfc3e3",
           "type": "optional",
           "description": "Collect the required 250,000 RUB",
-          "sourceQuestId": "6895bed8e7dac53c7c08797d"
+          "sourceQuestId": "6895bed8e7dac53c7c08797d",
+          "parentObjectiveId": "6895c24ec097ed522295a05d"
         },
         {
           "id": "6895c24ec097ed522295a05d",
@@ -7335,7 +7336,8 @@
           "id": "69bd75c3338353fb98d95b78",
           "type": "optional",
           "description": "Visit Interchange 3 times",
-          "sourceQuestId": "6895bf0872e2151e9e0a59fa"
+          "sourceQuestId": "6895bf0872e2151e9e0a59fa",
+          "parentObjectiveId": "69bd6bcb78ea678bd3d84907"
         },
         {
           "id": "68cc123af7f4373ce2365213",
@@ -7373,13 +7375,15 @@
           "id": "69bd80ade532cba53e0ae707",
           "type": "optional",
           "description": "Visit Customs 3 times",
-          "sourceQuestId": "6895bf1ecfb48128340d5a89"
+          "sourceQuestId": "6895bf1ecfb48128340d5a89",
+          "parentObjectiveId": "69bd7ff06c31a244742b1775"
         },
         {
           "id": "68cd000e66cfbf075021bbb4",
           "type": "optional",
           "description": "Find any 5 building materials or tools in raid",
-          "sourceQuestId": "6895bf1ecfb48128340d5a89"
+          "sourceQuestId": "6895bf1ecfb48128340d5a89",
+          "parentObjectiveId": "6895c4a6b9a96237b73e15a1"
         },
         {
           "id": "6895c4a6b9a96237b73e15a1",
@@ -7417,13 +7421,15 @@
           "id": "69bd8290da9b3f505b1baac9",
           "type": "optional",
           "description": "Visit Factory 3 times",
-          "sourceQuestId": "6895bf42a3de8e8f1d0426a8"
+          "sourceQuestId": "6895bf42a3de8e8f1d0426a8",
+          "parentObjectiveId": "69bd8255791d79ab057be056"
         },
         {
           "id": "68cd03317ad9451d1d306448",
           "type": "optional",
           "description": "Find any 2 weapons in raid",
-          "sourceQuestId": "6895bf42a3de8e8f1d0426a8"
+          "sourceQuestId": "6895bf42a3de8e8f1d0426a8",
+          "parentObjectiveId": "6895daa6f935f3dbe1de0a9d"
         },
         {
           "id": "6895daa6f935f3dbe1de0a9d",
@@ -7481,7 +7487,8 @@
           "id": "69bd84e421fa07eadaa652b5",
           "type": "optional",
           "description": "Visit Woods 3 times",
-          "sourceQuestId": "6895bf915bcf5c38e90b83d8"
+          "sourceQuestId": "6895bf915bcf5c38e90b83d8",
+          "parentObjectiveId": "69bd84d0e08ef0a8d3a85950"
         },
         {
           "id": "68c6a5ed545269faf1c4b157",
@@ -7523,13 +7530,15 @@
           "id": "69bd87733dc0daa202d06cb9",
           "type": "optional",
           "description": "Visit Shoreline 3 times",
-          "sourceQuestId": "6895bfd30cb3a157480db00a"
+          "sourceQuestId": "6895bfd30cb3a157480db00a",
+          "parentObjectiveId": "69bd8757c588aa8f204f8ef8"
         },
         {
           "id": "68cd008705dec39938e316d1",
           "type": "optional",
           "description": "Find 5 PMC dogtags in raid",
-          "sourceQuestId": "6895bfd30cb3a157480db00a"
+          "sourceQuestId": "6895bfd30cb3a157480db00a",
+          "parentObjectiveId": "69bd8757c588aa8f204f8ef8"
         },
         {
           "id": "6896020e3af3adc94b263d60",
@@ -7555,7 +7564,8 @@
           "id": "68cd005720baf6092be731c8",
           "type": "optional",
           "description": "Collect the required 8,000 USD",
-          "sourceQuestId": "6895bfa355ad4ab76001a1c9"
+          "sourceQuestId": "6895bfa355ad4ab76001a1c9",
+          "parentObjectiveId": "6895d2d18f186d19d54d102c"
         },
         {
           "id": "6895d2d18f186d19d54d102c",
@@ -7587,19 +7597,22 @@
           "id": "68c6aaba5deca7d908404c63",
           "type": "optional",
           "description": "Obtain a keycard or access codes to enter the facility",
-          "sourceQuestId": "68c6aa0e2f0a1d31380ad618"
+          "sourceQuestId": "68c6aa0e2f0a1d31380ad618",
+          "parentObjectiveId": "68c6afd2e48214ee402ccc2a"
         },
         {
           "id": "68c7e87321acda56046a7f4f",
           "type": "optional",
           "description": "Locate the entrance to the facility on Factory",
-          "sourceQuestId": "68c6aa0e2f0a1d31380ad618"
+          "sourceQuestId": "68c6aa0e2f0a1d31380ad618",
+          "parentObjectiveId": "68c6afd2e48214ee402ccc2a"
         },
         {
           "id": "68c7e86ff945792cfd97edfe",
           "type": "optional",
           "description": "Locate the entrance to the facility on Streets of Tarkov",
-          "sourceQuestId": "68c6aa0e2f0a1d31380ad618"
+          "sourceQuestId": "68c6aa0e2f0a1d31380ad618",
+          "parentObjectiveId": "68c6afd2e48214ee402ccc2a"
         },
         {
           "id": "68c6aa469b0217ce22d6fb0b",
@@ -7905,7 +7918,8 @@
           "id": "68fbbc8ea9ece72415bf5223",
           "type": "optional",
           "description": "Find any additional clues",
-          "sourceQuestId": "679cdee4ce3a208fee0ad657"
+          "sourceQuestId": "679cdee4ce3a208fee0ad657",
+          "parentObjectiveId": "679cdee4ce3a208fee0ad65a"
         },
         {
           "id": "690177dcaaed5ef80cdcd1ef",
@@ -7958,31 +7972,36 @@
           "id": "68cad2c2abcd16d97906a2d2",
           "type": "optional",
           "description": "Locate and obtain the Bogatyr squad patch",
-          "sourceQuestId": "68caba2ae86db94cdc051418"
+          "sourceQuestId": "68caba2ae86db94cdc051418",
+          "parentObjectiveId": "690e753e2abdafe866160a6a"
         },
         {
           "id": "68cad2d7ab591bad52125950",
           "type": "optional",
           "description": "Locate and obtain a dogtag of one of the Bogatyrs",
-          "sourceQuestId": "68caba2ae86db94cdc051418"
+          "sourceQuestId": "68caba2ae86db94cdc051418",
+          "parentObjectiveId": "690e753e2abdafe866160a6a"
         },
         {
           "id": "68cad2ddd5ccb3a7be444363",
           "type": "optional",
           "description": "Locate and obtain a personal item of one of the Bogatyrs",
-          "sourceQuestId": "68caba2ae86db94cdc051418"
+          "sourceQuestId": "68caba2ae86db94cdc051418",
+          "parentObjectiveId": "690e753e2abdafe866160a6a"
         },
         {
           "id": "68cad2e086e6f96ff175b95d",
           "type": "optional",
           "description": "Locate and obtain a keepsake of one of the Bogatyrs",
-          "sourceQuestId": "68caba2ae86db94cdc051418"
+          "sourceQuestId": "68caba2ae86db94cdc051418",
+          "parentObjectiveId": "690e753e2abdafe866160a6a"
         },
         {
           "id": "68cad2e142b4aa16844f4544",
           "type": "optional",
           "description": "Locate and obtain the squad commander's recorder",
-          "sourceQuestId": "68caba2ae86db94cdc051418"
+          "sourceQuestId": "68caba2ae86db94cdc051418",
+          "parentObjectiveId": "690e753e2abdafe866160a6a"
         },
         {
           "id": "690e753e2abdafe866160a6a",
@@ -8054,7 +8073,8 @@
           "id": "68cd72da971ca7fba504335a",
           "type": "optional",
           "description": "Locate and obtain Moreman's phone",
-          "sourceQuestId": "68caba2f28ffeb58ad030255"
+          "sourceQuestId": "68caba2f28ffeb58ad030255",
+          "parentObjectiveId": "68f81b2cf92d7f60dac72678"
         },
         {
           "id": "68f81b2cf92d7f60dac72678",
@@ -8234,19 +8254,22 @@
           "id": "68dbed24038b894e38a30aa1",
           "type": "optional",
           "description": "Investigate the BEAR camp east of the Ultra mall on Interchange",
-          "sourceQuestId": "68caba3da331c68e8209b55a"
+          "sourceQuestId": "68caba3da331c68e8209b55a",
+          "parentObjectiveId": "68dbece16a1143e91934617f"
         },
         {
           "id": "68dbed28d01c49f4ed397cea",
           "type": "optional",
           "description": "Investigate the BEAR camp on Lighthouse",
-          "sourceQuestId": "68caba3da331c68e8209b55a"
+          "sourceQuestId": "68caba3da331c68e8209b55a",
+          "parentObjectiveId": "68dbece16a1143e91934617f"
         },
         {
           "id": "68dbed2b5268b9d311f2d2d2",
           "type": "optional",
           "description": "Investigate the command bunker on Reserve",
-          "sourceQuestId": "68caba3da331c68e8209b55a"
+          "sourceQuestId": "68caba3da331c68e8209b55a",
+          "parentObjectiveId": "68dbece16a1143e91934617f"
         },
         {
           "id": "68dbff1b2281dcf3bf2ea214",
@@ -8264,25 +8287,29 @@
           "id": "68fac653495c7aedaef6cd69",
           "type": "optional",
           "description": "Investigate the cultist circle on Shoreline",
-          "sourceQuestId": "68caba3fcc16a93b26096721"
+          "sourceQuestId": "68caba3fcc16a93b26096721",
+          "parentObjectiveId": "68dbfc3fa283629c9270d9be"
         },
         {
           "id": "68dc05109075f2e13953ebec",
           "type": "optional",
           "description": "Investigate the cultist circle on Woods",
-          "sourceQuestId": "68caba3fcc16a93b26096721"
+          "sourceQuestId": "68caba3fcc16a93b26096721",
+          "parentObjectiveId": "68dbfc3fa283629c9270d9be"
         },
         {
           "id": "68dc0513d9f293e66c05c459",
           "type": "optional",
           "description": "Investigate the cultist circle on Reserve",
-          "sourceQuestId": "68caba3fcc16a93b26096721"
+          "sourceQuestId": "68caba3fcc16a93b26096721",
+          "parentObjectiveId": "68dbfc3fa283629c9270d9be"
         },
         {
           "id": "690f8a20c616b5a85666d054",
           "type": "optional",
           "description": "Investigate the cultist circle on Customs",
-          "sourceQuestId": "68caba3fcc16a93b26096721"
+          "sourceQuestId": "68caba3fcc16a93b26096721",
+          "parentObjectiveId": "68dbfc3fa283629c9270d9be"
         },
         {
           "id": "68faaab4615a04b8ee0be802",
@@ -8444,7 +8471,8 @@
           "id": "68ec687577b0c308f98a95d6",
           "type": "optional",
           "description": "Find out which room A.P. was assigned to",
-          "sourceQuestId": "67ced017029b9dbe190f3c77"
+          "sourceQuestId": "67ced017029b9dbe190f3c77",
+          "parentObjectiveId": "67e561c8975a2620b00b388f"
         },
         {
           "id": "68ec68e1137e88d6f94cf1fa",
@@ -8584,7 +8612,8 @@
           "id": "68e7909afdbe5686163f0808",
           "type": "optional",
           "description": "Gain access to Mechanic",
-          "sourceQuestId": "67b892b338076c36e50abfb5"
+          "sourceQuestId": "67b892b338076c36e50abfb5",
+          "parentObjectiveId": "68e79075869625375c90c382"
         },
         {
           "id": "67dbffc1b68b82b75762d7f9",
@@ -8699,7 +8728,8 @@
           "id": "68bc4228fb3735a6fc5897dc",
           "type": "optional",
           "description": "Obtain the key to the apartment",
-          "sourceQuestId": "68588eca1d2ea426e9085c29"
+          "sourceQuestId": "68588eca1d2ea426e9085c29",
+          "parentObjectiveId": "68bc344f639c10be50558d6a"
         },
         {
           "id": "68e2f412da3da7800550bcca",
@@ -8729,7 +8759,8 @@
           "id": "68fe53f12b2bbb7f94334484",
           "type": "optional",
           "description": "Gain access to Mechanic",
-          "sourceQuestId": "68588ecc10ea119db4095de7"
+          "sourceQuestId": "68588ecc10ea119db4095de7",
+          "parentObjectiveId": "68bc47ec6de448aac12c22e9"
         },
         {
           "id": "68589307a77e480f775134e1",
@@ -8783,7 +8814,8 @@
           "id": "68bc6cda0fd9f69c1c860815",
           "type": "optional",
           "description": "Locate the victim's belongings",
-          "sourceQuestId": "68588ed5c7a9b3b530005ec8"
+          "sourceQuestId": "68588ed5c7a9b3b530005ec8",
+          "parentObjectiveId": "68bc6e5e79239e9ac6b14897"
         },
         {
           "id": "68bc6cee5d6a14b608a68e4e",
@@ -8897,7 +8929,8 @@
           "id": "690a144cb3bb1e6f6cb9b95d",
           "type": "optional",
           "description": "Check that the station power is turned on",
-          "sourceQuestId": "68588edf975681ee130def28"
+          "sourceQuestId": "68588edf975681ee130def28",
+          "parentObjectiveId": "690a15748850c7c2ccc34e38"
         },
         {
           "id": "690a15748850c7c2ccc34e38",
@@ -8968,19 +9001,22 @@
           "id": "68f0ff6bb0c5f1c1e59ee772",
           "type": "optional",
           "description": "Access Kozlov's room",
-          "sourceQuestId": "68f0f54d0a378517c900226e"
+          "sourceQuestId": "68f0f54d0a378517c900226e",
+          "parentObjectiveId": "68f10c6d450cc4e461d7d95b"
         },
         {
           "id": "68f1003a16005381985a06e5",
           "type": "optional",
           "description": "Figure out where to get Kozlov's key",
-          "sourceQuestId": "68f0f54d0a378517c900226e"
+          "sourceQuestId": "68f0f54d0a378517c900226e",
+          "parentObjectiveId": "68f10c6d450cc4e461d7d95b"
         },
         {
           "id": "68f10ca30e1534718d91279f",
           "type": "optional",
           "description": "Investigate Kozlov's room",
-          "sourceQuestId": "68f0f54d0a378517c900226e"
+          "sourceQuestId": "68f0f54d0a378517c900226e",
+          "parentObjectiveId": "68f10c6d450cc4e461d7d95b"
         },
         {
           "id": "68f115c333e89b83374fe8c9",
@@ -8998,7 +9034,8 @@
           "id": "68f118992b0bc88a2b4f1f61",
           "type": "optional",
           "description": "Find the key to the apartment",
-          "sourceQuestId": "68f0f5516871d33422038cd2"
+          "sourceQuestId": "68f0f5516871d33422038cd2",
+          "parentObjectiveId": "68f117d2c52671056c769396"
         },
         {
           "id": "68f1191a5344aa2765f03322",
@@ -9010,7 +9047,8 @@
           "id": "6907e6e7dfe4440eca8e7c4b",
           "type": "optional",
           "description": "Investigate the apartment",
-          "sourceQuestId": "68f0f5516871d33422038cd2"
+          "sourceQuestId": "68f0f5516871d33422038cd2",
+          "parentObjectiveId": "68f11ad800eefa59290cede0"
         },
         {
           "id": "68f11ad800eefa59290cede0",
@@ -9082,13 +9120,15 @@
           "id": "68f3c51a829dc8fbee1f3651",
           "type": "optional",
           "description": "Locate and neutralize Reshala",
-          "sourceQuestId": "68f0f55b6310272fc402e2dc"
+          "sourceQuestId": "68f0f55b6310272fc402e2dc",
+          "parentObjectiveId": "68f3c3b9840a2e65ebc7fee1"
         },
         {
           "id": "68f3c46286136e291b3decea",
           "type": "optional",
           "description": "Obtain the key to Reshala's stash",
-          "sourceQuestId": "68f0f55b6310272fc402e2dc"
+          "sourceQuestId": "68f0f55b6310272fc402e2dc",
+          "parentObjectiveId": "68f3c3b9840a2e65ebc7fee1"
         },
         {
           "id": "68f3c48fd6712209faa7b385",
@@ -9100,13 +9140,15 @@
           "id": "68f3c4a12ae2a7bb9c6a7c8a",
           "type": "optional",
           "description": "Obtain Reshala's work notes",
-          "sourceQuestId": "68f0f55b6310272fc402e2dc"
+          "sourceQuestId": "68f0f55b6310272fc402e2dc",
+          "parentObjectiveId": "68f3c48fd6712209faa7b385"
         },
         {
           "id": "6907f9955766c2f7c917f84e",
           "type": "optional",
           "description": "Obtain courier Pasha's belongings",
-          "sourceQuestId": "68f0f55b6310272fc402e2dc"
+          "sourceQuestId": "68f0f55b6310272fc402e2dc",
+          "parentObjectiveId": "68f3c48fd6712209faa7b385"
         },
         {
           "id": "68f3c5703dba2961fcf0fa76",
@@ -9156,7 +9198,8 @@
           "id": "68e3aa7c8d0dd19dc845cbcc",
           "type": "optional",
           "description": "Ask Therapist how to access the underground facility",
-          "sourceQuestId": "68e3a3bc02661eb2d30ce389"
+          "sourceQuestId": "68e3a3bc02661eb2d30ce389",
+          "parentObjectiveId": "68e3aa759490da153915d7bb"
         },
         {
           "id": "68e4cf9b9faf030025469bef",
@@ -9174,49 +9217,57 @@
           "id": "68e4dc6ce8f4a928b9c97683",
           "type": "optional",
           "description": "Locate the entrance to the underground facility beneath the Health Resort",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "6907cf0a8bade80b86f79c5d",
           "type": "optional",
           "description": "Access the facility",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68e4e3eca3ce127ce890ec2f",
           "type": "optional",
           "description": "Locate the traces of the BEAR squad in The Labyrinth",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68e4e506dbb7abb1bc047018",
           "type": "optional",
           "description": "Investigate the BEAR squad regroup spot at Item 1156",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68e4e5235f8c749cfca48679",
           "type": "optional",
           "description": "Locate the squad leader",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68e4e546688ec98b13d6350a",
           "type": "optional",
           "description": "Gather more information about the squad",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68ffe508dcb52296aa8a4006",
           "type": "optional",
           "description": "Investigate the lab staff bodies",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68e4e8b45fae2c907a1c4343",
           "type": "optional",
           "description": "Access the locked office",
-          "sourceQuestId": "68e3a3d2ff05916c250a898b"
+          "sourceQuestId": "68e3a3d2ff05916c250a898b",
+          "parentObjectiveId": "694a79ac3b98590cfb8423b0"
         },
         {
           "id": "68e4e97ed2c83e861e65119c",
@@ -9234,7 +9285,8 @@
           "id": "68ffd68b52fa44fe7cb35762",
           "type": "optional",
           "description": "Locate and obtain the Labyrinth facility research report",
-          "sourceQuestId": "68e3a3e51edf1ca810009a99"
+          "sourceQuestId": "68e3a3e51edf1ca810009a99",
+          "parentObjectiveId": "68ffd719b3d6b70b0d469760"
         },
         {
           "id": "68ffd719b3d6b70b0d469760",
@@ -9408,7 +9460,8 @@
           "id": "67bc886390e71643f037a60f",
           "type": "optional",
           "description": "Obtain the TerraGroup Labs access keycard",
-          "sourceQuestId": "67bc86024e7dbc3aa202431b"
+          "sourceQuestId": "67bc86024e7dbc3aa202431b",
+          "parentObjectiveId": "67bc885febc1b9a2446146c2"
         },
         {
           "id": "68e2eb699fdd17b8c4065264",
@@ -9420,7 +9473,8 @@
           "id": "68e2eb399f73b1a93ded4c47",
           "type": "optional",
           "description": "Gain access to The Lab",
-          "sourceQuestId": "67bc86024e7dbc3aa202431b"
+          "sourceQuestId": "67bc86024e7dbc3aa202431b",
+          "parentObjectiveId": "67bc885febc1b9a2446146c2"
         },
         {
           "id": "68e2eb7fd393583cd94c4ea0",
@@ -9662,14 +9716,16 @@
           "type": "optional",
           "description": "Bring the reprogrammed RFID card with Mr. Kerman's hash codes",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "67bdf920f72ddfffed2b9b8d"
         },
         {
           "id": "68f54deb15aa37c3fa481760",
           "type": "optional",
           "description": "Bring the Secure container Alpha-1 with TerraGroup evidence",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "67bdf920f72ddfffed2b9b8d"
         },
         {
           "id": "68efcc353316ee1b07b4b2ba",
@@ -9697,7 +9753,8 @@
           "type": "optional",
           "description": "Retrieve the Secure container Alpha-1",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7eb1280b4d1114f1acb5e",
@@ -9711,49 +9768,56 @@
           "type": "optional",
           "description": "Locate the armory with the confiscated equipment",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ebabf77d9bba8fd60fae",
           "type": "optional",
           "description": "Locate the exit leading to the Terminal loading zone",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ec206cb96fcd5e730c2a",
           "type": "optional",
           "description": "Obtain the keycard to unlock the service passage",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ebcab907501e487e44eb",
           "type": "optional",
           "description": "Unlock the service passage inside the seaport building",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ed9e8ad566b5c5419f46",
           "type": "optional",
           "description": "Figure out how to reach the evacuation zone on the pier",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ef835b65e040bc7a1317",
           "type": "optional",
           "description": "Obtain the key to the gate blocking the road to the pier",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7edbd3a999dffc6a47b09",
           "type": "optional",
           "description": "Locate the way into the fuel depot",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ee1009c8143e31f2feaa",
@@ -9767,49 +9831,56 @@
           "type": "optional",
           "description": "Access the Terminal loading zone",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7eeb4fc3c24f0eb31ab8f",
           "type": "optional",
           "description": "Locate the pumping station inside the fuel depot",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ef09497ab3db747c4832",
           "type": "optional",
           "description": "Drain the water in the pumping station",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f7ef9e854da39746cb452b",
           "type": "optional",
           "description": "Locate the exit leading to the pier",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "6907abc1f29bc685319134b3",
           "type": "optional",
           "description": "Reach the evacuation area at the pier",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eb1280b4d1114f1acb5e"
         },
         {
           "id": "68f8babc010865c5d0e0ae19",
           "type": "optional",
           "description": "Figure out how to restore power to the pumping station",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f8bac80d780029e9a1e4bb",
           "type": "optional",
           "description": "Obtain the diagram of the electrical panels",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
-          "endingId": "68a6e8f1a7455e5e23099ad8"
+          "endingId": "68a6e8f1a7455e5e23099ad8",
+          "parentObjectiveId": "68f7eadf2379685b4546303d"
         },
         {
           "id": "68f174e12488a7ab54dedeb7",
@@ -9954,7 +10025,8 @@
           "id": "69b2b139114270cbf48bcff4",
           "type": "optional",
           "description": "Locate and obtain the AMG-10 fluid on Reserve",
-          "sourceQuestId": "69b2b0cc0a7db6b331031267"
+          "sourceQuestId": "69b2b0cc0a7db6b331031267",
+          "parentObjectiveId": "69b2b143b6449f7050b302ed"
         },
         {
           "id": "69b2b143b6449f7050b302ed",
@@ -10014,7 +10086,8 @@
           "id": "69ba8edc64dd474d456ab839",
           "type": "optional",
           "description": "Locate and obtain the engine room keycard",
-          "sourceQuestId": "69ba8cd91c440c14bb09a955"
+          "sourceQuestId": "69ba8cd91c440c14bb09a955",
+          "parentObjectiveId": "69ba8dfa4d29dbfc39cac747"
         },
         {
           "id": "69ba8ef59b8dfa643e494308",
@@ -10026,19 +10099,22 @@
           "id": "69e7871c5088efad039bac2a",
           "type": "optional",
           "description": "Bring Roubles to pay for the insertion onto the icebreaker",
-          "sourceQuestId": "69ba8cd91c440c14bb09a955"
+          "sourceQuestId": "69ba8cd91c440c14bb09a955",
+          "parentObjectiveId": "69ba8d651b499fbada0cd5ae"
         },
         {
           "id": "69e787cf1a8e0d067c803580",
           "type": "optional",
           "description": "Bring Euros to pay for the evacuation from the icebreaker",
-          "sourceQuestId": "69ba8cd91c440c14bb09a955"
+          "sourceQuestId": "69ba8cd91c440c14bb09a955",
+          "parentObjectiveId": "69ba8d651b499fbada0cd5ae"
         },
         {
           "id": "69e788391986fc5462bc3975",
           "type": "optional",
           "description": "Bring a green RSP signal flare",
-          "sourceQuestId": "69ba8cd91c440c14bb09a955"
+          "sourceQuestId": "69ba8cd91c440c14bb09a955",
+          "parentObjectiveId": "69ba8d651b499fbada0cd5ae"
         },
         {
           "id": "69ba958a2b1917db221bce57",
@@ -10062,13 +10138,15 @@
           "id": "69bab4f68c85b53b8e473911",
           "type": "optional",
           "description": "Reach the engine room",
-          "sourceQuestId": "69baaaae8f45d6b3fa020ade"
+          "sourceQuestId": "69baaaae8f45d6b3fa020ade",
+          "parentObjectiveId": "69baae00923698875e7b2941"
         },
         {
           "id": "69bab5121a15490f84594dcb",
           "type": "optional",
           "description": "Locate and obtain the engine room keycard",
-          "sourceQuestId": "69baaaae8f45d6b3fa020ade"
+          "sourceQuestId": "69baaaae8f45d6b3fa020ade",
+          "parentObjectiveId": "69baae00923698875e7b2941"
         },
         {
           "id": "69bab557f31c7fb31a72591e",
@@ -10098,7 +10176,8 @@
           "id": "69bab5cf10bf4e3de250480e",
           "type": "optional",
           "description": "Inspect the crew living quarters in the icebreaker superstructure",
-          "sourceQuestId": "69baaaae8f45d6b3fa020ade"
+          "sourceQuestId": "69baaaae8f45d6b3fa020ade",
+          "parentObjectiveId": "69bab59e8e59c8f34c271c22"
         },
         {
           "id": "69bab5d9a808cc922348458b",
@@ -10116,19 +10195,22 @@
           "id": "69e7888de4ffa7159fc3ec35",
           "type": "optional",
           "description": "Bring Roubles to pay for the insertion onto the icebreaker",
-          "sourceQuestId": "69baaaae8f45d6b3fa020ade"
+          "sourceQuestId": "69baaaae8f45d6b3fa020ade",
+          "parentObjectiveId": "69baae00923698875e7b2941"
         },
         {
           "id": "69e788a5aa6ebbdbf9fad1ef",
           "type": "optional",
           "description": "Bring Euros to pay for the evacuation from the icebreaker",
-          "sourceQuestId": "69baaaae8f45d6b3fa020ade"
+          "sourceQuestId": "69baaaae8f45d6b3fa020ade",
+          "parentObjectiveId": "69baae00923698875e7b2941"
         },
         {
           "id": "69e788b7e93cda1fa49d1ccb",
           "type": "optional",
           "description": "Bring a green RSP signal flare",
-          "sourceQuestId": "69baaaae8f45d6b3fa020ade"
+          "sourceQuestId": "69baaaae8f45d6b3fa020ade",
+          "parentObjectiveId": "69baae00923698875e7b2941"
         },
         {
           "id": "69babaf27ce5c2b328d6bb2e",
@@ -10212,25 +10294,29 @@
           "id": "69bc0278fe211e2c70fe4a6c",
           "type": "optional",
           "description": "Locate and obtain the keycard with access to compartment C-1",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfe405997a15939caf7c4"
         },
         {
           "id": "69bbfe4c4d7ec6c347262823",
           "type": "optional",
           "description": "Locate the entrance to the bridge",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfe405997a15939caf7c4"
         },
         {
           "id": "69bbfe7abb85b612104189c4",
           "type": "optional",
           "description": "Locate an alternative path to the bridge",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfe405997a15939caf7c4"
         },
         {
           "id": "69bbfe997ac0792bddc9e8f8",
           "type": "optional",
           "description": "Find something to thaw the hatch on the roof of the bridge",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfe405997a15939caf7c4"
         },
         {
           "id": "69bbfeb12980c03df915aa69",
@@ -10266,19 +10352,22 @@
           "id": "69e78b09e728378a9d0f4925",
           "type": "optional",
           "description": "Bring Roubles to pay for the insertion onto the icebreaker",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfae89ce356593c0e2f39"
         },
         {
           "id": "69e78b1409ffeb5a0cbffff3",
           "type": "optional",
           "description": "Bring Euros to pay for the evacuation from the icebreaker",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfae89ce356593c0e2f39"
         },
         {
           "id": "69e78d7ef8dd94707ac6d011",
           "type": "optional",
           "description": "Bring a green RSP signal flare",
-          "sourceQuestId": "69bbfae89ce356593c0e2f35"
+          "sourceQuestId": "69bbfae89ce356593c0e2f35",
+          "parentObjectiveId": "69bbfae89ce356593c0e2f39"
         },
         {
           "id": "69ea705f75a115dbfb489516",
@@ -10344,7 +10433,8 @@
           "id": "69c15a0fb61d78c89b5fe307",
           "type": "optional",
           "description": "Obtain respirators for the BTR driver",
-          "sourceQuestId": "69c151fd9c9149a8dd01a29a"
+          "sourceQuestId": "69c151fd9c9149a8dd01a29a",
+          "parentObjectiveId": "69c159ad1ba493f9f60a66fb"
         },
         {
           "id": "69c15642d2d74180f90e78bb",
@@ -10356,7 +10446,8 @@
           "id": "69c159db45b0d4bd6f227777",
           "type": "optional",
           "description": "Obtain the Kirasa-N body armor",
-          "sourceQuestId": "69c151fd9c9149a8dd01a29a"
+          "sourceQuestId": "69c151fd9c9149a8dd01a29a",
+          "parentObjectiveId": "69c1586cffdda1085a41cded"
         },
         {
           "id": "69c1586cffdda1085a41cded",
@@ -10368,7 +10459,8 @@
           "id": "69c159ef9fa4c0e8f7d74a8e",
           "type": "optional",
           "description": "Obtain class 5+ ballistic plates",
-          "sourceQuestId": "69c151fd9c9149a8dd01a29a"
+          "sourceQuestId": "69c151fd9c9149a8dd01a29a",
+          "parentObjectiveId": "69c158cd9e33113cb865839b"
         },
         {
           "id": "69c158cd9e33113cb865839b",
@@ -11953,8 +12045,8 @@
     }
   },
   "$meta": {
-    "version": "1.141",
-    "generated": "2026-10-13T01:18:08.141Z",
-    "sha256": "5626a1ce16104f95b8d45e693ab0028327ef2716ed40a8ce94d0f6cf67339ec6"
+    "version": "1.142",
+    "generated": "2026-10-13T03:44:30.289Z",
+    "sha256": "0778cf3e8f42765ab416bd3f2907f45c146899cd217e19b53d5a103d2e0e1f24"
   }
 }
