@@ -41,7 +41,11 @@ import {
 } from 'fs';
 import { dirname, isAbsolute, join, relative, resolve, sep, win32 } from 'path';
 import Ajv from 'ajv';
-import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
+import { isDirectExecution, STORY_ENDINGS, type StoryObjective } from '../src/lib/index.js';
+import {
+  assertStoryObjectiveParents,
+  isStoryObjectiveParent,
+} from '../src/lib/story-objective-parents.js';
 import { modeFromRequestUrl } from './eft-compare.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
 import { writeFileAtomicSync, writeFileExclusiveSync } from './lib/atomic-write.js';
@@ -140,6 +144,7 @@ interface ExpandedObjective {
   id: string;
   text: string;
   sourceQuestId: string;
+  parentObjectiveId?: string;
   endingId?: string;
 }
 
@@ -377,6 +382,8 @@ export function expandChapterObjectives(
       // corrupts consumers that persist completion per objective id. The source
       // id is unique and stable across regens.
       const expanded: ExpandedObjective = { id: objectiveId, text, sourceQuestId: subId };
+      const parentId = bareId(objective.parentId);
+      if (parentId) expanded.parentObjectiveId = parentId;
       // Objectives belonging to an ending's gate sub-quest carry that ending's
       // real id, so consumers can attribute a branch without a slug lookup.
       const ending = ENDING_BY_GATE_QUEST.get(subId);
@@ -1186,6 +1193,28 @@ function correctedObjectiveOptional(meta: JsonRecord, id: string, fallback: bool
   return meta.objectiveOptionalCorrections?.[id]?.optional ?? fallback;
 }
 
+/** Resolve against the final optional flags, after wiki matching and corrections. */
+export function attachStoryObjectiveParents(
+  objectives: StoryObjective[],
+  expanded: ExpandedObjective[]
+): { linked: number; unresolved: string[] } {
+  const byId = new Map(objectives.map((objective) => [objective.id, objective]));
+  const parents = new Map(expanded.map((objective) => [objective.id, objective.parentObjectiveId]));
+  const unresolved: string[] = [];
+  let linked = 0;
+  for (const objective of objectives.filter((entry) => entry.type === 'optional')) {
+    const parentId = parents.get(objective.id);
+    if (!parentId) continue;
+    if (!isStoryObjectiveParent(objective, byId.get(parentId))) {
+      unresolved.push(`${objective.id} -> ${parentId}`);
+      continue;
+    }
+    objective.parentObjectiveId = parentId;
+    linked += 1;
+  }
+  return { linked, unresolved };
+}
+
 function attachObjectiveMetadata(
   emitted: JsonRecord,
   objective: ExpandedObjective,
@@ -1232,7 +1261,7 @@ function main(): void {
 
   const stats: Record<
     string,
-    { objectives: number; matched: number; optional: number; wiki: number }
+    { objectives: number; matched: number; optional: number; wiki: number; linked: number }
   > = {};
 
   const out: Record<string, JsonRecord> = {};
@@ -1257,7 +1286,7 @@ function main(): void {
       const ratio = match.ratio;
       if (ratio >= MATCH_THRESHOLD) matched += 1;
       if (optional) optionalCount += 1;
-      const emitted: JsonRecord = {
+      const emitted: StoryObjective = {
         id: objective.id,
         type: optional ? 'optional' : 'main',
         description,
@@ -1266,11 +1295,18 @@ function main(): void {
       attachObjectiveMetadata(emitted, objective, meta);
       return emitted;
     });
+    const parents = attachStoryObjectiveParents(objectives, expansion.objectives);
+    if (parents.unresolved.length > 0) {
+      console.error(
+        `warning: ${chapterId} unresolved optional parents (left ungrouped): ${parents.unresolved.join(', ')}`
+      );
+    }
     stats[chapterId] = {
       objectives: objectives.length,
       matched,
       optional: optionalCount,
       wiki: wikiObjectives.length,
+      linked: parents.linked,
     };
 
     const chapter: JsonRecord = {
@@ -1341,6 +1377,7 @@ function main(): void {
       `  ${chapterId.padEnd(22)} objs=${String(s.objectives).padStart(3)} ` +
         `matched=${String(pct).padStart(3)}% optional=${String(s.optional).padStart(2)} ` +
         `wiki=${String(s.wiki).padStart(3)} ` +
+        `parents=${String(s.linked).padStart(2)} ` +
         `subquests=${coverage?.resolvedSubquests}/${coverage?.referencedSubquests}`
     );
     // A chapter that no longer matches the wiki means wording drift has
@@ -1375,6 +1412,7 @@ function main(): void {
     process.exit(1);
   }
 
+  assertStoryObjectiveParents(out);
   const payload = JSON.stringify(out, null, 2);
 
   // Every chapter validated and the output satisfies the schema the writer

@@ -172,6 +172,51 @@ describe('writeFileAtomicSync', () => {
 });
 
 describe('story artifact and provenance write failures', () => {
+  it('reports invalid parent links as a publication refusal without a stack trace or writes', () => {
+    const { dir, artifact, lock, input } = setupWorkspace('story-parent-refusal-');
+    try {
+      writeFileSync(
+        input,
+        JSON.stringify({
+          tour: {
+            id: 'tour',
+            name: 'Tour',
+            normalizedName: 'tour',
+            order: 1,
+            wikiLink: 'https://example.com/tour',
+            chapterQuestId: 'a'.repeat(24),
+            referenceCoverage: { referencedSubquests: 1, resolvedSubquests: 1, partial: false },
+            objectives: [
+              {
+                id: 'b'.repeat(24),
+                type: 'optional',
+                description: 'Find items',
+                sourceQuestId: 'c'.repeat(24),
+                parentObjectiveId: 'd'.repeat(24),
+              },
+            ],
+          },
+        })
+      );
+      const result = spawnSync(
+        process.execPath,
+        ['--import', import.meta.resolve('tsx'), writer, input],
+        {
+          cwd: dir,
+          encoding: 'utf8',
+        }
+      );
+      expect(result.status).toBe(1);
+      expect(result.stderr.trim()).toBe(
+        `tour/${'b'.repeat(24)}: parentObjectiveId must link an optional to a distinct main objective in the same chapter and sourceQuestId`
+      );
+      expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(existsSync(join(dir, 'data/eft/story-write.lock'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
   it.each(['EACCES', 'ENOENT', 'ENOSPC'])(
     'aborts publication without changing committed files when the snapshot fails with %s',
     (code) => {

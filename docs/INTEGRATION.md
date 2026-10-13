@@ -1148,6 +1148,8 @@ interface StoryObjective {
   description: string;
   /** EFT sub-quest id backing this objective (source traceability) */
   sourceQuestId: string;
+  /** Optional layout parent: a main objective in the same chapter and sourceQuestId. */
+  parentObjectiveId?: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;

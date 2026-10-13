@@ -8,6 +8,7 @@
 import Ajv from 'ajv';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import {
   isDirectExecution,
   getProjectPaths,
@@ -22,6 +23,7 @@ import {
   icons,
   type LocaleOverlay,
   type SchemaValidationResult,
+  type StoryChapter,
 } from '../src/lib/index.js';
 
 const { srcDir, schemasDir } = getProjectPaths();
@@ -152,6 +154,10 @@ export function validateFile(
     const errors = valid
       ? undefined
       : validator.errors?.map((e) => `${e.instancePath}: ${e.message}`);
+
+    if (valid && displayPath === 'additions/storyChapters.json5') {
+      assertStoryObjectiveParents(data as Record<string, StoryChapter>);
+    }
 
     return { file: displayPath, valid, errors };
   } catch (error) {

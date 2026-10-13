@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
 import JSON5 from 'json5';
 
-it('regenerates accurate Tour quantities, FIR wording and optional flags despite generic capture text', () => {
+it.each([20000, 8000])('preserves Tour corrections and parents at USD count %i', (usdCount) => {
   const dir = mkdtempSync(join(tmpdir(), 'story-tour-details-'));
   const questId = '6895bfa355ad4ab76001a1c9';
   const objectives = [
@@ -125,7 +125,8 @@ it('regenerates accurate Tour quantities, FIR wording and optional flags despite
                   ].map(([id, conditionType]) => ({
                     id,
                     conditionType,
-                    value: 20000,
+                    value: usdCount,
+                    ...(id === objectives[1][0] ? { parentId: objectives[0][0] } : {}),
                   })),
                 },
                 localization: {
@@ -175,6 +176,7 @@ it('regenerates accurate Tour quantities, FIR wording and optional flags despite
           sourceQuestId: questId,
           type: 'optional',
           description: 'Collect the required 8,000 USD',
+          parentObjectiveId: objectives[0][0],
         },
         ...details.map(([id, , description, optional]) => ({
           id,
@@ -262,10 +264,13 @@ it('regenerates every Tour objective in narrative order with stage rewards and u
                 return {
                   _id,
                   conditions: {
-                    AvailableForFinish: objectives.map((objective: { id: string }) => ({
-                      id: objective.id,
-                      conditionType: 'FindItem',
-                    })),
+                    AvailableForFinish: objectives.map(
+                      (objective: { id: string; parentObjectiveId?: string }) => ({
+                        id: objective.id,
+                        conditionType: 'FindItem',
+                        parentId: objective.parentObjectiveId,
+                      })
+                    ),
                   },
                   localization: {
                     en: Object.fromEntries(

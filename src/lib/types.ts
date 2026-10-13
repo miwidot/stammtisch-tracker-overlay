@@ -485,6 +485,8 @@ export interface StoryObjective {
    * `StoryChapter` that compiles but fails schema validation.
    */
   sourceQuestId: string;
+  /** Raw condition parent, for optional layout only; not a completion prerequisite. */
+  parentObjectiveId?: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;

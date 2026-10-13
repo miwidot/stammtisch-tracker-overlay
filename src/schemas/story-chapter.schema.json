@@ -236,6 +236,11 @@
               "type": "string",
               "pattern": "^[0-9a-f]{24}$"
             },
+            "parentObjectiveId": {
+              "description": "Presentation parent derived from the raw condition parentId. Only optional objectives may carry this field; the parent must be a main objective in the same chapter and sourceQuestId. Multiple optionals can share a parent. This does not imply a completion prerequisite or shared progress.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
+            },
             "type": {
               "description": "Whether the objective is required or bonus",
               "type": "string",
@@ -448,6 +453,12 @@
               }
             }
           },
+          "allOf": [
+            {
+              "if": { "required": ["parentObjectiveId"] },
+              "then": { "properties": { "type": { "const": "optional" } } }
+            }
+          ],
           "additionalProperties": false
         }
       },

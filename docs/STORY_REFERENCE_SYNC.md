@@ -19,6 +19,28 @@ objective. The match text controls classification without replacing the displaye
 description. Optional flags default to the wiki; evidenced `objectiveOptionalCorrections`
 can override classification for specific stable IDs. Objective IDs and
 source-subquest links stay capture-derived.
+
+`parentObjectiveId` is generated from each optional condition's raw `parentId`,
+after optional/main classification. It groups an optional under a main objective
+in the same chapter and source subquest; several optionals can share a parent.
+It is presentation metadata, not a completion dependency, shared counter, or
+automatic completion rule. Visibility conditions and matching item/count pairs
+are not used to guess parents. For example, Tour's dogtag collection belongs to
+the Shoreline access step in the capture, even though those items can be handed
+over to Prapor. The keycard and both Lab entrance options share the facility
+access parent.
+
+Generation reports link counts per chapter and warns about parent IDs that do
+not resolve to a main objective. Those optionals remain ungrouped. The generator,
+writer, source validator and overlay build reject invalid emitted references.
+Every generation recomputes parents from the locked references, so a newly
+selected capture can move, add or remove links without an ID mapping to maintain.
+The existing primary/supplement ownership rules still apply: adding a newer
+supplement does not replace a parent's definition in the primary capture.
+Updating capture provenance does not remove evidenced description corrections;
+review and retire those only when the new source actually supports the displayed
+requirement. Parent grouping never rewrites quantities.
+
 Tour's Lighthouse cash objectives use 8,000 USD based on a 1.2.0 Seasonal
 in-game screenshot and a user confirmation covering all modes, superseding the
 20,000 USD in older PvP/PvE captures. No mode-specific difference is reported.

@@ -8,6 +8,7 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
+import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import {
   getLatestTagVersion,
   getProjectPaths,
@@ -174,6 +175,7 @@ function build(): void {
 
   // Load all source files
   const data = loadSourceFiles();
+  assertStoryObjectiveParents(data.storyChapters ?? {});
 
   // Create output with metadata
   const output: OverlayOutput = {

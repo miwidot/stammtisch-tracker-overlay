@@ -31,6 +31,7 @@ import { basename, dirname, join } from 'path';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
 import { isDirectExecution } from '../src/lib/index.js';
+import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import { writeFileAtomicSync } from './lib/atomic-write.js';
 import {
   inspectStagedReferenceLock,
@@ -49,6 +50,8 @@ const HEADER =
   '  // objective id. Narrative ordering,\n' +
   '  // stage unlocks and chapter metadata are curated (scripts/story-chapter-meta.json).\n' +
   '  // Each objective uses its stable source id, with sourceQuestId linking to its sub-quest.\n' +
+  '  // Optional parentObjectiveId links come from raw parentId, for layout only;\n' +
+  '  // multiple optionals may share a main step and keep independent completion.\n' +
   '  // Every chapter is derived from the reference, so no objective carries a\n' +
   '  // fabricated id; endingId and the chapter-level `endings` list use the real\n' +
   '  // client/ending_list ids.\n' +
@@ -195,6 +198,11 @@ function publishStory(writeLock: WriteLock): void {
     throw new PublicationRefused(`story-chapter schema validation failed:\n${details}`);
   }
 
+  try {
+    assertStoryObjectiveParents(data);
+  } catch (error) {
+    throw new PublicationRefused((error as Error).message);
+  }
   const out = renderStoryChaptersJson5(data);
   const dest = join('src', 'additions', 'storyChapters.json5');
   const inputSha256 = sha256(raw);
