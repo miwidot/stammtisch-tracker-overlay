@@ -7268,6 +7268,7 @@
           "id": "6895bc04162304804bdc056e",
           "type": "main",
           "description": "Escape Ground Zero",
+          "completionPolicy": "tutorial",
           "sourceQuestId": "6895bbb0e7dac53c7c08797b",
           "unlocks": [
             {
@@ -12045,8 +12046,8 @@
     }
   },
   "$meta": {
-    "version": "1.142",
-    "generated": "2026-10-13T03:44:30.289Z",
-    "sha256": "0778cf3e8f42765ab416bd3f2907f45c146899cd217e19b53d5a103d2e0e1f24"
+    "version": "1.143",
+    "generated": "2026-10-13T05:25:52.921Z",
+    "sha256": "a97e761f10c3b0934378e3fd6df92e5d45d5ad8f540482a8d167a29c7c7a0104"
   }
 }
