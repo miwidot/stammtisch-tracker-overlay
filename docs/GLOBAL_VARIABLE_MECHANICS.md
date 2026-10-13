@@ -238,7 +238,7 @@ completed pool count, and in every retained profile it does for these four, so
 the registry publishes them on a best-effort basis. What keeps a group unresolved
 is a counter that disagrees with its completed pool count: Mechanic tier 3 and
 Ragman tier 1 (fewer children than tasks) and Mechanic tier 4 and Prapor tier 4
-(not fewer). See Caveats.
+(not fewer). See [Unreconciled groups](#unreconciled-groups).
 
 ## The second family: plain variables
 
@@ -467,12 +467,9 @@ route planning to verified contributors.
   tasks — not children versus pool size: Mechanic tier 3 (12 vs 16), Mechanic
   tier 4 (3 vs 4), Prapor tier 4 (6 vs 7), Ragman tier 1 (8 vs 9). In every case
   the counter reads lower, which is inconsistent with the pool being counted
-  one-per-task. The cause is undetermined and at least two explanations survive:
-  some task does not contribute (a shortfall in child count fits Mechanic tier 3
-  at 12 children for 16 tasks and Ragman tier 1 at 8 for 9, but Mechanic tier 4
-  has _more_ children than pool tasks and Prapor tier 4 has exactly as many), or
-  the counter reset at some point after contributions landed. Nothing here
-  distinguishes them, so no contributor identity is established for these groups.
+  one-per-task. What the retained captures narrow down per group is in
+  [Unreconciled groups](#unreconciled-groups); no contributor identity is
+  established for any of them.
 - **Seven groups where children ≠ pool size**, including Prapor tier 2
   (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). The surplus children are
   plausibly retired or mode-specific markers, which is unverified. For the four
@@ -490,6 +487,76 @@ route planning to verified contributors.
 - Everything here is from 1.1 captures (client `1.1.0.1.46699` / `.46911`) plus
   a live tarkov.dev read. Group membership and thresholds are BSG data and can
   change between patches; re-verify after a task rework.
+
+## Unreconciled groups
+
+Evidence scope: the level-55 PVE profile, a level-42 PVP profile captured after
+1.1, and two seasonal profiles, read against their own `quest_list`. The captures
+are local and untracked; per the policy above, child variables are described by
+count, never by ID. Faction and fail/restart state were checked for all four
+groups and explain none of them: every member is `side: Pmc` with no faction
+restriction, the only restartable members (Escort in Prapor tier 4, Psycho Sniper
+in Mechanic tier 4) are not distinguished from restartable tasks that counted in
+consistent groups (The Guide, Bullshit), and failed pool tasks elsewhere correctly
+do not count.
+
+**Common pattern.** Every completion recorded _after_ the 1.1 release advanced the
+counter by exactly one in every profile. Each shortfall traces to completions
+dated before 1.1, which the server backfilled. So whatever rule is at work shows
+up in how pre-1.1 history was credited, and may not reproduce for new completions.
+
+### Mechanic tier 3 and Ragman tier 1: paired contributors (strongly supported)
+
+- **Mechanic tier 3.** 16 tasks, 12 children. PVE reads 12 for 16 completed; PVP
+  reads 7 for 11 completed. Both are short by exactly 4. The 8 Gunsmith tasks in
+  the pool unlock in pairs at the same threshold (free: AKM, M4A1; ≥1: AKS-74N,
+  P226R; ≥3: AK-105, Vector 9x19; ≥5: MPX, AS VAL). If each pair is one point,
+  the 8 other tasks plus 4 pairs give 12, matching the child count. The PVP
+  profile has all 8 Gunsmith tasks plus 3 others completed (7 = 4 + 3). The 5
+  extra tasks complete in PVE set exactly 5 extra children, one each.
+- **Ragman tier 1.** 9 tasks, 8 children. PVE reads 8 for 9; PVP reads 2 for 3.
+  A seasonal profile shows Make ULTRA Great Again and Fuel Crisis each setting
+  their own child. The PVP profile's Make ULTRA Great Again, Inventory Files and
+  A Big Loss set only 2 children, so Inventory Files and A Big Loss (both ≥1)
+  share one child, or one of them does not count.
+
+Neither fits `distinctTaskCompletions`, which counts one point per task. Publishing
+these groups needs a derivation that counts one point per group of tasks, which is
+a registry contract change and is not made here.
+
+### Prapor tier 4: one non-contributor, unidentified
+
+8 tasks, 8 children. PVE reads 6 for 7 completed (Escort is not completed), with 2
+children unset. The PVP profile reads 4 for 4 completed (Regulated Materials,
+Intimidator, Getting Some Air, Unique Experience), so all four counted, including
+two completed after 1.1. The non-contributor in PVE is therefore one of **Best Job
+in the World**, **The Art of Explosion** or **Special Order**.
+
+- **Leading suspect: The Art of Explosion.** It is the only one of the three not
+  gated by the counter (start condition is Prapor loyalty 4 alone), it was the last
+  of them completed in that profile, and it was released as a tie-in to a video of
+  the same name, so it may have been treated as event content by the backfill.
+- **Why that is unproven.** Its `quest_list` entry is structurally identical to the
+  counting members (same `tierAccessory`, side and start-condition shape as
+  Regulated Materials and Getting Some Air). Being counter-free does not exclude a
+  task elsewhere. Completion timing alone does not explain it: other tasks
+  completed in the same days counted in consistent groups. One child's ID
+  timestamp is about 27 days later than its siblings, which is unexplained.
+
+### Mechanic tier 4: one non-contributor, unidentified
+
+5 tasks, 6 children. PVE reads 3 for 4 completed (Shooter Born in Heaven, Goals
+and Means, Calibration, Psycho Sniper; Setting Priorities is not completed). No
+profile isolates which of the four did not count.
+
+### Decisive tests
+
+- Prapor tier 4: a 1.1 profile that completes The Art of Explosion (or Best Job in
+  the World, or Special Order) as the only change between two captures.
+- Mechanic tier 4: the same for each of its four completed tasks.
+- Paired groups: a profile completing exactly one Gunsmith task of a pair, or only
+  one of Inventory Files and A Big Loss, then the other. If the first completion
+  moves the counter and the second does not, pairing is confirmed.
 
 ## Reproducing
 
