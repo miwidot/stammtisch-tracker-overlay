@@ -53,30 +53,65 @@ Without the trusted-proxy setting, quotas use the direct socket address.
 Rebuilds target the default `dist/overlay.json` output; custom local and HTTP(S)
 overlay targets remain read-only.
 
+The monitor compares task, item, map, hideout and trader corrections with each
+mode's upstream snapshot. Addition rows distinguish upstream adoption from field
+differences; a differing value needs correction evidence. Missing or failed
+snapshots display `unverified`. Values that match upstream but cancel a different
+shared patch display `mode guard` so they are not mistaken for removable patches.
+
 ## Maintenance
 
-The overlay is regularly validated against the tarkov.dev API to ensure corrections are still needed:
+The overlay is compared against current `json.tarkov.dev` data in each supported mode:
 
 ```bash
 npm run check-overrides
 ```
 
-This command compares all overrides against current API data and reports:
+This command reports upstream comparison results and the limits of each check:
 
-- ✅ Overrides that are still needed
+- ⚠️ Values that differ from upstream and require supporting correction evidence
 - 🔄 Corrections that have been fixed upstream (can be removed)
 - 🗑️ Tasks that have been removed from the API (can be deleted)
 - ⚠️ Upstream data-quality regressions (reported for escalation, not actionable here)
 
+Task additions match canonical IDs before wiki links or names. Maps include
+extract additions and effective shared/mode patches. Seasonal supplements check
+perk IDs and raw effects when upstream exposes them; progression counters check
+task references and exposed variable references. Counter pool membership,
+unexposed raw effects, editions and story data are explicitly reported as not
+comparable, rather than verified. Endpoint discovery flags potential new upstream
+edition/story sources for review without gating unrelated PRs.
+
+Item adoption checks include the mode's items, quest items and usable item-name
+entries in both English translation dictionaries. Dictionary-only identities must
+be item IDs, excluding generic labels and known task IDs. Incomplete item sources or
+malformed translations fail validation; unresolved translation placeholders do
+not establish field values. Empty task snapshots also fail validation. Missing
+objective lists and unexposed disabled flags remain unverified, and disabling a
+task does not skip its other field comparisons.
+
+The monitor publishes each upstream refresh independently, so a slow or failing
+entity endpoint does not hold back task comparisons. Overlay failures are
+reported separately from upstream failures. Counter checks reuse the main
+audit's task snapshots; standalone checks fetch independent modes concurrently.
+
+A difference alone does not establish that the overlay is correct. Missing local
+reference evidence is reported as `UNVERIFIED`; numeric objective contradictions
+with an applicable reference count toward `--strict`. API failures, malformed
+responses, unhandled source files and unhandled task fields fail validation, so
+new published data cannot silently bypass comparison. Internal `NEEDED` statuses
+mean "not redundant", not "independently proven correct".
+
 Run this periodically to keep the overlay lean and accurate.
 
-By default the command only reports. Each gate is opt-in:
+By default the command only reports. CI enables `--strict --fail-on-stale`;
+upstream data-quality regressions remain separately opt-in. Each gate is opt-in:
 
-| Flag                 | Fails on                                                            | Exit code |
-| -------------------- | ------------------------------------------------------------------- | --------- |
-| `--strict`           | Overlay inconsistency, or data served incorrectly                   | 2         |
-| `--fail-on-stale`    | Overlay carries data tarkov.dev now supplies (this is what CI runs) | 3         |
-| `--fail-on-upstream` | Upstream data-quality regression                                    | 4         |
+| Flag                 | Fails on                                          | Exit code |
+| -------------------- | ------------------------------------------------- | --------- |
+| `--strict`           | Overlay inconsistency, or data served incorrectly | 2         |
+| `--fail-on-stale`    | Overlay carries data tarkov.dev now supplies      | 3         |
+| `--fail-on-upstream` | Upstream data-quality regression                  | 4         |
 
 Exit `0` means no enabled gate found a problem; exit `1` is a script or network
 error. `--fail-on-upstream` is intentionally excluded from CI: those problems

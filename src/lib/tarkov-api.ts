@@ -38,6 +38,10 @@ import type {
   TraderAccessData,
 } from './types.js';
 import {
+  validObjectiveCollection,
+  buildItemComparisonIndex,
+  comparisonRecords,
+  validateTranslationMap,
   createTaskNormalizers,
   buildTaskContext as buildSharedTaskContext,
   fetchCached,
@@ -262,7 +266,7 @@ async function fetchTranslations(
         `Invalid json.tarkov.dev response for ${mode}/${endpoint}_${locale}: expected data object`
       );
     }
-    return envelope.data as TranslationMap;
+    return validateTranslationMap(envelope.data, `${mode}/${endpoint}_${locale}`);
   } catch (error) {
     // The endpoint registry currently advertises translations for every mode,
     // but pvp-season/items_en is absent in production. A missing translation
@@ -414,10 +418,10 @@ function adaptTaskMap(value: unknown, ctx: Context): TaskData['map'] {
   return resolveMapRef(value, ctx) ?? { id: '', name: 'Unknown map' };
 }
 
-/** Adapt task objectives while dropping malformed non-object entries. */
+/** An incomplete objective list cannot establish that an objective is absent. */
 function adaptObjectives(value: unknown, ctx: Context): TaskObjective[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter(isRecord).map((objective) => adaptObjective(objective, ctx));
+  if (!validObjectiveCollection(value)) return undefined;
+  return value.map((objective) => adaptObjective(objective, ctx));
 }
 
 /** Adapt one raw task record into the validator's normalized task shape. */
@@ -429,6 +433,7 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     name: translate(ctx.tasksEn, raw.name) ?? id,
     trader: adaptTaskTrader(raw.trader, ctx),
     minPlayerLevel: optionalNumber(raw.minPlayerLevel, true),
+    disabled: raw.disabled,
     wikiLink: optionalString(raw.wikiLink),
     map: adaptTaskMap(raw.map, ctx),
     kappaRequired: optionalBoolean(raw.kappaRequired),
@@ -659,6 +664,12 @@ export async function fetchTaskModeData(gameMode?: GameMode): Promise<TaskModeDa
   return { tasks: snapshot.tasks, access };
 }
 
+function assertNonemptyTasks(tasks: JsonRecord, mode: GameMode): void {
+  if (Object.keys(tasks).length === 0) {
+    throw new EnvelopeValidationError(`Invalid ${mode}/tasks: empty task collection`);
+  }
+}
+
 /**
  * Fetch all tasks for a game mode from json.tarkov.dev, adapt them into the
  * `TaskData[]` shape used by the override validator, and report the raw
@@ -678,6 +689,7 @@ async function fetchTaskSnapshot(
     );
   }
 
+  assertNonemptyTasks(tasksData.tasks, mode);
   const taskEntries: Array<[string, JsonRecord]> = [];
   const seenIds = new Set<string>();
   for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
@@ -710,6 +722,7 @@ async function fetchTaskSnapshot(
   return {
     tasks: taskEntries.map(([, rawTask]) => adaptTask(rawTask, ctx)),
     traderRequirementIds,
+    sourceData: tasksData,
   };
 }
 
@@ -748,6 +761,8 @@ export function countTraderRequirementIds(tasksData: unknown): TraderRequirement
 export interface TaskDataWithRequirementCounts {
   tasks: TaskData[];
   traderRequirementIds: TraderRequirementIdCounts;
+  /** Validated raw endpoint data, before task adaptation changes collection shapes. */
+  sourceData: JsonRecord;
 }
 
 /** Fetch adapted tasks and raw trader-requirement ID diagnostics together. */
@@ -852,4 +867,18 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
  */
 export function findTaskById(tasks: TaskData[], taskId: string): TaskData | undefined {
   return tasks.find((t) => t.id === taskId);
+}
+
+/** Fetch all upstream item identities and English fields used by adoption checks. */
+export async function fetchItemValidationData(mode: GameMode): Promise<Map<string, JsonRecord>> {
+  const cache: EndpointCache = new Map();
+  const [items, tasks, itemsEn, tasksEn] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/items`),
+    fetchEnvelope(cache, `${mode}/tasks`),
+    fetchEnvelope(cache, `${mode}/items_en`, false),
+    fetchEnvelope(cache, `${mode}/tasks_en`, false),
+  ]);
+  const tasksData = isRecord(tasks.data) ? tasks.data : undefined;
+  comparisonRecords(tasksData?.tasks, `${mode}/tasks`);
+  return buildItemComparisonIndex(items.data, tasks.data, itemsEn.data, tasksEn.data);
 }

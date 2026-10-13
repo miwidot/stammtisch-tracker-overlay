@@ -232,7 +232,7 @@ suppressing an item:
   `monitor/public/app.js`). Both server-side calls append to a hardcoded
   `https://json.tarkov.dev` base, so callers cannot select the requested host. The
   monitor transport also restricts paths to `endpoints` or safe-mode
-  task/item/map/trader endpoints and their translations. Its isolated
+  task/item/map/trader/hideout endpoints and their translations. Its isolated
   `security-sink` suppression is an independently reviewed tool false positive;
   keep that file limited to this guarded transport policy. The request-derived
   mode segment passes `normalizeMode` (allowlist with fallback) plus `isSafeModeName`

@@ -49,6 +49,7 @@ const viewRoutes = {
   tasks: "tasks",
   "tasks-additions": "tasksAdd",
   items: "items",
+  maps: "maps",
   hideout: "hideout",
   traders: "traders",
   editions: "editions",
@@ -273,7 +274,7 @@ function renderSections(sections) {
         const textValue = value ?? "";
         if (section.statusColumnIndex === index) {
           const badge = document.createElement("span");
-          badge.className = `badge ${String(textValue).toLowerCase()}`;
+          badge.className = `badge ${String(textValue).toLowerCase().replaceAll(" ", "-")}`;
           badge.textContent = textValue;
           td.appendChild(badge);
         } else {
@@ -335,13 +336,13 @@ function renderSummary(sections) {
   ).length;
   summaryEl.innerHTML = "";
 
-  const overrides = countBadges(sections, ["override", "changed", "missing"]);
+  const overrides = countBadges(sections, ["needs evidence", "unverified", "already upstream", "missing upstream", "name candidate"]);
   const cards = [
     { label: "Sections", value: sectionCount },
     { label: "Rows", value: totalRows },
   ];
   if (overrides > 0) {
-    cards.push({ label: "Corrections", value: overrides });
+    cards.push({ label: "Needs review", value: overrides });
   }
   cards.forEach((card) => {
     const el = document.createElement("div");

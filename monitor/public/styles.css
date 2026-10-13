@@ -432,17 +432,23 @@ h1 {
 }
 
 .badge.changed,
-.badge.override {
+.badge.override,
+.badge.needs-evidence,
+.badge.name-candidate {
   background: rgba(200, 169, 107, 0.2);
   color: #e2c58a;
 }
 
-.badge.same {
+.badge.same,
+.badge.already-upstream,
+.badge.mode-guard {
   background: rgba(97, 196, 128, 0.18);
   color: #a7e0b7;
 }
 
-.badge.missing {
+.badge.missing,
+.badge.unverified,
+.badge.missing-upstream {
   background: rgba(194, 104, 88, 0.2);
   color: #e09a8b;
 }

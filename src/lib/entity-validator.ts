@@ -67,7 +67,7 @@ export function validateEntityOverrides(
 
   for (const [entityId, rawOverride] of Object.entries(overrides)) {
     if (!rawOverride || typeof rawOverride !== 'object' || Array.isArray(rawOverride)) {
-      continue;
+      throw new Error(`Invalid entity override ${entityId}: expected an object`);
     }
     const override = rawOverride as Record<string, unknown>;
     const apiEntity = apiEntities.get(entityId);
@@ -120,7 +120,7 @@ export function validateEntityOverrides(
           details.push({
             field,
             status: 'needed',
-            message: `${field}: absent from API (not exposed upstream) - STILL NEEDED`,
+            message: `${field}: absent from API (not exposed upstream) - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
           });
         } else {
           details.push({
@@ -147,7 +147,7 @@ export function validateEntityOverrides(
             details.push({
               field: `${field}:${subKey}`,
               status: 'synthetic',
-              message: `${field} '${subKey}': not in API - synthetic overlay entry, STILL NEEDED`,
+              message: `${field} '${subKey}': not in API - synthetic overlay entry, NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
             });
             continue;
           }
@@ -160,7 +160,7 @@ export function validateEntityOverrides(
               ? `${field} '${subKey}': FIXED IN API`
               : `${field} '${subKey}': API=${formatValue(apiSub)}, overlay=${formatValue(
                   subValue
-                )} - STILL NEEDED`,
+                )} - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
           });
         }
         continue;
@@ -174,7 +174,7 @@ export function validateEntityOverrides(
           ? `${field}: ${formatValue(apiValue)} - FIXED IN API`
           : `${field}: API=${formatValue(apiValue)}, overlay=${formatValue(
               overrideValue
-            )} - STILL NEEDED`,
+            )} - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
       });
     }
 
@@ -233,10 +233,10 @@ export function validateEntityAdditions(
   const results: EntityValidationResult[] = [];
 
   for (const [key, rawAddition] of Object.entries(additions)) {
-    const addition =
-      rawAddition && typeof rawAddition === 'object' && !Array.isArray(rawAddition)
-        ? (rawAddition as Record<string, unknown>)
-        : {};
+    if (!rawAddition || typeof rawAddition !== 'object' || Array.isArray(rawAddition)) {
+      throw new Error(`Invalid entity addition ${key}: expected an object`);
+    }
+    const addition = rawAddition as Record<string, unknown>;
     const explicitId = typeof addition.id === 'string' ? addition.id : undefined;
 
     const present = apiEntities.has(key) || (explicitId ? apiEntities.has(explicitId) : false);
@@ -251,7 +251,7 @@ export function validateEntityAdditions(
           status: present ? 'fixed' : 'needed',
           message: present
             ? 'NOW IN API - remove the addition and switch to an override if still wrong'
-            : 'Still missing from API - STILL NEEDED',
+            : 'Still missing from API - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE',
         },
       ],
     });
@@ -457,7 +457,7 @@ export function checkTaskSuppressionStaleness(
         objectiveId,
         stale: !exists,
         message: exists
-          ? 'suppressed objective still present upstream - STILL NEEDED'
+          ? 'suppressed objective still present upstream - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE'
           : 'suppressed objective no longer present upstream - suppression is stale',
       });
     }

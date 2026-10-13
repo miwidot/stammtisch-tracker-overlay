@@ -308,6 +308,8 @@ export interface TaskObjectiveAdd extends Omit<
 
 /** Task data from tarkov.dev API */
 export interface TaskData {
+  /** Present only when upstream explicitly exposes gameplay visibility. */
+  disabled?: boolean;
   id: string;
   name: string;
   /** Trader that offers the task. */

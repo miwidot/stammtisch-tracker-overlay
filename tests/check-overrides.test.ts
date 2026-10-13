@@ -2,15 +2,17 @@
  * Tests for scripts/check-overrides.ts helpers
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   loadReferenceQuestIds,
+  printReferenceCrossCheck,
   normalizeWikiLink,
   checkTaskAdditions,
   checkEditionTaskReferences,
+  checkEntityData,
   countRequirementTypes,
   getValidationExitCode,
 } from '../scripts/check-overrides.js';
@@ -474,6 +476,129 @@ describe('loadReferenceQuestIds', () => {
       );
       expect(loadReferenceQuestIds(dir)).toBeNull();
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('canonical task addition identity', () => {
+  it.each(['key', 'id'])('detects upstream adoption by %s despite renamed text', (identity) => {
+    const addition = createTaskAddition({
+      id: identity === 'id' ? 'upstream' : 'local',
+      name: 'Old name',
+      wikiLink: undefined,
+    });
+    const results = checkTaskAdditions({ [identity === 'key' ? 'upstream' : 'local']: addition }, [
+      createApiTask({ id: 'upstream', name: 'Renamed task' }),
+    ]);
+    expect(results[0].status).toBe('RESOLVED');
+    expect(results[0].message).toContain('by id');
+  });
+});
+
+it('detects item additions adopted through quest items and translation-only names in every mode', async () => {
+  const sourceDir = mkdtempSync(join(tmpdir(), 'overlay-item-adoption-'));
+  mkdirSync(join(sourceDir, 'additions'));
+  const questId = '688896b3ea36baf84d085544';
+  const dictionaryId = '688896b3ea36baf84d085545';
+  writeFileSync(
+    join(sourceDir, 'additions', 'itemsAdd.json5'),
+    JSON.stringify({
+      quest: { id: questId, name: 'Known quest item' },
+      dictionary: { id: dictionaryId, name: 'Known dictionary item' },
+    })
+  );
+  const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => {
+      const endpoint = String(url).split('/').at(-1);
+      const payloads: Record<string, unknown> = {
+        items: { items: { existing: { id: 'existing' } } },
+        tasks: {
+          tasks: { task: { id: 'task' } },
+          questItems: [{ id: questId, name: `${questId} Name` }],
+        },
+        items_en: { [`${dictionaryId} Name`]: 'Known dictionary item' },
+        tasks_en: { [`${questId} Name`]: 'Known quest item' },
+      };
+      return new Response(JSON.stringify({ data: payloads[endpoint!] }), { status: 200 });
+    })
+  );
+  try {
+    expect(await checkEntityData(sourceDir)).toEqual({
+      actionable: 0,
+      staleProblems: 6,
+      upstreamProblems: 0,
+    });
+    expect(output.mock.calls.flat().join('\n')).toContain('NOW IN API');
+  } finally {
+    vi.unstubAllGlobals();
+    output.mockRestore();
+    rmSync(sourceDir, { recursive: true });
+  }
+});
+
+describe('reference verification coverage', () => {
+  it('reports unavailable evidence explicitly', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-no-reference-'));
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      expect(printReferenceCrossCheck([], dir)).toBe(0);
+      expect(log.mock.calls.flat().join(' ')).toContain('UNVERIFIED');
+    } finally {
+      log.mockRestore();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns numeric reference contradictions for the strict gate', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-conflict-'));
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      writeFileSync(
+        join(dir, 'quest_list.json'),
+        JSON.stringify({
+          request: { url: 'https://gw-pve.escapefromtarkov.com/client/quest/list' },
+          response: {
+            decoded_response: {
+              data: [
+                {
+                  _id: 'task',
+                  conditions: {
+                    AvailableForFinish: [
+                      { id: 'objective', conditionType: 'CounterCreator', value: 7 },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+      expect(
+        printReferenceCrossCheck(
+          [{ label: 'pve', overrides: { task: { objectives: { objective: { count: 8 } } } } }],
+          dir
+        )
+      ).toBe(1);
+      expect(
+        printReferenceCrossCheck(
+          [
+            { label: 'base', overrides: { task: { objectives: { objective: { count: 8 } } } } },
+            { label: 'pve', overrides: { task: { objectives: { objective: { count: 7 } } } } },
+          ],
+          dir
+        )
+      ).toBe(0);
+      expect(
+        printReferenceCrossCheck(
+          [{ label: 'regular', overrides: { task: { objectives: { objective: { count: 8 } } } } }],
+          dir
+        )
+      ).toBe(0);
+    } finally {
+      log.mockRestore();
       rmSync(dir, { recursive: true, force: true });
     }
   });

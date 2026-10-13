@@ -8,6 +8,8 @@ const { URL } = require("url");
 const { exec } = require("child_process");
 const { DEFAULT_MODES, VIEW_CONFIG, config, getModeLabel } = require("./lib/config.js");
 const {
+  markModeGuards,
+  buildEntityComparisonSections,
   buildCraftAddSections,
   buildEditionsSections,
   buildLocaleSections,
@@ -30,7 +32,7 @@ const {
   verifyOverlaySha256,
 } = require("../src/lib/tarkov-api-shared.cjs");
 
-const {fetchApiTasks, fetchEnvelopeOnce} = require("./lib/tarkov-api.js");
+const {fetchApiTasks, fetchApiEntities, fetchEnvelopeOnce} = require("./lib/tarkov-api.js");
 
 const PORT = config.port;
 const PUBLIC_DIR = config.publicDir;
@@ -657,6 +659,17 @@ async function refreshOverlay() {
 // mirrors src/lib/tarkov-api.ts (the monitor is standalone CommonJS and cannot
 // import the ESM/TS adapter without a build step).
 
+async function refreshUpstreamState(state, fetchData, fallbackError) {
+  try {
+    state.data = await fetchData();
+    state.updatedAt = new Date().toISOString();
+    state.error = null;
+  } catch (error) {
+    state.error = error.message || fallbackError;
+  }
+  rebuildSummaries();
+}
+
 async function refreshApiTasks(mode) {
   const lock = readLocks[mode];
   if (!lock) {
@@ -668,14 +681,16 @@ async function refreshApiTasks(mode) {
   }
   lock.isReading = true;
   try {
-    const tasks = await fetchApiTasks(mode);
-    apiState[mode].data = tasks;
-    apiState[mode].updatedAt = new Date().toISOString();
-    apiState[mode].error = null;
-    rebuildSummaries();
-  } catch (error) {
-    apiState[mode].error = error.message || "Unable to fetch API tasks";
-    rebuildSummaries();
+    const state = apiState[mode];
+    const entities = state.entities ||= {};
+    const entityRefreshes = ["items", "maps", "hideout", "traders"].map((endpoint) => {
+      const entity = entities[endpoint] ||= { data: null, error: null, updatedAt: null };
+      return refreshUpstreamState(entity, () => fetchApiEntities(mode, endpoint), "Unable to fetch entities");
+    });
+    await Promise.allSettled([
+      refreshUpstreamState(state, () => fetchApiTasks(mode), "Unable to fetch API tasks"),
+      ...entityRefreshes,
+    ]);
   } finally {
     lock.isReading = false;
     if (lock.pendingRead) {
@@ -698,9 +713,9 @@ function buildSummary(view, mode, locale) {
     const sharedOverrides = overlay.tasks || {};
     const modeOverrides = overlay.modes?.[mode]?.tasks || {};
     const mergedOverrides = mergeTaskOverrides(sharedOverrides, modeOverrides);
-    const apiTasks = apiState[mode]?.data || [];
+    const apiTasks = apiState[mode]?.error ? [] : apiState[mode]?.data || [];
     return {
-      sections: buildTasksSections(mergedOverrides, apiTasks),
+      sections: buildTasksSections(mergedOverrides, apiTasks, !!apiState[mode]?.data && !apiState[mode]?.error, sharedOverrides),
       error: overlayState.error || apiState[mode]?.error || null,
     };
   }
@@ -711,8 +726,8 @@ function buildSummary(view, mode, locale) {
     try {
       const mergedAdditions = mergeTaskAdditions(sharedAdditions, modeAdditions);
       return {
-        sections: buildTaskAdditionSections(mergedAdditions, mode),
-        error: overlayState.error || null,
+        sections: buildTaskAdditionSections(mergedAdditions, mode, apiState[mode]?.error ? null : apiState[mode]?.data),
+        error: overlayState.error || apiState[mode]?.error || null,
       };
     } catch (error) {
       return {
@@ -725,24 +740,17 @@ function buildSummary(view, mode, locale) {
     }
   }
 
-  if (view === "items") {
+  if (["items", "itemsAdd", "maps", "hideout", "traders"].includes(view)) {
+    const endpoint = view === "itemsAdd" ? "items" : view;
+    const state = apiState[mode || "regular"]?.entities?.[endpoint];
+    const patches = { ...(overlay[view] || {}) };
+    for (const [id, patch] of Object.entries(overlay.modes?.[mode]?.[view] || {})) {
+      patches[id] = { ...patches[id], ...patch };
+    }
     return {
-      sections: buildOverrideSections("Items", overlay.items || {}),
-      error: overlayState.error || null,
-    };
-  }
-
-  if (view === "hideout") {
-    return {
-      sections: buildOverrideSections("Hideout", overlay.hideout || {}),
-      error: overlayState.error || null,
-    };
-  }
-
-  if (view === "traders") {
-    return {
-      sections: buildOverrideSections("Traders", overlay.traders || {}),
-      error: overlayState.error || null,
+      sections: markModeGuards(buildEntityComparisonSections(VIEW_CONFIG[view].title, patches,
+        state?.error ? null : state?.data, view === "itemsAdd"), overlay[view] || {}, patches),
+      error: overlayState.error || state?.error || (!state?.data ? "Upstream data not loaded" : null),
     };
   }
 
@@ -756,13 +764,6 @@ function buildSummary(view, mode, locale) {
   if (view === "storyChapters") {
     return {
       sections: buildStoryChapterSections(overlay.storyChapters || {}),
-      error: overlayState.error || null,
-    };
-  }
-
-  if (view === "itemsAdd") {
-    return {
-      sections: buildOverrideSections("Items Additions", overlay.itemsAdd || {}),
       error: overlayState.error || null,
     };
   }
@@ -820,6 +821,20 @@ function rebuildSummaries() {
   });
 }
 
+function getUpstreamState(view, mode) {
+  if (["items", "itemsAdd", "maps", "hideout", "traders"].includes(view)) {
+    return apiState[mode]?.entities?.[view === "itemsAdd" ? "items" : view];
+  }
+  return apiState[mode];
+}
+
+function getUpstreamStatus(view, mode) {
+  const state = getUpstreamState(view, mode);
+  const message = state?.error || (!state?.data ? "Upstream data not loaded" : null);
+  return { updatedAt: state?.updatedAt || null,
+    error: message ? redactErrorMessage(message, "") : null };
+}
+
 function getState(view, mode, locale) {
   const config = VIEW_CONFIG[view];
   const scope = {
@@ -851,10 +866,7 @@ function getState(view, mode, locale) {
       error: overlayState.error ? redactErrorMessage(overlayState.error) : null,
     },
     api: config?.requiresMode
-      ? {
-          updatedAt: apiState[mode]?.updatedAt || null,
-          error: apiState[mode]?.error || null,
-        }
+      ? getUpstreamStatus(view, mode)
       : null,
     rebuild: {
       enabled: isRebuildEnabled(),
@@ -1153,6 +1165,7 @@ const server = http.createServer((req, res) => {
     pathname === "/tasks-additions" ||
     pathname === "/hideout" ||
     pathname === "/items" ||
+    pathname === "/maps" ||
     pathname === "/items-additions" ||
     pathname === "/traders" ||
     pathname === "/editions" ||

@@ -1,4 +1,9 @@
 const {
+  validObjectiveCollection,
+  buildItemComparisonIndex,
+  comparisonRecords,
+  translateComparisonValues,
+  validateTranslationMap,
   MAX_RESPONSE_BYTES: TARKOV_JSON_MAX_BYTES,
   createTaskNormalizers,
   buildTaskContext: buildSharedTaskContext,
@@ -127,7 +132,7 @@ async function fetchTranslations(cache, mode, endpoint) {
       error.fatal = true;
       throw error;
     }
-    return envelope.data;
+    return validateTranslationMap(envelope.data, `${mode}/${endpoint}_en`);
   } catch (error) {
     if (optional && error instanceof Error && /request failed: 404\b/.test(error.message)) {
       return {};
@@ -198,6 +203,7 @@ function adaptTask(raw, ctx) {
     name: translate(ctx.tasksEn, raw.name) || id,
     trader: adaptTaskTrader(raw.trader, ctx),
     minPlayerLevel: raw.minPlayerLevel,
+    disabled: raw.disabled,
     wikiLink: typeof raw.wikiLink === 'string' ? raw.wikiLink : undefined,
     map: adaptTaskMap(raw.map, ctx),
     kappaRequired: typeof raw.kappaRequired === 'boolean' ? raw.kappaRequired : undefined,
@@ -222,8 +228,8 @@ function adaptTask(raw, ctx) {
     availableDelaySecondsMin: raw.availableDelaySecondsMin,
     availableDelaySecondsMax: raw.availableDelaySecondsMax,
     experience: typeof raw.experience === 'number' ? raw.experience : undefined,
-    objectives: Array.isArray(raw.objectives)
-      ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))
+    objectives: validObjectiveCollection(raw.objectives)
+      ? raw.objectives.map((objective) => adaptObjective(objective, ctx))
       : undefined,
     startRewards: adaptReward(raw.startRewards, ctx),
     finishRewards: adaptReward(raw.finishRewards, ctx),
@@ -256,7 +262,8 @@ async function fetchApiTasks(mode) {
       )}`
     );
   }
-  const ctx = await buildTaskContext(cache, gameMode, tasksData);
+  if (Object.keys(tasksData.tasks).length === 0)
+    throw new Error(`Invalid ${gameMode}/tasks: empty task collection`);
   const tasks = [];
   const seenIds = new Set();
   for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
@@ -283,9 +290,31 @@ async function fetchApiTasks(mode) {
       throw error;
     }
     seenIds.add(id);
-    tasks.push(adaptTask(rawTask, ctx));
+    tasks.push(rawTask);
   }
-  return tasks;
+  const ctx = await buildTaskContext(cache, gameMode, tasksData);
+  return tasks.map((rawTask) => adaptTask(rawTask, ctx));
 }
 
-module.exports = { fetchApiTasks, fetchEnvelopeOnce };
+async function fetchApiEntities(mode, endpoint) {
+  const cache = new Map();
+  const key = { items: 'items', maps: 'maps' }[endpoint];
+  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}`);
+  const collection = key ? envelope.data[key] : envelope.data;
+  const records = comparisonRecords(collection, `${mode}/${endpoint}`);
+  const translated = await fetchEnvelope(cache, `${mode}/${endpoint}_en`, false);
+  const translations = validateTranslationMap(translated.data, `${mode}/${endpoint}_en`);
+  if (endpoint === 'items') {
+    const [tasks, tasksEn] = await Promise.all([
+      fetchEnvelope(cache, `${mode}/tasks`),
+      fetchEnvelope(cache, `${mode}/tasks_en`, false),
+    ]);
+    comparisonRecords(tasks.data?.tasks, `${mode}/tasks`);
+    return buildItemComparisonIndex(envelope.data, tasks.data, translations, tasksEn.data);
+  }
+  return new Map(
+    records.map((record) => [record.id, translateComparisonValues(record, translations)])
+  );
+}
+
+module.exports = { fetchApiTasks, fetchApiEntities, fetchEnvelopeOnce };

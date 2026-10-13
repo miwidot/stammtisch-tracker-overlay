@@ -24,23 +24,28 @@
     },
     tasksAdd: {
       title: "Task Additions",
-      lede: "Tasks added by the overlay that are missing from tarkov.dev.",
+      lede: "Task additions compared with upstream adoption.",
       requiresMode: true,
     },
     items: {
       title: "Item Overrides",
       lede: "Item corrections included in the overlay build.",
-      requiresMode: false,
+      requiresMode: true,
+    },
+    maps: {
+      title: "Map Overrides",
+      lede: "Map corrections and extract additions compared to tarkov.dev.",
+      requiresMode: true,
     },
     hideout: {
       title: "Hideout Overrides",
       lede: "Hideout corrections included in the overlay build.",
-      requiresMode: false,
+      requiresMode: true,
     },
     traders: {
       title: "Trader Overrides",
       lede: "Trader corrections included in the overlay build.",
-      requiresMode: false,
+      requiresMode: true,
     },
     editions: {
       title: "Editions",
@@ -55,7 +60,7 @@
     itemsAdd: {
       title: "Item Additions",
       lede: "Items added by the overlay.",
-      requiresMode: false,
+      requiresMode: true,
     },
     prestige: {
       title: "Prestige Overrides",

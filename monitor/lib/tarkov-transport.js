@@ -7,7 +7,7 @@
 async function fetchTarkovJson(path, signal) {
   if (
     typeof path !== 'string' ||
-    !/^(?:endpoints|[a-z0-9]+(?:-[a-z0-9]+)*\/(?:tasks|items|maps|traders)(?:_en)?)$/.test(path)
+    !/^(?:endpoints|[a-z0-9]+(?:-[a-z0-9]+)*\/(?:tasks|items|maps|traders|hideout)(?:_en)?)$/.test(path)
   ) {
     const error = new Error('Invalid tarkov.dev endpoint');
     error.fatal = true;

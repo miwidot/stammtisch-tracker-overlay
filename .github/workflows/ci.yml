@@ -163,7 +163,7 @@ jobs:
 
       - name: Check overlay for data now supplied by tarkov.dev
         timeout-minutes: 15
-        run: npm run check-overrides -- --fail-on-stale
+        run: npm run check-overrides -- --strict --fail-on-stale
 
       - name: Upload validated release overlay
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

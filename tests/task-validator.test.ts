@@ -44,6 +44,42 @@ describe('validateTaskOverride', () => {
       expect(result.stillNeeded).toBe(true);
       expect(result.details.some((d) => d.field === 'disabled' && d.status === 'check')).toBe(true);
     });
+
+    it.each([true, false])('compares an explicitly exposed disabled=%s flag', (disabled) => {
+      const task = createApiTask({ disabled });
+      const same = validateTaskOverride(task.id, { disabled }, [task]);
+      expect(same.details).toContainEqual(
+        expect.objectContaining({ field: 'disabled', status: 'fixed' })
+      );
+      const different = validateTaskOverride(task.id, { disabled: !disabled }, [task]);
+      expect(different.stillNeeded).toBe(true);
+      expect(different.details).toContainEqual(
+        expect.objectContaining({ field: 'disabled', status: 'needed' })
+      );
+    });
+
+    it('keeps a re-enabling guard unverified when upstream does not expose the flag', () => {
+      const result = validateTaskOverride('test-task-id', { disabled: false }, apiTasks);
+      expect(result.stillNeeded).toBe(true);
+      expect(result.details).toContainEqual(
+        expect.objectContaining({
+          field: 'disabled',
+          status: 'check',
+          message: expect.stringContaining('UNVERIFIED'),
+        })
+      );
+    });
+
+    it('compares all remaining fields of a disabled task', () => {
+      const result = validateTaskOverride(
+        'test-task-id',
+        { disabled: true, minPlayerLevel: 10 },
+        apiTasks
+      );
+      expect(result.details).toContainEqual(
+        expect.objectContaining({ field: 'minPlayerLevel', status: 'fixed' })
+      );
+    });
   });
 
   describe('minPlayerLevel validation', () => {
@@ -355,7 +391,7 @@ describe('validateTaskOverride', () => {
           (d) =>
             d.field === 'objective:obj-1:maps' &&
             d.status === 'needed' &&
-            d.message.includes('STILL NEEDED')
+            d.message.includes('VERIFY CORRECTION EVIDENCE')
         )
       ).toBe(true);
     });
@@ -1180,3 +1216,29 @@ describe('categorizeResults', () => {
     expect(categorized.removedFromApi).toHaveLength(1);
   });
 });
+
+it('refuses to classify an unhandled task field as fixed upstream', () => {
+  expect(() =>
+    validateTaskOverride('task', { futureField: 1 } as never, [{ id: 'task', name: 'Task' }])
+  ).toThrow('futureField');
+});
+
+it.each([undefined, null, {}, [{}], [{ id: '' }], [{ id: 'o' }, { id: 'o' }]])(
+  'does not infer added-objective absence from an unavailable list: %s',
+  (objectives) => {
+    const result = validateTaskOverride(
+      'task',
+      {
+        objectivesAdd: [{ id: 'added', description: 'New objective' }],
+      },
+      [{ id: 'task', name: 'Task', objectives } as TaskData]
+    );
+    expect(result.details).toContainEqual(
+      expect.objectContaining({
+        field: 'objectivesAdd:added',
+        status: 'check',
+        message: expect.stringContaining('UNVERIFIED'),
+      })
+    );
+  }
+);

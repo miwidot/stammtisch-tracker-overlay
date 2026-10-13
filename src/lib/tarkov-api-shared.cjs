@@ -617,7 +617,149 @@ function createTaskNormalizers(helpers) {
   };
 }
 
+function validationRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function validateTranslationMap(value, label) {
+  if (!validationRecord(value) || Object.values(value).some((entry) => typeof entry !== 'string')) {
+    throw new Error(`Invalid ${label} translations: expected string translations`);
+  }
+  return value;
+}
+
+function comparisonRecordId(record, label) {
+  if (!validationRecord(record) || typeof record.id !== 'string' || !record.id.trim()) {
+    throw new Error(`Invalid ${label} entity IDs`);
+  }
+  return record.id;
+}
+
+function validIdentityRecord(value) {
+  return validationRecord(value) && typeof value.id === 'string' && Boolean(value.id.trim());
+}
+
+function validObjectiveCollection(value) {
+  if (!Array.isArray(value) || !value.every(validIdentityRecord)) return false;
+  const ids = value.map((record) => record.id);
+  return new Set(ids).size === ids.length;
+}
+
+function validateComparisonIds(records, label) {
+  const seen = new Set();
+  for (const record of records) {
+    const id = comparisonRecordId(record, label);
+    if (seen.has(id)) throw new Error(`Invalid ${label} entity IDs: duplicate '${id}'`);
+    seen.add(id);
+  }
+}
+
+function comparisonRecords(collection, label, allowEmpty = false) {
+  if (!validationRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(`Invalid ${label} entity collection`);
+  }
+  const records = Object.values(collection);
+  if (!allowEmpty && records.length === 0)
+    throw new Error(`Invalid ${label} entity IDs: empty collection`);
+  validateComparisonIds(records, label);
+  return records;
+}
+
+function translateComparisonRecord(value, translations, identity) {
+  const recordId = value.id ?? identity;
+  const result = Object.create(null);
+  for (const [key, entry] of Object.entries(value)) {
+    if (['__proto__', 'constructor', 'prototype'].includes(key)) continue;
+    const translated = translateComparisonValues(entry, translations, recordId);
+    if (translated !== undefined) result[key] = translated;
+  }
+  return result;
+}
+
+function translateComparisonValues(value, translations, identity) {
+  if (Array.isArray(value))
+    return value.map((entry) => translateComparisonValues(entry, translations, identity));
+  if (validationRecord(value)) return translateComparisonRecord(value, translations, identity);
+  if (typeof value !== 'string') return value;
+  return translateComparisonString(value, translations, identity);
+}
+
+function isUnresolvedComparisonKey(value, translations, identity) {
+  const match = /^([^\s]+) (?:Name|ShortName|Description)$/.exec(value.trim());
+  if (!match) return false;
+  return match[1] === identity || Object.hasOwn(translations, value.trim());
+}
+
+function translateComparisonString(value, translations, identity) {
+  const translated = Object.hasOwn(translations, value) ? translations[value] : value;
+  return isUnresolvedComparisonKey(translated, translations, identity) ? undefined : translated;
+}
+
+function usableDictionaryId(key, name, translations) {
+  const match = /^([a-f0-9]{24}) Name$/.exec(key);
+  if (!match || !name.trim()) return undefined;
+  return isUnresolvedComparisonKey(name, translations, match[1]) ? undefined : match[1];
+}
+
+function usableItemText(value) {
+  return typeof value === 'string' && Boolean(value.trim());
+}
+
+function fillItemText(result, id, field, suffix, translations) {
+  if (usableItemText(result[field])) return;
+  const key = `${id} ${suffix}`;
+  if (!Object.hasOwn(translations, key)) return;
+  const text = translateComparisonString(key, translations, id);
+  if (usableItemText(text)) result[field] = text;
+}
+
+function enrichItemRecord(record, translations) {
+  const result = translateComparisonValues(record, translations);
+  for (const [field, suffix] of [
+    ['name', 'Name'],
+    ['shortName', 'ShortName'],
+    ['description', 'Description'],
+  ]) {
+    fillItemText(result, record.id, field, suffix, translations);
+  }
+  return result;
+}
+
+function dictionaryItemId(key, name, translations, taskIds) {
+  const id = usableDictionaryId(key, name, translations);
+  return taskIds.has(id) ? undefined : id;
+}
+
+function addDictionaryItems(index, translations, taskIds) {
+  for (const [key, name] of Object.entries(translations)) {
+    const id = dictionaryItemId(key, name, translations, taskIds);
+    if (id && !index.has(id)) index.set(id, enrichItemRecord({ id, name }, translations));
+  }
+}
+
+function buildItemComparisonIndex(itemsData, tasksData, itemsEn, tasksEn) {
+  validateTranslationMap(itemsEn, 'items_en');
+  validateTranslationMap(tasksEn, 'tasks_en');
+  const items = comparisonRecords(itemsData?.items, 'items');
+  const quests = comparisonRecords(tasksData?.questItems, 'tasks questItems', true);
+  const taskIds = new Set(
+    comparisonRecords(tasksData?.tasks ?? {}, 'tasks', true).map((record) => record.id)
+  );
+  const questTranslations = { ...itemsEn, ...tasksEn };
+  const itemTranslations = { ...tasksEn, ...itemsEn };
+  const index = new Map();
+  for (const record of quests) index.set(record.id, enrichItemRecord(record, questTranslations));
+  for (const record of items) index.set(record.id, enrichItemRecord(record, itemTranslations));
+  addDictionaryItems(index, itemTranslations, taskIds);
+  return index;
+}
+
 module.exports = {
+  validObjectiveCollection,
+  buildItemComparisonIndex,
+  comparisonRecords,
+  translateComparisonValues,
+  validateTranslationMap,
   createTaskNormalizers,
   MAX_RESPONSE_BYTES: DEFAULT_MAX_RESPONSE_BYTES,
   adaptReward,

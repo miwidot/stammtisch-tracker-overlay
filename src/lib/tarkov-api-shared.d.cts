@@ -134,3 +134,22 @@ export function createTaskNormalizers(helpers: {
   adaptObjective: (raw: JsonRecord, ctx: TaskContext) => JsonRecord;
   adaptReward: <T>(raw: unknown, ctx: TaskContext) => T | undefined;
 };
+
+export function validateTranslationMap(value: unknown, label: string): Record<string, string>;
+export function comparisonRecords(
+  value: unknown,
+  label: string,
+  allowEmpty?: boolean
+): JsonRecord[];
+export function translateComparisonValues(
+  value: unknown,
+  translations: Record<string, string>
+): unknown;
+export function buildItemComparisonIndex(
+  itemsData: unknown,
+  tasksData: unknown,
+  itemsEn: unknown,
+  tasksEn: unknown
+): Map<string, JsonRecord>;
+
+export function validObjectiveCollection(value: unknown): value is JsonRecord[];

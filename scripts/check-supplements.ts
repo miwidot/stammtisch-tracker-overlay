@@ -1,0 +1,145 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { getProjectPaths, loadJson5File } from '../src/lib/file-loader.js';
+import { isDirectExecution } from '../src/lib/script-utils.js';
+import { fetchTarkovEnvelope } from '../src/lib/tarkov-api.js';
+import { SUPPORTED_GAME_MODES, type GameMode } from '../src/lib/types.js';
+import {
+  validateSeasonalPerks,
+  validateProgressionCounters,
+  type SupplementReport,
+} from '../src/lib/supplement-validator.js';
+
+type Counts = Pick<SupplementReport, 'actionable' | 'staleProblems'>;
+type FetchEnvelope = typeof fetchTarkovEnvelope;
+type LoadSupplement = (name: string) => Record<string, unknown>;
+
+function loadSupplement(sourceDir: string, name: string): Record<string, unknown> {
+  const file = join(sourceDir, 'additions', `${name}.json5`);
+  return existsSync(file) ? loadJson5File(file) : {};
+}
+
+async function compareSupplement(
+  label: string,
+  path: string,
+  validate: (data: unknown) => SupplementReport,
+  fetchEnvelope: FetchEnvelope,
+  counts: Counts
+): Promise<void> {
+  try {
+    const report = validate((await fetchEnvelope(path)).data);
+    counts.actionable += report.actionable;
+    counts.staleProblems += report.staleProblems;
+    for (const message of report.messages) console.log(`${label}: ${message}`);
+  } catch {
+    throw new Error(`${label}: upstream comparison unavailable or malformed`);
+  }
+}
+
+async function checkPerks(
+  load: LoadSupplement,
+  fetchEnvelope: FetchEnvelope,
+  counts: Counts
+): Promise<void> {
+  const perks = load('seasonalPerks');
+  if (!Object.keys(perks).length) {
+    console.log('seasonalPerks: no supplemental entries');
+    return;
+  }
+  await compareSupplement(
+    'pvp-season',
+    'pvp-season/season',
+    (data) => validateSeasonalPerks(perks, data),
+    fetchEnvelope,
+    counts
+  );
+}
+
+async function checkCounterMode(
+  mode: string,
+  entries: unknown,
+  fetchEnvelope: FetchEnvelope,
+  counts: Counts,
+  taskData?: Record<string, unknown>
+): Promise<void> {
+  if (!entries || !Object.keys(entries).length) {
+    console.log(`${mode}/progressionCounters: no supplemental entries`);
+    return;
+  }
+  await compareSupplement(
+    mode,
+    `${mode}/tasks`,
+    (data) => validateProgressionCounters(entries as Record<string, unknown>, data),
+    taskData === undefined ? fetchEnvelope : async () => ({ data: taskData }),
+    counts
+  );
+}
+
+function endpointLabel(entry: unknown): string {
+  const endpoint = entry as { name?: unknown; path?: unknown };
+  if (typeof endpoint?.name !== 'string' || typeof endpoint.path !== 'string') {
+    throw new Error('Expected endpoint name and path');
+  }
+  return `${endpoint.name} ${endpoint.path}`;
+}
+
+async function discoverEndpoints(fetchEnvelope: FetchEnvelope): Promise<string[]> {
+  try {
+    const data = (await fetchEnvelope('endpoints')).data as { endpoints?: unknown };
+    if (!Array.isArray(data?.endpoints) || !data.endpoints.length) {
+      throw new Error('Expected nonempty endpoint catalogue');
+    }
+    return data.endpoints.map(endpointLabel);
+  } catch {
+    throw new Error('Supplement endpoint discovery unavailable or malformed');
+  }
+}
+
+function reportUnsupported(name: string, endpoints: string[], load: LoadSupplement): void {
+  const pattern = name === 'editions' ? /edition/i : /\b(?:story|chapters?|storyChapters)\b/i;
+  const candidates = endpoints.filter((endpoint) => pattern.test(endpoint));
+  if (candidates.length) {
+    console.log(
+      `${name}: NEEDS REVIEW — new potential upstream endpoint(s): ${candidates.join(', ')}; comparison not implemented`
+    );
+    return;
+  }
+  console.log(
+    `${name}: NOT COMPARABLE — no corresponding endpoint advertised; ${Object.keys(load(name)).length} supplemental entries (not a clean upstream comparison)`
+  );
+}
+
+export async function checkSupplements(
+  sourceDir = getProjectPaths().srcDir,
+  fetchEnvelope: FetchEnvelope = fetchTarkovEnvelope,
+  taskDataByMode: Partial<Record<GameMode, Record<string, unknown>>> = {}
+): Promise<Counts> {
+  const counts = { actionable: 0, staleProblems: 0 };
+  const load: LoadSupplement = (name) => loadSupplement(sourceDir, name);
+  await checkPerks(load, fetchEnvelope, counts);
+  const counters = load('progressionCounters');
+  await Promise.all(
+    SUPPORTED_GAME_MODES.map((mode) =>
+      checkCounterMode(mode, counters[mode], fetchEnvelope, counts, taskDataByMode[mode])
+    )
+  );
+  const endpoints = await discoverEndpoints(fetchEnvelope);
+  for (const name of ['editions', 'storyChapters']) reportUnsupported(name, endpoints, load);
+  return counts;
+}
+
+function printSummary(counts: Counts): void {
+  console.log(
+    `Supplements: ${counts.actionable} reference problems, ${counts.staleProblems} adopted raw effects`
+  );
+  process.exitCode = counts.actionable ? 2 : counts.staleProblems ? 3 : 0;
+}
+
+if (isDirectExecution(import.meta.url)) {
+  checkSupplements()
+    .then(printSummary)
+    .catch((error: unknown) => {
+      console.error(error);
+      process.exitCode = 1;
+    });
+}

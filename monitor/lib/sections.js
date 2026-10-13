@@ -1,7 +1,7 @@
 "use strict";
 
 const { config, getModeLabel } = require("./config.js");
-const { mergeTaskOverride, selectTaskAdditions } = require("../../src/lib/tarkov-api-shared.cjs");
+const { mergeTaskOverride, selectTaskAdditions, validObjectiveCollection } = require("../../src/lib/tarkov-api-shared.cjs");
 
 function createSection(title, columns, options = {}) {
   return {
@@ -23,7 +23,7 @@ function pushRow(section, row) {
 
 function normalizeCompareValue(value) {
   if (Array.isArray(value)) {
-    return value.map(normalizeCompareValue);
+    return value.map(normalizeCompareValue).sort((a, b) => String(JSON.stringify(a)).localeCompare(String(JSON.stringify(b))));
   }
 
   if (value && typeof value === "object") {
@@ -40,6 +40,124 @@ function normalizeCompareValue(value) {
 function valuesEqual(a, b) {
   if (a === undefined && b === undefined) return true;
   return JSON.stringify(normalizeCompareValue(a)) === JSON.stringify(normalizeCompareValue(b));
+}
+
+// Object patches compare only supplied keys; arrays replace and compare without order.
+function compareSubset(overlay, upstream) {
+  if (overlay === undefined) return true;
+  if (!overlay || typeof overlay !== "object" || Array.isArray(overlay)) {
+    return valuesEqual(overlay, upstream);
+  }
+  return !!upstream && typeof upstream === "object" && !Array.isArray(upstream) &&
+    Object.keys(overlay).every((key) => compareSubset(overlay[key], upstream[key]));
+}
+
+function comparisonStatus(value, upstream, available) {
+  if (!available || upstream === undefined) return "unverified";
+  return compareSubset(value, upstream) ? "same" : "needs evidence";
+}
+
+function pushExtractAdditionRow(section, id, extract, upstream, available) {
+  if (!isEntityRecord(extract)) {
+    pushRow(section, [id, "extractsAdd", "unknown", formatValue(extract), "unverified"]);
+    return;
+  }
+  const match = findAddedEntity(upstream?.extracts, extract, "name");
+  pushRow(section, [id, `extractsAdd:${extract.id}.presence`, formatValue(match), "addition",
+    presenceStatus(match, available && !!upstream)]);
+  const fields = { ...extract };
+  delete fields.id;
+  pushRow(section, [id, `extractsAdd:${extract.id}`, formatValue(match), formatValue(extract),
+    comparisonStatus(fields, match, available)]);
+}
+
+function pushExtractAdditionRows(section, id, additions, upstream, available) {
+  available = available && Array.isArray(upstream?.extracts);
+  if (additions.length === 0) {
+    pushRow(section, [id, "extractsAdd", formatValue(upstream?.extracts), "[]",
+      guardedComparisonStatus([], [], available && !!upstream)]);
+  }
+  for (const extract of additions) pushExtractAdditionRow(section, id, extract, upstream, available);
+}
+
+function isEntityRecord(value) {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function findAddedEntity(entries = [], addition, nameField) {
+  if (!Array.isArray(entries)) return undefined;
+  entries = entries.filter((entry) => entry && typeof entry === "object");
+  const exact = entries.find((entry) => entry.id === addition.id);
+  if (exact) return exact;
+  const names = entries.filter((entry) => addition[nameField] && entry[nameField] === addition[nameField]);
+  return names.length === 1 ? names[0] : undefined;
+}
+
+function presenceStatus(upstream, available) {
+  if (!available) return "unverified";
+  return upstream ? "already upstream" : "missing upstream";
+}
+
+function pushEntityFieldRows(section, id, patch, upstream, available) {
+  if (!isEntityRecord(patch)) {
+    pushRow(section, [id, "entity", "unknown", formatValue(patch), "unverified"]);
+    return;
+  }
+  for (const [field, value] of Object.entries(patch || {})) {
+    if (field === "extractsAdd" && Array.isArray(value)) {
+      pushExtractAdditionRows(section, id, value, upstream, available);
+    } else {
+      pushRow(section, [id, field, formatValue(upstream?.[field]), formatValue(value),
+        comparisonStatus(value, upstream?.[field], available)]);
+    }
+  }
+}
+
+function findTaskCandidate(apiEntities, patch) {
+  const entries = [...apiEntities.values()];
+  const wikiMatches = entries.filter((entry) => patch.wikiLink && entry.wikiLink === patch.wikiLink);
+  if (wikiMatches.length === 1) return { upstream: wikiMatches[0], status: "already upstream" };
+  const names = entries.filter((entry) => patch.name && entry.name === patch.name);
+  if (names.length) return { upstream: undefined, status: "name candidate" };
+  return { upstream: undefined, status: "missing upstream" };
+}
+
+function findEntityMatch(apiEntities, id, key, patch, taskCandidates) {
+  if (!apiEntities) return { upstream: undefined, status: "unverified" };
+  const upstream = apiEntities.get(id) || apiEntities.get(key);
+  if (upstream) return { upstream, status: "already upstream" };
+  if (taskCandidates && isEntityRecord(patch)) return findTaskCandidate(apiEntities, patch);
+  return { upstream: undefined, status: "missing upstream" };
+}
+
+function buildEntityComparisonSections(title, overrides = {}, apiEntities, additions = false, taskCandidates = false) {
+  const section = createSection(`${title} vs API`, ["Entity", "Field", "API", "Overlay", "Status"],
+    { statusColumnIndex: 4 });
+  for (const [key, patch] of Object.entries(overrides)) {
+    const id = additions ? patch?.id || key : key;
+    const match = findEntityMatch(apiEntities, id, additions ? key : id, patch, taskCandidates);
+    const upstream = match.upstream;
+    if (additions) {
+      pushRow(section, [id, "entity", upstream ? "present" : "missing", "addition", match.status]);
+    }
+    pushEntityFieldRows(section, id, patch, upstream, !!apiEntities);
+  }
+  return [section];
+}
+
+function markModeGuards(sections, shared, effective) {
+  for (const section of sections) {
+    if (section.statusColumnIndex === undefined) continue;
+    for (const row of section.rows) {
+      if (row[section.statusColumnIndex] !== "same") continue;
+      const field = row[1].split(":")[0];
+      if (shared[row[0]]?.[field] !== undefined &&
+          !valuesEqual(shared[row[0]][field], effective[row[0]]?.[field])) {
+        row[section.statusColumnIndex] = "mode guard";
+      }
+    }
+  }
+  return sections;
 }
 
 function formatValue(value, maxLength = 220) {
@@ -144,30 +262,9 @@ function buildStoryChapterSections(chapters = {}) {
   return [section];
 }
 
-function buildTaskAdditionSections(tasksAdd = {}, mode) {
-  const section = createSection(`Task Additions (${getModeLabel(mode)})`, [
-    "Task",
-    "ID",
-    "Trader",
-    "Map",
-    "Wiki",
-  ]);
-
-  for (const [taskId, addition] of Object.entries(tasksAdd)) {
-    if (!addition || typeof addition !== "object") {
-      pushRow(section, [taskId, taskId, "-", "-", "-"]);
-      continue;
-    }
-    pushRow(section, [
-      addition.name || taskId,
-      addition.id || taskId,
-      addition.trader?.name || "-",
-      addition.map?.name || "-",
-      addition.wikiLink || "-",
-    ]);
-  }
-
-  return [section];
+function buildTaskAdditionSections(tasksAdd = {}, mode, apiTasks) {
+  return buildEntityComparisonSections(`Task Additions (${getModeLabel(mode)})`, tasksAdd,
+    apiTasks ? new Map(apiTasks.map((task) => [task.id, task])) : null, true, true);
 }
 
 function buildPrestigeSections(prestige = {}) {
@@ -294,87 +391,98 @@ function buildCraftAddSections(crafts = {}) {
   return [section];
 }
 
-function buildTasksSections(overrides = {}, apiTasks = []) {
-  const diffSection = createSection(
-    "Task Overrides vs API",
-    ["Task", "Field", "API", "Overlay", "Status"],
-    { statusColumnIndex: 4 }
-  );
-  const objectivesAddSection = createSection("Added Objectives", ["Task", "Objective", "Overlay"]);
-  const missingSection = createSection("Tasks Missing From API", ["Task", "Task ID"]);
-  const disabledSection = createSection("Disabled Tasks", ["Task", "Task ID"]);
+function guardedComparisonStatus(value, upstream, available, shared) {
+  const status = comparisonStatus(value, upstream, available);
+  return status === "same" && shared !== undefined && !valuesEqual(shared, value) ? "mode guard" : status;
+}
 
-  const apiById = new Map(apiTasks.map((task) => [task.id, task]));
-
-  for (const [taskId, override] of Object.entries(overrides)) {
-    if (!override || typeof override !== "object") {
-      continue;
-    }
-    const apiTask = apiById.get(taskId);
-    const taskName = apiTask?.name || override.name || `Task ID ${taskId}`;
-
-    if (!apiTask) {
-      pushRow(missingSection, [taskName, taskId]);
-      continue;
-    }
-
-    if (override.disabled === true) {
-      pushRow(disabledSection, [taskName, taskId]);
-    }
-
-    const { objectives, objectivesAdd, ...topLevel } = override;
-    for (const [field, value] of Object.entries(topLevel)) {
-      if (value === undefined) continue;
-      const apiValue = apiTask[field];
-      pushRow(diffSection, [
-        taskName,
-        field,
-        formatValue(apiValue),
-        formatValue(value),
-        valuesEqual(apiValue, value) ? "same" : "override",
-      ]);
-    }
-
-    if (objectives && typeof objectives === "object") {
-      for (const [objectiveId, objOverride] of Object.entries(objectives)) {
-        if (!objOverride || typeof objOverride !== "object") continue;
-        const apiObjective = apiTask.objectives?.find((objective) => objective.id === objectiveId);
-        if (!apiObjective) {
-          pushRow(diffSection, [
-            taskName,
-            `objective:${objectiveId}`,
-            "missing",
-            formatValue(objOverride),
-            "missing",
-          ]);
-          continue;
-        }
-        for (const [field, value] of Object.entries(objOverride)) {
-          if (value === undefined) continue;
-          const apiValue = apiObjective[field];
-          pushRow(diffSection, [
-            taskName,
-            `objective:${objectiveId}.${field}`,
-            formatValue(apiValue),
-            formatValue(value),
-            valuesEqual(apiValue, value) ? "same" : "override",
-          ]);
-        }
-      }
-    }
-
-    if (Array.isArray(objectivesAdd)) {
-      for (const objective of objectivesAdd) {
-        const label = objective.description || objective.id || "Added objective";
-        pushRow(objectivesAddSection, [taskName, label, formatValue(objective)]);
-      }
-    }
+function pushTaskFieldRows(section, taskName, override, apiTask, available, shared) {
+  const { objectives, objectivesAdd, ...fields } = override;
+  for (const [field, value] of Object.entries(fields)) {
+    if (value === undefined) continue;
+    pushRow(section, [taskName, field, formatValue(apiTask[field]), formatValue(value),
+      guardedComparisonStatus(value, apiTask[field], available, shared?.[field])]);
   }
+}
 
+function findApiObjective(objectives, id) {
+  if (!validObjectiveCollection(objectives)) return undefined;
+  return objectives.find((objective) => isEntityRecord(objective) && objective.id === id);
+}
+
+function pushObjectiveFields(section, taskName, objectiveId, patch, upstream, available, shared) {
+  for (const [field, value] of Object.entries(patch)) {
+    if (value === undefined) continue;
+    pushRow(section, [taskName, `objective:${objectiveId}.${field}`, formatValue(upstream[field]), formatValue(value),
+      guardedComparisonStatus(value, upstream[field], available, shared?.[field])]);
+  }
+}
+
+function pushObjectiveOverrideRow(section, taskName, objectiveId, patch, apiTask, available, shared) {
+  if (!isEntityRecord(patch)) return;
+  const upstream = findApiObjective(apiTask.objectives, objectiveId);
+  if (!upstream) {
+    pushRow(section, [taskName, `objective:${objectiveId}`, "missing", formatValue(patch), "unverified"]);
+    return;
+  }
+  pushObjectiveFields(section, taskName, objectiveId, patch, upstream, available, shared?.objectives?.[objectiveId]);
+}
+
+function pushObjectiveOverrideRows(section, taskName, objectives, apiTask, available, shared) {
+  for (const [objectiveId, patch] of Object.entries(objectives || {})) {
+    pushObjectiveOverrideRow(section, taskName, objectiveId, patch, apiTask, available, shared);
+  }
+}
+
+function objectiveLabel(objective) {
+  return objective.description || objective.id || "Added objective";
+}
+
+function objectiveComparisonFields(objective, upstream) {
+  const fields = { ...objective };
+  if (upstream?.id !== objective.id) delete fields.id;
+  return fields;
+}
+
+function pushObjectiveAdditionRow(section, taskName, objective, apiTask, available) {
+  const label = objectiveLabel(objective);
+  const upstream = findAddedEntity(apiTask.objectives, objective, "description");
+  pushRow(section, [taskName, label, formatValue(objective), formatValue(upstream),
+    comparisonStatus(objectiveComparisonFields(objective, upstream), upstream, available)]);
+  pushRow(section, [taskName, `${label} (presence)`, "addition", upstream ? "present" : "missing",
+    presenceStatus(upstream, available && !!apiTask.id)]);
+}
+
+function pushObjectiveAdditionRows(section, taskName, additions, apiTask, available) {
+  if (!Array.isArray(additions)) return;
+  available = available && validObjectiveCollection(apiTask.objectives);
+  for (const objective of additions) {
+    pushObjectiveAdditionRow(section, taskName, objective, apiTask, available);
+  }
+}
+
+function buildTasksSections(overrides = {}, apiTasks = [], available = true, shared = {}) {
+  const diffSection = createSection("Task Overrides vs API", ["Task", "Field", "API", "Overlay", "Status"], { statusColumnIndex: 4 });
+  const objectivesAddSection = createSection("Added Objectives", ["Task", "Objective", "Overlay", "API", "Status"], { statusColumnIndex: 4 });
+  const missingSection = createSection("Tasks Missing From API", ["Task", "Task ID", "Status"], { statusColumnIndex: 2 });
+  const disabledSection = createSection("Disabled Tasks", ["Task", "Task ID"]);
+  const apiById = new Map(apiTasks.map((task) => [task.id, task]));
+  for (const [taskId, override] of Object.entries(overrides)) {
+    if (!override || typeof override !== "object") continue;
+    const apiTask = apiById.get(taskId) || {};
+    const taskName = apiTask.name || override.name || `Task ID ${taskId}`;
+    if (!apiTask.id) pushRow(missingSection, [taskName, taskId, "unverified"]);
+    if (override.disabled === true) pushRow(disabledSection, [taskName, taskId]);
+    pushTaskFieldRows(diffSection, taskName, override, apiTask, available, shared[taskId]);
+    pushObjectiveOverrideRows(diffSection, taskName, override.objectives, apiTask, available, shared[taskId]);
+    pushObjectiveAdditionRows(objectivesAddSection, taskName, override.objectivesAdd, apiTask, available);
+  }
   return [diffSection, objectivesAddSection, missingSection, disabledSection];
 }
 
 module.exports = {
+  markModeGuards,
+  buildEntityComparisonSections,
   buildCraftAddSections,
   buildEditionsSections,
   buildLocaleSections,

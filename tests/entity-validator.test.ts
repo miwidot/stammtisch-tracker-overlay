@@ -287,3 +287,8 @@ describe('categorizeEntityResults', () => {
     expect(grouped.removedFromApi).toHaveLength(1);
   });
 });
+
+it('rejects malformed entries rather than silently skipping upstream comparison', () => {
+  expect(() => validateEntityOverrides({ bad: null }, new Map())).toThrow('bad');
+  expect(() => validateEntityAdditions({ bad: [] }, new Map())).toThrow('bad');
+});

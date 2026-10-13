@@ -44,7 +44,7 @@ function mockEndpoints(routes: Routes) {
 /** Minimal set of empty endpoints so a fetch never hits the 404 path. */
 function baseRoutes(mode: string, overrides: Routes = {}): Routes {
   return {
-    [`${mode}/tasks`]: { data: { tasks: {} } },
+    [`${mode}/tasks`]: { data: { tasks: { fixture: { id: 'fixture' } } } },
     [`${mode}/tasks_en`]: { data: {} },
     [`${mode}/items`]: { data: { items: {} } },
     [`${mode}/items_en`]: { data: {} },
@@ -774,7 +774,7 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
 
     const fetchMock = mockEndpoints(routes);
 
-    await expect(fetchTasks('pvp-season')).resolves.toEqual([]);
+    await expect(fetchTasks('pvp-season')).resolves.toEqual([{ id: 'fixture', name: 'fixture' }]);
     expect(
       fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/pvp-season/items_en'))
     ).toHaveLength(1);
@@ -1184,4 +1184,16 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
       );
     });
   });
+});
+
+it('returns validated raw task source data before adaptation', async () => {
+  const raw = {
+    tasks: { t: { id: 't', otherRequirements: { id: 'r', type: 'globalVariable' } } },
+    questItems: [],
+  };
+  mockEndpoints(baseRoutes('regular', { 'regular/tasks': { data: raw } }));
+  const snapshot = await fetchTasksWithRequirementCounts();
+  expect(snapshot).toHaveProperty('sourceData', raw);
+  expect(snapshot.tasks[0].otherRequirements).toBeInstanceOf(Array);
+  vi.unstubAllGlobals();
 });

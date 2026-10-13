@@ -13,7 +13,7 @@
  *
  * Flags (all off by default; without them the script only reports):
  *   --strict            Fail when the overlay is inconsistent or data is being
- *                       served incorrectly (see `actionable` in main()).
+ *                       served incorrectly (see `actionable` in main()). CI enables this.
  *   --fail-on-stale     Fail when the overlay carries data tarkov.dev now
  *                       supplies itself. This is what CI runs.
  *   --fail-on-upstream  Fail on upstream data-quality regressions. Off by
@@ -39,6 +39,8 @@
 
 import { join } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
+import { assertComparisonCoverage } from '../src/lib/comparison-coverage.js';
+import { checkSupplements } from './check-supplements.js';
 import {
   getProjectPaths,
   isDirectExecution,
@@ -57,6 +59,7 @@ import {
   fetchTasksWithRequirementCounts,
   fetchLocaleBundle,
   fetchRawEntities,
+  fetchItemValidationData,
   fetchMapValidationData,
   validateMapOverrides,
   mergeMapOverrides,
@@ -344,8 +347,18 @@ export function checkTaskAdditions(
   apiTasks: TaskData[]
 ): AdditionResult[] {
   const { byWikiLink, byName } = buildApiIndexes(apiTasks);
+  const byId = new Map(apiTasks.map((task) => [task.id, task]));
 
   return Object.entries(additions).map(([key, addition]) => {
+    const idMatch = byId.get(addition.id) ?? byId.get(key);
+    if (idMatch) {
+      return {
+        key,
+        name: addition.name,
+        status: 'RESOLVED',
+        message: `Matched API task '${idMatch.name}' (${idMatch.id}) by id - remove the addition and keep any proven corrections as overrides`,
+      };
+    }
     const wikiKey = normalizeWikiLink(addition.wikiLink);
     const wikiMatch = wikiKey ? byWikiLink.get(wikiKey) : undefined;
     if (wikiMatch) {
@@ -497,7 +510,12 @@ function printResults(
   const { stillNeeded, fixed, removedFromApi } = categorizeResults(results);
   const line = (r: ValidationResult) => `${r.name} (${r.id})`;
 
-  printCountSection('Still need overrides', 'green', stillNeeded.map(line), icons.success);
+  printCountSection(
+    'Not redundant; correctness requires supporting evidence',
+    'yellow',
+    stillNeeded.map(line),
+    icons.warning
+  );
   printCountSection('Fixed in API, can remove', 'yellow', fixed.map(line), icons.sync);
 
   // Fully fixed and removed entries are already counted as obsolete below.
@@ -691,15 +709,54 @@ async function checkLocaleOverrides(): Promise<number> {
  * Cross-check objective overrides against the local quest reference file
  * (authoritative source). The API-only validator can only say "override differs
  * from API", which it treats as "still needed" - it cannot tell when the
- * override itself is wrong. The reference file adjudicates that. No-ops cleanly
- * when no reference file is present in `eft/`.
+ * override itself is wrong. The reference file adjudicates objective counts.
+ * Missing reference coverage is reported explicitly.
  */
-function printReferenceCrossCheck(
-  groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>
+function mergeReferenceOverrides(
+  groups: Array<{ overrides: Record<string, TaskOverride> }>
+): Record<string, TaskOverride> {
+  const merged: Record<string, TaskOverride> = {};
+  for (const { overrides } of groups) {
+    for (const [id, patch] of Object.entries(overrides)) {
+      const previous = merged[id] ?? {};
+      const objectives = { ...previous.objectives };
+      for (const [objectiveId, objective] of Object.entries(patch.objectives ?? {})) {
+        objectives[objectiveId] = { ...objectives[objectiveId], ...objective };
+      }
+      merged[id] = { ...previous, ...patch, objectives };
+    }
+  }
+  return merged;
+}
+
+function printReferenceModeCoverage(
+  refMode: GameMode | null,
+  skipped: Array<{ label: string }>
 ): void {
-  const eftDir = join(rootDir, 'eft');
+  if (refMode) {
+    console.log(dim(`  (reference mode: ${refMode})`));
+    for (const g of skipped) {
+      console.log(dim(`  (skipping ${g.label} overrides: reference is ${refMode})`));
+    }
+  } else {
+    console.log(
+      dim('  (UNVERIFIED reference mode; base comparison is diagnostic only, not gated)')
+    );
+  }
+  console.log();
+}
+
+export function printReferenceCrossCheck(
+  groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>,
+  eftDir = join(rootDir, 'eft')
+): number {
   const eftTasks = loadEftTasks(eftDir);
-  if (!eftTasks) return; // no reference file available; skip silently
+  if (!eftTasks) {
+    console.log(
+      'UNVERIFIED: local quest reference unavailable; upstream differences do not prove corrections are correct.'
+    );
+    return 0;
+  }
 
   printHeader('REFERENCE CROSS-CHECK');
 
@@ -709,28 +766,22 @@ function printReferenceCrossCheck(
   const refMode = detectReferenceMode(eftDir);
   const applicable = groups.filter((g) => g.label === 'base' || g.label === refMode);
   const skipped = groups.filter((g) => !applicable.includes(g));
-  if (refMode) {
-    console.log(dim(`  (reference mode: ${refMode})`));
-    for (const g of skipped) {
-      console.log(dim(`  (skipping ${g.label} overrides: reference is ${refMode})`));
-    }
-  } else {
-    console.log(dim('  (reference mode unknown; checking base overrides only)'));
-  }
-  console.log();
+  printReferenceModeCoverage(refMode, skipped);
 
   const countConflicts: CrossCheckEntry[] = [];
   const descConflicts: CrossCheckEntry[] = [];
   const unverifiable: CrossCheckEntry[] = [];
   let confirmed = 0;
 
-  for (const { overrides } of applicable) {
-    for (const entry of crossCheckOverrides(overrides, eftTasks)) {
-      if (entry.verdict === 'CONFLICTS_REFERENCE') {
-        (entry.field === 'count' ? countConflicts : descConflicts).push(entry);
-      } else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
-      else confirmed += 1;
-    }
+  const effective = mergeReferenceOverrides([
+    ...applicable.filter((group) => group.label === 'base'),
+    ...applicable.filter((group) => group.label !== 'base'),
+  ]);
+  for (const entry of crossCheckOverrides(effective, eftTasks)) {
+    if (entry.verdict === 'CONFLICTS_REFERENCE') {
+      (entry.field === 'count' ? countConflicts : descConflicts).push(entry);
+    } else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
+    else confirmed += 1;
   }
 
   const printConflict = (c: CrossCheckEntry): void => {
@@ -779,6 +830,7 @@ function printReferenceCrossCheck(
     )} : ${icons.info}`
   );
   console.log();
+  return refMode ? countConflicts.length : 0;
 }
 
 /**
@@ -1042,7 +1094,7 @@ function printEntityResults(
     icons.error
   );
   printCountSection(
-    'Still needed',
+    'Not redundant; correctness requires supporting evidence',
     'yellow',
     lines(grouped.stillNeeded),
     icons.warning,
@@ -1283,9 +1335,13 @@ export async function checkMapData(
   return { actionable, staleProblems, upstreamProblems: 0 };
 }
 
-async function checkEntityData(): Promise<GateCounts> {
+export async function checkEntityData(sourceDir = srcDir): Promise<GateCounts> {
   let actionable = 0;
   let staleProblems = 0;
+  const loadEntitySource = (spec: EntityCheckSpec) => {
+    const file = join(sourceDir, ...spec.segments);
+    return existsSync(file) ? loadJson5File<Record<string, unknown>>(file) : {};
+  };
   // Prestige only exists in upstream regular mode, so its overlay is scoped
   // to modes.regular rather than being applied to pve/pvp-season.
   const prestigeSpec: EntityCheckSpec = {
@@ -1308,13 +1364,16 @@ async function checkEntityData(): Promise<GateCounts> {
     const key = `${mode}/${spec.endpoint}/${spec.collectionKey ?? ''}`;
     let pending = entityCache.get(key);
     if (!pending) {
-      pending = fetchRawEntities(mode, spec.endpoint, spec.collectionKey);
+      pending =
+        spec.endpoint === 'items'
+          ? fetchItemValidationData(mode)
+          : fetchRawEntities(mode, spec.endpoint, spec.collectionKey);
       entityCache.set(key, pending);
     }
     return pending;
   };
 
-  const prestigeOverrides = loadOptional(...prestigeSpec.segments);
+  const prestigeOverrides = loadEntitySource(prestigeSpec);
   if (Object.keys(prestigeOverrides).length > 0) {
     printProgress('Fetching regular prestige data from tarkov.dev API...');
     const apiEntities = await getEntities('regular', prestigeSpec);
@@ -1329,7 +1388,7 @@ async function checkEntityData(): Promise<GateCounts> {
   }
 
   for (const spec of ENTITY_OVERRIDE_SPECS) {
-    const entityOverrides = loadOptional(...spec.segments);
+    const entityOverrides = loadEntitySource(spec);
     const relPath = `src/${spec.segments.join('/')}`;
     if (Object.keys(entityOverrides).length === 0) {
       const report = printEntityResults(spec.label, relPath, []);
@@ -1349,7 +1408,7 @@ async function checkEntityData(): Promise<GateCounts> {
   }
 
   for (const spec of ENTITY_ADDITION_SPECS) {
-    const entityAdditions = loadOptional(...spec.segments);
+    const entityAdditions = loadEntitySource(spec);
     const relPath = `src/${spec.segments.join('/')}`;
     if (Object.keys(entityAdditions).length === 0) {
       printEntityResults(spec.label, relPath, []);
@@ -1486,6 +1545,7 @@ async function checkModeTasks(
   // cross-mode passes so nothing is fetched twice.
   const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
   const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
+  const sourceTaskDataByMode: Partial<Record<GameMode, Record<string, unknown>>> = {};
   // Keyed snapshots keep each mode's tasks and its raw trader-requirement ID
   // counts together, so the diagnostic cannot see one without the other.
   const snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>> = {};
@@ -1500,6 +1560,7 @@ async function checkModeTasks(
     const modeSnapshot = await getTasksForMode(mode);
     const modeApiTasks = modeSnapshot.tasks;
     apiTasksByMode[mode] = modeApiTasks;
+    sourceTaskDataByMode[mode] = modeSnapshot.sourceData;
     snapshotsByMode[mode] = modeSnapshot;
     printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
@@ -1525,7 +1586,13 @@ async function checkModeTasks(
   }
   printBaseCrossModeSummary(baseResultsByMode);
 
-  return { apiTasksByMode, modeOverridesByMode, staleProblems, upstreamProblems };
+  return {
+    apiTasksByMode,
+    sourceTaskDataByMode,
+    modeOverridesByMode,
+    staleProblems,
+    upstreamProblems,
+  };
 }
 
 function checkModeDivergences(
@@ -1609,6 +1676,7 @@ async function main(): Promise<void> {
   let upstreamProblems = 0;
 
   try {
+    assertComparisonCoverage(srcDir);
     printProgress('Loading task overrides...');
     const overrides = loadTaskOverrides();
     const taskCount = Object.keys(overrides).length;
@@ -1649,7 +1717,7 @@ async function main(): Promise<void> {
       staleSharedAdditionKeys,
       crossCheckGroups
     );
-    const { apiTasksByMode, modeOverridesByMode } = modeCounts;
+    const { apiTasksByMode, sourceTaskDataByMode, modeOverridesByMode } = modeCounts;
     staleProblems += modeCounts.staleProblems;
     upstreamProblems += modeCounts.upstreamProblems;
 
@@ -1661,15 +1729,25 @@ async function main(): Promise<void> {
 
     const entityCounts = await checkEntityData();
     const mapCounts = await checkMapData();
+    const supplementCounts = {
+      ...(await checkSupplements(srcDir, undefined, sourceTaskDataByMode)),
+      upstreamProblems: 0,
+    };
     const storyCounts = checkStoryData(apiTasksByMode, additions);
     const suppressionCounts = checkSuppressions(apiTasks, apiTasksByMode);
-    for (const counts of [entityCounts, mapCounts, storyCounts, suppressionCounts]) {
+    for (const counts of [
+      entityCounts,
+      mapCounts,
+      supplementCounts,
+      storyCounts,
+      suppressionCounts,
+    ]) {
       actionable += counts.actionable;
       staleProblems += counts.staleProblems;
       upstreamProblems += counts.upstreamProblems;
     }
 
-    printReferenceCrossCheck(crossCheckGroups);
+    actionable += printReferenceCrossCheck(crossCheckGroups);
 
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();

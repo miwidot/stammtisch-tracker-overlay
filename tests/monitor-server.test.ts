@@ -3,12 +3,14 @@
  *
  * Every test in this file imports the real module via createRequire and
  * exercises the real exported functions / the real http.Server instance.
- * No test doubles, no local re-implementations.
+ * Refresh scheduling tests inject in-memory transport promises into the real source.
  */
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import path from 'node:path';
 import vm from 'node:vm';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { createServer as createHttpServer } from 'node:http';
 
 // NODE_ENV must be "test" *before* importing the module so it:
@@ -208,7 +210,7 @@ describe('buildTasksSections', () => {
     expect(row).toBeDefined();
     expect(row[2]).toBe('10');
     expect(row[3]).toBe('45');
-    expect(row[4]).toBe('override');
+    expect(row[4]).toBe('needs evidence');
   });
 
   it('produces a "same" row when values match', () => {
@@ -223,7 +225,7 @@ describe('buildTasksSections', () => {
   it('routes unknown task IDs to the missing section', () => {
     const [, , missing] = buildTasksSections({ ghost: { name: 'Ghost' } }, []);
     expect(missing.rows).toHaveLength(1);
-    expect(missing.rows[0]).toEqual(['Ghost', 'ghost']);
+    expect(missing.rows[0]).toEqual(['Ghost', 'ghost', 'unverified']);
   });
 
   it('routes disabled tasks to the disabled section', () => {
@@ -239,7 +241,7 @@ describe('buildTasksSections', () => {
       { t1: { objectivesAdd: [{ id: 'o', description: 'Plant' }] } },
       [{ id: 't1', name: 'T', objectives: [] }]
     );
-    expect(added.rows).toHaveLength(1);
+    expect(added.rows).toHaveLength(2);
     expect(added.rows[0][0]).toBe('T');
     expect(added.rows[0][1]).toBe('Plant');
   });
@@ -252,7 +254,7 @@ describe('buildTasksSections', () => {
     expect(row).toBeDefined();
     expect(row[2]).toBe('Orig');
     expect(row[3]).toBe('Fixed');
-    expect(row[4]).toBe('override');
+    expect(row[4]).toBe('needs evidence');
   });
 
   it('marks objectives missing from the API', () => {
@@ -261,7 +263,7 @@ describe('buildTasksSections', () => {
     ]);
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:gone');
     expect(row).toBeDefined();
-    expect(row[4]).toBe('missing');
+    expect(row[4]).toBe('unverified');
   });
 
   it('skips null/non-object overrides', () => {
@@ -337,7 +339,7 @@ describe('buildSummary', () => {
   it('returns 1 section for "items"', () => {
     const s = buildSummary('items', '');
     expect(s.sections).toHaveLength(1);
-    expect(s.sections[0].title).toContain('Items');
+    expect(s.sections[0].title).toContain('Item');
   });
 
   it('returns 1 section for "tasksAdd"', () => {
@@ -529,16 +531,17 @@ describe('buildTaskAdditionSections', () => {
       { ct: { id: 'ct', name: 'CT', trader: { name: 'Prapor' }, map: { name: 'Customs' } } },
       'regular'
     );
-    expect(sec.rows[0][0]).toBe('CT');
-    expect(sec.rows[0][2]).toBe('Prapor');
-    expect(sec.rows[0][3]).toBe('Customs');
+    expect(sec.rows[0][0]).toBe('ct');
+    expect(sec.rows.find((row: string[]) => row[1] === 'trader')[3]).toContain('Prapor');
+    expect(sec.rows.find((row: string[]) => row[1] === 'map')[3]).toContain('Customs');
+    expect(sec.rows.every((row: string[]) => row[4] === 'unverified')).toBe(true);
   });
 
   it('uses the human-readable mode label in the title', () => {
     const [sec] = buildTaskAdditionSections({}, 'regular');
-    expect(sec.title).toBe('Task Additions (PvP)');
+    expect(sec.title).toBe('Task Additions (PvP) vs API');
     const [seasonal] = buildTaskAdditionSections({}, 'pvp-season');
-    expect(seasonal.title).toBe('Task Additions (PvP PvE Seasonal)');
+    expect(seasonal.title).toBe('Task Additions (PvP PvE Seasonal) vs API');
   });
 });
 
@@ -724,9 +727,9 @@ describe('formatValue', () => {
 describe('valuesEqual', () => {
   it('normalises object key order', () =>
     expect(valuesEqual({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true));
-  it('preserves array order', () => {
+  it('ignores array order', () => {
     expect(valuesEqual([1, 2], [1, 2])).toBe(true);
-    expect(valuesEqual([1, 2], [2, 1])).toBe(false);
+    expect(valuesEqual([1, 2], [2, 1])).toBe(true);
   });
   it('undefined === undefined', () => expect(valuesEqual(undefined, undefined)).toBe(true));
   it('undefined !== null', () => expect(valuesEqual(undefined, null)).toBe(false));
@@ -854,7 +857,7 @@ describe('monitor hardening', () => {
   it('builds view-specific query parameters from the shared configuration', () => {
     expect(buildViewParams('tasks', 'pve', 'en').toString()).toBe('view=tasks&mode=pve');
     expect(buildViewParams('locales', 'regular', 'en').toString()).toBe('view=locales&locale=en');
-    expect(buildViewParams('items', 'pve', 'en').toString()).toBe('view=items');
+    expect(buildViewParams('items', 'pve', 'en').toString()).toBe('view=items&mode=pve');
   });
 
   it('only enables rebuilds for the default overlay path', () => {
@@ -1121,14 +1124,44 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(row).toBeDefined();
     expect(row[2]).toBe('10'); // API
     expect(row[3]).toBe('45'); // overlay
-    expect(row[4]).toBe('override');
+    expect(row[4]).toBe('needs evidence');
   });
 
   it('GET /latest — respects view=items', async () => {
     const data = await (await fetch(`${baseUrl}/latest?view=items`)).json();
     expect(data.view).toBe('items');
-    expect(data.mode).toBeNull();
-    expect(data.sections[0].title).toContain('Items');
+    expect(data.mode).toBe('regular');
+    expect(data.sections[0].title).toContain('Item');
+  });
+
+  it('keeps healthy API status when the local overlay fails', async () => {
+    const previous = overlayState.error;
+    const previousData = overlayState.data;
+    try {
+      overlayState.error = 'Local overlay parse failed';
+      rebuildSummaries();
+      const data = await (await fetch(`${baseUrl}/latest?view=tasks`)).json();
+      expect(data.overlay.error).toContain('Local overlay parse failed');
+      expect(data.api.error).toBeNull();
+    } finally {
+      overlayState.data = previousData;
+      overlayState.error = previous;
+      rebuildSummaries();
+    }
+  });
+
+  it('redacts upstream errors in the API status as well as the summary', async () => {
+    const previous = apiState.regular.error;
+    try {
+      apiState.regular.error = 'Fetch failed: https://example.invalid/?token=private';
+      rebuildSummaries();
+      const data = await (await fetch(`${baseUrl}/latest?view=tasks`)).json();
+      expect(data.api.error).not.toContain('token=private');
+      expect(data.api.error).toContain('[remote overlay]');
+    } finally {
+      apiState.regular.error = previous;
+      rebuildSummaries();
+    }
   });
 
   it('GET /latest — defaults unknown view to tasks', async () => {
@@ -1285,4 +1318,224 @@ describe('HTTP — real monitor/server.js handlers', () => {
     const res = await fetch(`${baseUrl}/latest`, { method: 'POST' });
     expect(res.status).toBe(405);
   });
+});
+
+// Regression coverage for upstream adoption and fail-closed comparisons.
+describe('monitor upstream coverage', () => {
+  it('compares task additions by canonical ID and supplied fields', () => {
+    overlayState.data = {
+      tasksAdd: {
+        alias: { id: '0123456789abcdef01234567', name: 'Task', trader: { name: 'Prapor' } },
+      },
+    };
+    apiState.regular.data = [{ id: '0123456789abcdef01234567', name: 'Task', experience: 20 }];
+    apiState.regular.error = null;
+    const rows = buildSummary('tasksAdd', 'regular').sections[0].rows;
+    expect(rows.some((row: string[]) => row.at(-1) === 'same')).toBe(true);
+  });
+  it('recognizes adopted objective additions without requiring extra upstream fields', () => {
+    const [, added] = buildTasksSections({ t: { objectivesAdd: [{ id: 'o', count: 2 }] } }, [
+      { id: 't', objectives: [{ id: 'o', count: 2, description: 'Extra' }] },
+    ]);
+    expect(added.rows[0].at(-1)).toBe('same');
+  });
+  it('does not use stale task data after a failed refresh', () => {
+    overlayState.data = { tasks: { t: { experience: 2 } } };
+    apiState.regular.data = [{ id: 't', experience: 2 }];
+    apiState.regular.error = 'Failed refresh';
+    const summary = buildSummary('tasks', 'regular');
+    expect(summary.sections.flatMap((section: any) => section.rows).flat()).not.toContain('same');
+    apiState.regular.error = null;
+  });
+});
+
+describe('entity comparison monitor views', () => {
+  it.each(['items', 'hideout', 'traders', 'maps', 'itemsAdd'])(
+    'compares %s per mode and fails closed',
+    (view) => {
+      const endpoint = view === 'itemsAdd' ? 'items' : view;
+      overlayState.data = { [view]: { x: { id: 'x', value: { count: 2 } } } };
+      apiState.pve.entities = {
+        [endpoint]: {
+          data: new Map([['x', { id: 'x', value: { count: 2, extra: true } }]]),
+          error: null,
+        },
+      };
+      const rows = buildSummary(view, 'pve').sections[0].rows;
+      expect(rows.find((row: string[]) => row[1] === 'value')[4]).toBe('same');
+      apiState.pve.entities[endpoint].error = 'Failed refresh';
+      expect(
+        buildSummary(view, 'pve').sections[0].rows.every((row: string[]) => row[4] === 'unverified')
+      ).toBe(true);
+    }
+  );
+  it('matches map extracts adopted under an upstream canonical ID by translated name', () => {
+    overlayState.data = {
+      maps: { m: { extractsAdd: [{ id: 'overlay.extract', name: 'Exit', position: { x: 1 } }] } },
+    };
+    apiState.regular.entities = {
+      maps: {
+        data: new Map([
+          [
+            'm',
+            { id: 'm', extracts: [{ id: 'canonical', name: 'Exit', position: { x: 1, y: 2 } }] },
+          ],
+        ]),
+        error: null,
+      },
+    };
+    expect(buildSummary('maps', 'regular').sections[0].rows[1][4]).toBe('same');
+    apiState.regular.entities.maps.data.get('m').extracts[0].position.x = 3;
+    expect(buildSummary('maps', 'regular').sections[0].rows[1][4]).toBe('needs evidence');
+  });
+});
+
+describe('monitor mode guards and adoption presence', () => {
+  it('preserves task mode guards that equal upstream', () => {
+    const [diff] = buildTasksSections(
+      { t: { experience: 2 } },
+      [{ id: 't', name: 'Task', experience: 2 }],
+      true,
+      { t: { experience: 1 } }
+    );
+    expect(diff.rows[0][4]).toBe('mode guard');
+  });
+  it('preserves an empty extract list clearing a shared addition', () => {
+    overlayState.data = {
+      maps: { m: { extractsAdd: [{ id: 'overlay', name: 'Exit' }] } },
+      modes: { pve: { maps: { m: { extractsAdd: [] } } } },
+    };
+    apiState.pve.entities = {
+      maps: { data: new Map([['m', { id: 'm', extracts: [] }]]), error: null },
+    };
+    expect(buildSummary('maps', 'pve').sections[0].rows[0][4]).toBe('mode guard');
+  });
+  it('distinguishes adoption from agreeing field values for objectives', () => {
+    const [, added] = buildTasksSections(
+      { t: { objectivesAdd: [{ id: 'synthetic', description: 'Exit', count: 2 }] } },
+      [{ id: 't', objectives: [{ id: 'canonical', description: 'Exit', count: 3 }] }]
+    );
+    expect(added.rows[0][4]).toBe('needs evidence');
+    expect(added.rows[1][4]).toBe('already upstream');
+  });
+});
+
+describe('monitor addition identity candidates', () => {
+  it('checks item source keys as well as embedded IDs', () => {
+    overlayState.data = { itemsAdd: { source: { id: 'embedded', name: 'Item' } } };
+    apiState.regular.entities = {
+      items: { data: new Map([['source', { id: 'source', name: 'Item' }]]), error: null },
+    };
+    const rows = buildSummary('itemsAdd', 'regular').sections[0].rows;
+    expect(rows[0][4]).toBe('already upstream');
+    expect(rows.find((row: string[]) => row[1] === 'id')[4]).toBe('needs evidence');
+  });
+  it('recognizes task wiki adoption and treats names as candidates', () => {
+    const [wiki] = buildTaskAdditionSections(
+      { x: { id: 'x', name: 'Task', wikiLink: 'https://wiki/Task' } },
+      'regular',
+      [{ id: 'canonical', name: 'Task', wikiLink: 'https://wiki/Task' }]
+    );
+    expect(wiki.rows[0][4]).toBe('already upstream');
+    const [name] = buildTaskAdditionSections({ x: { id: 'x', name: 'Task' } }, 'regular', [
+      { id: 'canonical', name: 'Task' },
+    ]);
+    expect(name.rows[0][4]).toBe('name candidate');
+  });
+});
+
+it('does not report extract absence when the upstream extract collection is malformed', () => {
+  overlayState.data = { maps: { m: { extractsAdd: [{ id: 'x', name: 'Exit' }] } } };
+  apiState.regular.entities = {
+    maps: { data: new Map([['m', { id: 'm', extracts: null }]]), error: null },
+  };
+  expect(
+    buildSummary('maps', 'regular').sections[0].rows.every(
+      (row: string[]) => row[4] === 'unverified'
+    )
+  ).toBe(true);
+});
+
+describe('monitor independent upstream refresh', () => {
+  it('publishes tasks and successful entities while hideout is pending and coalesces reads', async () => {
+    const requireMonitor = createRequire(path.resolve('monitor/server.js'));
+    let rejectHideout!: (error: Error) => void;
+    const hideout = new Promise((_, reject) => {
+      rejectHideout = reject;
+    });
+    const fetchTasks = vi.fn(async () => [{ id: 't', experience: 2 }]);
+    const fetchEntities = vi.fn(async (_mode: string, endpoint: string) => {
+      if (endpoint === 'hideout') return hideout;
+      return new Map([['x', { id: 'x', count: 2 }]]);
+    });
+    const context = vm.createContext({
+      require: (id: string) =>
+        id === './lib/tarkov-api.js'
+          ? { fetchApiTasks: fetchTasks, fetchApiEntities: fetchEntities }
+          : requireMonitor(id),
+      process,
+      console,
+      Buffer,
+      Headers,
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval,
+      module: { exports: {} },
+      __dirname: path.resolve('monitor'),
+    });
+    vm.runInContext(readFileSync(path.resolve('monitor/server.js'), 'utf8'), context);
+    const isolated: any = vm.runInContext('module.exports', context);
+    isolated.overlayState.data = {
+      tasks: { t: { experience: 2 } },
+      items: { x: { count: 2 } },
+      hideout: { x: { count: 2 } },
+    };
+    const previousHideout = new Map([['x', { id: 'x', count: 2 }]]);
+    isolated.apiState.regular.entities = {
+      hideout: { data: previousHideout, error: null, updatedAt: 'previous' },
+    };
+    const refreshing = vm.runInContext('refreshApiTasks("regular")', context);
+    await vm.runInContext('refreshApiTasks("regular")', context);
+    try {
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fetchTasks).toHaveBeenCalledTimes(1);
+      expect(isolated.apiState.regular.data).toEqual([{ id: 't', experience: 2 }]);
+      const state = vm.runInContext('getState("tasks", "regular", "")', context);
+      expect(state.sections[0].rows[0][4]).toBe('same');
+      const items = vm.runInContext('getState("items", "regular", "")', context);
+      expect(items.sections[0].rows[0][4]).toBe('same');
+    } finally {
+      rejectHideout(new Error('Hideout failed'));
+      await refreshing;
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+    expect(fetchTasks).toHaveBeenCalledTimes(2);
+    expect(isolated.apiState.regular.entities.hideout.error).toBe('Hideout failed');
+    expect(isolated.apiState.regular.entities.hideout.data).toBe(previousHideout);
+    expect(isolated.apiState.regular.entities.hideout.updatedAt).toBe('previous');
+    const failedSummary = isolated.buildSummary('hideout', 'regular');
+    expect(failedSummary.error).toContain('Hideout failed');
+    expect(failedSummary.sections[0].rows[0][4]).toBe('unverified');
+  });
+});
+
+it.each([undefined, null, {}, [null, {}, 'malformed']])(
+  'treats unavailable objective collections as unverified without crashing: %j',
+  (objectives) => {
+    const [overrides, additions] = buildTasksSections(
+      { t: { objectives: { o: { count: 2 } }, objectivesAdd: [{ id: 'o', count: 2 }] } },
+      [{ id: 't', objectives }]
+    );
+    expect(overrides.rows[0][4]).toBe('unverified');
+    expect(additions.rows[0][4]).toBe('unverified');
+    expect(additions.rows[1][4]).toBe('unverified');
+  }
+);
+
+it('reports objective absence for a valid empty upstream collection', () => {
+  const [, additions] = buildTasksSections({ t: { objectivesAdd: [{ id: 'o', count: 2 }] } }, [
+    { id: 't', objectives: [] },
+  ]);
+  expect(additions.rows[1][4]).toBe('missing upstream');
 });
