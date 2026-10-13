@@ -61,7 +61,7 @@
           {
               id: '6895c24ec097ed522295a05d',
               type: 'main',
-              description: 'Hand over the cash to Therapist',
+              description: 'Hand over 250,000 RUB to Therapist',
               sourceQuestId: '6895bed8e7dac53c7c08797d',
           },
           {
@@ -73,7 +73,7 @@
           {
               id: '68ccffb395ec3bc6eddfc3e3',
               type: 'optional',
-              description: 'Collect the required amount in RUB',
+              description: 'Collect the required 250,000 RUB',
               sourceQuestId: '6895bed8e7dac53c7c08797d',
           },
           {
@@ -103,7 +103,7 @@
           {
               id: '6895c4a6b9a96237b73e15a1',
               type: 'main',
-              description: 'Hand over any Building materials items to Skier',
+              description: 'Hand over any 5 building materials or tools found in raid to Skier',
               sourceQuestId: '6895bf1ecfb48128340d5a89',
           },
           {
@@ -115,7 +115,7 @@
           {
               id: '68cd000e66cfbf075021bbb4',
               type: 'optional',
-              description: 'Find any item in raid from the Building materials category',
+              description: 'Find any 5 building materials or tools in raid',
               sourceQuestId: '6895bf1ecfb48128340d5a89',
           },
           {
@@ -133,7 +133,7 @@
           {
               id: '6895daa6f935f3dbe1de0a9d',
               type: 'main',
-              description: 'Hand over any weapon to Mechanic',
+              description: 'Hand over any 2 weapons found in raid to Mechanic',
               sourceQuestId: '6895bf42a3de8e8f1d0426a8',
           },
           {
@@ -145,7 +145,7 @@
           {
               id: '68cd03317ad9451d1d306448',
               type: 'optional',
-              description: 'Find any weapon in raid',
+              description: 'Find any 2 weapons in raid',
               sourceQuestId: '6895bf42a3de8e8f1d0426a8',
           },
           {
@@ -163,7 +163,7 @@
           {
               id: '68c42742aba9a345346af424',
               type: 'main',
-              description: 'Eliminate any target on Woods',
+              description: 'Eliminate any 3 targets on Woods',
               sourceQuestId: '6895bf915bcf5c38e90b83d8',
           },
           {
@@ -223,13 +223,13 @@
           {
               id: '6896020e3af3adc94b263d60',
               type: 'main',
-              description: 'Hand over the item to Prapor: PMC dogtag',
+              description: 'Hand over 5 PMC dogtags to Prapor',
               sourceQuestId: '6895bfd30cb3a157480db00a',
           },
           {
               id: '68cd008705dec39938e316d1',
-              type: 'main',
-              description: 'Find the item in raid: PMC dogtag',
+              type: 'optional',
+              description: 'Find 5 PMC dogtags in raid',
               sourceQuestId: '6895bfd30cb3a157480db00a',
           },
           {

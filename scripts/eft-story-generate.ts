@@ -1203,14 +1203,17 @@ function main(): void {
     let matched = 0;
     let optionalCount = 0;
     const objectives = expansion.objectives.map((objective) => {
-      const { optional, ratio } = matchOptional(objective.text, wikiObjectives);
+      const description =
+        meta.objectiveDescriptionCorrections?.[objective.id]?.description ?? objective.text;
+      const wikiMatchText =
+        meta.objectiveDescriptionCorrections?.[objective.id]?.wikiMatchText ?? objective.text;
+      const { optional, ratio } = matchOptional(wikiMatchText, wikiObjectives);
       if (ratio >= MATCH_THRESHOLD) matched += 1;
       if (optional) optionalCount += 1;
       const emitted: JsonRecord = {
         id: objective.id,
         type: optional ? 'optional' : 'main',
-        description:
-          meta.objectiveDescriptionCorrections?.[objective.id]?.description ?? objective.text,
+        description,
         sourceQuestId: objective.sourceQuestId,
       };
       if (objective.endingId) emitted.endingId = objective.endingId;

@@ -18,6 +18,43 @@
       "68cd005720baf6092be731c8": {
         "description": "Collect the required 8,000 USD",
         "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; 1.2.0 Seasonal in-game screenshot shows the optional USD collection counter with an 8,000 target; user confirms 8,000 across all modes. Was: 20,000 USD in older PvP/PvE captures; published description omitted the amount."
+      },
+      "6895c24ec097ed522295a05d": {
+        "description": "Hand over 250,000 RUB to Therapist",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. HandoverItem.value = 250000, onlyFoundInRaid = false; Was: generic cash hand-in text without the amount."
+      },
+      "68ccffb395ec3bc6eddfc3e3": {
+        "description": "Collect the required 250,000 RUB",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. FindItem.value = 250000; Was: generic RUB collection text without the amount."
+      },
+      "6895c4a6b9a96237b73e15a1": {
+        "description": "Hand over any 5 building materials or tools found in raid to Skier",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. HandoverItem.value = 5, onlyFoundInRaid = true; accepted targets include building materials and tools. Was: generic building materials hand-in text without count or FIR requirement."
+      },
+      "68cd000e66cfbf075021bbb4": {
+        "description": "Find any 5 building materials or tools in raid",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. FindItem.value = 5, onlyFoundInRaid = true; accepted targets include building materials and tools. Was: generic building materials collection text without the count."
+      },
+      "6895daa6f935f3dbe1de0a9d": {
+        "description": "Hand over any 2 weapons found in raid to Mechanic",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. HandoverItem.value = 2, onlyFoundInRaid = true. Was: generic weapon hand-in text without count or FIR requirement."
+      },
+      "68cd03317ad9451d1d306448": {
+        "description": "Find any 2 weapons in raid",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. FindItem.value = 2, onlyFoundInRaid = true. Was: Find any weapon in raid."
+      },
+      "68c42742aba9a345346af424": {
+        "description": "Eliminate any 3 targets on Woods",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. CounterCreator.value = 3, nested Kills target Any on Woods. Was: Eliminate any target on Woods."
+      },
+      "6896020e3af3adc94b263d60": {
+        "description": "Hand over 5 PMC dogtags to Prapor",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. HandoverItem.value = 5, onlyFoundInRaid = false. Was: generic PMC dogtag hand-in text without the count."
+      },
+      "68cd008705dec39938e316d1": {
+        "description": "Find 5 PMC dogtags in raid",
+        "evidence": "https://escapefromtarkov.fandom.com/wiki/Tour; verified in the pinned PvE quest conditions. FindItem.value = 5; wiki marks collection optional and the hand-in does not require FIR. Was: generic PMC dogtag collection text without the count, incorrectly matched as required.",
+        "wikiMatchText": "Find 5 PMC dogtags in raid"
       }
     },
     "rewards": {
