@@ -70,18 +70,18 @@
     locales: {
       title: "Locale Corrections",
       lede: "Per-locale translation corrections in the overlay.",
-      requiresMode: false,
+      requiresMode: true,
       requiresLocale: true,
     },
     seasonalPerks: {
       title: "Seasonal Perks",
       lede: "Raw seasonal (pvp-season) effect supplements; perk metadata comes from upstream.",
-      requiresMode: false,
+      requiresMode: true,
     },
     craftsAdd: {
       title: "Craft Additions",
       lede: "Hideout crafts added by the overlay.",
-      requiresMode: false,
+      requiresMode: true,
     },
   };
 

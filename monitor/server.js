@@ -32,7 +32,7 @@ const {
   verifyOverlaySha256,
 } = require("../src/lib/tarkov-api-shared.cjs");
 
-const {fetchApiTasks, fetchApiEntities, fetchEnvelopeOnce} = require("./lib/tarkov-api.js");
+const {fetchApiTasks, fetchApiEntities, fetchApiLocales, fetchEnvelopeOnce} = require("./lib/tarkov-api.js");
 
 const PORT = config.port;
 const PUBLIC_DIR = config.publicDir;
@@ -56,6 +56,12 @@ const apiState = Object.fromEntries(
   DEFAULT_MODES.map((mode) => [mode, { data: null, updatedAt: null, error: null }])
 );
 
+const UNSUPPORTED_SEASON_STATE = Object.freeze({
+  data: null, updatedAt: null, error: "Seasonal perks are only exposed in pvp-season",
+});
+
+const localeReads = new Map();
+const modeRefreshCaches = new Map();
 const summaryByKey = new Map();
 const readLocks = {
   overlay: { isReading: false, pendingRead: false, promise: null },
@@ -629,10 +635,12 @@ async function refreshOverlay() {
   lock.promise = (async () => {
     try {
       const { data, updatedAt } = await loadOverlay();
+      const previousLocales = getAvailableLocales();
       overlayState.data = data;
       overlayState.updatedAt = updatedAt;
       overlayState.error = null;
       rebuildSummaries();
+      scheduleOverlayLocales(previousLocales);
     } catch (error) {
       overlayState.error = redactErrorMessage(error, "Unable to read overlay");
       rebuildSummaries();
@@ -670,6 +678,65 @@ async function refreshUpstreamState(state, fetchData, fallbackError) {
   rebuildSummaries();
 }
 
+function localeState(mode, locale) {
+  const entities = apiState[mode].entities ||= {};
+  return entities[`locale:${locale}`] ||= { data: null, error: null, updatedAt: null };
+}
+
+function queueLocaleRefresh(read, cache) {
+  if (read.cache !== cache) read.nextCache = cache;
+  return read.promise;
+}
+
+function finishLocaleRefresh(mode, locale, key, read) {
+  localeReads.delete(key);
+  if (!read.nextCache) return;
+  if (!apiState[mode]) return;
+  if (!getAvailableLocales().includes(locale)) return;
+  refreshModeLocale(mode, locale, read.nextCache).catch(() => {});
+}
+
+function refreshModeLocale(mode, locale, cache) {
+  const key = `${mode}:${locale}`;
+  const existing = localeReads.get(key);
+  if (existing) return queueLocaleRefresh(existing, cache);
+  const read = { cache, nextCache: null, promise: null };
+  const operation = refreshUpstreamState(localeState(mode, locale), () => fetchApiLocales(mode, locale, cache), "Unable to fetch translations");
+  read.promise = operation.finally(() => finishLocaleRefresh(mode, locale, key, read));
+  localeReads.set(key, read);
+  return read.promise;
+}
+
+function overlayLocaleNeedsRefresh(mode, locale, previousLocales) {
+  const state = localeState(mode, locale);
+  return !previousLocales.includes(locale) || !state.data || Boolean(state.error);
+}
+
+function overlayLocaleCache(mode, locale, cache, retryCache) {
+  return localeState(mode, locale).error ? retryCache : cache;
+}
+
+function refreshOverlayModeLocales(mode, previousLocales) {
+  const cache = modeRefreshCaches.get(mode) || new Map();
+  const retryCache = new Map();
+  const requested = getAvailableLocales().filter(locale => overlayLocaleNeedsRefresh(mode, locale, previousLocales));
+  requested.forEach(locale => refreshModeLocale(mode, locale, overlayLocaleCache(mode, locale, cache, retryCache)).catch(() => {}));
+}
+
+function scheduleOverlayLocales(previousLocales) {
+  supportedModes.forEach(mode => refreshOverlayModeLocales(mode, previousLocales));
+}
+
+function refreshSeason(mode, entities, cache) {
+  const state = entities.season ||= { data: null, error: null, updatedAt: null };
+  if (mode === "pvp-season") return refreshUpstreamState(state, () => fetchApiEntities(mode, "season", cache), "Unable to fetch seasonal perks");
+  state.data = null;
+  state.updatedAt = null;
+  state.error = UNSUPPORTED_SEASON_STATE.error;
+  rebuildSummaries();
+  return Promise.resolve();
+}
+
 async function refreshApiTasks(mode) {
   const lock = readLocks[mode];
   if (!lock) {
@@ -683,21 +750,43 @@ async function refreshApiTasks(mode) {
   try {
     const state = apiState[mode];
     const entities = state.entities ||= {};
-    const entityRefreshes = ["items", "maps", "hideout", "traders"].map((endpoint) => {
+    const cache = new Map();
+    modeRefreshCaches.set(mode, cache);
+    const entityRefreshes = ["items", "maps", "hideout", "traders", "crafts"].map((endpoint) => {
       const entity = entities[endpoint] ||= { data: null, error: null, updatedAt: null };
-      return refreshUpstreamState(entity, () => fetchApiEntities(mode, endpoint), "Unable to fetch entities");
+      return refreshUpstreamState(entity, () => fetchApiEntities(mode, endpoint, cache), "Unable to fetch entities");
     });
+    const localeRefreshes = getAvailableLocales().map(locale => refreshModeLocale(mode, locale, cache));
     await Promise.allSettled([
-      refreshUpstreamState(state, () => fetchApiTasks(mode), "Unable to fetch API tasks"),
+      ...localeRefreshes,
+      refreshSeason(mode, entities, cache),
+      refreshUpstreamState(state, () => fetchApiTasks(mode, cache), "Unable to fetch API tasks"),
       ...entityRefreshes,
     ]);
   } finally {
+    modeRefreshCaches.delete(mode);
     lock.isReading = false;
     if (lock.pendingRead) {
       lock.pendingRead = false;
       refreshApiTasks(mode).catch(() => {});
     }
   }
+}
+
+function mergeModePatches(shared, modePatches) {
+  const patches = { ...shared };
+  for (const [id, patch] of Object.entries(modePatches)) {
+    patches[id] = { ...patches[id], ...patch };
+  }
+  return patches;
+}
+
+function modePatchesFor(overlay, mode, view) {
+  return overlay.modes?.[mode]?.[view] || {};
+}
+
+function effectivePatches(overlay, mode, view) {
+  return mergeModePatches(overlay[view] || {}, modePatchesFor(overlay, mode, view));
 }
 
 function buildSummary(view, mode, locale) {
@@ -743,10 +832,7 @@ function buildSummary(view, mode, locale) {
   if (["items", "itemsAdd", "maps", "hideout", "traders"].includes(view)) {
     const endpoint = view === "itemsAdd" ? "items" : view;
     const state = apiState[mode || "regular"]?.entities?.[endpoint];
-    const patches = { ...(overlay[view] || {}) };
-    for (const [id, patch] of Object.entries(overlay.modes?.[mode]?.[view] || {})) {
-      patches[id] = { ...patches[id], ...patch };
-    }
+    const patches = effectivePatches(overlay, mode, view);
     return {
       sections: markModeGuards(buildEntityComparisonSections(VIEW_CONFIG[view].title, patches,
         state?.error ? null : state?.data, view === "itemsAdd"), overlay[view] || {}, patches),
@@ -775,25 +861,15 @@ function buildSummary(view, mode, locale) {
     };
   }
 
-  if (view === "locales") {
-    return {
-      sections: buildLocaleSections(overlay.locales || {}, locale),
-      error: overlayState.error || null,
+  if (["locales", "seasonalPerks", "craftsAdd"].includes(view)) {
+    const state = getUpstreamState(view, mode, locale);
+    const upstream = state?.error ? null : state?.data;
+    const builders = {
+      locales: () => buildLocaleSections(overlay.locales || {}, locale, upstream),
+      seasonalPerks: () => buildSeasonalPerkSections(effectivePatches(overlay, mode, view), upstream),
+      craftsAdd: () => buildCraftAddSections(effectivePatches(overlay, mode, view), upstream),
     };
-  }
-
-  if (view === "seasonalPerks") {
-    return {
-      sections: buildSeasonalPerkSections(overlay.seasonalPerks || {}),
-      error: overlayState.error || null,
-    };
-  }
-
-  if (view === "craftsAdd") {
-    return {
-      sections: buildCraftAddSections(overlay.craftsAdd || {}),
-      error: overlayState.error || null,
-    };
+    return { sections: builders[view](), error: overlayState.error || state?.error || (!state?.data ? "Upstream data not loaded" : null) };
   }
 
   return { sections: [], error: "Unknown view" };
@@ -821,15 +897,20 @@ function rebuildSummaries() {
   });
 }
 
-function getUpstreamState(view, mode) {
-  if (["items", "itemsAdd", "maps", "hideout", "traders"].includes(view)) {
-    return apiState[mode]?.entities?.[view === "itemsAdd" ? "items" : view];
-  }
+function unsupportedSeasonView(view, mode) {
+  return view === "seasonalPerks" && mode !== "pvp-season";
+}
+
+function getUpstreamState(view, mode, locale) {
+  if (unsupportedSeasonView(view, mode)) return UNSUPPORTED_SEASON_STATE;
+  const endpoint = { craftsAdd: "crafts", seasonalPerks: "season", locales: `locale:${locale}`,
+    itemsAdd: "items", items: "items", maps: "maps", hideout: "hideout", traders: "traders" }[view];
+  if (endpoint) return apiState[mode]?.entities?.[endpoint];
   return apiState[mode];
 }
 
-function getUpstreamStatus(view, mode) {
-  const state = getUpstreamState(view, mode);
+function getUpstreamStatus(view, mode, locale) {
+  const state = getUpstreamState(view, mode, locale);
   const message = state?.error || (!state?.data ? "Upstream data not loaded" : null);
   return { updatedAt: state?.updatedAt || null,
     error: message ? redactErrorMessage(message, "") : null };
@@ -866,7 +947,7 @@ function getState(view, mode, locale) {
       error: overlayState.error ? redactErrorMessage(overlayState.error) : null,
     },
     api: config?.requiresMode
-      ? getUpstreamStatus(view, mode)
+      ? getUpstreamStatus(view, mode, locale)
       : null,
     rebuild: {
       enabled: isRebuildEnabled(),

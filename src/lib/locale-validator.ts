@@ -15,19 +15,22 @@
  *
  * Verdicts:
  * - STALE:        bundle now matches the override — fixed upstream, remove it
- * - NEEDED:       bundle still differs (or can't be confirmed) — keep it
+ * - NEEDED:       bundle still differs — keep it
  * - REMOVED:      entity (or objective) no longer exists in any mode's API — delete it
- * - UNVERIFIABLE: overlay-authored entity (storyChapters) absent from
- *                 tarkov.dev — cannot be checked, skip
+ * - UNVERIFIABLE: missing translations, incomplete records, unsupported fields
+ *                 or overlay-authored entities — cannot verify, keep it
  */
 
-import type { LocaleOverlay, ObjectiveLocaleOverride } from './types.js';
+import { comparisonTranslation } from './task-comparison.cjs';
+import type { LocaleOverlay } from './types.js';
+import { compareOverlayFields } from './overlay-comparison.cjs';
+import { validObjectiveCollection } from './tarkov-api-shared.cjs';
 import type { LocaleBundle, TranslationMap } from './tarkov-api.js';
 
 export type LocaleVerdict = 'STALE' | 'NEEDED' | 'REMOVED' | 'UNVERIFIABLE';
 
 export type LocaleEntityType =
-  'tasks' | 'items' | 'traders' | 'maps' | 'prestige' | 'storyChapters';
+  'tasks' | 'items' | 'traders' | 'maps' | 'prestige' | 'storyChapters' | 'unsupported';
 
 export interface LocaleValidationResult {
   locale: string;
@@ -35,8 +38,8 @@ export interface LocaleValidationResult {
   entityId: string;
   /** Patched field, e.g. 'name', 'wikiLink', or 'objectives[<objId>].description' */
   field: string;
-  overrideValue?: string;
-  bundleValue?: string;
+  overrideValue?: unknown;
+  bundleValue?: unknown;
   verdict: LocaleVerdict;
   message: string;
 }
@@ -53,10 +56,7 @@ function isRecord(value: unknown): value is JsonRecord {
  * confirm an upstream fix". Own-property check guards prototype keys.
  */
 function resolveTranslation(key: unknown, map: TranslationMap): string | undefined {
-  if (typeof key !== 'string') return undefined;
-  if (!Object.prototype.hasOwnProperty.call(map, key)) return undefined;
-  const value = map[key];
-  return typeof value === 'string' ? value : undefined;
+  return comparisonTranslation(key, map);
 }
 
 type ResultBase = Pick<LocaleValidationResult, 'locale' | 'entityType' | 'entityId'>;
@@ -74,7 +74,7 @@ function compareValues(
       field,
       overrideValue,
       bundleValue,
-      verdict: 'NEEDED',
+      verdict: 'UNVERIFIABLE',
       message: `translation not found in ${base.locale} bundle - cannot confirm upstream fix, keep override`,
     };
   }
@@ -101,7 +101,7 @@ function compareValues(
 function removedResult(
   base: ResultBase,
   field: string,
-  overrideValue?: string
+  overrideValue?: unknown
 ): LocaleValidationResult {
   return {
     ...base,
@@ -112,24 +112,9 @@ function removedResult(
   };
 }
 
-/** Enumerate every patched field of an entity patch (for REMOVED reporting). */
-function listPatchedFields(patch: JsonRecord): string[] {
-  const fields: string[] = [];
-  for (const [key, value] of Object.entries(patch)) {
-    if (key === 'objectives' && isRecord(value)) {
-      for (const objectiveId of Object.keys(value)) {
-        fields.push(`objectives[${objectiveId}].description`);
-      }
-    } else if (typeof value === 'string') {
-      fields.push(key);
-    }
-  }
-  return fields;
-}
-
 /** Per-entity-type validation config. */
 type EntityCheck = {
-  entityType: Exclude<LocaleEntityType, 'storyChapters'>;
+  entityType: Exclude<LocaleEntityType, 'storyChapters' | 'unsupported'>;
   /** Core records of this entity type in one mode bundle (entity presence) */
   coreOf: (bundle: LocaleBundle) => Map<string, JsonRecord>;
   /** Locale map that resolves this entity type's translated fields */
@@ -155,15 +140,16 @@ function collectViews(check: EntityCheck, bundles: LocaleBundle[], entityId: str
   return views;
 }
 
-/** Objective record and translation map when the bundle carries the objective. */
-function findObjectiveView(
-  view: EntityView,
-  objectiveId: string
-): { objective: JsonRecord; translations: TranslationMap } | undefined {
-  const coreObjectives = Array.isArray(view.core.objectives)
-    ? view.core.objectives.filter(isRecord)
-    : [];
-  const objective = coreObjectives.find((entry) => entry.id === objectiveId);
+type ObjectiveView = { objective: JsonRecord; translations: TranslationMap };
+
+function objectiveCollection(view: EntityView): JsonRecord[] | undefined {
+  return validObjectiveCollection(view.core.objectives)
+    ? (view.core.objectives as JsonRecord[])
+    : undefined;
+}
+
+function findObjectiveView(view: EntityView, objectiveId: string): ObjectiveView | undefined {
+  const objective = objectiveCollection(view)?.find((entry) => entry.id === objectiveId);
   return objective ? { objective, translations: view.translations } : undefined;
 }
 
@@ -193,7 +179,7 @@ function compareViews(
       field,
       overrideValue,
       bundleValue: resolved[0],
-      verdict: 'NEEDED',
+      verdict: 'UNVERIFIABLE',
       message: `translation not found in ${base.locale} bundle - cannot confirm upstream fix, keep override`,
     };
   }
@@ -210,109 +196,267 @@ function compareViews(
   return compareValues(base, field, overrideValue, resolved[0]);
 }
 
+function unverifiedPatch(
+  base: ResultBase,
+  field: string,
+  value: unknown,
+  message: string
+): LocaleValidationResult[] {
+  if (value === undefined) return [];
+  return compareOverlayFields({ [field]: value }, undefined).map((entry) => ({
+    ...base,
+    field: entry.field,
+    overrideValue: entry.overlayValue,
+    verdict: 'UNVERIFIABLE',
+    message,
+  }));
+}
+
+function objectiveDescription(
+  base: ResultBase,
+  views: EntityView[],
+  objectiveId: string,
+  overrideValue: string
+): LocaleValidationResult {
+  const field = `objectives[${objectiveId}].description`;
+  const incomplete = views.some((view) => objectiveCollection(view) === undefined);
+  const objectiveViews = views
+    .map((view) => findObjectiveView(view, objectiveId))
+    .filter((view): view is ObjectiveView => view !== undefined);
+  if (incomplete) {
+    return {
+      ...base,
+      field,
+      overrideValue,
+      verdict: 'UNVERIFIABLE',
+      message:
+        'objective collection unavailable, malformed or ambiguous - cannot verify, keep override',
+    };
+  }
+  if (!objectiveViews.length) {
+    return {
+      ...removedResult(base, field, overrideValue),
+      message: 'objective no longer exists in the API - delete override',
+    };
+  }
+  return compareViews(
+    base,
+    field,
+    overrideValue,
+    objectiveViews.map((view) => resolveTranslation(view.objective.description, view.translations))
+  );
+}
+
+function objectivePatch(
+  base: ResultBase,
+  views: EntityView[],
+  objectiveId: string,
+  patch: unknown
+): LocaleValidationResult[] {
+  const path = `objectives[${objectiveId}]`;
+  if (!isRecord(patch))
+    return unverifiedPatch(base, path, patch, 'Malformed objective locale patch');
+  if (!Object.keys(patch).length)
+    return unverifiedPatch(
+      base,
+      path,
+      patch,
+      'Empty objective patch has no translated field to verify'
+    );
+  return Object.entries(patch).flatMap(([field, value]) => {
+    if (field === 'description' && typeof value === 'string') {
+      return [objectiveDescription(base, views, objectiveId, value)];
+    }
+    return unverifiedPatch(
+      base,
+      `${path}.${field}`,
+      value,
+      'Unsupported or malformed objective locale field - cannot verify, keep override'
+    );
+  });
+}
+
 function checkObjectivePatches(
   base: ResultBase,
   views: EntityView[],
-  objectives: Record<string, ObjectiveLocaleOverride>
+  objectives: unknown
 ): LocaleValidationResult[] {
-  const results: LocaleValidationResult[] = [];
-
-  for (const [objectiveId, patch] of Object.entries(objectives)) {
-    const field = `objectives[${objectiveId}].description`;
-    if (typeof patch.description !== 'string') continue;
-
-    const objectiveViews = views
-      .map((view) => findObjectiveView(view, objectiveId))
-      .filter((view): view is NonNullable<typeof view> => view !== undefined);
-    if (objectiveViews.length === 0) {
-      results.push({
-        ...base,
-        field,
-        overrideValue: patch.description,
-        verdict: 'REMOVED',
-        message: 'objective no longer exists in the API - delete override',
-      });
-      continue;
-    }
-
-    results.push(
-      compareViews(
-        base,
-        field,
-        patch.description,
-        objectiveViews.map((view) =>
-          resolveTranslation(view.objective.description, view.translations)
-        )
-      )
+  if (!isRecord(objectives))
+    return unverifiedPatch(base, 'objectives', objectives, 'Malformed objective locale collection');
+  if (!Object.keys(objectives).length)
+    return unverifiedPatch(
+      base,
+      'objectives',
+      objectives,
+      'Empty objective patch has no translated field to verify'
     );
-  }
+  return Object.entries(objectives).flatMap(([id, patch]) =>
+    objectivePatch(base, views, id, patch)
+  );
+}
 
-  return results;
+function directValue(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function supportedFieldValues(
+  check: EntityCheck,
+  views: EntityView[],
+  field: string
+): Array<string | undefined> {
+  if (check.translatedFields.includes(field)) {
+    return views.map((view) => resolveTranslation(view.core[field], view.translations));
+  }
+  return views.map((view) => directValue(view.core[field]));
+}
+
+function supportedField(check: EntityCheck, field: string): boolean {
+  return check.translatedFields.includes(field) || (check.directFields ?? []).includes(field);
+}
+
+function objectiveField(check: EntityCheck, field: string): boolean {
+  return Boolean(check.hasObjectives) && field === 'objectives';
+}
+
+function entityField(
+  base: ResultBase,
+  check: EntityCheck,
+  views: EntityView[],
+  field: string,
+  value: unknown
+): LocaleValidationResult[] {
+  if (objectiveField(check, field)) return checkObjectivePatches(base, views, value);
+  if (supportedField(check, field) && typeof value === 'string') {
+    return [compareViews(base, field, value, supportedFieldValues(check, views, field))];
+  }
+  return unverifiedPatch(
+    base,
+    field,
+    value,
+    'Unsupported or malformed locale field - cannot verify, keep override'
+  );
+}
+
+function removedFields(base: ResultBase, patch: JsonRecord): LocaleValidationResult[] {
+  return compareOverlayFields(patch, undefined)
+    .filter((entry) => leafValue(entry.overlayValue))
+    .map((entry) => removedResult(base, localePath(entry.field), entry.overlayValue));
+}
+
+function leafValue(value: unknown): boolean {
+  if (!isRecord(value)) return true;
+  return Object.keys(value).length === 0;
+}
+
+function localePath(field: string): string {
+  return field.replace(/^objectives\.([^.]+)/, 'objectives[$1]');
+}
+
+function missingEntityResult(
+  base: ResultBase,
+  check: EntityCheck,
+  bundles: LocaleBundle[],
+  patch: JsonRecord
+): LocaleValidationResult[] {
+  return missingItemCatalog(check, bundles)
+    ? missingEntityFields(base, patch)
+    : removedFields(base, patch);
+}
+
+function missingItemCatalog(check: EntityCheck, bundles: LocaleBundle[]): boolean {
+  return (
+    check.entityType === 'items' && bundles.some((bundle) => bundle.itemCatalogComplete === false)
+  );
+}
+
+function missingEntityFields(base: ResultBase, patch: JsonRecord): LocaleValidationResult[] {
+  return compareOverlayFields(patch, undefined).map((entry) => ({
+    ...base,
+    field: localePath(entry.field),
+    overrideValue: entry.overlayValue,
+    verdict: 'UNVERIFIABLE',
+    message:
+      'item and quest-item catalog is incomplete - cannot prove entity removal, keep override',
+  }));
+}
+
+function checkEntityPatch(
+  locale: string,
+  check: EntityCheck,
+  entityId: string,
+  patch: unknown,
+  bundles: LocaleBundle[]
+): LocaleValidationResult[] {
+  const base: ResultBase = { locale, entityType: check.entityType, entityId };
+  if (!isRecord(patch))
+    return unverifiedPatch(base, '(root)', patch, 'Malformed entity locale patch');
+  const views = collectViews(check, bundles, entityId);
+  if (!views.length) return missingEntityResult(base, check, bundles, patch);
+  if (!Object.keys(patch).length)
+    return unverifiedPatch(
+      base,
+      '(root)',
+      patch,
+      'Empty locale patch has no translated field to verify'
+    );
+  return Object.entries(patch).flatMap(([field, value]) =>
+    entityField(base, check, views, field, value)
+  );
 }
 
 function checkEntityPatches(
   locale: string,
   check: EntityCheck,
-  patches: Record<string, JsonRecord>,
+  patches: unknown,
   bundles: LocaleBundle[]
 ): LocaleValidationResult[] {
-  const results: LocaleValidationResult[] = [];
-
-  for (const [entityId, patch] of Object.entries(patches)) {
-    if (!isRecord(patch)) continue;
-    const base: ResultBase = { locale, entityType: check.entityType, entityId };
-    const views = collectViews(check, bundles, entityId);
-
-    if (views.length === 0) {
-      for (const field of listPatchedFields(patch)) {
-        const overrideValue = field.startsWith('objectives[')
-          ? undefined
-          : (patch[field] as string);
-        results.push(removedResult(base, field, overrideValue));
-      }
-      continue;
-    }
-
-    for (const field of check.translatedFields) {
-      const overrideValue = patch[field];
-      if (typeof overrideValue !== 'string') continue;
-      results.push(
-        compareViews(
-          base,
-          field,
-          overrideValue,
-          views.map((view) => resolveTranslation(view.core[field], view.translations))
-        )
-      );
-    }
-
-    for (const field of check.directFields ?? []) {
-      const overrideValue = patch[field];
-      if (typeof overrideValue !== 'string') continue;
-      results.push(
-        compareViews(
-          base,
-          field,
-          overrideValue,
-          views.map((view) =>
-            typeof view.core[field] === 'string' ? (view.core[field] as string) : undefined
-          )
-        )
-      );
-    }
-
-    if (check.hasObjectives && isRecord(patch.objectives)) {
-      results.push(
-        ...checkObjectivePatches(
-          base,
-          views,
-          patch.objectives as Record<string, ObjectiveLocaleOverride>
-        )
-      );
-    }
+  if (!isRecord(patches)) {
+    return unverifiedPatch(
+      { locale, entityType: check.entityType, entityId: '(collection)' },
+      '(root)',
+      patches,
+      'Malformed locale entity collection'
+    );
   }
+  return Object.entries(patches).flatMap(([id, patch]) =>
+    checkEntityPatch(locale, check, id, patch, bundles)
+  );
+}
 
-  return results;
+function storyChapterResults(locale: string, chapters: unknown): LocaleValidationResult[] {
+  if (chapters === undefined) return [];
+  if (!isRecord(chapters)) {
+    return unverifiedPatch(
+      { locale, entityType: 'storyChapters', entityId: '(collection)' },
+      '(root)',
+      chapters,
+      'Malformed storyChapters locale collection'
+    );
+  }
+  return Object.entries(chapters).flatMap(([entityId, patch]) => {
+    const base: ResultBase = { locale, entityType: 'storyChapters', entityId };
+    return compareOverlayFields(patch, undefined).map((entry) => ({
+      ...base,
+      field: localePath(entry.field),
+      overrideValue: entry.overlayValue,
+      verdict: 'UNVERIFIABLE',
+      message:
+        'storyChapters are overlay-authored and absent from tarkov.dev - cannot verify, keep override',
+    }));
+  });
+}
+
+function unsupportedSections(locale: string, overrides: LocaleOverlay): LocaleValidationResult[] {
+  const supported = ['tasks', 'items', 'traders', 'maps', 'prestige', 'storyChapters'];
+  return Object.entries(overrides).flatMap(([section, value]) => {
+    if (supported.includes(section)) return [];
+    return unverifiedPatch(
+      { locale, entityType: 'unsupported', entityId: section },
+      section,
+      value,
+      'Unsupported locale entity section - cannot verify, keep override'
+    );
+  });
 }
 
 /**
@@ -373,26 +517,12 @@ export function validateLocaleOverrides(
 
   for (const check of checks) {
     const patches = overrides[check.entityType];
-    if (!patches) continue;
-    results.push(
-      ...checkEntityPatches(locale, check, patches as Record<string, JsonRecord>, bundles)
-    );
+    if (patches === undefined) continue;
+    results.push(...checkEntityPatches(locale, check, patches, bundles));
   }
 
-  // Story chapters are overlay-authored additions with no tarkov.dev
-  // counterpart, so their locale patches can never be verified against a
-  // bundle. One result per chapter keeps the summary honest without noise.
-  for (const chapterId of Object.keys(overrides.storyChapters ?? {})) {
-    results.push({
-      locale,
-      entityType: 'storyChapters',
-      entityId: chapterId,
-      field: '*',
-      verdict: 'UNVERIFIABLE',
-      message:
-        'storyChapters are overlay-authored and absent from tarkov.dev - cannot verify, keep override',
-    });
-  }
+  results.push(...storyChapterResults(locale, overrides.storyChapters));
+  results.push(...unsupportedSections(locale, overrides));
 
   return results;
 }

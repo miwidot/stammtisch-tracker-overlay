@@ -4,10 +4,29 @@
 // host, query, fragment, or traversal path. Keep this policy isolated so security
 // candidates in the API adapter remain visible. Native redirects retain the
 // upstream service's existing behavior.
+const SAFE_LANGUAGES = new Set(["cs", "de", "en", "es", "fr", "hu", "id", "it", "ja", "ko", "pl", "pt", "ro", "ru", "sk", "th", "tr", "vn", "zh"]);
+
+function validEndpoint(path) {
+  if (path === "endpoints") return true;
+  const match = /^([a-z0-9]+(?:-[a-z0-9]+)*)\/(tasks|items|maps|traders|hideout|crafts|season)(?:_([a-z]{2}(?:-[a-z]{2})?))?$/.exec(path);
+  if (!match) return false;
+  return validSeasonPath(match) && validTranslationPath(match);
+}
+
+function validTranslationPath(match) {
+  if (!match[3]) return true;
+  return match[2] !== "crafts" && SAFE_LANGUAGES.has(match[3]);
+}
+
+function validSeasonPath(match) {
+  if (match[2] !== "season") return true;
+  return match[1] === "pvp-season";
+}
+
 async function fetchTarkovJson(path, signal) {
   if (
     typeof path !== 'string' ||
-    !/^(?:endpoints|[a-z0-9]+(?:-[a-z0-9]+)*\/(?:tasks|items|maps|traders|hideout)(?:_en)?)$/.test(path)
+    !validEndpoint(path)
   ) {
     const error = new Error('Invalid tarkov.dev endpoint');
     error.fatal = true;
@@ -23,4 +42,4 @@ async function fetchTarkovJson(path, signal) {
   });
 }
 
-module.exports = { fetchTarkovJson };
+module.exports = { fetchTarkovJson, SAFE_LANGUAGES };

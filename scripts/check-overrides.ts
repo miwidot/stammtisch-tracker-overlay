@@ -37,6 +37,17 @@
  * 2 (our overlay is wrong) before 3 (our overlay is merely redundant).
  */
 
+import {
+  compareOverlayFields,
+  type OverlayComparisonDetail,
+} from '../src/lib/overlay-comparison.cjs';
+import { checkAdditionContracts } from './check-addition-contracts.js';
+import { validObjectiveCollection } from '../src/lib/tarkov-api-shared.cjs';
+import {
+  aggregateEntityRetirement,
+  type EntityModeEvidence,
+} from '../src/lib/entity-retirement.js';
+import { comparisonTask, type ComparisonTaskData } from '../src/lib/task-comparison.cjs';
 import { join } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { assertComparisonCoverage } from '../src/lib/comparison-coverage.js';
@@ -62,6 +73,7 @@ import {
   fetchItemValidationData,
   fetchMapValidationData,
   validateMapOverrides,
+  validateModeMapOverrides,
   mergeMapOverrides,
   SUPPORTED_GAME_MODES,
   validateAllOverrides,
@@ -232,6 +244,8 @@ export type AdditionResult = {
   name: string;
   status: AdditionStatus;
   message: string;
+  adopted?: boolean;
+  comparison?: OverlayComparisonDetail[];
 };
 
 export type EditionTaskReference = {
@@ -324,119 +338,188 @@ export function getValidationExitCode({
 }
 
 function buildApiIndexes(apiTasks: TaskData[]) {
-  const byWikiLink = new Map<string, TaskData>();
+  const byWikiLink = new Map<string, TaskData[]>();
   const byName = new Map<string, TaskData[]>();
-
   for (const task of apiTasks) {
     const wikiKey = normalizeWikiLink(task.wikiLink);
-    if (wikiKey) {
-      byWikiLink.set(wikiKey, task);
-    }
-
+    if (wikiKey) byWikiLink.set(wikiKey, [...(byWikiLink.get(wikiKey) ?? []), task]);
     const nameKey = normalizeName(task.name);
-    const matches = byName.get(nameKey) ?? [];
-    matches.push(task);
-    byName.set(nameKey, matches);
+    byName.set(nameKey, [...(byName.get(nameKey) ?? []), task]);
   }
-
   return { byWikiLink, byName };
 }
 
+function additionValuesMatch(comparison: OverlayComparisonDetail[]): boolean {
+  return comparison.length > 0 && comparison.every((row) => row.status === 'same');
+}
+
+function additionRetirementMessage(message: string, identical: boolean): string {
+  return identical
+    ? `${message}; all supplied values match upstream`
+    : `${message}; duplicate addition must become only proven corrections. Differing or unverified values require review before retirement`;
+}
+
+function additionComparison(
+  result: AdditionResult,
+  addition: TaskAddition,
+  upstream?: TaskData,
+  adopted = false
+): AdditionResult {
+  const comparison = compareOverlayFields(
+    addition,
+    upstream ? comparisonTask(upstream) : undefined
+  );
+  if (!adopted) return { ...result, adopted: false, comparison };
+  const identical = additionValuesMatch(comparison);
+  return {
+    ...result,
+    adopted,
+    comparison,
+    status: identical ? 'RESOLVED' : 'CHECK',
+    message: additionRetirementMessage(result.message, identical),
+  };
+}
+
+function nameAdditionResult(
+  key: string,
+  addition: TaskAddition,
+  matches: TaskData[],
+  label: string
+): AdditionResult {
+  const base = { key, name: addition.name, status: 'CHECK' as const };
+  if (matches.length === 1)
+    return additionComparison(
+      {
+        ...base,
+        message: `Matched API task '${matches[0].name}' (${matches[0].id}) by ${label} - NEEDS REVIEW`,
+      },
+      addition,
+      matches[0]
+    );
+  if (matches.length > 1)
+    return additionComparison(
+      {
+        ...base,
+        message: `Multiple API tasks share this name${label === 'name only' ? '' : ` and ${label}`} (${matches.map((task) => task.id).join(', ')}) - NEEDS REVIEW`,
+      },
+      addition
+    );
+  return additionComparison(
+    { ...base, status: 'MISSING', message: 'Still missing from API - STILL NEEDED' },
+    addition
+  );
+}
+
+function prestigeAdditionResult(
+  key: string,
+  addition: TaskAddition,
+  matches: TaskData[],
+  prestige: number
+): AdditionResult {
+  const candidates = matches.filter((task) => getPrestigeLevel(task) === prestige);
+  if (candidates.length)
+    return nameAdditionResult(key, addition, candidates, `name and requiredPrestige=${prestige}`);
+  const available = [...new Set(matches.map(getPrestigeLevel))].sort((a, b) => a - b).join(', ');
+  return additionComparison(
+    {
+      key,
+      name: addition.name,
+      status: 'MISSING',
+      message: `API tasks share this name, but none match requiredPrestige=${prestige} (available: ${available}) - STILL NEEDED`,
+    },
+    addition
+  );
+}
+
+function namedAdditionCandidates(
+  addition: TaskAddition,
+  indexes: ReturnType<typeof buildApiIndexes>
+): TaskData[] {
+  return indexes.byName.get(normalizeName(addition.name)) ?? [];
+}
+
+function unresolvedAddition(
+  key: string,
+  addition: TaskAddition,
+  indexes: ReturnType<typeof buildApiIndexes>
+): AdditionResult {
+  const matches = namedAdditionCandidates(addition, indexes);
+  const prestige = addition.requiredPrestige?.prestigeLevel;
+  if (prestige !== undefined && matches.length)
+    return prestigeAdditionResult(key, addition, matches, prestige);
+  return nameAdditionResult(key, addition, matches, 'name only');
+}
+
+function canonicalAdditionTask(
+  addition: TaskAddition,
+  key: string,
+  byId: Map<string, TaskData>
+): TaskData | undefined {
+  return byId.get(addition.id) ?? byId.get(key);
+}
+
+function wikiAdditionCandidates(
+  addition: TaskAddition,
+  indexes: ReturnType<typeof buildApiIndexes>
+): TaskData[] {
+  return indexes.byWikiLink.get(normalizeWikiLink(addition.wikiLink) ?? '') ?? [];
+}
+
+function indexedAddition(
+  key: string,
+  addition: TaskAddition,
+  byId: Map<string, TaskData>,
+  indexes: ReturnType<typeof buildApiIndexes>
+): AdditionResult {
+  const idMatch = canonicalAdditionTask(addition, key, byId);
+  if (idMatch)
+    return additionComparison(
+      {
+        key,
+        name: addition.name,
+        status: 'RESOLVED',
+        message: `Matched API task '${idMatch.name}' (${idMatch.id}) by id`,
+      },
+      addition,
+      idMatch,
+      true
+    );
+  const wikiMatches = wikiAdditionCandidates(addition, indexes);
+  if (wikiMatches.length === 1)
+    return additionComparison(
+      {
+        key,
+        name: addition.name,
+        status: 'RESOLVED',
+        message: `Matched API task '${wikiMatches[0].name}' (${wikiMatches[0].id}) by wikiLink`,
+      },
+      addition,
+      wikiMatches[0],
+      true
+    );
+  if (wikiMatches.length > 1)
+    return additionComparison(
+      {
+        key,
+        name: addition.name,
+        status: 'CHECK',
+        message: `Ambiguous wikiLink matches (${wikiMatches.map((task) => task.id).join(', ')}) - NEEDS REVIEW`,
+      },
+      addition
+    );
+  return unresolvedAddition(key, addition, indexes);
+}
+
+/** Match identities first, then compare every supplied value without equating candidates with adoption. */
 export function checkTaskAdditions(
   additions: Record<string, TaskAddition>,
   apiTasks: TaskData[]
 ): AdditionResult[] {
-  const { byWikiLink, byName } = buildApiIndexes(apiTasks);
+  const indexes = buildApiIndexes(apiTasks);
   const byId = new Map(apiTasks.map((task) => [task.id, task]));
-
-  return Object.entries(additions).map(([key, addition]) => {
-    const idMatch = byId.get(addition.id) ?? byId.get(key);
-    if (idMatch) {
-      return {
-        key,
-        name: addition.name,
-        status: 'RESOLVED',
-        message: `Matched API task '${idMatch.name}' (${idMatch.id}) by id - remove the addition and keep any proven corrections as overrides`,
-      };
-    }
-    const wikiKey = normalizeWikiLink(addition.wikiLink);
-    const wikiMatch = wikiKey ? byWikiLink.get(wikiKey) : undefined;
-    if (wikiMatch) {
-      return {
-        key,
-        name: addition.name,
-        status: 'RESOLVED',
-        message: `Matched API task '${wikiMatch.name}' (${wikiMatch.id}) by wikiLink - RESOLVED`,
-      };
-    }
-
-    const nameKey = normalizeName(addition.name);
-    const nameMatches = byName.get(nameKey) ?? [];
-    const additionPrestigeLevel = addition.requiredPrestige?.prestigeLevel;
-
-    if (additionPrestigeLevel !== undefined && nameMatches.length > 0) {
-      const prestigeMatches = nameMatches.filter(
-        (task) => getPrestigeLevel(task) === additionPrestigeLevel
-      );
-
-      if (prestigeMatches.length === 1) {
-        return {
-          key,
-          name: addition.name,
-          status: 'CHECK',
-          message: `Matched API task '${prestigeMatches[0].name}' (${prestigeMatches[0].id}) by name and requiredPrestige=${additionPrestigeLevel} - NEEDS REVIEW`,
-        };
-      }
-
-      if (prestigeMatches.length > 1) {
-        const ids = prestigeMatches.map((task) => task.id).join(', ');
-        return {
-          key,
-          name: addition.name,
-          status: 'CHECK',
-          message: `Multiple API tasks share this name and requiredPrestige=${additionPrestigeLevel} (${ids}) - NEEDS REVIEW`,
-        };
-      }
-
-      const availablePrestigeLevels = [
-        ...new Set(nameMatches.map((task) => getPrestigeLevel(task))),
-      ]
-        .sort((a, b) => a - b)
-        .join(', ');
-      return {
-        key,
-        name: addition.name,
-        status: 'MISSING',
-        message: `API tasks share this name, but none match requiredPrestige=${additionPrestigeLevel} (available: ${availablePrestigeLevels}) - STILL NEEDED`,
-      };
-    }
-
-    if (nameMatches.length === 1) {
-      return {
-        key,
-        name: addition.name,
-        status: 'CHECK',
-        message: `Matched API task '${nameMatches[0].name}' (${nameMatches[0].id}) by name only - NEEDS REVIEW`,
-      };
-    }
-
-    if (nameMatches.length > 1) {
-      const ids = nameMatches.map((task) => task.id).join(', ');
-      return {
-        key,
-        name: addition.name,
-        status: 'CHECK',
-        message: `Multiple API tasks share this name (${ids}) - NEEDS REVIEW`,
-      };
-    }
-
-    return {
-      key,
-      name: addition.name,
-      status: 'MISSING',
-      message: 'Still missing from API - STILL NEEDED',
-    };
-  });
+  return Object.entries(additions).map(([key, addition]) =>
+    indexedAddition(key, addition, byId, indexes)
+  );
 }
 
 export function checkEditionTaskReferences(
@@ -497,6 +580,9 @@ function printResults(
     const icon = STATUS_ICONS[result.status];
     console.log(`${bold(result.name)} ${dim(`(${result.id})`)} : ${icon}`);
 
+    for (const row of result.comparison ?? []) {
+      console.log(`   ${row.field}: ${row.status.toUpperCase()} - ${row.reason}`);
+    }
     for (const detail of result.details) {
       const color = DETAIL_COLORS[detail.status];
       console.log(`   ${color}${detail.message}${colors.reset}`);
@@ -576,6 +662,9 @@ function printAdditionResults(
     const color = ADDITION_COLORS[result.status];
     console.log(`${bold(result.name)} ${dim(`(${result.key})`)} : ${icon}`);
     console.log(`   ${color}${result.message}${colors.reset}`);
+    for (const detail of result.comparison ?? []) {
+      console.log(`   ${detail.field}: ${detail.status.toUpperCase()} - ${detail.reason}`);
+    }
     console.log();
   }
 
@@ -591,9 +680,16 @@ function printAdditionResults(
     icons.success
   );
   printCountSection('Still missing from API', 'yellow', byStatus('MISSING'), icons.warning);
-  printCountSection('Needs review (name-only matches)', 'yellow', byStatus('CHECK'), icons.sync);
+  printCountSection(
+    'Needs review (identity, value or ambiguous name matches)',
+    'yellow',
+    byStatus('CHECK'),
+    icons.sync
+  );
 
-  return { resolved: results.filter((result) => result.status === 'RESOLVED').length };
+  return {
+    resolved: results.filter((result) => result.adopted || result.status === 'RESOLVED').length,
+  };
 }
 
 function printEditionReferenceResults(missing: EditionTaskReference[]): void {
@@ -883,71 +979,6 @@ function printRequirementTypeCounts(
 }
 
 /**
- * Report base-override verdicts across every game mode.
- *
- * Base overrides are mode-agnostic: `docs/INTEGRATION.md` applies them to both
- * modes before mode-specific ones. Validating them against regular alone can
- * therefore hide two failure shapes - an override that is stale in regular but
- * load-bearing in PvE, and one that is quietly wrong in the mode we never
- * checked. Only overrides stale in EVERY mode are safe to retire.
- */
-function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, ValidationResult[]>>): {
-  staleEverywhere: string[];
-  verdictDiffers: string[];
-} {
-  const modes = Object.keys(resultsByMode) as GameMode[];
-  printHeader('BASE OVERRIDES ACROSS ALL MODES');
-  console.log(dim(`  (base overrides apply to every mode: ${modes.join(', ')})`));
-  console.log();
-
-  const byTask = new Map<string, Partial<Record<GameMode, ValidationResult>>>();
-  for (const mode of modes) {
-    for (const result of resultsByMode[mode] ?? []) {
-      const entry = byTask.get(result.id) ?? {};
-      entry[mode] = result;
-      byTask.set(result.id, entry);
-    }
-  }
-
-  const staleEverywhere: string[] = [];
-  const verdictDiffers: string[] = [];
-
-  for (const [taskId, perMode] of byTask) {
-    const present = modes.filter((mode) => perMode[mode]);
-    // A task missing from one mode's data is mode-exclusive, not a disagreement.
-    const comparable = present.filter((mode) => perMode[mode]!.status !== 'REMOVED_FROM_API');
-    if (comparable.length === 0) continue;
-
-    const name = perMode[comparable[0]]!.name;
-    const needed = comparable.filter((mode) => perMode[mode]!.stillNeeded);
-
-    if (needed.length === 0) {
-      staleEverywhere.push(`${name} (${taskId}) - redundant in ${comparable.join(' + ')}`);
-    } else if (needed.length < comparable.length) {
-      const idle = comparable.filter((mode) => !perMode[mode]!.stillNeeded);
-      verdictDiffers.push(
-        `${name} (${taskId}) - needed in ${needed.join(' + ')}, redundant in ${idle.join(' + ')}`
-      );
-    }
-  }
-
-  printCountSection(
-    'Base overrides redundant in EVERY mode (safe to retire)',
-    'yellow',
-    staleEverywhere,
-    icons.warning
-  );
-  printCountSection(
-    'Base overrides whose verdict DIFFERS by mode (keep; consider moving to a mode file)',
-    'cyan',
-    verdictDiffers,
-    icons.info
-  );
-
-  return { staleEverywhere, verdictDiffers };
-}
-
-/**
  * Report the mode-divergence registry against every recorded upstream mode.
  *
  * This is the check that catches a mirror-direction flip. `OVERRIDE_MISSING`
@@ -1064,10 +1095,22 @@ function formatDivergenceValue(value: unknown): string {
   return typeof value === 'string' ? `'${value}'` : String(value);
 }
 
-/**
- * Report generic entity override/addition results (prestige, items, traders,
- * hideout, itemsAdd).
- */
+function isFieldAncestor(ancestor: string, field: string): boolean {
+  return ['.', '[', ':'].some((separator) => field.startsWith(`${ancestor}${separator}`));
+}
+
+function isRetirableEntityField(
+  detail: EntityValidationResult['details'][number],
+  details: EntityValidationResult['details']
+): boolean {
+  if (detail.status !== 'fixed' || detail.field.includes('[')) return false;
+  if (detail.field.startsWith('extractsAdd:')) return false;
+  return !details.some(
+    (parent) => parent.status === 'fixed' && isFieldAncestor(parent.field, detail.field)
+  );
+}
+
+/** Report generic entity override/addition results. */
 function printEntityResults(
   label: string,
   filePath: string,
@@ -1121,12 +1164,17 @@ function printEntityResults(
   }
 
   const staleFieldsInNeededEntries = grouped.stillNeeded
-    .flatMap((result) => result.details)
-    .filter((detail) => detail.status === 'fixed').length;
+    .filter((result) => result.adopted === undefined)
+    .flatMap((result) =>
+      result.details.filter((detail) => isRetirableEntityField(detail, result.details))
+    ).length;
 
   return {
     errors: grouped.removedFromApi.length + identityErrors.length,
-    stale: grouped.fixed.length + staleFieldsInNeededEntries,
+    stale:
+      grouped.fixed.length +
+      grouped.stillNeeded.filter((result) => result.adopted).length +
+      staleFieldsInNeededEntries,
   };
 }
 
@@ -1315,6 +1363,7 @@ export async function checkMapData(
     : {};
   let actionable = 0;
   let staleProblems = 0;
+  const sharedEvidence: EntityModeEvidence[] = [];
   for (const mode of SUPPORTED_GAME_MODES) {
     const modePath = join(sourceDir, 'overrides', 'modes', mode, 'maps.json5');
     const modeOverrides = existsSync(modePath)
@@ -1324,10 +1373,20 @@ export async function checkMapData(
     if (Object.keys(effective).length === 0) continue;
     printProgress(`Fetching ${mode} maps from tarkov.dev API...`);
     const { maps, translations } = await fetchData(mode);
+    sharedEvidence.push({ mode, results: validateMapOverrides(shared, maps, translations) });
     const report = printEntityResults(
       `${mode} maps`,
-      `shared maps + modes/${mode}/maps`,
-      validateMapOverrides(effective, maps, translations, shared)
+      `modes/${mode}/maps`,
+      validateModeMapOverrides(modeOverrides, shared, maps, translations)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+  if (Object.keys(shared).length) {
+    const report = printEntityResults(
+      'shared maps (all modes)',
+      'shared maps',
+      aggregateEntityRetirement(sharedEvidence, SUPPORTED_GAME_MODES)
     );
     actionable += report.errors;
     staleProblems += report.stale;
@@ -1396,15 +1455,21 @@ export async function checkEntityData(sourceDir = srcDir): Promise<GateCounts> {
       staleProblems += report.stale;
       continue;
     }
+    const evidence: EntityModeEvidence[] = [];
     for (const mode of SUPPORTED_GAME_MODES) {
       printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
       const apiEntities = await getEntities(mode, spec);
       printSuccess(`Fetched ${apiEntities.size} ${mode} ${spec.label} record(s)\n`);
       const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
-      const report = printEntityResults(`${mode} ${spec.label}`, relPath, entityResults);
-      actionable += report.errors;
-      staleProblems += report.stale;
+      evidence.push({ mode, results: entityResults });
     }
+    const report = printEntityResults(
+      `${spec.label} (all modes)`,
+      relPath,
+      aggregateEntityRetirement(evidence, SUPPORTED_GAME_MODES)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
   }
 
   for (const spec of ENTITY_ADDITION_SPECS) {
@@ -1414,18 +1479,20 @@ export async function checkEntityData(sourceDir = srcDir): Promise<GateCounts> {
       printEntityResults(spec.label, relPath, []);
       continue;
     }
+    const evidence: EntityModeEvidence[] = [];
     for (const mode of SUPPORTED_GAME_MODES) {
       printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
       const apiEntities = await getEntities(mode, spec);
       printSuccess(`Fetched ${apiEntities.size} ${mode} record(s)\n`);
-      const report = printEntityResults(
-        `${mode} ${spec.label}`,
-        relPath,
-        validateEntityAdditions(entityAdditions, apiEntities)
-      );
-      actionable += report.errors;
-      staleProblems += report.stale;
+      evidence.push({ mode, results: validateEntityAdditions(entityAdditions, apiEntities) });
     }
+    const report = printEntityResults(
+      `${spec.label} (all modes)`,
+      relPath,
+      aggregateEntityRetirement(evidence, SUPPORTED_GAME_MODES)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
   }
 
   return { actionable, staleProblems, upstreamProblems: 0 };
@@ -1492,14 +1559,244 @@ function checkSuppressions(apiTasks: TaskData[], apiTasksByMode: TasksByMode): G
   return { actionable, staleProblems: 0, upstreamProblems: 0 };
 }
 
-function checkModeOverrides(
+function applySharedTask(task: TaskData, patch: TaskOverride = {}): ComparisonTaskData {
+  const source = comparisonTask(task);
+  const { objectives, objectivesAdd, ...fields } = patch;
+  const result = { ...source, ...fields };
+  if (!validObjectiveCollection(source.objectives)) return result;
+  const patched = source.objectives!.map((objective) => ({
+    ...objective,
+    ...objectives?.[objective.id],
+  }));
+  result.objectives = [...patched, ...(objectivesAdd ?? [])] as ComparisonTaskData['objectives'];
+  return result;
+}
+
+/** Mode removals must preserve the effective shared correction beneath them. */
+export function validateModeTaskOverrides(
+  overrides: Record<string, TaskOverride>,
+  shared: Record<string, TaskOverride>,
+  tasks: TaskData[]
+): ValidationResult[] {
+  const inherited = tasks.map((task) => applySharedTask(task, shared[task.id]));
+  return validateAllOverrides(overrides, inherited).map((result) => ({
+    ...result,
+    details: result.details.map((detail) => ({
+      ...detail,
+      message: `Shared-applied baseline: ${detail.message}`,
+    })),
+    comparison: result.comparison?.map((row) => ({
+      ...row,
+      reason: `${row.reason}; shared overlay is applied before this mode correction`,
+    })),
+  }));
+}
+
+type TaskCorrectionUnit = { field: string; patch: TaskOverride };
+
+function objectiveCorrectionUnits(
+  objectives: NonNullable<TaskOverride['objectives']>
+): TaskCorrectionUnit[] {
+  return Object.entries(objectives).flatMap(([id, patch]) =>
+    Object.entries(patch).map(([field, value]) => ({
+      field: `objective:${id}:${field}`,
+      patch: { objectives: { [id]: { [field]: value } } } as TaskOverride,
+    }))
+  );
+}
+
+function taskCorrectionUnits(patch: TaskOverride): TaskCorrectionUnit[] {
+  const { objectives, ...fields } = patch;
+  const units = Object.entries(fields).map(([field, value]) => ({
+    field,
+    patch: { [field]: value } as TaskOverride,
+  }));
+  return [...units, ...objectiveCorrectionUnits(objectives ?? {})];
+}
+
+function coversCorrection(shared: unknown, mode: unknown): boolean {
+  if (!isCorrectionRecord(shared)) return mode !== undefined;
+  if (!isCorrectionRecord(mode)) return false;
+  return Object.entries(shared).every(
+    ([key, value]) => Object.hasOwn(mode, key) && coversCorrection(value, mode[key])
+  );
+}
+
+function isCorrectionRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function matchingModeUnit(
+  unit: TaskCorrectionUnit,
+  modePatch: TaskOverride = {}
+): TaskCorrectionUnit | undefined {
+  if (unit.field === 'objectivesAdd') return undefined;
+  return taskCorrectionUnits(modePatch).find((candidate) => candidate.field === unit.field);
+}
+
+function correctionMasked(
+  id: string,
+  unit: TaskCorrectionUnit,
+  modePatch: TaskOverride | undefined,
+  tasks: TaskData[]
+): boolean {
+  const modeUnit = matchingModeUnit(unit, modePatch);
+  if (!modeUnit || !coversCorrection(unit.patch, modeUnit.patch)) return false;
+  return independentlyNeededModeUnit(id, unit, modeUnit, tasks);
+}
+
+function independentlyNeededModeUnit(
+  id: string,
+  shared: TaskCorrectionUnit,
+  mode: TaskCorrectionUnit,
+  tasks: TaskData[]
+): boolean {
+  const task = tasks.find((candidate) => candidate.id === id);
+  if (!task) return false;
+  const baseline = applySharedTask(task, shared.patch);
+  const result = validateAllOverrides({ [id]: mode.patch }, [baseline])[0];
+  return (
+    result.details.every((detail) => ['fixed', 'needed'].includes(detail.status)) &&
+    result.details.some((detail) => detail.status === 'needed')
+  );
+}
+
+function availableModeTasks(tasksByMode: TasksByMode, mode: GameMode): TaskData[] {
+  return tasksByMode[mode] ?? [];
+}
+
+function unitModeResult(
+  id: string,
+  unit: TaskCorrectionUnit,
+  mode: GameMode,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>>
+): ValidationResult {
+  const result = validateAllOverrides(
+    { [id]: unit.patch },
+    availableModeTasks(tasksByMode, mode)
+  )[0];
+  if (correctionMasked(id, unit, patchesByMode[mode]?.[id], availableModeTasks(tasksByMode, mode)))
+    return { ...result, status: 'FIXED', stillNeeded: false, details: [] };
+  if (result.status !== 'REMOVED_FROM_API') return result;
+  return {
+    ...result,
+    status: 'NEEDED',
+    stillNeeded: true,
+    details: [
+      {
+        field: unit.field,
+        status: 'check',
+        message: 'Task unavailable in this mode; retirement is unverified',
+      },
+    ],
+  };
+}
+
+function sharedUnitDetail(
+  id: string,
+  unit: TaskCorrectionUnit,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>>
+): ValidationDetail {
+  const needed = SUPPORTED_GAME_MODES.filter(
+    (mode) => unitModeResult(id, unit, mode, tasksByMode, patchesByMode).stillNeeded
+  );
+  return {
+    field: unit.field,
+    status: needed.length ? 'needed' : 'fixed',
+    message: needed.length
+      ? `${unit.field}: keep shared correction; required or unverified in ${needed.join(', ')}`
+      : `${unit.field}: redundant after shared/mode layering in every supported mode`,
+  };
+}
+
+function sharedModeComparison(
+  id: string,
+  patch: TaskOverride,
+  mode: GameMode,
+  tasksByMode: TasksByMode
+): OverlayComparisonDetail[] {
+  const result = validateAllOverrides({ [id]: patch }, tasksByMode[mode] ?? [])[0];
+  return (result.comparison ?? []).map((row) => ({
+    ...row,
+    field: `${mode}.${row.field}`,
+    reason: `${row.reason}; raw upstream comparison, retirement also accounts for mode masking`,
+  }));
+}
+
+function absentFromLoadedMode(id: string, tasks: TaskData[] | undefined): boolean {
+  if (!tasks) return false;
+  return !tasks.some((task) => task.id === id);
+}
+
+function absentFromEveryMode(id: string, tasksByMode: TasksByMode): boolean {
+  return SUPPORTED_GAME_MODES.every((mode) => absentFromLoadedMode(id, tasksByMode[mode]));
+}
+
+function removedSharedTask(id: string): ValidationResult {
+  return {
+    id,
+    name: id,
+    status: 'REMOVED_FROM_API',
+    stillNeeded: false,
+    details: [
+      {
+        field: 'task',
+        status: 'info',
+        message: 'Task absent from every loaded supported mode; remove the shared override',
+      },
+    ],
+  };
+}
+
+/** Shared retirement is authoritative only after examining every supported mode. */
+export function validateSharedTaskOverrides(
+  shared: Record<string, TaskOverride>,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {}
+): ValidationResult[] {
+  return Object.entries(shared).map(([id, patch]) => {
+    if (absentFromEveryMode(id, tasksByMode)) return removedSharedTask(id);
+    const details = taskCorrectionUnits(patch).map((unit) =>
+      sharedUnitDetail(id, unit, tasksByMode, patchesByMode)
+    );
+    const stillNeeded = details.some((detail) => detail.status !== 'fixed');
+    const name =
+      Object.values(tasksByMode)
+        .flat()
+        .find((task) => task.id === id)?.name ?? id;
+    return {
+      id,
+      name,
+      details,
+      stillNeeded,
+      status: stillNeeded ? 'NEEDED' : 'FIXED',
+      comparison: SUPPORTED_GAME_MODES.flatMap((mode) =>
+        sharedModeComparison(id, patch, mode, tasksByMode)
+      ),
+    };
+  });
+}
+
+export function checkSharedTaskOverrides(
+  shared: Record<string, TaskOverride>,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {}
+): number {
+  const report = printResults(validateSharedTaskOverrides(shared, tasksByMode, patchesByMode));
+  return report.obsoleteEntries + report.staleFields;
+}
+
+export function checkModeOverrides(
   mode: GameMode,
   overrides: Record<string, TaskOverride>,
-  tasks: TaskData[]
+  tasks: TaskData[],
+  shared: Record<string, TaskOverride>
 ): number {
   if (Object.keys(overrides).length === 0) return 0;
   printProgress(`Validating ${mode} mode overrides...\n`);
-  const report = printResults(validateAllOverrides(overrides, tasks), {
+  const report = printResults(validateModeTaskOverrides(overrides, shared, tasks), {
     titlePrefix: mode.toUpperCase(),
     overridePath: `src/overrides/modes/${mode}/tasks.json5`,
   });
@@ -1517,7 +1814,8 @@ function checkModeAdditions(
 }
 
 function resolvedAdditionKeys(results: AdditionResult[], keys: Set<string>): void {
-  for (const result of results) if (result.status === 'RESOLVED') keys.add(result.key);
+  for (const result of results)
+    if (result.adopted || result.status === 'RESOLVED') keys.add(result.key);
 }
 
 function checkSharedModeAdditions(
@@ -1567,7 +1865,7 @@ async function checkModeTasks(
     const modeOverrideCount = Object.keys(modeOverrides).length;
 
     if (modeOverrideCount > 0) crossCheckGroups.push({ label: mode, overrides: modeOverrides });
-    staleProblems += checkModeOverrides(mode, modeOverrides, modeApiTasks);
+    staleProblems += checkModeOverrides(mode, modeOverrides, modeApiTasks, overrides);
     staleProblems += checkModeAdditions(mode, modeAdditions, modeApiTasks);
     checkSharedModeAdditions(mode, additions, modeApiTasks, resolvedSharedKeys);
   }
@@ -1577,14 +1875,7 @@ async function checkModeTasks(
   // diagnostic is already recorded here.
   upstreamProblems += printRequirementTypeCounts(snapshotsByMode).missingRequirementIds;
 
-  // Base overrides apply to every mode, so validate them against every mode.
-  const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};
-  for (const mode of SUPPORTED_GAME_MODES) {
-    const modeApiTasks = apiTasksByMode[mode];
-    if (!modeApiTasks) continue;
-    baseResultsByMode[mode] = validateAllOverrides(overrides, modeApiTasks);
-  }
-  printBaseCrossModeSummary(baseResultsByMode);
+  staleProblems += checkSharedTaskOverrides(overrides, apiTasksByMode, modeOverridesByMode);
 
   return {
     apiTasksByMode,
@@ -1693,12 +1984,6 @@ async function main(): Promise<void> {
     const { tasks: apiTasks } = await getTasksForMode();
     printSuccess(`Fetched ${apiTasks.length} tasks from API\n`);
 
-    printProgress('Validating overrides...\n');
-    const results = validateAllOverrides(overrides, apiTasks);
-
-    const baseTaskReport = printResults(results);
-    staleProblems += baseTaskReport.obsoleteEntries + baseTaskReport.staleFields;
-
     // Collect every override group for the reference cross-check below.
     const crossCheckGroups: Array<{ label: string; overrides: Record<string, TaskOverride> }> = [
       { label: 'base', overrides },
@@ -1727,6 +2012,7 @@ async function main(): Promise<void> {
 
     actionable += checkModeDivergences(overrides, apiTasksByMode, modeOverridesByMode);
 
+    const contractCounts = await checkAdditionContracts(srcDir, apiTasksByMode);
     const entityCounts = await checkEntityData();
     const mapCounts = await checkMapData();
     const supplementCounts = {
@@ -1736,6 +2022,7 @@ async function main(): Promise<void> {
     const storyCounts = checkStoryData(apiTasksByMode, additions);
     const suppressionCounts = checkSuppressions(apiTasks, apiTasksByMode);
     for (const counts of [
+      contractCounts,
       entityCounts,
       mapCounts,
       supplementCounts,

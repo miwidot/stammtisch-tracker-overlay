@@ -23,6 +23,7 @@
  */
 
 import { SYNTHETIC_REQUIREMENT_ID_PREFIX } from './types.js';
+import { registerTaskComparison } from './task-comparison.cjs';
 import type {
   TaskData,
   TaskObjective,
@@ -428,7 +429,8 @@ function adaptObjectives(value: unknown, ctx: Context): TaskObjective[] | undefi
 function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   const id = stringId(raw) ?? '';
   const syntheticRequirementIdOccurrences = new Map<string, number>();
-  return compact({
+  const task = compact({
+    ...raw,
     id,
     name: translate(ctx.tasksEn, raw.name) ?? id,
     trader: adaptTaskTrader(raw.trader, ctx),
@@ -462,6 +464,8 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     startRewards: adaptReward(raw.startRewards, ctx),
     finishRewards: adaptReward(raw.finishRewards, ctx),
   }) as unknown as TaskData;
+  registerTaskComparison(task, raw, ctx);
+  return task;
 }
 
 /** Build the shared entity and translation context for task adaptation. */
@@ -791,6 +795,8 @@ export interface LocaleBundle {
   locale: string;
   tasksById: Map<string, Record<string, unknown>>;
   itemsById: Map<string, Record<string, unknown>>;
+  /** Missing quest-item source cannot prove an item identity is absent. */
+  itemCatalogComplete?: boolean;
   tradersById: Map<string, Record<string, unknown>>;
   mapsById: Map<string, Record<string, unknown>>;
   /** Prestige records live in the tasks payload's `prestige` array */
@@ -851,15 +857,67 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
   return {
     locale,
     tasksById: toLookup(tasksData.tasks, `${mode}/tasks`),
-    itemsById: toLookup(itemsData.items, `${mode}/items`),
+    itemCatalogComplete: tasksData.questItems !== undefined,
+    itemsById: localeItemIndex(itemsData.items, tasksData, itemsLocale, tasksLocale),
     mapsById: toLookup(mapsData.maps, `${mode}/maps`),
     tradersById: toLookup(tradersEnvelope.data, `${mode}/traders`),
     prestigeById: toLookup(tasksData.prestige, `${mode}/tasks prestige`),
     tasksLocale,
-    itemsLocale,
+    itemsLocale: { ...tasksLocale, ...itemsLocale },
     mapsLocale,
     tradersLocale,
   };
+}
+
+/** Keep translation keys raw while including quest and dictionary-only items. */
+function localeItemIndex(
+  items: unknown,
+  tasksData: JsonRecord,
+  itemsLocale: TranslationMap,
+  tasksLocale: TranslationMap
+): Map<string, JsonRecord> {
+  const index = localeCatalogItems(items, tasksData);
+  const tasks = toLookup(tasksData.tasks, 'tasks');
+  for (const key of Object.keys({ ...tasksLocale, ...itemsLocale })) {
+    includeDictionaryLocaleItem(index, tasks, key);
+  }
+  const translations = { ...tasksLocale, ...itemsLocale };
+  for (const [id, item] of index) index.set(id, localeItemFields(item, translations));
+  return index;
+}
+
+function localeCatalogItems(items: unknown, tasksData: JsonRecord): Map<string, JsonRecord> {
+  const questItems = tasksData.questItems === undefined ? {} : tasksData.questItems;
+  const quests = comparisonRecords(questItems, 'tasks questItems', true);
+  const index = new Map(quests.map((item) => [item.id as string, item]));
+  for (const item of comparisonRecords(items, 'items', true)) index.set(item.id as string, item);
+  return index;
+}
+
+function dictionaryLocaleId(key: string): string | undefined {
+  return /^([a-f0-9]{24}) Name$/.exec(key)?.[1];
+}
+
+function includeDictionaryLocaleItem(
+  index: Map<string, JsonRecord>,
+  tasks: Map<string, JsonRecord>,
+  key: string
+): void {
+  const id = dictionaryLocaleId(key);
+  if (id && !index.has(id) && !tasks.has(id)) index.set(id, { id, name: key });
+}
+
+function localeItemFields(item: JsonRecord, translations: TranslationMap): JsonRecord {
+  const result = { ...item };
+  for (const [field, suffix] of [
+    ['name', 'Name'],
+    ['shortName', 'ShortName'],
+    ['description', 'Description'],
+  ]) {
+    const key = `${item.id} ${suffix}`;
+    if (result[field] === undefined && Object.hasOwn(translations, key)) result[field] = key;
+  }
+  return result;
 }
 
 /**
@@ -871,6 +929,14 @@ export function findTaskById(tasks: TaskData[], taskId: string): TaskData | unde
 
 /** Fetch all upstream item identities and English fields used by adoption checks. */
 export async function fetchItemValidationData(mode: GameMode): Promise<Map<string, JsonRecord>> {
+  return (await fetchItemValidationSnapshot(mode)).items;
+}
+
+/** The index and raw catalog share the same upstream exchange and source revision. */
+export async function fetchItemValidationSnapshot(mode: GameMode): Promise<{
+  items: Map<string, JsonRecord>;
+  data: JsonRecord;
+}> {
   const cache: EndpointCache = new Map();
   const [items, tasks, itemsEn, tasksEn] = await Promise.all([
     fetchEnvelope(cache, `${mode}/items`),
@@ -880,5 +946,8 @@ export async function fetchItemValidationData(mode: GameMode): Promise<Map<strin
   ]);
   const tasksData = isRecord(tasks.data) ? tasks.data : undefined;
   comparisonRecords(tasksData?.tasks, `${mode}/tasks`);
-  return buildItemComparisonIndex(items.data, tasks.data, itemsEn.data, tasksEn.data);
+  return {
+    items: buildItemComparisonIndex(items.data, tasks.data, itemsEn.data, tasksEn.data),
+    data: items.data as JsonRecord,
+  };
 }

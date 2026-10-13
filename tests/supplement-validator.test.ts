@@ -9,6 +9,34 @@ import {
 } from '../src/lib/supplement-validator.js';
 
 describe('supplement upstream coverage', () => {
+  it.each([{}, { 'perk name': 'perk name' }, { 'perk name': '   ' }])(
+    'does not prove untranslated seasonal metadata from %j',
+    async (dictionary) => {
+      const sourceDir = mkdtempSync(join(tmpdir(), 'season-texts-'));
+      mkdirSync(join(sourceDir, 'additions'));
+      writeFileSync(
+        join(sourceDir, 'additions', 'seasonalPerks.json5'),
+        JSON.stringify({
+          perk: { id: 'perk', name: 'perk name', effects: [] },
+        })
+      );
+      const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+      try {
+        await checkSupplements(sourceDir, async (endpoint) => ({
+          data: endpoint.endsWith('season_en')
+            ? dictionary
+            : endpoint.endsWith('/season')
+              ? { perks: { personal: [{ id: 'perk', name: 'perk name', effects: [] }] } }
+              : { endpoints: [{ name: 'tasks', path: '/tasks' }] },
+        }));
+        expect(output.mock.calls.flat().join('\n')).toContain('name UNVERIFIED');
+        expect(output.mock.calls.flat().join('\n')).not.toContain('name SAME');
+      } finally {
+        output.mockRestore();
+        rmSync(sourceDir, { recursive: true });
+      }
+    }
+  );
   it('checks actual perk IDs and raw effects, never display descriptions', () => {
     const overlay = { perk: { id: 'perk', effects: [{ effectId: 'speed', multiplicator: 2 }] } };
     const unexposed = validateSeasonalPerks(overlay, {
@@ -43,6 +71,132 @@ describe('supplement upstream coverage', () => {
       })
     ).toMatchObject({ staleProblems: 1 });
   });
+  it('compares supplied metadata while keeping raw effects independent of prose', () => {
+    const result = validateSeasonalPerks(
+      {
+        perk: {
+          id: 'perk',
+          name: 'Overlay name',
+          description: 'Overlay prose',
+          icon: 'overlay.png',
+          unknown: { count: 0 },
+          effects: [{ effectId: 'speed', multiplicator: 2 }],
+        },
+      },
+      {
+        perks: {
+          personal: [
+            {
+              id: 'perk',
+              name: 'Upstream name',
+              description: 'Upstream prose',
+              icon: 'overlay.png',
+            },
+          ],
+        },
+      }
+    );
+    expect(result).toMatchObject({ actionable: 2, staleProblems: 0 });
+    expect(result.details.find((entry) => entry.field === 'name')).toMatchObject({
+      status: 'different',
+      overlayValue: 'Overlay name',
+      upstreamValue: 'Upstream name',
+    });
+    expect(result.details.find((entry) => entry.field === 'description')?.status).toBe('different');
+    expect(result.details.find((entry) => entry.field === 'icon')?.status).toBe('same');
+    expect(result.details.find((entry) => entry.field === 'unknown.count')?.status).toBe(
+      'unverified'
+    );
+    expect(result.details.find((entry) => entry.field === 'effects[0].multiplicator')?.status).toBe(
+      'unverified'
+    );
+    expect(result.messages.join('\n')).toContain('effects[0].multiplicator');
+  });
+
+  it('reports matching effect IDs with differing nested values independently', () => {
+    const result = validateSeasonalPerks(
+      {
+        perk: {
+          id: 'perk',
+          effects: [{ effectId: 'speed', attributes: { count: 2, optional: false } }],
+        },
+      },
+      {
+        perks: {
+          personal: [
+            {
+              id: 'perk',
+              effects: [{ effectId: 'speed', attributes: { count: 1, optional: true } }],
+            },
+          ],
+        },
+      }
+    );
+    expect(result).toMatchObject({ actionable: 1, staleProblems: 0 });
+    expect(
+      result.details.find((entry) => entry.field === 'effects[0].attributes.count')?.status
+    ).toBe('different');
+    expect(
+      result.details.find((entry) => entry.field === 'effects[0].attributes.optional')?.status
+    ).toBe('different');
+  });
+
+  it('does not retire raw effects with missing supplied attributes', () => {
+    const result = validateSeasonalPerks(
+      { perk: { id: 'perk', effects: [{ effectId: 'speed', multiplicator: 2 }] } },
+      { perks: { personal: [{ id: 'perk', effects: [{ effectId: 'speed' }] }] } }
+    );
+    expect(result).toMatchObject({ actionable: 0, staleProblems: 0 });
+    expect(result.details.find((entry) => entry.field === 'effects[0].multiplicator')?.status).toBe(
+      'unverified'
+    );
+  });
+
+  it.each(['overlay', 'upstream'])('does not retire repeated %s effect identities', (side) => {
+    const effects = [{ effectId: 'speed', multiplicator: 2 }];
+    const duplicates = [...effects, ...effects];
+    const result = validateSeasonalPerks(
+      { perk: { id: 'perk', effects: side === 'overlay' ? duplicates : effects } },
+      { perks: { personal: [{ id: 'perk', effects: side === 'upstream' ? duplicates : effects }] } }
+    );
+    expect(result).toMatchObject({ actionable: 0, staleProblems: 0 });
+    expect(result.details.find((entry) => entry.field === 'effects[0].multiplicator')?.status).toBe(
+      'unverified'
+    );
+  });
+
+  it('keeps null upstream raw effects unavailable instead of inventing contradictory values', () => {
+    const result = validateSeasonalPerks(
+      { perk: { id: 'perk', effects: [{ effectId: 'speed', multiplicator: 2 }] } },
+      { perks: { personal: [{ id: 'perk', effects: null }] } }
+    );
+    expect(result).toMatchObject({ actionable: 0, staleProblems: 0 });
+    expect(result.details.find((entry) => entry.field === 'effects')?.status).toBe('unverified');
+    expect(result.details.find((entry) => entry.field === 'effects[0].multiplicator')?.status).toBe(
+      'unverified'
+    );
+  });
+
+  it('reports every field when a supplemental perk is absent upstream', () => {
+    const result = validateSeasonalPerks(
+      {
+        missing: {
+          id: 'missing',
+          description: 'Text',
+          effects: [{ effectId: 'speed', multiplicator: 0 }],
+        },
+      },
+      { perks: { personal: [{ id: 'other' }] } }
+    );
+    expect(result).toMatchObject({ actionable: 1, staleProblems: 0 });
+    expect(result.details.find((entry) => entry.field === 'description')?.status).toBe(
+      'unverified'
+    );
+    expect(result.details.find((entry) => entry.field === 'effects[0].multiplicator')?.status).toBe(
+      'unverified'
+    );
+  });
+
   it('resolves task and variable references without claiming pool membership validation', () => {
     const counters = { counter: { derivation: { taskIds: ['exists', 'missing'] } } };
     const result = validateProgressionCounters(counters, {
@@ -225,4 +379,31 @@ describe('supplement coverage orchestration', () => {
       rmSync(sourceDir, { recursive: true });
     }
   });
+});
+
+it('does not classify unknown-only seasonal effect attributes as actionable discrepancies', () => {
+  const season = {
+    perks: { personal: [{ id: 'perk', effects: [{ effectId: 'speed', multiplicator: 2 }] }] },
+  };
+  const overlay = {
+    perk: { id: 'perk', effects: [{ effectId: 'speed', multiplicator: 2, unknown: { count: 4 } }] },
+  };
+  const result = validateSeasonalPerks(overlay, season);
+  expect(result).toMatchObject({ actionable: 0, staleProblems: 0 });
+  expect(result.messages.some((message) => message.includes('value not verified'))).toBe(true);
+  expect(
+    result.details.some(
+      (detail) => detail.field.includes('unknown') && detail.status === 'unverified'
+    )
+  ).toBe(true);
+  const changed = validateSeasonalPerks(
+    {
+      perk: {
+        id: 'perk',
+        effects: [{ effectId: 'speed', multiplicator: 3, unknown: { count: 4 } }],
+      },
+    },
+    season
+  );
+  expect(changed).toMatchObject({ actionable: 1, staleProblems: 0 });
 });

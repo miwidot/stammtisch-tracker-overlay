@@ -3,6 +3,8 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { comparisonTask, registerTaskComparison } from '../src/lib/task-comparison.cjs';
+import { compareOverlayFields } from '../src/lib/overlay-comparison.cjs';
 import {
   deriveTaskUnlockDefinition,
   evaluateTaskUnlock,
@@ -13,6 +15,7 @@ import {
   fetchLocaleBundle,
   fetchRawEntities,
   findTaskById,
+  validateTaskOverride,
   FETCH_TIMEOUT_MS,
   MAX_RESPONSE_BYTES,
   USER_AGENT,
@@ -109,6 +112,299 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(tasks).toHaveLength(1);
     expect(tasks[0].name).toBe('The First Task');
     expect(tasks[0].objectives?.[0].description).toBe('Visit the place');
+  });
+
+  it('keeps untranslated display fallbacks unavailable in comparison snapshots', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t: {
+                id: 't',
+                name: 't name',
+                trader: 'r',
+                map: 'm',
+                taskRequirements: [{ id: 'req', task: 'previous', status: ['complete'] }],
+                objectives: [
+                  {
+                    id: 'o',
+                    type: 'item',
+                    description: 'o',
+                    items: ['i'],
+                    maps: ['m'],
+                    usingWeaponMods: [['i']],
+                  },
+                ],
+                finishRewards: { items: [{ item: 'i', count: 1 }] },
+              },
+              previous: { id: 'previous', name: 'previous name' },
+            },
+          },
+        },
+        'regular/items': {
+          data: { items: { i: { id: 'i', name: 'i Name', shortName: 'i ShortName' } } },
+        },
+        'regular/maps': { data: { maps: { m: { id: 'm', name: 'm Name' } } } },
+        'regular/traders': { data: { r: { id: 'r', name: 'r Name' } } },
+      })
+    );
+    const task = (await fetchTasks()).find((entry) => entry.id === 't')!;
+    const serialized = JSON.stringify(task);
+    const comparison = comparisonTask(task);
+    expect(task.name).toBe('t name');
+    expect(task.objectives?.[0].description).toBe('o');
+    expect(task.objectives?.[0].items?.[0].name).toBe('i Name');
+    expect(comparison.name).toBeUndefined();
+    expect(comparison.trader?.name).toBeUndefined();
+    expect(comparison.map?.name).toBeUndefined();
+    expect(comparison.taskRequirements?.[0].task?.name).toBeUndefined();
+    expect(comparison.objectives?.[0].description).toBeUndefined();
+    expect(comparison.objectives?.[0].items?.[0].name).toBeUndefined();
+    expect(comparison.objectives?.[0].items?.[0].shortName).toBeUndefined();
+    expect(comparison.objectives?.[0].usingWeaponMods?.[0][0].name).toBeUndefined();
+    expect(comparison.finishRewards?.items?.[0].item?.name).toBeUndefined();
+    const details = compareOverlayFields(
+      {
+        name: 't name',
+        objectives: { o: { description: 'o', items: [{ id: 'i', name: 'Actual item' }] } },
+      },
+      comparison
+    );
+    expect(details.find((entry) => entry.field === 'name')?.status).toBe('unverified');
+    expect(details.find((entry) => entry.field === 'objectives.o.description')?.status).toBe(
+      'unverified'
+    );
+    expect(details.find((entry) => entry.field === 'objectives.o.items[0].name')?.status).toBe(
+      'unverified'
+    );
+    expect(JSON.stringify(task)).toBe(serialized);
+    expect(comparison).not.toBe(task);
+    expect(comparison.objectives).not.toBe(task.objectives);
+  });
+
+  it('compares known English text through the correct reference dictionaries and inline sources', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t: {
+                id: 't',
+                name: 't name',
+                map: 'shared',
+                trader: 'r',
+                requiredPrestige: 'p',
+                objectives: [
+                  {
+                    id: 'o',
+                    type: 'item',
+                    description: 'o',
+                    items: ['shared', { id: 'inline', name: 'inline Name' }],
+                    maps: ['shared'],
+                  },
+                ],
+              },
+            },
+            prestige: [{ id: 'p', name: 'p name', prestigeLevel: 1 }],
+          },
+        },
+        'regular/tasks_en': { data: { 't name': 'Task', o: 'Objective', 'p name': 'Prestige' } },
+        'regular/items': {
+          data: {
+            items: { shared: { id: 'shared', name: 'item Name', shortName: 'item ShortName' } },
+          },
+        },
+        'regular/items_en': {
+          data: { 'item Name': 'Item', 'item ShortName': 'I', 'inline Name': 'Inline item' },
+        },
+        'regular/maps': { data: { maps: { shared: { id: 'shared', name: 'map Name' } } } },
+        'regular/maps_en': { data: { 'map Name': 'Map' } },
+        'regular/traders': { data: { r: { id: 'r', name: 'r Name' } } },
+        'regular/traders_en': { data: { 'r Name': 'Trader' } },
+      })
+    );
+    const task = (await fetchTasks())[0];
+    const comparison = comparisonTask(task);
+    expect(comparison.name).toBe('Task');
+    expect(comparison.map?.name).toBe('Map');
+    expect(comparison.trader?.name).toBe('Trader');
+    expect(comparison.requiredPrestige?.name).toBe('Prestige');
+    expect(comparison.objectives?.[0].description).toBe('Objective');
+    expect(comparison.objectives?.[0].items?.[0].name).toBe('Item');
+    expect(comparison.objectives?.[0].items?.[0].shortName).toBe('I');
+    expect(comparison.objectives?.[0].items?.[1].name).toBe('Inline item');
+    expect(
+      compareOverlayFields(
+        {
+          name: 'Task',
+          trader: { id: 'r', name: 'Trader' },
+          objectives: { o: { description: 'Objective', maps: [{ id: 'shared', name: 'Map' }] } },
+        },
+        comparison
+      ).every((entry) => entry.status === 'same')
+    ).toBe(true);
+  });
+
+  it('does not use inherited translation entries as comparison evidence', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': { data: { tasks: { t: { id: 't', name: 'toString' } } } },
+      })
+    );
+    expect(comparisonTask((await fetchTasks())[0]).name).toBeUndefined();
+  });
+
+  it('leaves unregistered task fixtures available without introducing serialized metadata', () => {
+    const task = { id: 't', name: 'Known task' } as TaskData;
+    expect(comparisonTask(task)).toBe(task);
+    expect(Object.keys(task)).toEqual(['id', 'name']);
+  });
+
+  it('rejects inherited string translations in registered comparison contexts', () => {
+    const task = { id: 't', name: 'Untrusted name' } as TaskData;
+    const raw = { id: 't', name: 't name' };
+    registerTaskComparison(task, raw, {
+      tasksById: new Map([['t', raw]]),
+      itemsById: new Map(),
+      questItemsById: new Map(),
+      mapsById: new Map(),
+      tradersById: new Map(),
+      prestigeById: new Map(),
+      tasksEn: Object.create({ 't name': 'Untrusted name' }),
+      itemsEn: {},
+      mapsEn: {},
+      tradersEn: {},
+    });
+    expect(comparisonTask(task).name).toBeUndefined();
+  });
+
+  it.each([
+    [
+      'reward items',
+      { finishRewards: { items: [null] } },
+      { finishRewards: { items: [] } },
+      'finishRewards.items',
+    ],
+    [
+      'reward standing',
+      { finishRewards: { traderStanding: [null] } },
+      { finishRewards: { traderStanding: [] } },
+      'finishRewards.traderStanding',
+    ],
+    [
+      'reward offers',
+      { finishRewards: { offerUnlock: [null] } },
+      { finishRewards: { offerUnlock: [] } },
+      'finishRewards.offerUnlock',
+    ],
+    [
+      'reward trader unlock',
+      { finishRewards: { traderUnlock: [null] } },
+      { finishRewards: { traderUnlock: [] } },
+      'finishRewards.traderUnlock',
+    ],
+    [
+      'reward map unlock',
+      { finishRewards: { locationUnlock: [null] } },
+      { finishRewards: { locationUnlock: [] } },
+      'finishRewards.locationUnlock',
+    ],
+    [
+      'objective items',
+      { objectives: [{ id: 'o', type: 'item', items: [null] }] },
+      { objectives: { o: { items: [] } } },
+      'objectives.o.items',
+    ],
+    [
+      'objective maps',
+      { objectives: [{ id: 'o', type: 'visit', maps: [null] }] },
+      { objectives: { o: { maps: [] } } },
+      'objectives.o.maps',
+    ],
+    [
+      'objective matrix',
+      { objectives: [{ id: 'o', type: 'item', wearing: [[null]] }] },
+      { objectives: { o: { wearing: [] } } },
+      'objectives.o.wearing',
+    ],
+    [
+      'requirement group',
+      { taskRequirementGroups: [null] },
+      { taskRequirementGroups: [[]] },
+      'taskRequirementGroups[0]',
+    ],
+    [
+      'partial rewards',
+      { finishRewards: { items: [null, { item: 'i', count: 1 }] } },
+      { finishRewards: { items: [{ item: { id: 'i' }, count: 1 }] } },
+      'finishRewards.items',
+    ],
+    [
+      'partial references',
+      { objectives: [{ id: 'o', type: 'item', items: [null, 'i'] }] },
+      { objectives: { o: { items: [{ id: 'i' }] } } },
+      'objectives.o.items',
+    ],
+    [
+      'partial matrix group',
+      { objectives: [{ id: 'o', type: 'item', wearing: [[null, 'i']] }] },
+      { objectives: { o: { wearing: [[{ id: 'i' }]] } } },
+      'objectives.o.wearing[0]',
+    ],
+    [
+      'malformed reference identity',
+      { objectives: [{ id: 'o', type: 'item', items: [{}] }] },
+      { objectives: { o: { items: [{ id: '' }] } } },
+      'objectives.o.items[0]',
+    ],
+    [
+      'manufactured requirement record',
+      { otherRequirements: [null] },
+      { otherRequirements: [{ id: 'malformed-requirement', type: 'malformed' }] },
+      'otherRequirements[0]',
+    ],
+  ])(
+    'does not compare filtered %s as a complete source collection',
+    async (_name, raw, patch, field) => {
+      mockEndpoints(
+        baseRoutes('regular', {
+          'regular/tasks': { data: { tasks: { t: { id: 't', name: 't name', ...raw } } } },
+        })
+      );
+      const task = (await fetchTasks())[0];
+      const details = compareOverlayFields(patch, comparisonTask(task));
+      expect(details.find((entry) => entry.field === field)?.status).toBe('unverified');
+      expect(details.every((entry) => entry.status === 'same')).toBe(false);
+    }
+  );
+
+  it('retains explicit empty arrays and intentional singleton reference normalization', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t: {
+                id: 't',
+                name: 't name',
+                finishRewards: { items: [], traderUnlock: 'r', locationUnlock: 'm' },
+                objectives: [{ id: 'o', type: 'item', wearing: ['i'], items: [] }],
+              },
+            },
+          },
+        },
+      })
+    );
+    const task = (await fetchTasks())[0];
+    const details = compareOverlayFields(
+      {
+        finishRewards: { items: [], traderUnlock: [{ id: 'r' }], locationUnlock: [{ id: 'm' }] },
+        objectives: { o: { wearing: [[{ id: 'i' }]], items: [] } },
+      },
+      comparisonTask(task)
+    );
+    expect(details.every((entry) => entry.status === 'same')).toBe(true);
   });
 
   it('drops unsafe object keys while adapting tasks and rewards', async () => {
@@ -1063,6 +1359,115 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     await expect(fetchTasks()).rejects.toThrow(
       'Invalid json.tarkov.dev response for regular/tasks: expected data.tasks object'
     );
+  });
+
+  it('includes quest and dictionary-only item locale fields without interpreting task IDs as items', async () => {
+    const questId = '688896b3ea36baf84d085544';
+    const dictionaryId = '688896b3ea36baf84d085545';
+    const taskId = '688896b3ea36baf84d085546';
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: { [taskId]: { id: taskId, name: 'task name' } },
+            questItems: [{ id: questId, name: `${questId} Name` }],
+          },
+        },
+        'regular/tasks_en': {
+          data: {
+            [`${questId} Name`]: 'Quest item',
+            [`${questId} Description`]: 'Quest description',
+            [`${taskId} Name`]: 'Task title',
+          },
+        },
+        'regular/items_en': {
+          data: {
+            [`${dictionaryId} Name`]: 'Dictionary item',
+            [`${dictionaryId} ShortName`]: 'Short',
+          },
+        },
+      })
+    );
+    const bundle = await fetchLocaleBundle();
+    expect(bundle.itemsById.get(questId)?.description).toBe(`${questId} Description`);
+    expect(bundle.itemsById.get(dictionaryId)?.shortName).toBe(`${dictionaryId} ShortName`);
+    expect(bundle.itemsById.has(taskId)).toBe(false);
+    expect(bundle.itemsLocale[`${questId} Description`]).toBe('Quest description');
+    expect(bundle.itemCatalogComplete).toBe(true);
+  });
+
+  it.each(
+    [null, [null], [{ name: 'missing ID' }], [{ id: 'q' }, { id: 'q' }]].map((questItems) => [
+      questItems,
+    ])
+  )('rejects malformed present quest-item locale catalogs: %j', async (questItems) => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': { data: { tasks: { t: { id: 't' } }, questItems } },
+      })
+    );
+    await expect(fetchLocaleBundle()).rejects.toThrow(/quest/);
+  });
+
+  it.each([[null], [{ name: 'missing ID' }], [{ id: 'i' }, { id: 'i' }]].map((items) => [items]))(
+    'rejects malformed primary item locale catalogs instead of dropping records: %j',
+    async (items) => {
+      mockEndpoints(
+        baseRoutes('regular', {
+          'regular/tasks': { data: { tasks: { t: { id: 't' } }, questItems: [] } },
+          'regular/items': { data: { items } },
+        })
+      );
+      await expect(fetchLocaleBundle()).rejects.toThrow(/item/);
+    }
+  );
+
+  it('keeps absent quest-item locale catalogs incomplete while accepting explicitly empty ones', async () => {
+    const routes = baseRoutes('regular');
+    mockEndpoints(routes);
+    expect((await fetchLocaleBundle()).itemCatalogComplete).toBe(false);
+    routes['regular/tasks'] = { data: { tasks: { t: { id: 't' } }, questItems: [] } };
+    mockEndpoints(routes);
+    expect((await fetchLocaleBundle()).itemCatalogComplete).toBe(true);
+  });
+
+  it.each(['t name', ' '])(
+    'does not use empty or unresolved dictionary text as comparison evidence: %s',
+    async (text) => {
+      mockEndpoints(
+        baseRoutes('regular', {
+          'regular/tasks': { data: { tasks: { t: { id: 't', name: 't name' } } } },
+          'regular/tasks_en': { data: { 't name': text } },
+        })
+      );
+      const [task] = await fetchTasks();
+      const result = validateTaskOverride('t', { name: text }, [task]);
+      expect(result.status).toBe('NEEDED');
+      expect(result.comparison).toEqual(
+        expect.arrayContaining([expect.objectContaining({ field: 'name', status: 'unverified' })])
+      );
+    }
+  );
+
+  it('preserves raw upstream task fields used by addition comparisons', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              fixture: {
+                id: 'fixture',
+                name: 'Fixture',
+                normalizedName: 'fixture',
+                futureField: { enabled: false },
+              },
+            },
+          },
+        },
+      })
+    );
+    const [task] = await fetchTasks();
+    expect(task).toMatchObject({ normalizedName: 'fixture', futureField: { enabled: false } });
   });
 
   it('fetchLocaleBundle fetches the requested locale endpoints and builds raw lookups', async () => {

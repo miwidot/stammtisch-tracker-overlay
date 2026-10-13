@@ -2,7 +2,12 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { getProjectPaths, loadJson5File } from '../src/lib/file-loader.js';
 import { isDirectExecution } from '../src/lib/script-utils.js';
+import {
+  translateComparisonValues,
+  validateTranslationMap,
+} from '../src/lib/tarkov-api-shared.cjs';
 import { fetchTarkovEnvelope } from '../src/lib/tarkov-api.js';
+import { comparisonTranslation } from '../src/lib/task-comparison.cjs';
 import { SUPPORTED_GAME_MODES, type GameMode } from '../src/lib/types.js';
 import {
   validateSeasonalPerks,
@@ -36,6 +41,55 @@ async function compareSupplement(
   }
 }
 
+async function seasonTranslations(fetchEnvelope: FetchEnvelope): Promise<Record<string, string>> {
+  try {
+    return validateTranslationMap(
+      (await fetchEnvelope('pvp-season/season_en', false)).data,
+      'season_en'
+    );
+  } catch {
+    throw new Error('pvp-season: upstream comparison unavailable or malformed');
+  }
+}
+
+function textRecord(raw: unknown): raw is Record<string, unknown> {
+  return raw !== null && typeof raw === 'object' && !Array.isArray(raw);
+}
+
+function applyPerkTexts(
+  perk: Record<string, unknown>,
+  result: Record<string, unknown>,
+  translations: Record<string, string>
+): void {
+  for (const field of ['name', 'description']) {
+    if (Object.hasOwn(perk, field))
+      result[field] = comparisonTranslation(perk[field], translations);
+  }
+}
+
+function perkTexts(raw: unknown, translations: Record<string, string>): unknown {
+  if (!textRecord(raw)) return raw;
+  const result = translateComparisonValues(raw, translations) as Record<string, unknown>;
+  applyPerkTexts(raw, result, translations);
+  return result;
+}
+
+function perkGroupTexts(raw: unknown, translations: Record<string, string>): unknown {
+  return Array.isArray(raw) ? raw.map((perk) => perkTexts(perk, translations)) : raw;
+}
+
+function seasonTexts(raw: unknown, translations: Record<string, string>): unknown {
+  if (!textRecord(raw)) return raw;
+  const perks = raw.perks;
+  if (!textRecord(perks)) return raw;
+  return {
+    ...raw,
+    perks: Object.fromEntries(
+      Object.entries(perks).map(([key, group]) => [key, perkGroupTexts(group, translations)])
+    ),
+  };
+}
+
 async function checkPerks(
   load: LoadSupplement,
   fetchEnvelope: FetchEnvelope,
@@ -46,10 +100,11 @@ async function checkPerks(
     console.log('seasonalPerks: no supplemental entries');
     return;
   }
+  const translations = await seasonTranslations(fetchEnvelope);
   await compareSupplement(
     'pvp-season',
     'pvp-season/season',
-    (data) => validateSeasonalPerks(perks, data),
+    (data) => validateSeasonalPerks(perks, seasonTexts(data, translations)),
     fetchEnvelope,
     counts
   );

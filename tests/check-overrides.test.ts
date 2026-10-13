@@ -13,8 +13,13 @@ import {
   checkTaskAdditions,
   checkEditionTaskReferences,
   checkEntityData,
+  checkMapData,
   countRequirementTypes,
   getValidationExitCode,
+  validateModeTaskOverrides,
+  validateSharedTaskOverrides,
+  checkModeOverrides,
+  checkSharedTaskOverrides,
 } from '../scripts/check-overrides.js';
 import { countTraderRequirementIds } from '../src/lib/index.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
@@ -216,7 +221,7 @@ describe('normalizeWikiLink', () => {
 });
 
 describe('checkTaskAdditions', () => {
-  it('marks additions as resolved when wiki links match after normalization', () => {
+  it('distinguishes normalized wiki identity adoption from complete addition retirement', () => {
     const additions = {
       taskA: createTaskAddition({
         name: 'New Beginning',
@@ -233,8 +238,11 @@ describe('checkTaskAdditions', () => {
 
     const [result] = checkTaskAdditions(additions, apiTasks);
 
-    expect(result?.status).toBe('RESOLVED');
-    expect(result?.message).toContain('by wikiLink');
+    expect(result?.status).toBe('CHECK');
+    expect(result?.adopted).toBe(true);
+    expect(result?.comparison).toEqual(
+      expect.arrayContaining([expect.objectContaining({ field: 'wikiLink', status: 'different' })])
+    );
   });
 
   it('marks additions for review when only name matches are found', () => {
@@ -491,8 +499,11 @@ describe('canonical task addition identity', () => {
     const results = checkTaskAdditions({ [identity === 'key' ? 'upstream' : 'local']: addition }, [
       createApiTask({ id: 'upstream', name: 'Renamed task' }),
     ]);
-    expect(results[0].status).toBe('RESOLVED');
-    expect(results[0].message).toContain('by id');
+    expect(results[0].status).toBe('CHECK');
+    expect(results[0].adopted).toBe(true);
+    expect(results[0].comparison).toEqual(
+      expect.arrayContaining([expect.objectContaining({ field: 'name', status: 'different' })])
+    );
   });
 });
 
@@ -528,10 +539,10 @@ it('detects item additions adopted through quest items and translation-only name
   try {
     expect(await checkEntityData(sourceDir)).toEqual({
       actionable: 0,
-      staleProblems: 6,
+      staleProblems: 2,
       upstreamProblems: 0,
     });
-    expect(output.mock.calls.flat().join('\n')).toContain('NOW IN API');
+    expect(output.mock.calls.flat().join('\n')).toContain('ID exists upstream');
   } finally {
     vi.unstubAllGlobals();
     output.mockRestore();
@@ -602,4 +613,395 @@ describe('reference verification coverage', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+});
+
+it('counts removable correction roots once and separately gates an adopted addition with differing values', async () => {
+  const sourceDir = mkdtempSync(join(tmpdir(), 'overlay-stale-roots-'));
+  mkdirSync(join(sourceDir, 'overrides'));
+  mkdirSync(join(sourceDir, 'additions'));
+  writeFileSync(
+    join(sourceDir, 'overrides', 'items.json5'),
+    JSON.stringify({ existing: { properties: { value: 1 }, name: 'Wrong' } })
+  );
+  writeFileSync(
+    join(sourceDir, 'additions', 'itemsAdd.json5'),
+    JSON.stringify({ existing: { id: 'existing', name: 'Wrong' } })
+  );
+  const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => {
+      const endpoint = String(url).split('/').at(-1);
+      const payloads: Record<string, unknown> = {
+        items: {
+          items: { existing: { id: 'existing', name: 'Correct', properties: { value: 1 } } },
+        },
+        tasks: { tasks: { task: { id: 'task' } }, questItems: [] },
+        items_en: {},
+        tasks_en: {},
+      };
+      return new Response(JSON.stringify({ data: payloads[endpoint!] }), { status: 200 });
+    })
+  );
+  try {
+    expect(await checkEntityData(sourceDir)).toEqual({
+      actionable: 0,
+      staleProblems: 2,
+      upstreamProblems: 0,
+    });
+    expect(output.mock.calls.flat().join('\n')).toContain('DIFFERENT');
+  } finally {
+    vi.unstubAllGlobals();
+    output.mockRestore();
+    rmSync(sourceDir, { recursive: true });
+  }
+});
+
+it('does not adopt a task addition through an ambiguous wikiLink', () => {
+  const addition = createTaskAddition({ wikiLink: 'https://wiki.example/shared' });
+  const tasks = [
+    createApiTask({ id: 'first', wikiLink: addition.wikiLink }),
+    createApiTask({ id: 'second', wikiLink: addition.wikiLink }),
+  ];
+  const [result] = checkTaskAdditions({ added: addition }, tasks);
+  expect(result.adopted).toBe(false);
+  expect(result.status).toBe('CHECK');
+  expect(result.message).toContain('Ambiguous');
+});
+
+describe('task retirement across shared and mode layering', () => {
+  function modes(experience: number) {
+    return Object.fromEntries(
+      ['regular', 'pve', 'pvp-season'].map((mode) => [
+        mode,
+        [createApiTask({ id: 't', experience })],
+      ])
+    );
+  }
+
+  it('keeps an upstream-matching mode override that guards against a shared correction', () => {
+    const results = validateModeTaskOverrides({ t: { experience: 2 } }, { t: { experience: 1 } }, [
+      createApiTask({ id: 't', experience: 2 }),
+    ]);
+    expect(results[0].stillNeeded).toBe(true);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      expect(
+        checkModeOverrides(
+          'pve',
+          { t: { experience: 2 } },
+          [createApiTask({ id: 't', experience: 2 })],
+          { t: { experience: 1 } }
+        )
+      ).toBe(0);
+      expect(log.mock.calls.flat().join(' ')).not.toContain('remove 1 obsolete');
+    } finally {
+      log.mockRestore();
+    }
+    expect(results[0].details.find((detail) => detail.field === 'experience')?.status).toBe(
+      'needed'
+    );
+    const redundant = validateModeTaskOverrides(
+      { t: { experience: 2 } },
+      { t: { experience: 2 } },
+      [createApiTask({ id: 't', experience: 1 })]
+    );
+    expect(redundant[0].status).toBe('FIXED');
+  });
+
+  it('retains nested objective mode guards while allowing unrelated matching fields to retire', () => {
+    const task = createApiTask({
+      id: 't',
+      objectives: [{ id: 'o', count: 2, optional: false }],
+      experience: 2,
+    });
+    const [result] = validateModeTaskOverrides(
+      { t: { objectives: { o: { count: 2 } }, experience: 2 } },
+      { t: { objectives: { o: { count: 1 } } } },
+      [task]
+    );
+    expect(result.stillNeeded).toBe(true);
+    expect(result.details.find((detail) => detail.field === 'objective:o:count')?.status).toBe(
+      'needed'
+    );
+    expect(result.details.find((detail) => detail.field === 'experience')?.status).toBe('fixed');
+  });
+
+  it('does not retire shared corrections that match regular but are needed in PvE', () => {
+    const tasks = modes(2);
+    tasks.pve = [createApiTask({ id: 't', experience: 1 })];
+    const [result] = validateSharedTaskOverrides({ t: { experience: 2 } }, tasks);
+    expect(result.stillNeeded).toBe(true);
+    expect(result.details[0].status).toBe('needed');
+    expect(result.details[0].message).toContain('pve');
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      expect(checkSharedTaskOverrides({ t: { experience: 2 } }, tasks)).toBe(0);
+      expect(log.mock.calls.flat().join(' ')).not.toContain('remove 1 obsolete');
+    } finally {
+      log.mockRestore();
+    }
+    tasks.pve = [createApiTask({ id: 't', experience: 2 })];
+    expect(validateSharedTaskOverrides({ t: { experience: 2 } }, tasks)[0].status).toBe('FIXED');
+  });
+
+  it('accounts for mode-masked shared fields and checks nested objectives in every mode', () => {
+    const tasks = modes(1);
+    const patches = {
+      regular: { t: { experience: 1 } },
+      pve: { t: { experience: 1 } },
+      'pvp-season': { t: { experience: 1 } },
+    };
+    expect(validateSharedTaskOverrides({ t: { experience: 2 } }, tasks, patches)[0].status).toBe(
+      'FIXED'
+    );
+    for (const mode of ['regular', 'pve', 'pvp-season'])
+      tasks[mode] = [
+        createApiTask({
+          id: 't',
+          objectives: [{ id: 'o', count: mode === 'pve' ? 1 : 2 }],
+          experience: 1,
+        }),
+      ];
+    const [result] = validateSharedTaskOverrides(
+      { t: { objectives: { o: { count: 2 } }, experience: 1 } },
+      tasks
+    );
+    expect(result.details.find((detail) => detail.field === 'objective:o:count')?.status).toBe(
+      'needed'
+    );
+    expect(result.details.find((detail) => detail.field === 'experience')?.status).toBe('fixed');
+  });
+
+  it('requires all mode snapshots before declaring a shared correction removable', () => {
+    const tasks = modes(2);
+    delete tasks.pve;
+    expect(validateSharedTaskOverrides({ t: { experience: 2 } }, tasks)[0].stillNeeded).toBe(true);
+  });
+});
+
+it('keeps the shared correction when identical mode patches are independently redundant', () => {
+  const tasks = Object.fromEntries(
+    ['regular', 'pve', 'pvp-season'].map((mode) => [
+      mode,
+      [createApiTask({ id: 't', experience: 1, objectives: [{ id: 'o', count: 1 }] })],
+    ])
+  );
+  const shared = { t: { experience: 2, objectives: { o: { count: 2 } } } };
+  const patches = Object.fromEntries(
+    ['regular', 'pve', 'pvp-season'].map((mode) => [mode, shared])
+  );
+  const [result] = validateSharedTaskOverrides(shared, tasks, patches);
+  expect(result.status).toBe('NEEDED');
+  expect(result.details.every((detail) => detail.status === 'needed')).toBe(true);
+  for (const mode of ['regular', 'pve', 'pvp-season']) {
+    expect(validateModeTaskOverrides(patches[mode], shared, tasks[mode])[0].status).toBe('FIXED');
+  }
+});
+
+it('does not let a partial nested mode patch retire the other shared nested values', () => {
+  const tasks = Object.fromEntries(
+    ['regular', 'pve', 'pvp-season'].map((mode) => [
+      mode,
+      [createApiTask({ id: 't', objectives: [{ id: 'o', count: 1, optional: false }] })],
+    ])
+  );
+  const shared = { t: { objectives: { o: { count: 2, optional: true } } } };
+  const patches = Object.fromEntries(
+    ['regular', 'pve', 'pvp-season'].map((mode) => [
+      mode,
+      { t: { objectives: { o: { count: 3 } } } },
+    ])
+  );
+  const [result] = validateSharedTaskOverrides(shared, tasks, patches);
+  expect(result.details.find((detail) => detail.field === 'objective:o:optional')?.status).toBe(
+    'needed'
+  );
+});
+
+it('counts converged nested leaves even when the correction container still differs', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'overlay-stale-leaf-'));
+  mkdirSync(join(dir, 'overrides'));
+  writeFileSync(
+    join(dir, 'overrides', 'items.json5'),
+    JSON.stringify({ existing: { properties: { value: 1, wrong: 2 } } })
+  );
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => {
+      const endpoint = String(url).split('/').at(-1)!;
+      const payloads: Record<string, unknown> = {
+        items: { items: { existing: { id: 'existing', properties: { value: 1, wrong: 1 } } } },
+        tasks: { tasks: { task: { id: 'task' } }, questItems: [] },
+        items_en: {},
+        tasks_en: {},
+      };
+      return new Response(JSON.stringify({ data: payloads[endpoint] }));
+    })
+  );
+  try {
+    const report = await checkEntityData(dir);
+    expect(report.staleProblems).toBe(1);
+  } finally {
+    vi.unstubAllGlobals();
+    log.mockRestore();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+it('keeps replacement arrays atomic and counts matching nested fields within each entity', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'overlay-stale-atomic-'));
+  mkdirSync(join(dir, 'overrides'));
+  writeFileSync(
+    join(dir, 'overrides', 'items.json5'),
+    JSON.stringify({
+      one: { properties: { value: 1 }, name: 'wrong' },
+      two: { properties: { value: 1, wrong: 2 } },
+      three: { properties: { entries: [{ id: 'x', value: 2 }] } },
+    })
+  );
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => {
+      const endpoint = String(url).split('/').at(-1)!;
+      const payloads: Record<string, unknown> = {
+        items: {
+          items: {
+            one: { id: 'one', properties: { value: 1 }, name: 'correct' },
+            two: { id: 'two', properties: { value: 1, wrong: 1 } },
+            three: { id: 'three', properties: { entries: [{ id: 'x', value: 1 }] } },
+          },
+        },
+        tasks: { tasks: { task: { id: 'task' } }, questItems: [] },
+        items_en: {},
+        tasks_en: {},
+      };
+      return new Response(JSON.stringify({ data: payloads[endpoint] }));
+    })
+  );
+  try {
+    expect((await checkEntityData(dir)).staleProblems).toBe(2);
+  } finally {
+    vi.unstubAllGlobals();
+    log.mockRestore();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+it('retires shared map fields only after every mode agrees, once per physical source', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'overlay-map-retirement-'));
+  mkdirSync(join(dir, 'overrides'));
+  writeFileSync(join(dir, 'overrides', 'maps.json5'), JSON.stringify({ map: { disabled: false } }));
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  let converged = false;
+  try {
+    const getMaps = async (mode: string) => ({
+      maps: new Map([
+        [
+          'map',
+          { id: 'map', extracts: [], disabled: mode === 'regular' || converged ? false : true },
+        ],
+      ]),
+      translations: {},
+    });
+    expect((await checkMapData(dir, getMaps)).staleProblems).toBe(0);
+    converged = true;
+    expect((await checkMapData(dir, getMaps)).staleProblems).toBe(1);
+  } finally {
+    log.mockRestore();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+it('retains shared entity fields and additions needed in another mode', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'overlay-entity-retirement-'));
+  mkdirSync(join(dir, 'overrides'));
+  mkdirSync(join(dir, 'additions'));
+  writeFileSync(
+    join(dir, 'overrides', 'items.json5'),
+    JSON.stringify({ existing: { properties: { value: 2 } } })
+  );
+  writeFileSync(
+    join(dir, 'additions', 'itemsAdd.json5'),
+    JSON.stringify({ added: { id: 'added', name: 'New' } })
+  );
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  let converged = false;
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => {
+      const [mode, endpoint] = url.replace('https://json.tarkov.dev/', '').split('/');
+      const matches = mode === 'regular' || converged;
+      const payloads: Record<string, unknown> = {
+        items: {
+          items: {
+            existing: { id: 'existing', properties: { value: matches ? 2 : 1 } },
+            ...(matches ? { added: { id: 'added', name: 'New' } } : {}),
+          },
+        },
+        tasks: { tasks: { t: { id: 't' } }, questItems: [] },
+        items_en: {},
+        tasks_en: {},
+      };
+      return new Response(JSON.stringify({ data: payloads[endpoint] }));
+    })
+  );
+  try {
+    expect((await checkEntityData(dir)).staleProblems).toBe(0);
+    converged = true;
+    expect((await checkEntityData(dir)).staleProblems).toBe(2);
+  } finally {
+    vi.unstubAllGlobals();
+    log.mockRestore();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+it('retires removed shared tasks only with complete snapshots and absence in every mode', () => {
+  const shared = { gone: { experience: 2 } };
+  const tasks = Object.fromEntries(
+    ['regular', 'pve', 'pvp-season'].map((mode) => [
+      mode,
+      [createApiTask({ id: 'another', experience: 1 })],
+    ])
+  );
+  expect(validateSharedTaskOverrides(shared, tasks)[0].status).toBe('REMOVED_FROM_API');
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    expect(checkSharedTaskOverrides(shared, tasks)).toBe(1);
+  } finally {
+    log.mockRestore();
+  }
+  delete tasks.pve;
+  expect(validateSharedTaskOverrides(shared, tasks)[0].status).toBe('NEEDED');
+  tasks.pve = [createApiTask({ id: 'gone', experience: 1 })];
+  expect(validateSharedTaskOverrides(shared, tasks)[0].status).toBe('NEEDED');
+});
+
+it('keeps scoped additive extract arrays atomic after shared additions', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'overlay-map-additive-'));
+  mkdirSync(join(dir, 'overrides', 'modes', 'pve'), { recursive: true });
+  const a = { id: 'a', name: 'A' };
+  const b = { id: 'b', name: 'B' };
+  writeFileSync(
+    join(dir, 'overrides', 'maps.json5'),
+    JSON.stringify({ map: { extractsAdd: [a, b] } })
+  );
+  writeFileSync(
+    join(dir, 'overrides', 'modes', 'pve', 'maps.json5'),
+    JSON.stringify({ map: { extractsAdd: [a] } })
+  );
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    const getMaps = async () => ({
+      maps: new Map([['map', { id: 'map', extracts: [] }]]),
+      translations: {},
+    });
+    expect((await checkMapData(dir, getMaps)).staleProblems).toBe(0);
+  } finally {
+    log.mockRestore();
+    rmSync(dir, { recursive: true });
+  }
 });

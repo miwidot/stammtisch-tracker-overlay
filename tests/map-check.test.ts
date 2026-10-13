@@ -11,7 +11,7 @@ const addition = {
   faction: 'scav',
   position: { x: 1, y: 2, z: 3 },
 };
-const extract = { id: 'canonical', name: 'exit_key', faction: 'scav' };
+const extract = { ...addition, name: 'exit_key' };
 let sourceDir: string;
 
 function writeMaps(patches: unknown, mode?: string) {
@@ -53,19 +53,30 @@ describe('live map check orchestration', () => {
     vi.unstubAllGlobals();
   });
 
-  it('checks all modes and gates only the mode where the extract is present', async () => {
+  it('checks all modes and retires shared additions only when every mode converges', async () => {
     writeMaps({ map: { extractsAdd: [addition] } });
     const fetchMock = mockMaps({ regular: [extract], pve: [], 'pvp-season': [] });
     const counts = await checkMapData(sourceDir);
-    expect(counts).toEqual({ actionable: 0, staleProblems: 1, upstreamProblems: 0 });
+    expect(counts).toEqual({ actionable: 0, staleProblems: 0, upstreamProblems: 0 });
     expect(
       getValidationExitCode({ ...counts, strict: true, failOnStale: true, failOnUpstream: false })
-    ).toBe(3);
+    ).toBe(0);
     expect(
       fetchMock.mock.calls
         .map(([url]) => String(url).replace('https://json.tarkov.dev/', ''))
         .sort()
     ).toEqual(SUPPORTED_GAME_MODES.flatMap((mode) => [`${mode}/maps`, `${mode}/maps_en`]).sort());
+    mockMaps(Object.fromEntries(SUPPORTED_GAME_MODES.map((mode) => [mode, [extract]])));
+    const converged = await checkMapData(sourceDir);
+    expect(converged.staleProblems).toBe(1);
+    expect(
+      getValidationExitCode({
+        ...converged,
+        strict: true,
+        failOnStale: true,
+        failOnUpstream: false,
+      })
+    ).toBe(3);
   });
 
   it('replaces shared addition arrays with the current mode list while retaining other fields', async () => {
@@ -77,7 +88,7 @@ describe('live map check orchestration', () => {
     mockMaps(Object.fromEntries(SUPPORTED_GAME_MODES.map((mode) => [mode, [extract]])));
     expect(await checkMapData(sourceDir)).toEqual({
       actionable: 0,
-      staleProblems: 2,
+      staleProblems: 1,
       upstreamProblems: 0,
     });
   });

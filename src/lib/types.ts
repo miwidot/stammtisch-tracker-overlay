@@ -5,6 +5,8 @@
  * and eliminate duplication.
  */
 
+import type { OverlayComparisonDetail } from './overlay-comparison.cjs';
+
 /** Task override structure for corrections */
 export interface TaskOverride {
   name?: string;
@@ -344,6 +346,7 @@ export interface ValidationResult {
   status: ValidationStatus;
   stillNeeded: boolean;
   details: ValidationDetail[];
+  comparison?: OverlayComparisonDetail[];
 }
 
 /** Possible validation statuses */

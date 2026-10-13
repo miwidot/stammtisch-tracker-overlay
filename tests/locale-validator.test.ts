@@ -71,7 +71,7 @@ describe('validateLocaleOverrides', () => {
     expect(result.bundleValue).toBe('Neuanfang');
   });
 
-  it('marks NEEDED (not STALE) when the translation key is missing from the locale map', () => {
+  it('marks UNVERIFIABLE when the translation key is missing from the locale map', () => {
     const bundle = makeBundle({
       tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
       tasksLocale: {},
@@ -82,7 +82,7 @@ describe('validateLocaleOverrides', () => {
 
     const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
-    expect(result.verdict).toBe('NEEDED');
+    expect(result.verdict).toBe('UNVERIFIABLE');
     expect(result.bundleValue).toBeUndefined();
     expect(result.message).toContain('cannot confirm');
   });
@@ -250,7 +250,9 @@ describe('validateLocaleOverrides', () => {
 
     const results = validateLocaleOverrides('en', overrides, [makeBundle()]);
 
-    expect(results).toHaveLength(1);
+    expect(results.map((entry) => entry.field)).toContain('objectives[tour-main-1].description');
+    expect(results.every((entry) => entry.verdict === 'UNVERIFIABLE')).toBe(true);
+    expect(results.map((entry) => entry.field)).toContain('name');
     expect(results[0].verdict).toBe('UNVERIFIABLE');
     expect(results[0].entityType).toBe('storyChapters');
     expect(results[0].entityId).toBe('tour');
@@ -268,7 +270,7 @@ describe('validateLocaleOverrides', () => {
     const [result] = validateLocaleOverrides('en', overrides, [bundle]);
 
     // Object.prototype.toString must not leak in as a resolved translation.
-    expect(result.verdict).toBe('NEEDED');
+    expect(result.verdict).toBe('UNVERIFIABLE');
     expect(result.bundleValue).toBeUndefined();
   });
 
@@ -339,7 +341,7 @@ describe('validateLocaleOverrides', () => {
 
   it('resolves a mode-exclusive objective from a later bundle', () => {
     const regular = makeBundle({
-      tasksById: new Map([['t1', { id: 't1', name: 't1 name' }]]),
+      tasksById: new Map([['t1', { id: 't1', name: 't1 name', objectives: [] }]]),
       tasksLocale: { o1: 'Wrong text' },
     });
     const pve = makeBundle({
@@ -365,6 +367,155 @@ describe('validateLocaleOverrides', () => {
 
     expect(result.verdict).toBe('STALE');
     expect(result.field).toBe('objectives[pve-only].description');
+  });
+
+  it.each([undefined, null, {}, [null], [{ description: 'o1' }], [{ id: 'o1' }, { id: 'o1' }]])(
+    'does not infer objective removal from an incomplete or malformed collection: %j',
+    (objectives) => {
+      const bundle = makeBundle({ tasksById: new Map([['t1', { id: 't1', objectives }]]) });
+      const overrides: LocaleOverlay = {
+        tasks: { t1: { objectives: { o1: { description: 'Text' } } } },
+      };
+      const [result] = validateLocaleOverrides('en', overrides, [bundle]);
+      expect(result.verdict).toBe('UNVERIFIABLE');
+      expect(result.field).toBe('objectives[o1].description');
+    }
+  );
+
+  it('does not declare a locale objective stale when another mode collection is unavailable', () => {
+    const complete = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', objectives: [{ id: 'o1', description: 'o1' }] }]]),
+      tasksLocale: { o1: 'Text' },
+    });
+    const incomplete = makeBundle({ tasksById: new Map([['t1', { id: 't1' }]]) });
+    const overrides: LocaleOverlay = {
+      tasks: { t1: { objectives: { o1: { description: 'Text' } } } },
+    };
+    expect(validateLocaleOverrides('en', overrides, [complete, incomplete])[0].verdict).toBe(
+      'UNVERIFIABLE'
+    );
+  });
+
+  it('does not declare shared translations verified while one carrying mode lacks its value', () => {
+    const complete = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', name: 'key' }]]),
+      tasksLocale: { key: 'Text' },
+    });
+    const incomplete = makeBundle({ tasksById: new Map([['t1', { id: 't1', name: 'key' }]]) });
+    expect(
+      validateLocaleOverrides('en', { tasks: { t1: { name: 'Text' } } }, [complete, incomplete])[0]
+        .verdict
+    ).toBe('UNVERIFIABLE');
+  });
+
+  it('reports every unsupported or malformed field and nested supplied value', () => {
+    const overrides = {
+      tasks: {
+        t1: {
+          name: 0,
+          unknown: { enabled: false },
+          objectives: { o1: { description: 0, count: 2 }, malformed: null },
+        },
+      },
+    } as unknown as LocaleOverlay;
+    const bundle = makeBundle({
+      tasksById: new Map([['t1', { id: 't1', objectives: [{ id: 'o1' }] }]]),
+    });
+    const results = validateLocaleOverrides('en', overrides, [bundle]);
+    expect(results.map((entry) => entry.field)).toEqual([
+      'name',
+      'unknown',
+      'unknown.enabled',
+      'objectives[o1].description',
+      'objectives[o1].count',
+      'objectives[malformed]',
+    ]);
+    expect(results.every((entry) => entry.verdict === 'UNVERIFIABLE')).toBe(true);
+    expect(results.find((entry) => entry.field === 'unknown.enabled')?.overrideValue).toBe(false);
+  });
+
+  it.each([null, [], 0, false])(
+    'reports malformed locale entity patches explicitly: %j',
+    (patch) => {
+      const overrides = { tasks: { t1: patch } } as unknown as LocaleOverlay;
+      expect(validateLocaleOverrides('en', overrides, [makeBundle()])).toMatchObject([
+        { field: '(root)', verdict: 'UNVERIFIABLE', overrideValue: patch },
+      ]);
+    }
+  );
+
+  it('retains unknown removed-entity fields and supplied objective values', () => {
+    const overrides = {
+      tasks: {
+        gone: {
+          unknown: { enabled: false },
+          objectives: { o1: { description: 'Text', count: 0 } },
+        },
+      },
+    } as unknown as LocaleOverlay;
+    const results = validateLocaleOverrides('en', overrides, [makeBundle()]);
+    expect(results.map((entry) => entry.field)).toEqual([
+      'unknown.enabled',
+      'objectives[o1].description',
+      'objectives[o1].count',
+    ]);
+    expect(results.every((entry) => entry.verdict === 'REMOVED')).toBe(true);
+    expect(
+      results.find((entry) => entry.field === 'objectives[o1].description')?.overrideValue
+    ).toBe('Text');
+  });
+
+  it('does not infer item removal from an explicitly incomplete quest-item catalog', () => {
+    const results = validateLocaleOverrides('en', { items: { missing: { name: 'Text' } } }, [
+      makeBundle({ itemCatalogComplete: false }),
+    ]);
+    expect(results).toMatchObject([{ field: 'name', verdict: 'UNVERIFIABLE' }]);
+  });
+
+  it('still verifies a known item in an explicitly incomplete catalog', () => {
+    const bundle = makeBundle({
+      itemCatalogComplete: false,
+      itemsById: new Map([['known', { id: 'known', name: 'key' }]]),
+      itemsLocale: { key: 'Text' },
+    });
+    expect(
+      validateLocaleOverrides('en', { items: { known: { name: 'Text' } } }, [bundle])
+    ).toMatchObject([{ field: 'name', verdict: 'STALE' }]);
+  });
+
+  it('reports unsupported top-level locale sections and every supplied nested value', () => {
+    const overrides = {
+      future: { entry: { name: 'Text', count: 0 } },
+      empty: {},
+      malformed: false,
+    } as unknown as LocaleOverlay;
+    const results = validateLocaleOverrides('en', overrides, [makeBundle()]);
+    expect(results.map((entry) => entry.field)).toEqual([
+      'future',
+      'future.entry',
+      'future.entry.name',
+      'future.entry.count',
+      'empty',
+      'malformed',
+    ]);
+    expect(
+      results.every(
+        (entry) => entry.entityType === 'unsupported' && entry.verdict === 'UNVERIFIABLE'
+      )
+    ).toBe(true);
+    expect(results.find((entry) => entry.field === 'future.entry.count')?.overrideValue).toBe(0);
+  });
+
+  it('skips only undefined fields without inventing root diagnostics', () => {
+    const overrides = {
+      tasks: { t1: { name: undefined } },
+      future: undefined,
+    } as unknown as LocaleOverlay;
+    expect(
+      validateLocaleOverrides('en', overrides, [
+        makeBundle({ tasksById: new Map([['t1', { id: 't1' }]]) }),
+      ])
+    ).toEqual([]);
   });
 
   it('rejects an empty bundle list rather than reporting everything REMOVED', () => {

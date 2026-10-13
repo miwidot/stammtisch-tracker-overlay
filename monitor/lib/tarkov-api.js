@@ -1,3 +1,4 @@
+const { registerTaskComparison, comparisonTranslation } = require('../../src/lib/task-comparison.cjs');
 const {
   validObjectiveCollection,
   buildItemComparisonIndex,
@@ -12,7 +13,7 @@ const {
   readResponseJson,
   resolveDialogueTraderRefs: resolveSharedDialogueTraderRefs,
 } = require('../../src/lib/tarkov-api-shared.cjs');
-const { fetchTarkovJson } = require('./tarkov-transport.js');
+const { fetchTarkovJson, SAFE_LANGUAGES } = require('./tarkov-transport.js');
 function getValueType(value) {
   if (value === null) return 'null';
   if (Array.isArray(value)) return 'array';
@@ -113,8 +114,8 @@ async function fetchEnvelopeOnce(path, retryNotFound = true) {
   throw lastError || new Error(`Failed to fetch ${path}`);
 }
 
-// Cache is scoped to a single fetchApiTasks call so concurrent endpoint reads
-// within one refresh are deduped, while each poll cycle fetches fresh data.
+// A caller-supplied cache shares concurrent reads across one refresh.
+// Standalone callers receive their own cache; new refreshes fetch fresh data.
 function fetchEnvelope(cache, path, retryNotFound = true) {
   return fetchCached(cache, path, (requestedPath) =>
     fetchEnvelopeOnce(requestedPath, retryNotFound)
@@ -198,7 +199,8 @@ function adaptTaskMap(value, ctx) {
 
 function adaptTask(raw, ctx) {
   const id = stringId(raw) || '';
-  return compact({
+  const task = compact({
+    ...raw,
     id,
     name: translate(ctx.tasksEn, raw.name) || id,
     trader: adaptTaskTrader(raw.trader, ctx),
@@ -234,6 +236,8 @@ function adaptTask(raw, ctx) {
     startRewards: adaptReward(raw.startRewards, ctx),
     finishRewards: adaptReward(raw.finishRewards, ctx),
   });
+  registerTaskComparison(task, raw, ctx);
+  return task;
 }
 
 async function buildTaskContext(cache, mode, tasksData) {
@@ -245,14 +249,12 @@ async function buildTaskContext(cache, mode, tasksData) {
   });
 }
 
-async function fetchApiTasks(mode) {
+async function fetchApiTasks(mode, cache = new Map()) {
   const gameMode = mode || 'regular';
   if (typeof gameMode !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(gameMode)) {
     throw new Error('Invalid game mode');
   }
-  // Per-call cache: dedupe concurrent endpoint reads within this refresh while
-  // ensuring each poll cycle fetches fresh data from json.tarkov.dev.
-  const cache = new Map();
+  // The monitor supplies one cache per mode refresh; standalone reads stay fresh.
   const tasksEnvelope = await fetchEnvelope(cache, `${gameMode}/tasks`);
   const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
   if (!tasksData || !isRecord(tasksData.tasks)) {
@@ -296,25 +298,173 @@ async function fetchApiTasks(mode) {
   return tasks.map((rawTask) => adaptTask(rawTask, ctx));
 }
 
-async function fetchApiEntities(mode, endpoint) {
-  const cache = new Map();
-  const key = { items: 'items', maps: 'maps' }[endpoint];
-  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}`);
-  const collection = key ? envelope.data[key] : envelope.data;
-  const records = comparisonRecords(collection, `${mode}/${endpoint}`);
-  const translated = await fetchEnvelope(cache, `${mode}/${endpoint}_en`, false);
-  const translations = validateTranslationMap(translated.data, `${mode}/${endpoint}_en`);
-  if (endpoint === 'items') {
-    const [tasks, tasksEn] = await Promise.all([
-      fetchEnvelope(cache, `${mode}/tasks`),
-      fetchEnvelope(cache, `${mode}/tasks_en`, false),
-    ]);
-    comparisonRecords(tasks.data?.tasks, `${mode}/tasks`);
-    return buildItemComparisonIndex(envelope.data, tasks.data, translations, tasksEn.data);
-  }
-  return new Map(
-    records.map((record) => [record.id, translateComparisonValues(record, translations)])
-  );
+function entityCollection(data, key) {
+  if (!key || Array.isArray(data)) return data;
+  return data[key];
 }
 
-module.exports = { fetchApiTasks, fetchApiEntities, fetchEnvelopeOnce };
+function seasonCollection(data) {
+  if (!isRecord(data.perks)) throw new Error('Invalid seasonal perk catalog');
+  const groups = Object.values(data.perks);
+  if (!groups.every(Array.isArray)) throw new Error('Invalid seasonal perk groups');
+  return groups.flat();
+}
+
+function seasonalComparisonRecord(record, translations) {
+  const translated = translateComparisonValues(record, translations);
+  for (const field of ['name', 'description']) {
+    delete translated[field];
+    const text = comparisonTranslation(record[field], translations);
+    if (text !== undefined) translated[field] = text;
+  }
+  return translated;
+}
+
+function requireEntityMode(mode, endpoint) {
+  if (endpoint === 'season' && mode !== 'pvp-season') {
+    throw new Error('Seasonal perks are only exposed in pvp-season');
+  }
+}
+
+function entityComparisonRecords(data, mode, endpoint) {
+  const key = { items: 'items', maps: 'maps', crafts: 'crafts' }[endpoint];
+  const collection = endpoint === 'season' ? seasonCollection(data) : entityCollection(data, key);
+  return comparisonRecords(collection, `${mode}/${endpoint}`);
+}
+
+async function completeItemComparison(data, translations, mode, cache) {
+  const [tasks, tasksEn] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/tasks`),
+    fetchEnvelope(cache, `${mode}/tasks_en`, false),
+  ]);
+  comparisonRecords(tasks.data?.tasks, `${mode}/tasks`);
+  return buildItemComparisonIndex(data, tasks.data, translations, tasksEn.data);
+}
+
+function translatedEntityComparison(record, translations, endpoint) {
+  if (endpoint === 'season') return seasonalComparisonRecord(record, translations);
+  return translateComparisonValues(record, translations);
+}
+
+async function fetchApiEntities(mode, endpoint, cache = new Map()) {
+  requireEntityMode(mode, endpoint);
+  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}`);
+  const records = entityComparisonRecords(envelope.data, mode, endpoint);
+  if (endpoint === 'crafts') return new Map(records.map(record => [record.id, record]));
+  const translated = await fetchEnvelope(cache, `${mode}/${endpoint}_en`, false);
+  const translations = validateTranslationMap(translated.data, `${mode}/${endpoint}_en`);
+  if (endpoint === 'items') return completeItemComparison(envelope.data, translations, mode, cache);
+  return new Map(records.map(record => [record.id, translatedEntityComparison(record, translations, endpoint)]));
+}
+
+function localeText(value, translations) {
+  return comparisonTranslation(value, translations);
+}
+
+function localeObjective(record, translations) {
+  return compact({ id: record.id, description: localeText(record.description, translations) });
+}
+
+function hasLocaleSourceText(value) {
+  return typeof value === 'string' && Boolean(value.trim());
+}
+
+function localeField(record, field, translations) {
+  const suffix = { name: 'Name', shortName: 'ShortName', description: 'Description' }[field];
+  const key = hasLocaleSourceText(record[field]) ? record[field] : `${record.id} ${suffix}`;
+  return localeText(key, translations);
+}
+
+function localeRecord(record, translations) {
+  const translated = { ...record };
+  for (const field of ['name', 'shortName', 'description']) {
+    delete translated[field];
+    const value = localeField(record, field, translations);
+    if (value !== undefined) translated[field] = value;
+  }
+  delete translated.objectives;
+  if (validObjectiveCollection(record.objectives)) {
+    translated.objectives = record.objectives.map(objective => localeObjective(objective, translations));
+  }
+  return translated;
+}
+
+function localeIndex(collection, translations, label, allowEmpty = false) {
+  return new Map(comparisonRecords(collection, label, allowEmpty).map(record =>
+    [record.id, localeRecord(record, translations)]));
+}
+
+function optionalLocaleIndex(collection, translations, label) {
+  if (collection === undefined) return undefined;
+  return localeIndex(collection, translations, label, true);
+}
+
+function localeCollection(data, endpoint) {
+  if (endpoint === 'traders') return data;
+  if (!isRecord(data)) throw new Error(`Invalid ${endpoint} locale source`);
+  return data[endpoint];
+}
+
+async function localeEndpoint(cache, mode, endpoint, locale) {
+  const [source, translated] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/${endpoint}`),
+    fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`, false),
+  ]);
+  const translations = validateTranslationMap(translated.data, `${mode}/${endpoint}_${locale}`);
+  const collection = localeCollection(source.data, endpoint);
+  const result = { [endpoint]: localeIndex(collection, translations, `${mode}/${endpoint}`) };
+  if (['tasks', 'items'].includes(endpoint)) result.dictionaryItems = localeDictionaryItems(translations);
+  if (endpoint !== 'tasks') return result;
+  result.questItems = optionalLocaleIndex(source.data.questItems, translations, `${mode}/questItems`);
+  result.prestige = optionalLocaleIndex(source.data.prestige, translations, `${mode}/prestige`);
+  return result;
+}
+
+function dictionaryLocaleItem(key, translations) {
+  const match = /^([a-f0-9]{24}) Name$/.exec(key);
+  if (!match) return undefined;
+  const name = translations[key];
+  if (!name.trim() || name === key) return undefined;
+  return compact({ id: match[1], name,
+    shortName: localeText(`${match[1]} ShortName`, translations),
+    description: localeText(`${match[1]} Description`, translations) });
+}
+
+function localeDictionaryItems(translations) {
+  const items = new Map();
+  for (const key of Object.keys(translations)) {
+    const item = dictionaryLocaleItem(key, translations);
+    if (item) items.set(item.id, item);
+  }
+  return items;
+}
+
+function localeDictionarySnapshot(snapshots, tasks) {
+  const items = new Map();
+  const dictionaries = snapshots.map(snapshot => snapshot.dictionaryItems || new Map());
+  for (const dictionary of dictionaries) {
+    for (const [id, item] of dictionary) {
+      if (!tasks.has(id)) items.set(id, item);
+    }
+  }
+  return items;
+}
+
+function completeLocaleItems(snapshots, result) {
+  const dictionary = localeDictionarySnapshot(snapshots, result.tasks);
+  result.items = new Map([...dictionary, ...(result.questItems || []), ...result.items]);
+  delete result.dictionaryItems;
+  return result;
+}
+
+async function fetchApiLocales(mode, locale, cache = new Map()) {
+  if (!SAFE_LANGUAGES.has(locale)) throw new Error('Unsupported upstream language');
+  const catalog = await fetchEnvelope(cache, 'endpoints');
+  const languages = catalog.data.languages;
+  if (!Array.isArray(languages) || !languages.includes(locale)) throw new Error('Unsupported upstream language');
+  const snapshots = await Promise.all(['tasks', 'items', 'maps', 'traders'].map(endpoint =>
+    localeEndpoint(cache, mode, endpoint, locale)));
+  return completeLocaleItems(snapshots, Object.assign({}, ...snapshots));
+}
+
+module.exports = { fetchApiTasks, fetchApiEntities, fetchApiLocales, fetchEnvelopeOnce };

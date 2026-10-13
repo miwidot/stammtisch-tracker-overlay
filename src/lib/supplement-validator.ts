@@ -1,9 +1,10 @@
-import { compareSubset } from './value-compare.js';
+import { compareOverlayFields, type OverlayComparisonDetail } from './overlay-comparison.cjs';
 
 export interface SupplementReport {
   actionable: number;
   staleProblems: number;
   messages: string[];
+  details: Array<OverlayComparisonDetail & { entityId: string }>;
 }
 
 type RecordData = Record<string, unknown>;
@@ -15,7 +16,7 @@ function record(value: unknown): RecordData {
 }
 
 function newReport(): SupplementReport {
-  return { actionable: 0, staleProblems: 0, messages: [] };
+  return { actionable: 0, staleProblems: 0, messages: [], details: [] };
 }
 
 function rawEffect(value: unknown): RecordData {
@@ -52,6 +53,10 @@ function indexPerks(season: unknown): Map<string, RecordData> {
   return perks;
 }
 
+function effectDiscrepancy(details: OverlayComparisonDetail[]): boolean {
+  return details.some((entry) => entry.status === 'different' || entry.status === 'invalid');
+}
+
 function compareEffect(
   id: string,
   effect: RecordData,
@@ -59,15 +64,80 @@ function compareEffect(
   report: SupplementReport
 ): void {
   const label = `${id}: raw effect ${String(effect.effectId)}`;
-  if (upstream.some((candidate) => compareSubset(effect, candidate))) {
+  const matches = upstream.filter((candidate) => candidate.effectId === effect.effectId);
+  if (matches.length !== 1) {
+    report.messages.push(`${label} UNSUPPORTED or ambiguous upstream; value not verified`);
+    return;
+  }
+  const details = compareOverlayFields(effect, matches[0]);
+  if (details.every((entry) => entry.status === 'same')) {
     report.staleProblems++;
     report.messages.push(`${label} now present upstream; review retirement`);
-  } else if (upstream.some((candidate) => candidate.effectId === effect.effectId)) {
+    return;
+  }
+  if (effectDiscrepancy(details)) {
     report.actionable++;
     report.messages.push(`${label} differs upstream — NEEDS EVIDENCE; no automatic retirement`);
-  } else {
-    report.messages.push(`${label} UNSUPPORTED upstream; value not verified`);
+    return;
   }
+  report.messages.push(`${label} UNSUPPORTED upstream; value not verified`);
+}
+
+function displayValue(value: unknown): string {
+  try {
+    return JSON.stringify(value) ?? 'undefined';
+  } catch {
+    return '[invalid JSON]';
+  }
+}
+
+function fieldMessage(id: string, entry: OverlayComparisonDetail): string {
+  return `${id}: ${entry.field} ${entry.status.toUpperCase()} — ${entry.reason}; API=${displayValue(entry.upstreamValue)}, overlay=${displayValue(entry.overlayValue)}`;
+}
+
+function comparablePerk(upstream: RecordData | undefined): RecordData | undefined {
+  if (!upstream) return undefined;
+  return upstream.effects == null ? { ...upstream, effects: undefined } : upstream;
+}
+
+function reportPerkFields(
+  id: string,
+  supplement: RecordData,
+  upstream: RecordData | undefined,
+  report: SupplementReport
+): void {
+  const details = compareOverlayFields(supplement, comparablePerk(upstream), {
+    identityFields: ['id'],
+  });
+  report.details.push(...details.map((entry) => ({ entityId: id, ...entry })));
+  report.messages.push(...details.map((entry) => fieldMessage(id, entry)));
+  const metadata = details.filter((entry) => Object.hasOwn(supplement, entry.field));
+  report.actionable += metadata.filter((entry) => metadataProblem(entry)).length;
+}
+
+function metadataProblem(entry: OverlayComparisonDetail): boolean {
+  if (['id', 'effects'].includes(entry.field)) return false;
+  return entry.status === 'different' || entry.status === 'invalid';
+}
+
+function comparePerkEffects(
+  id: string,
+  supplement: RecordData,
+  upstream: RecordData,
+  report: SupplementReport
+): void {
+  const effects = rawEffects(supplement.effects);
+  const exposed = optionalEffects(upstream);
+  if (!exposed) {
+    report.messages.push(`${id}: raw effects UNSUPPORTED upstream; values not verified`);
+    return;
+  }
+  const ids = effects.map((effect) => effect.effectId);
+  if (new Set(ids).size !== ids.length) {
+    report.messages.push(`${id}: repeated supplemental effect identities; values not verified`);
+    return;
+  }
+  effects.forEach((effect) => compareEffect(id, effect, exposed, report));
 }
 
 function comparePerk(
@@ -78,27 +148,22 @@ function comparePerk(
 ): void {
   const supplement = record(raw);
   const upstream = perks.get(id);
+  reportPerkFields(id, supplement, upstream, report);
   if (!upstream || supplement.id !== id) {
     report.actionable++;
     report.messages.push(`${id}: perk ID missing upstream or supplement ID disagrees with key`);
     return;
   }
-  const effects = rawEffects(supplement.effects);
-  const exposed = optionalEffects(upstream);
-  if (!exposed) {
-    report.messages.push(`${id}: raw effects UNSUPPORTED upstream; values not verified`);
-    return;
-  }
-  effects.forEach((effect) => compareEffect(id, effect, exposed, report));
+  comparePerkEffects(id, supplement, upstream, report);
 }
 
-/** Compare raw effects only; locale descriptions are not evidence of raw values. */
+/** Compare raw effects and supplied metadata independently; prose is never raw-effect evidence. */
 export function validateSeasonalPerks(overlay: RecordData, season: unknown): SupplementReport {
   const perks = indexPerks(season);
   const report = newReport();
   Object.entries(overlay).forEach(([id, raw]) => comparePerk(id, raw, perks, report));
   report.messages.push(
-    'seasonalPerks: IDs and exposed raw effects compared; absent raw effects remain supplements (descriptions not compared)'
+    'seasonalPerks: supplied metadata and exposed raw effects compared; absent raw effects remain unverified supplements (descriptions do not establish raw values)'
   );
   return report;
 }

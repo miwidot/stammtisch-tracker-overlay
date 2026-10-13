@@ -7,17 +7,28 @@
 
 import type {
   TaskOverride,
+  TaskObjective,
   TaskData,
   ValidationResult,
   ValidationDetail,
   ValidationStatus,
 } from './types.js';
+import {
+  comparisonTask,
+  type ComparisonTaskData,
+  type ComparisonValue,
+} from './task-comparison.cjs';
+import { compareOverlayFields, type OverlayComparisonDetail } from './overlay-comparison.cjs';
 import { compareSubset, formatValue, type CompareOptions } from './value-compare.js';
 import { normalizeTaskStatus } from './task-unlocks.js';
 import { validObjectiveCollection } from './tarkov-api-shared.cjs';
+import { compareRequirementValues } from './requirement-comparison.js';
 
 /** Field validator function signature */
-type FieldValidator = (override: TaskOverride, apiTask: TaskData) => ValidationDetail | null;
+type FieldValidator = (
+  override: TaskOverride,
+  apiTask: ComparisonTaskData
+) => ValidationDetail | null;
 
 type ObjectiveLike = { maps?: Array<{ id?: string; name?: string }> };
 
@@ -50,10 +61,14 @@ function collectObjectiveMapKeys(objectives: ObjectiveLike[]): Set<string> {
 }
 
 /** Determine whether a task spans more than one objective map. */
-function hasMultipleObjectiveMaps(override: TaskOverride, apiTask: TaskData): boolean {
-  const apiObjectives = (
+function comparableObjectives(apiTask: ComparisonTaskData): ObjectiveLike[] {
+  return (
     validObjectiveCollection(apiTask.objectives) ? apiTask.objectives : []
   ) as ObjectiveLike[];
+}
+
+function hasMultipleObjectiveMaps(override: TaskOverride, apiTask: ComparisonTaskData): boolean {
+  const apiObjectives = comparableObjectives(apiTask);
   const overrideObjectives = Object.values(override.objectives ?? {}) as ObjectiveLike[];
   const mapKeys = new Set<string>();
 
@@ -64,6 +79,22 @@ function hasMultipleObjectiveMaps(override: TaskOverride, apiTask: TaskData): bo
 }
 
 /** Create a simple field comparison validator. */
+function fieldComparisonResult(
+  field: string,
+  overrideValue: unknown,
+  apiValue: unknown,
+  compareOptions?: CompareOptions
+): ValidationDetail {
+  const isMatch = compareSubset(overrideValue, apiValue, compareOptions);
+  return {
+    field,
+    status: isMatch ? 'fixed' : 'needed',
+    message: isMatch
+      ? `${field}: ${formatValue(apiValue)} - FIXED IN API`
+      : `${field}: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
+  };
+}
+
 function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
   field: K,
   compareOptions?: CompareOptions
@@ -73,24 +104,20 @@ function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
     if (overrideValue === undefined) return null;
 
     const apiValue = apiTask[field];
-    const isMatch = compareSubset(overrideValue, apiValue, compareOptions);
-
-    return {
-      field,
-      status: isMatch ? 'fixed' : 'needed',
-      message: isMatch
-        ? `${field}: ${formatValue(apiValue)} - FIXED IN API`
-        : `${field}: API=${formatValue(apiValue)}, Override=${formatValue(
-            overrideValue
-          )} - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
-    };
+    if (apiValue === undefined)
+      return {
+        field,
+        status: 'check',
+        message: `${field}: upstream value unavailable - UNVERIFIED`,
+      };
+    return fieldComparisonResult(field, overrideValue, apiValue, compareOptions);
   };
 }
 
 /** Validate an override for a task whose objectives span multiple maps. */
 function validateMultiMapOverride(
   overrideValue: TaskOverride['map'],
-  apiValue: TaskData['map']
+  apiValue: ComparisonTaskData['map']
 ): ValidationDetail | null {
   if (overrideValue === undefined) {
     if (apiValue === null || apiValue === undefined) return null;
@@ -126,7 +153,7 @@ function validateMultiMapOverride(
 /** Validate an ordinary single-map override. */
 function validateSingleMapOverride(
   overrideValue: TaskOverride['map'],
-  apiValue: TaskData['map']
+  apiValue: ComparisonTaskData['map']
 ): ValidationDetail | null {
   if (overrideValue === undefined) return null;
 
@@ -475,6 +502,74 @@ const COMPARABLE_FIELDS = new Set([
   'objectivesAdd',
 ]);
 
+/** Missing or malformed collections cannot establish that a clearing patch is redundant. */
+function requirementRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function validReference(value: unknown): boolean {
+  const reference = requirementRecord(value);
+  return typeof reference?.id === 'string' && reference.id.length > 0;
+}
+
+function validStates(value: unknown): boolean {
+  if (value === undefined) return true;
+  return (
+    Array.isArray(value) &&
+    value.every((state) => typeof state === 'string' && normalizeTaskStatus(state) !== undefined)
+  );
+}
+
+function validTaskRequirement(value: unknown): boolean {
+  const requirement = requirementRecord(value);
+  return Boolean(
+    requirement && validReference(requirement.task) && validStates(requirement.status)
+  );
+}
+
+function validTraderRequirement(value: unknown): boolean {
+  const requirement = requirementRecord(value);
+  if (!requirement || !validReference(requirement.trader)) return false;
+  return typeof requirement.compareMethod === 'string' && typeof requirement.value === 'number';
+}
+
+function validRequirementGroup(value: unknown): boolean {
+  return Array.isArray(value) && value.length > 0 && value.every(validTaskRequirement);
+}
+
+function validRequirementArray(field: string, value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  if (field === 'taskRequirementGroups') return value.every(validRequirementGroup);
+  return value.every(
+    field === 'traderRequirements' ? validTraderRequirement : validTaskRequirement
+  );
+}
+
+function withRequirementCollection(
+  field: 'taskRequirements' | 'taskRequirementGroups' | 'traderRequirements',
+  validator: FieldValidator
+): FieldValidator {
+  return (override, apiTask) => {
+    if (override[field] === undefined) return validator(override, apiTask);
+    if (!validRequirementArray(field, apiTask[field])) {
+      return {
+        field,
+        status: 'check',
+        message: `${field}: upstream collection unavailable - UNVERIFIED`,
+      };
+    }
+    if (!validRequirementArray(field, override[field]))
+      return {
+        field,
+        status: 'check',
+        message: `${field}: malformed overlay requirements - UNVERIFIED`,
+      };
+    return validator(override, apiTask);
+  };
+}
+
 const FIELD_VALIDATORS: FieldValidator[] = [
   validateDisabled,
   createFieldValidator('minPlayerLevel'),
@@ -492,84 +587,291 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('neededKeys'),
   createFieldValidator('availableDelaySecondsMin'),
   createFieldValidator('availableDelaySecondsMax'),
-  validateTaskRequirementGroups,
-  validateTaskRequirements,
-  validateTraderRequirements,
+  withRequirementCollection('taskRequirementGroups', validateTaskRequirementGroups),
+  withRequirementCollection('taskRequirements', validateTaskRequirements),
+  withRequirementCollection('traderRequirements', validateTraderRequirements),
 ];
 
-/** Validate field-level corrections for objectives already known to the API. */
-function validateObjectiveOverrides(override: TaskOverride, apiTask: TaskData): ValidationDetail[] {
-  const details: ValidationDetail[] = [];
-  if (!override.objectives) return details;
+/** Compare one objective field without inventing unavailable upstream values. */
+function objectiveFieldResult(
+  objId: string,
+  field: string,
+  value: unknown,
+  upstream: unknown
+): ValidationDetail {
+  const same = compareSubset(value, upstream);
+  return {
+    field: `objective:${objId}:${field}`,
+    status: same ? 'fixed' : 'needed',
+    message: same
+      ? `objective ${field}: ${formatValue(upstream)} - FIXED IN API`
+      : `objective ${field}: API=${formatValue(upstream)}, Override=${formatValue(value)} - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
+  };
+}
 
-  for (const [objId, objOverride] of Object.entries(override.objectives)) {
-    const apiObj = findApiObjective(apiTask, objId);
-    if (!apiObj) {
-      details.push({
+function objectiveField(
+  objId: string,
+  field: string,
+  value: unknown,
+  apiObj: Record<string, unknown>
+): ValidationDetail[] {
+  if (value === undefined) return [];
+  const upstream = apiObj[field];
+  if (upstream === undefined)
+    return [
+      {
+        field: `objective:${objId}:${field}`,
+        status: 'check',
+        message: `objective ${objId}.${field}: upstream value unavailable - UNVERIFIED`,
+      },
+    ];
+  return [objectiveFieldResult(objId, field, value, upstream)];
+}
+
+function objectivePatch(
+  objId: string,
+  patch: Record<string, unknown>,
+  apiTask: ComparisonTaskData
+): ValidationDetail[] {
+  const apiObj = findApiObjective(apiTask, objId);
+  if (!apiObj)
+    return [
+      {
         field: `objective:${objId}`,
         status: 'check',
         message: `objective ${objId}: Not found in API - CHECK MANUALLY`,
-      });
-      continue;
-    }
+      },
+    ];
+  return Object.entries(patch).flatMap(([field, value]) =>
+    objectiveField(objId, field, value, apiObj as unknown as Record<string, unknown>)
+  );
+}
 
-    for (const [field, overrideValue] of Object.entries(objOverride)) {
-      if (overrideValue === undefined) continue;
-      const apiValue = (apiObj as unknown as Record<string, unknown>)[field];
-      const isMatch = compareSubset(overrideValue, apiValue);
-      details.push({
-        field: `objective:${objId}:${field}`,
-        status: isMatch ? 'fixed' : 'needed',
-        message: isMatch
-          ? `objective ${field}: ${formatValue(apiValue)} - FIXED IN API`
-          : `objective ${field}: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
-      });
-    }
-  }
-
-  return details;
+/** Validate field-level corrections for objectives already known to the API. */
+function validateObjectiveOverrides(
+  override: TaskOverride,
+  apiTask: ComparisonTaskData
+): ValidationDetail[] {
+  return Object.entries(override.objectives ?? {}).flatMap(([id, patch]) =>
+    objectivePatch(id, patch as Record<string, unknown>, apiTask)
+  );
 }
 
 /** Missing objective collections cannot provide an objective to compare. */
-function findApiObjective(apiTask: TaskData, id: string) {
+function findApiObjective(apiTask: ComparisonTaskData, id: string) {
   if (!validObjectiveCollection(apiTask.objectives)) return undefined;
   return apiTask.objectives.find((objective) => objective.id === id);
 }
 
-/** Check whether objectives added by the overlay have appeared upstream. */
-function validateObjectiveAdditions(override: TaskOverride, apiTask: TaskData): ValidationDetail[] {
-  const details: ValidationDetail[] = [];
-  if (!override.objectivesAdd) return details;
+interface ObjectiveAdditionMatch {
+  upstream?: ComparisonValue<TaskObjective>;
+  adopted: boolean;
+  available: boolean;
+}
 
-  for (const added of override.objectivesAdd) {
-    const field = `objectivesAdd:${added.id || added.description}`;
-    if (!validObjectiveCollection(apiTask.objectives)) {
-      details.push({
+function objectiveAdditionMatch(
+  added: Record<string, unknown>,
+  task: ComparisonTaskData
+): ObjectiveAdditionMatch {
+  if (!validObjectiveCollection(task.objectives)) return { adopted: false, available: false };
+  const idMatch = task.objectives.find((objective) => objective.id === added.id);
+  if (idMatch) return { upstream: idMatch, adopted: true, available: true };
+  const candidates = task.objectives.filter(
+    (objective) =>
+      typeof added.description === 'string' && objective.description === added.description
+  );
+  return {
+    upstream: candidates.length === 1 ? candidates[0] : undefined,
+    adopted: false,
+    available: true,
+  };
+}
+
+function objectiveAdditionPresence(
+  added: Record<string, unknown>,
+  field: string,
+  adopted: boolean
+): ValidationDetail {
+  return {
+    field,
+    status: adopted ? 'fixed' : 'check',
+    message: adopted
+      ? `added objective '${added.description}': NOW IN API - MOVE TO OBJECTIVES OR REMOVE; values checked separately`
+      : `added objective '${added.description}': description candidate only - CHECK ID AND VALUES MANUALLY`,
+  };
+}
+
+function objectiveAdditionDetails(
+  added: Record<string, unknown>,
+  task: ComparisonTaskData
+): ValidationDetail[] {
+  const match = objectiveAdditionMatch(added, task);
+  const field = `objectivesAdd:${String(added.id || added.description)}`;
+  if (!match.available)
+    return [
+      {
         field,
         status: 'check',
         message: `added objective '${added.description}': UNVERIFIED upstream objectives unavailable`,
-      });
-      continue;
-    }
-    const apiMatch = apiTask.objectives.find(
-      (objective) => objective.id === added.id || objective.description === added.description
-    );
-    details.push(
-      apiMatch
-        ? {
-            field,
-            status: 'fixed',
-            message: `added objective '${added.description}': NOW IN API - MOVE TO OBJECTIVES OR REMOVE`,
-          }
-        : {
-            field,
-            status: 'needed',
-            message: `added objective '${added.description}': Still missing from API - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
-          }
-    );
-  }
+      },
+    ];
+  if (!match.upstream)
+    return [
+      {
+        field,
+        status: 'needed',
+        message: `added objective '${added.description}': Still missing by ID; description matches do not establish identity - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
+      },
+    ];
+  const presence = objectiveAdditionPresence(added, field, match.adopted);
+  const statuses = {
+    same: 'info',
+    different: 'needed',
+    unverified: 'check',
+    invalid: 'check',
+  } as const;
+  const fields = compareOverlayFields(added, match.upstream).map((row) => ({
+    field: `${field}:${row.field}`,
+    status: statuses[row.status],
+    message: `${row.field}: ${row.status.toUpperCase()} - ${row.reason}`,
+  }));
+  return [presence, ...fields];
+}
 
+/** Identity adoption is independent of whether all supplied objective values match. */
+function validateObjectiveAdditions(
+  override: TaskOverride,
+  apiTask: ComparisonTaskData
+): ValidationDetail[] {
+  return (override.objectivesAdd ?? []).flatMap((added) =>
+    objectiveAdditionDetails(added as unknown as Record<string, unknown>, apiTask)
+  );
+}
+
+function taskFieldComparison(
+  override: TaskOverride,
+  task: ComparisonTaskData,
+  semantic: ValidationDetail[]
+): OverlayComparisonDetail[] {
+  const { objectivesAdd, ...fields } = override;
+  let details = compareOverlayFields(fields, task);
+  for (const verdict of semantic.filter((row) => row.status === 'fixed')) {
+    details = applySemanticEvidence(verdict.field, override, task, details);
+  }
+  (objectivesAdd ?? []).forEach((added, index) => {
+    const match = objectiveAdditionMatch(added as unknown as Record<string, unknown>, task);
+    const rows = compareOverlayFields(added, match.upstream).map((row) => ({
+      ...row,
+      field: `objectivesAdd[${index}].${row.field}`,
+    }));
+    details.push(...rows);
+  });
   return details;
+}
+
+function fieldRows(rows: OverlayComparisonDetail[], field: string): OverlayComparisonDetail[] {
+  return rows.filter(
+    (row) =>
+      row.field === field || row.field.startsWith(`${field}.`) || row.field.startsWith(`${field}[`)
+  );
+}
+
+function hasSemanticRequirementValues(field: string, supplied: unknown, source: unknown): boolean {
+  return (
+    ['taskRequirements', 'taskRequirementGroups', 'traderRequirements'].includes(field) &&
+    Array.isArray(supplied) &&
+    Array.isArray(source)
+  );
+}
+
+function applySemanticEvidence(
+  field: string,
+  patch: TaskOverride,
+  task: ComparisonTaskData,
+  rows: OverlayComparisonDetail[]
+): OverlayComparisonDetail[] {
+  const supplied = patch[field as keyof TaskOverride];
+  const source = task[field as keyof TaskData];
+  if (hasSemanticRequirementValues(field, supplied, source)) {
+    const replaced = new Set(fieldRows(rows, field));
+    return [
+      ...rows.filter((row) => !replaced.has(row)),
+      ...compareRequirementValues(field, supplied as unknown[], source as unknown[]),
+    ];
+  }
+  if (field === 'startRewards' || field === 'finishRewards')
+    return rewardSubsetEvidence(rows, field);
+  return rows;
+}
+
+function rewardSubsetEvidence(
+  rows: OverlayComparisonDetail[],
+  field: string
+): OverlayComparisonDetail[] {
+  const relevant = fieldRows(rows, field);
+  if (relevant.some((row) => row.status === 'invalid' || row.status === 'unverified')) return rows;
+  const approved = new Set(relevant);
+  return rows.map((row) =>
+    approved.has(row) && row.status === 'different'
+      ? {
+          ...row,
+          status: 'same',
+          reason: 'Every supplied reward value matches a semantic subset of upstream rewards',
+        }
+      : row
+  );
+}
+
+function comparisonFieldPath(field: string): string {
+  const objective = /^objective:([^:]+):(.+)$/.exec(field);
+  return objective ? `objectives.${objective[1]}.${objective[2]}` : field;
+}
+
+function retainFixedDetail(
+  detail: ValidationDetail,
+  root?: OverlayComparisonDetail
+): ValidationDetail {
+  if (!root || root.status === 'same') return detail;
+  return {
+    ...detail,
+    status: root.status === 'different' ? 'needed' : 'check',
+    message: `${detail.field}: ${root.status.toUpperCase()} supplied values; retain until every field is proven upstream`,
+  };
+}
+
+function retainUnprovenFields(
+  details: ValidationDetail[],
+  comparison: OverlayComparisonDetail[]
+): ValidationDetail[] {
+  return details.map((detail) => {
+    if (detail.status !== 'fixed') return detail;
+    const root = comparison.find((row) => row.field === comparisonFieldPath(detail.field));
+    return retainFixedDetail(detail, root);
+  });
+}
+
+function validateSupportedFields(taskId: string, override: TaskOverride): void {
+  const unhandled = Object.keys(override).filter((field) => !COMPARABLE_FIELDS.has(field));
+  if (unhandled.length)
+    throw new Error(`No upstream comparison for task ${taskId} fields: ${unhandled.join(', ')}`);
+}
+
+function collectValidationDetails(
+  override: TaskOverride,
+  apiTask: ComparisonTaskData
+): ValidationDetail[] {
+  const details: ValidationDetail[] = [];
+  for (const validator of FIELD_VALIDATORS) {
+    const result = validator(override, apiTask);
+    if (result) details.push(result);
+  }
+  details.push(...validateObjectiveOverrides(override, apiTask));
+  details.push(...validateObjectiveAdditions(override, apiTask));
+  return details;
+}
+
+function comparisonDisplayName(task: ComparisonTaskData): string {
+  return task.name ?? task.id;
 }
 
 /**
@@ -583,13 +885,11 @@ function validateObjectiveAdditions(override: TaskOverride, apiTask: TaskData): 
 export function validateTaskOverride(
   taskId: string,
   override: TaskOverride,
-  apiTasks: TaskData[]
+  apiTasks: ComparisonTaskData[]
 ): ValidationResult {
-  const unhandled = Object.keys(override).filter((field) => !COMPARABLE_FIELDS.has(field));
-  if (unhandled.length) {
-    throw new Error(`No upstream comparison for task ${taskId} fields: ${unhandled.join(', ')}`);
-  }
-  const apiTask = apiTasks.find((t) => t.id === taskId);
+  validateSupportedFields(taskId, override);
+  const displayTask = apiTasks.find((t) => t.id === taskId);
+  const apiTask = displayTask ? comparisonTask(displayTask) : undefined;
 
   // Task not found in API
   if (!apiTask) {
@@ -598,6 +898,7 @@ export function validateTaskOverride(
       name: 'Unknown',
       status: 'REMOVED_FROM_API',
       stillNeeded: false,
+      comparison: compareOverlayFields(override, undefined),
       details: [
         {
           field: 'task',
@@ -608,28 +909,21 @@ export function validateTaskOverride(
     };
   }
 
-  // Run all field validators
-  const details: ValidationDetail[] = [];
-
-  for (const validator of FIELD_VALIDATORS) {
-    const result = validator(override, apiTask);
-    if (result) details.push(result);
-  }
-
-  // Handle nested objective validations separately for full detail.
-  details.push(...validateObjectiveOverrides(override, apiTask));
-  details.push(...validateObjectiveAdditions(override, apiTask));
+  const details = collectValidationDetails(override, apiTask);
 
   // Determine overall status
-  const needsOverride = details.some((d) => d.status === 'needed' || d.status === 'check');
+  const comparison = taskFieldComparison(override, apiTask, details);
+  const verifiedDetails = retainUnprovenFields(details, comparison);
+  const needsOverride = verifiedDetails.some((d) => d.status === 'needed' || d.status === 'check');
   const status: ValidationStatus = needsOverride ? 'NEEDED' : 'FIXED';
 
   return {
     id: taskId,
-    name: apiTask.name,
+    name: comparisonDisplayName(displayTask!),
     status,
     stillNeeded: needsOverride,
-    details,
+    comparison,
+    details: verifiedDetails,
   };
 }
 
@@ -642,7 +936,7 @@ export function validateTaskOverride(
  */
 export function validateAllOverrides(
   overrides: Record<string, TaskOverride>,
-  apiTasks: TaskData[]
+  apiTasks: ComparisonTaskData[]
 ): ValidationResult[] {
   return Object.entries(overrides).map(([taskId, override]) =>
     validateTaskOverride(taskId, override, apiTasks)

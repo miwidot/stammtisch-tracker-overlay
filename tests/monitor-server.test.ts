@@ -241,7 +241,7 @@ describe('buildTasksSections', () => {
       { t1: { objectivesAdd: [{ id: 'o', description: 'Plant' }] } },
       [{ id: 't1', name: 'T', objectives: [] }]
     );
-    expect(added.rows).toHaveLength(2);
+    expect(added.rows).toHaveLength(4);
     expect(added.rows[0][0]).toBe('T');
     expect(added.rows[0][1]).toBe('Plant');
   });
@@ -427,12 +427,14 @@ describe('buildSummary', () => {
   it('returns locale sections for "locales"', () => {
     const s = buildSummary('locales', '', 'en');
     expect(s.sections).toHaveLength(1);
-    expect(s.sections[0].title).toBe('tasks (en)');
+    expect(s.sections[0].title).toBe('tasks (en) vs API');
   });
 
   it('returns 1 section for "seasonalPerks" and "craftsAdd"', () => {
-    expect(buildSummary('seasonalPerks', '').sections[0].title).toBe('Seasonal Perk Effects');
-    expect(buildSummary('craftsAdd', '').sections[0].title).toBe('Craft Additions');
+    expect(buildSummary('seasonalPerks', '').sections[0].title).toBe(
+      'Seasonal Perk Effects vs API'
+    );
+    expect(buildSummary('craftsAdd', '').sections[0].title).toBe('Craft Additions vs API');
   });
 });
 
@@ -581,12 +583,16 @@ describe('buildLocaleSections', () => {
       },
       'en'
     );
-    expect(sections.map((s: any) => s.title)).toEqual(['tasks (en)', 'items (en)']);
+    expect(sections.map((s: any) => s.title)).toEqual(['tasks (en) vs API', 'items (en) vs API']);
     const taskRows = sections[0].rows;
-    expect(taskRows).toEqual([
-      ['t1', 'name', 'Renamed'],
-      ['t1', 'objective:o1.description', 'Fixed'],
-    ]);
+    expect(
+      taskRows.some(
+        (row: string[]) => row[1] === 'name' && row[3] === 'Renamed' && row[4] === 'unverified'
+      )
+    ).toBe(true);
+    expect(
+      taskRows.some((row: string[]) => row[1].endsWith('.description') && row[3] === 'Fixed')
+    ).toBe(true);
   });
 
   it('returns an empty placeholder section for unknown locales', () => {
@@ -601,41 +607,60 @@ describe('buildLocaleSections', () => {
   });
 });
 
-describe('buildSeasonalPerkSections', () => {
-  it('renders perk ids and raw values without requiring upstream metadata', () => {
-    const effects = [{ effectId: 'pmc_experience_multiplicator', multiplicator: 1.25 }];
-    const [sec] = buildSeasonalPerkSections({ perk1: { id: 'perk1', effects } });
-    expect(sec.columns).toEqual(['Perk ID', 'Raw Effects']);
-    expect(sec.rows[0]).toEqual(['perk1', JSON.stringify(effects)]);
+describe('new monitor upstream comparisons', () => {
+  it('keeps exposed seasonal metadata separate from unavailable effects', () => {
+    const [sec] = buildSeasonalPerkSections(
+      { p: { id: 'p', name: 'Perk', effects: [{ effectId: 'x', value: 2 }] } },
+      new Map([['p', { id: 'p', name: 'Perk' }]])
+    );
+    expect(sec.rows.find((row: string[]) => row[1] === 'name')[4]).toBe('same');
+    expect(sec.rows.find((row: string[]) => row[1] === 'effects')[4]).toBe('unverified');
+    expect(
+      sec.rows.some((row: string[]) => row[1] === 'entity' || row[4] === 'already upstream')
+    ).toBe(false);
+    expect(sec.rows.find((row: string[]) => row[1] === 'id')[5]).toContain('identity field');
   });
-
-  it('falls back to the keyed id and empty effects', () => {
-    const [sec] = buildSeasonalPerkSections({ p: {} });
-    expect(sec.rows[0]).toEqual(['p', '[]']);
+  it('compares supplied nested craft values even when identity matches', () => {
+    const craft = { id: 'c', duration: 10, productItem: { item: 'i', count: 2 } };
+    const upstream = new Map([['c', { ...craft, productItem: { item: 'i', count: 1 } }]]);
+    const [sec] = buildCraftAddSections({ c: craft }, upstream);
+    expect(sec.rows.find((row: string[]) => row[1] === 'duration')[4]).toBe('same');
+    expect(sec.rows.find((row: string[]) => row[1] === 'productItem.count')[4]).toBe(
+      'needs evidence'
+    );
+    expect(
+      buildCraftAddSections({ c: craft })[0].rows.every((row: string[]) => row[4] === 'unverified')
+    ).toBe(true);
   });
-
-  it('preserves malformed raw entries for inspection', () => {
-    const [sec] = buildSeasonalPerkSections({ p: { effects: [null, 'bad'] } });
-    expect(sec.rows[0][1]).toBe('[null,"bad"]');
-  });
-});
-
-describe('buildCraftAddSections', () => {
-  it('renders craft metadata with formatted duration', () => {
-    const [sec] = buildCraftAddSections({
-      c1: {
-        id: 'c1',
-        station: 'medstation',
-        level: 3,
-        duration: 3600,
-        productItem: { item: 'meds', count: 1 },
+  it('compares localized objectives by ID and reports unknown supplied fields', () => {
+    const bundle = {
+      fr: {
+        tasks: {
+          t: {
+            name: 'Nom',
+            objectives: { o: { description: 'Texte', count: 3 } },
+            unknown: 'same',
+          },
+        },
       },
-    });
-    expect(sec.rows[0][0]).toBe('c1');
-    expect(sec.rows[0][2]).toBe('medstation');
-    expect(sec.rows[0][3]).toBe(3);
-    expect(sec.rows[0][4]).toBe('60 min');
-    expect(sec.rows[0][5]).toBe('meds');
+    };
+    const upstream = {
+      tasks: new Map([
+        [
+          't',
+          {
+            name: 'Nom',
+            objectives: [{ id: 'o', description: 'Texte', count: 3 }],
+            unknown: 'same',
+          },
+        ],
+      ]),
+    };
+    const [sec] = buildLocaleSections(bundle, 'fr', upstream);
+    expect(sec.rows.find((row: string[]) => row[1] === 'name')[4]).toBe('same');
+    expect(sec.rows.find((row: string[]) => row[1] === 'objectives.o.description')[4]).toBe('same');
+    expect(sec.rows.find((row: string[]) => row[1] === 'unknown')[4]).toBe('unverified');
+    expect(sec.rows.find((row: string[]) => row[1] === 'objectives.o.count')[4]).toBe('unverified');
   });
 });
 
@@ -856,7 +881,9 @@ describe('monitor hardening', () => {
 
   it('builds view-specific query parameters from the shared configuration', () => {
     expect(buildViewParams('tasks', 'pve', 'en').toString()).toBe('view=tasks&mode=pve');
-    expect(buildViewParams('locales', 'regular', 'en').toString()).toBe('view=locales&locale=en');
+    expect(buildViewParams('locales', 'regular', 'en').toString()).toBe(
+      'view=locales&mode=regular&locale=en'
+    );
     expect(buildViewParams('items', 'pve', 'en').toString()).toBe('view=items&mode=pve');
   });
 
@@ -1222,13 +1249,15 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(data.view).toBe('locales');
     expect(data.locale).toBe('en');
     expect(data.locales).toContain('en');
-    expect(data.sections[0].title).toBe('tasks (en)');
+    expect(data.sections[0].title).toBe('tasks (en) vs API');
   });
 
   it('GET /latest — view=seasonalPerks returns perk rows', async () => {
     const data = await (await fetch(`${baseUrl}/latest?view=seasonalPerks`)).json();
-    expect(data.sections[0].title).toBe('Seasonal Perk Effects');
-    expect(data.sections[0].rows[0]).toEqual(['perk1', '[{"effectId":"insurance_disabled"}]']);
+    expect(data.sections[0].title).toBe('Seasonal Perk Effects vs API');
+    expect(
+      data.sections[0].rows.some((row: string[]) => row[1] === 'effects' && row[4] === 'unverified')
+    ).toBe(true);
   });
 
   it('GET /health — reports ok and mode api states', async () => {
@@ -1331,7 +1360,7 @@ describe('monitor upstream coverage', () => {
     apiState.regular.data = [{ id: '0123456789abcdef01234567', name: 'Task', experience: 20 }];
     apiState.regular.error = null;
     const rows = buildSummary('tasksAdd', 'regular').sections[0].rows;
-    expect(rows.some((row: string[]) => row.at(-1) === 'same')).toBe(true);
+    expect(rows.some((row: string[]) => row[4] === 'same')).toBe(true);
   });
   it('recognizes adopted objective additions without requiring extra upstream fields', () => {
     const [, added] = buildTasksSections({ t: { objectivesAdd: [{ id: 'o', count: 2 }] } }, [
@@ -1388,6 +1417,63 @@ describe('entity comparison monitor views', () => {
     apiState.regular.entities.maps.data.get('m').extracts[0].position.x = 3;
     expect(buildSummary('maps', 'regular').sections[0].rows[1][4]).toBe('needs evidence');
   });
+
+  it.each(
+    [
+      [
+        { id: 'x', name: 'Exit', position: { x: 1 } },
+        { id: 'x', name: 'Other', position: { x: 9 } },
+      ],
+      [
+        { id: 'x', name: 'Other', position: { x: 9 } },
+        { id: 'x', name: 'Exit', position: { x: 1 } },
+      ],
+      [{ id: 'x', name: 'Exit', position: { x: 1 } }, null],
+    ].map((extracts) => [extracts])
+  )(
+    'does not choose arbitrary extract evidence from incomplete or duplicate arrays: %j',
+    (extracts) => {
+      const { buildEntityComparisonSections } = createRequire(import.meta.url)(
+        '../monitor/lib/sections.js'
+      );
+      const [section] = buildEntityComparisonSections(
+        'Maps',
+        { m: { extractsAdd: [{ id: 'x', name: 'Exit', position: { x: 1 } }] } },
+        new Map([['m', { id: 'm', extracts }]])
+      );
+      expect(section.rows.every((row: string[]) => row[4] === 'unverified')).toBe(true);
+      expect(section.rows.map((row: string[]) => row[1])).toContain('extractsAdd:x.position.x');
+    }
+  );
+
+  it('covers every supplied extract field separately from canonical adoption identity', () => {
+    const { buildEntityComparisonSections } = createRequire(import.meta.url)(
+      '../monitor/lib/sections.js'
+    );
+    const [section] = buildEntityComparisonSections(
+      'Maps',
+      { m: { extractsAdd: [{ id: 'synthetic', name: 'Exit', position: { x: 1 }, extra: false }] } },
+      new Map([
+        ['m', { id: 'm', extracts: [{ id: 'canonical', name: 'Exit', position: { x: 1 } }] }],
+      ])
+    );
+    expect(section.rows.map((row: string[]) => row[1])).toEqual(
+      expect.arrayContaining([
+        'extractsAdd:synthetic.position.x',
+        'extractsAdd:synthetic.id',
+        'extractsAdd:synthetic.extra',
+      ])
+    );
+    expect(
+      section.rows.find((row: string[]) => row[1] === 'extractsAdd:synthetic.position.x')[4]
+    ).toBe('same');
+    expect(section.rows.find((row: string[]) => row[1] === 'extractsAdd:synthetic.id')[4]).toBe(
+      'needs evidence'
+    );
+    expect(section.rows.find((row: string[]) => row[1] === 'extractsAdd:synthetic.extra')[4]).toBe(
+      'unverified'
+    );
+  });
 });
 
 describe('monitor mode guards and adoption presence', () => {
@@ -1416,7 +1502,8 @@ describe('monitor mode guards and adoption presence', () => {
       [{ id: 't', objectives: [{ id: 'canonical', description: 'Exit', count: 3 }] }]
     );
     expect(added.rows[0][4]).toBe('needs evidence');
-    expect(added.rows[1][4]).toBe('already upstream');
+    expect(added.rows[1][4]).toBe('description candidate');
+    expect(added.rows.find((row: string[]) => row[1].endsWith('.id'))[4]).toBe('needs evidence');
   });
 });
 
@@ -1468,10 +1555,17 @@ describe('monitor independent upstream refresh', () => {
       if (endpoint === 'hideout') return hideout;
       return new Map([['x', { id: 'x', count: 2 }]]);
     });
+    const fetchLocales = vi.fn(async (_mode: string, locale: string) =>
+      locale === 'fr' ? hideout : { tasks: new Map() }
+    );
     const context = vm.createContext({
       require: (id: string) =>
         id === './lib/tarkov-api.js'
-          ? { fetchApiTasks: fetchTasks, fetchApiEntities: fetchEntities }
+          ? {
+              fetchApiTasks: fetchTasks,
+              fetchApiEntities: fetchEntities,
+              fetchApiLocales: fetchLocales,
+            }
           : requireMonitor(id),
       process,
       console,
@@ -1490,6 +1584,8 @@ describe('monitor independent upstream refresh', () => {
       tasks: { t: { experience: 2 } },
       items: { x: { count: 2 } },
       hideout: { x: { count: 2 } },
+      locales: { en: {}, fr: {} },
+      seasonalPerks: { p: { effects: [{ effectId: 'x' }] } },
     };
     const previousHideout = new Map([['x', { id: 'x', count: 2 }]]);
     isolated.apiState.regular.entities = {
@@ -1500,6 +1596,18 @@ describe('monitor independent upstream refresh', () => {
     try {
       await new Promise((resolve) => setImmediate(resolve));
       expect(fetchTasks).toHaveBeenCalledTimes(1);
+      expect(fetchEntities.mock.calls.some(([, endpoint]) => endpoint === 'season')).toBe(false);
+      const unsupported = vm.runInContext('getState("seasonalPerks", "regular", "")', context);
+      expect(unsupported.api.error).toBe('Seasonal perks are only exposed in pvp-season');
+      expect(unsupported.sections[0].rows.every((row: string[]) => row[4] === 'unverified')).toBe(
+        true
+      );
+      expect(isolated.apiState.regular.entities['locale:en'].data).toBeTruthy();
+      expect(isolated.apiState.regular.entities['locale:fr'].data).toBeNull();
+      const cache = (fetchTasks.mock.calls[0] as unknown as [string, unknown])[1];
+      expect(cache).toBeTruthy();
+      expect((fetchEntities.mock.calls[0] as unknown as [string, string, unknown])[2]).toBe(cache);
+      expect((fetchLocales.mock.calls[0] as unknown as [string, string, unknown])[2]).toBe(cache);
       expect(isolated.apiState.regular.data).toEqual([{ id: 't', experience: 2 }]);
       const state = vm.runInContext('getState("tasks", "regular", "")', context);
       expect(state.sections[0].rows[0][4]).toBe('same');
@@ -1511,12 +1619,22 @@ describe('monitor independent upstream refresh', () => {
       await new Promise((resolve) => setImmediate(resolve));
     }
     expect(fetchTasks).toHaveBeenCalledTimes(2);
+    expect((fetchTasks.mock.calls[1] as unknown as [string, unknown])[1]).not.toBe(
+      (fetchTasks.mock.calls[0] as unknown as [string, unknown])[1]
+    );
     expect(isolated.apiState.regular.entities.hideout.error).toBe('Hideout failed');
     expect(isolated.apiState.regular.entities.hideout.data).toBe(previousHideout);
     expect(isolated.apiState.regular.entities.hideout.updatedAt).toBe('previous');
     const failedSummary = isolated.buildSummary('hideout', 'regular');
     expect(failedSummary.error).toContain('Hideout failed');
     expect(failedSummary.sections[0].rows[0][4]).toBe('unverified');
+    await vm.runInContext('refreshApiTasks("pvp-season")', context);
+    expect(
+      fetchEntities.mock.calls.filter(
+        ([mode, endpoint]) => mode === 'pvp-season' && endpoint === 'season'
+      )
+    ).toHaveLength(1);
+    expect(isolated.apiState['pvp-season'].entities.season.error).toBeNull();
   });
 });
 
@@ -1538,4 +1656,260 @@ it('reports objective absence for a valid empty upstream collection', () => {
     { id: 't', objectives: [] },
   ]);
   expect(additions.rows[1][4]).toBe('missing upstream');
+});
+
+describe('supplemental mode state', () => {
+  it('selects mode patches and never compares stale craft data after failure', () => {
+    overlayState.data = {
+      craftsAdd: { c: { id: 'c', duration: 10 } },
+      modes: { pve: { craftsAdd: { c: { duration: 20 } } } },
+    };
+    apiState.regular.entities = {
+      crafts: { data: new Map([['c', { id: 'c', duration: 10 }]]), error: null },
+    };
+    apiState.pve.entities = {
+      crafts: { data: new Map([['c', { id: 'c', duration: 20 }]]), error: null },
+    };
+    expect(
+      buildSummary('craftsAdd', 'regular').sections[0].rows.find(
+        (row: string[]) => row[1] === 'duration'
+      )[3]
+    ).toBe('10');
+    expect(
+      buildSummary('craftsAdd', 'pve').sections[0].rows.find(
+        (row: string[]) => row[1] === 'duration'
+      )[3]
+    ).toBe('20');
+    apiState.pve.entities.crafts.error = 'Refresh failed';
+    const failed = buildSummary('craftsAdd', 'pve');
+    expect(failed.error).toBe('Refresh failed');
+    expect(failed.sections[0].rows.every((row: string[]) => row[4] === 'unverified')).toBe(true);
+  });
+  it('isolates locale and mode snapshots and makes unavailable seasonal data explicit', () => {
+    overlayState.data = {
+      locales: { fr: { tasks: { t: { name: 'Nom' } } } },
+      seasonalPerks: { p: { effects: [{ effectId: 'x' }] } },
+    };
+    apiState.regular.entities = {
+      'locale:fr': { data: { tasks: new Map([['t', { name: 'Nom' }]]) }, error: null },
+    };
+    apiState.pve.entities = {
+      'locale:fr': { data: { tasks: new Map([['t', { name: 'Other' }]]) }, error: null },
+    };
+    expect(buildSummary('locales', 'regular', 'fr').sections[0].rows[0][4]).toBe('same');
+    expect(buildSummary('locales', 'pve', 'fr').sections[0].rows[0][4]).toBe('needs evidence');
+    expect(buildSummary('locales', 'regular', 'fr').sections[0].rows[0][4]).toBe('same');
+    expect(buildSummary('seasonalPerks', 'regular').error).toBe(
+      'Seasonal perks are only exposed in pvp-season'
+    );
+  });
+});
+
+it('retains mode guards on nested entity comparison rows', () => {
+  overlayState.data = {
+    items: { i: { properties: { count: 1 } } },
+    modes: { pve: { items: { i: { properties: { count: 2 } } } } },
+  };
+  apiState.pve.entities = {
+    items: { data: new Map([['i', { properties: { count: 2 } }]]), error: null },
+  };
+  const rows = buildSummary('items', 'pve').sections[0].rows;
+  expect(rows.find((row: string[]) => row[1] === 'properties')[4]).toBe('mode guard');
+  expect(rows.find((row: string[]) => row[1] === 'properties.count')[4]).toBe('mode guard');
+});
+
+it.each([null, false, []].map((entries) => [entries]))(
+  'reports malformed locale entity bundles explicitly: %j',
+  (entries) => {
+    const [section] = buildLocaleSections({ fr: { tasks: entries } }, 'fr');
+    expect(section.rows[0][4]).toBe('invalid');
+    expect(section.rows[0][5]).toContain('ID-keyed');
+  }
+);
+
+it('compares nested task and objective values with reasons and leaf mode guards', () => {
+  const patch = {
+    finishRewards: { items: [{ item: { id: 'i' }, count: 2 }] },
+    objectives: { o: { zone: { radius: 3, count: 4 } } },
+  };
+  const api = [
+    {
+      id: 't',
+      name: 'Task',
+      finishRewards: { items: [{ item: { id: 'i' }, count: 1 }] },
+      objectives: [{ id: 'o', zone: { radius: 3, count: 4 } }],
+    },
+  ];
+  const shared = { t: { objectives: { o: { zone: { radius: 2, count: 4 } } } } };
+  const [section] = buildTasksSections({ t: patch }, api, true, shared);
+  expect(section.rows.find((row: string[]) => row[1] === 'finishRewards.items[0].count')[4]).toBe(
+    'needs evidence'
+  );
+  expect(section.rows.find((row: string[]) => row[1] === 'objective:o.zone.radius')[4]).toBe(
+    'mode guard'
+  );
+  expect(section.rows.find((row: string[]) => row[1] === 'objective:o.zone.count')[4]).toBe('same');
+  expect(section.rows.every((row: string[]) => typeof row[5] === 'string')).toBe(true);
+});
+
+it('objective identity wins over description candidates while duplicate descriptions cannot establish adoption', () => {
+  const [, exact] = buildTasksSections(
+    { t: { objectivesAdd: [{ id: 'a', description: 'Same', count: 2 }] } },
+    [
+      {
+        id: 't',
+        objectives: [
+          { id: 'a', description: 'Changed', count: 2 },
+          { id: 'b', description: 'Same', count: 2 },
+        ],
+      },
+    ]
+  );
+  expect(exact.rows[1][4]).toBe('already upstream');
+  expect(exact.rows.find((row: string[]) => row[1].endsWith('.description'))[4]).toBe(
+    'needs evidence'
+  );
+  const [, ambiguous] = buildTasksSections(
+    { t: { objectivesAdd: [{ id: 'x', description: 'Same', count: 2 }] } },
+    [
+      {
+        id: 't',
+        objectives: [
+          { id: 'a', description: 'Same', count: 2 },
+          { id: 'b', description: 'Same', count: 2 },
+        ],
+      },
+    ]
+  );
+  expect(ambiguous.rows[1][4]).toBe('missing upstream');
+  expect(ambiguous.rows[0][4]).toBe('unverified');
+});
+
+it.each(['regular', 'pve'])(
+  'reports the known seasonal limitation before the first %s refresh',
+  (mode) => {
+    overlayState.data = { seasonalPerks: { p: { id: 'p', effects: [{ effectId: 'x' }] } } };
+    apiState[mode].entities = {};
+    const summary = buildSummary('seasonalPerks', mode);
+    expect(summary.error).toBe('Seasonal perks are only exposed in pvp-season');
+    expect(summary.sections[0].rows.every((row: string[]) => row[4] === 'unverified')).toBe(true);
+  }
+);
+
+describe('locale refresh when overlay languages change', () => {
+  it('loads new locales promptly during an API refresh without restarting task or entity reads, and retries failed locale reloads', async () => {
+    const requireMonitor = createRequire(path.resolve('monitor/server.js'));
+    let resolveEntities!: (value: Map<string, unknown>) => void;
+    const entities = new Promise<Map<string, unknown>>((resolve) => {
+      resolveEntities = resolve;
+    });
+    const fetchTasks = vi.fn(async () => [{ id: 't', name: 'Task' }]);
+    const fetchEntities = vi.fn(async () => entities);
+    let failFrench = true;
+    let resolveGerman!: (value: { tasks: Map<string, unknown> }) => void;
+    const german = new Promise<{ tasks: Map<string, unknown> }>((resolve) => {
+      resolveGerman = resolve;
+    });
+    let resolveRussian!: (value: { tasks: Map<string, unknown> }) => void;
+    const russian = new Promise<{ tasks: Map<string, unknown> }>((resolve) => {
+      resolveRussian = resolve;
+    });
+    const fetchLocales = vi.fn(async (_mode: string, locale: string) => {
+      if (locale === 'de') return german;
+      if (locale === 'ru') return russian;
+      if (locale === 'fr' && failFrench) throw new Error('Synthetic locale failure');
+      return { tasks: new Map([['t', { id: 't', name: locale }]]) };
+    });
+    const context = vm.createContext({
+      require: (id: string) =>
+        id === './lib/tarkov-api.js'
+          ? {
+              fetchApiTasks: fetchTasks,
+              fetchApiEntities: fetchEntities,
+              fetchApiLocales: fetchLocales,
+            }
+          : requireMonitor(id),
+      process,
+      console,
+      Buffer,
+      Headers,
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval,
+      module: { exports: {} },
+      __dirname: path.resolve('monitor'),
+      testOverlay: { locales: {} },
+    });
+    vm.runInContext(readFileSync(path.resolve('monitor/server.js'), 'utf8'), context);
+    const isolated: any = vm.runInContext('module.exports', context);
+    vm.runInContext(
+      'supportedModes = ["regular"]; loadOverlay = async () => ({data: testOverlay, updatedAt: "overlay"})',
+      context
+    );
+    const initial = vm.runInContext('refreshApiTasks("regular")', context);
+    try {
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fetchLocales).not.toHaveBeenCalled();
+      context.testOverlay = { locales: { en: {} } };
+      await vm.runInContext('refreshOverlay()', context);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fetchLocales.mock.calls.map(([, locale]) => locale)).toEqual(['en']);
+      expect(isolated.apiState.regular.entities['locale:en'].data).toBeTruthy();
+      expect(fetchTasks).toHaveBeenCalledTimes(1);
+      expect(fetchEntities).toHaveBeenCalledTimes(5);
+      expect((fetchLocales.mock.calls[0] as unknown as [string, string, unknown])[2]).toBe(
+        (fetchTasks.mock.calls[0] as unknown as [string, unknown])[1]
+      );
+      context.testOverlay = { locales: { en: {}, fr: {} } };
+      await vm.runInContext('refreshOverlay()', context);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(isolated.apiState.regular.entities['locale:fr'].error).toContain(
+        'Synthetic locale failure'
+      );
+      failFrench = false;
+      await vm.runInContext('refreshOverlay()', context);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(isolated.apiState.regular.entities['locale:fr'].error).toBeNull();
+      expect(fetchLocales.mock.calls.map(([, locale]) => locale)).toEqual(['en', 'fr', 'fr']);
+      expect((fetchLocales.mock.calls[2] as unknown as [string, string, unknown])[2]).not.toBe(
+        (fetchLocales.mock.calls[1] as unknown as [string, string, unknown])[2]
+      );
+      expect(fetchTasks).toHaveBeenCalledTimes(1);
+      expect(fetchEntities).toHaveBeenCalledTimes(5);
+      context.testOverlay = { locales: { fr: {} } };
+      await vm.runInContext('refreshOverlay()', context);
+      context.testOverlay = { locales: { en: {}, fr: {} } };
+      await vm.runInContext('refreshOverlay()', context);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fetchLocales.mock.calls.map(([, locale]) => locale)).toEqual(['en', 'fr', 'fr', 'en']);
+      context.testOverlay = { locales: { en: {}, fr: {}, de: {} } };
+      await vm.runInContext('refreshOverlay()', context);
+      const queuedGerman = vm.runInContext(
+        'refreshModeLocale("regular", "de", new Map())',
+        context
+      );
+      resolveGerman({ tasks: new Map([['t', { name: 'de' }]]) });
+      await queuedGerman;
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fetchLocales.mock.calls.filter(([, locale]) => locale === 'de')).toHaveLength(2);
+      context.testOverlay = { locales: { ru: {} } };
+      await vm.runInContext('refreshOverlay()', context);
+      const queuedRussian = vm.runInContext(
+        'refreshModeLocale("regular", "ru", new Map())',
+        context
+      );
+      context.testOverlay = { locales: {} };
+      await vm.runInContext('refreshOverlay()', context);
+      resolveRussian({ tasks: new Map() });
+      await queuedRussian;
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fetchLocales.mock.calls.filter(([, locale]) => locale === 'ru')).toHaveLength(1);
+      expect(fetchTasks).toHaveBeenCalledTimes(1);
+      expect(fetchEntities).toHaveBeenCalledTimes(5);
+    } finally {
+      resolveEntities(new Map());
+      await initial;
+    }
+  });
 });
