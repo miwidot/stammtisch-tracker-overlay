@@ -83,7 +83,7 @@ it.each([20000, 8000])('preserves Tour corrections and parents at USD count %i',
     readFileSync(new URL('../scripts/story-chapter-meta.json', import.meta.url), 'utf8')
   );
   try {
-    for (const path of ['scripts', 'eft', 'data/eft', 'src/schemas'])
+    for (const path of ['scripts', 'data/reference', 'data/eft', 'src/schemas'])
       mkdirSync(join(dir, path), { recursive: true });
     writeFileSync(
       join(dir, 'src/schemas/story-chapter.schema.json'),
@@ -103,7 +103,7 @@ it.each([20000, 8000])('preserves Tour corrections and parents at USD count %i',
       })
     );
     writeFileSync(
-      join(dir, 'eft/quest_list.json'),
+      join(dir, 'data/reference/quest_list.json'),
       JSON.stringify({
         request: {
           url: 'https://gw-pve.example/client/quest/list',
@@ -153,7 +153,7 @@ it.each([20000, 8000])('preserves Tour corrections and parents at USD count %i',
         env: {
           ...process.env,
           STORY_REFERENCE_UPDATE_LOCK: '1',
-          STORY_REFERENCE: 'eft/quest_list.json',
+          STORY_REFERENCE: 'data/reference/quest_list.json',
           STORY_REFERENCE_SUPPLEMENTS: '[]',
         },
         encoding: 'utf8',
@@ -215,7 +215,7 @@ it('regenerates every Tour objective in narrative order with stage rewards and u
     ),
   ];
   try {
-    for (const path of ['scripts', 'eft', 'data/eft', 'src/schemas'])
+    for (const path of ['scripts', 'data/reference', 'data/eft', 'src/schemas'])
       mkdirSync(join(dir, path), { recursive: true });
     writeFileSync(
       join(dir, 'src/schemas/story-chapter.schema.json'),
@@ -239,7 +239,7 @@ it('regenerates every Tour objective in narrative order with stage rewards and u
       })
     );
     writeFileSync(
-      join(dir, 'eft/quest_list.json'),
+      join(dir, 'data/reference/quest_list.json'),
       JSON.stringify({
         request: {
           url: 'https://gw-pve.example/client/quest/list',
@@ -303,7 +303,7 @@ it('regenerates every Tour objective in narrative order with stage rewards and u
             env: {
               ...process.env,
               STORY_REFERENCE_UPDATE_LOCK: '1',
-              STORY_REFERENCE: 'eft/quest_list.json',
+              STORY_REFERENCE: 'data/reference/quest_list.json',
               STORY_REFERENCE_SUPPLEMENTS: '[]',
             },
             encoding: 'utf8',

@@ -16,7 +16,7 @@
  * Usage:
  *   tsx scripts/eft-wiki-crosscheck.ts [eftDir] [--mode pve|regular] [--json out.json]
  *
- * eftDir defaults to ./eft. Reuses the wiki fetch/parse from wiki-compare and
+ * eftDir defaults to ./data/reference. Reuses the wiki fetch/parse from wiki-compare and
  * the reference parser from eft-compare; both are pure imports here.
  */
 

@@ -19,7 +19,7 @@
  *   every chapter is derived from the reference so that no objective ships a
  *   fabricated id.
  *
- * Generation is local-only: the capture lives under the gitignored eft/, so CI
+ * Generation is local-only: the capture lives under the gitignored data/reference/, so CI
  * and contributors without it cannot regenerate. What makes the committed output
  * auditable anyway is the lock file, which pins the exact capture by SHA-256
  * (plus client version, mode, capture time and resolution counts). A different
@@ -29,6 +29,7 @@
  * Emits final storyChapters JSON to stdout. Deterministic given the inputs.
  */
 
+import { referenceDirectory } from './local-reference.js';
 import { createHash } from 'crypto';
 import {
   existsSync,
@@ -458,13 +459,13 @@ function scoreReference(quests: JsonRecord[]): { chapters: number; texts: number
 }
 
 /**
- * Quest-capture files under eft/, enriched variants first.
+ * Quest-capture files under data/reference/, enriched variants first.
  *
  * Directory entries are sorted before walking: `readdirSync` order is
  * filesystem-dependent, so relying on it would make discovery - and therefore
  * the fallback candidate ranking - vary between machines.
  */
-export function storyReferenceCandidates(root = 'eft'): string[] {
+export function storyReferenceCandidates(root = referenceDirectory()): string[] {
   const found: string[] = [];
   const visited = new Set<string>();
   const walk = (dir: string): void => {
@@ -606,7 +607,7 @@ function readLock(): ReferenceLock | null {
 function isSafeReferencePath(file: unknown): file is string {
   return (
     typeof file === 'string' &&
-    file.length > 0 &&
+    file.startsWith('data/reference/') &&
     !isAbsolute(file) &&
     !win32.isAbsolute(file) &&
     !/[:\\\0]/.test(file) &&
@@ -614,10 +615,10 @@ function isSafeReferencePath(file: unknown): file is string {
   );
 }
 
-/** Re-pins may name only a capture physically contained in the project's eft/ directory. */
-function canonicalRepinSource(file: string): string {
+/** Every story read must stay physically inside the project's capture directory. */
+function canonicalReferenceSource(file: string): string {
   const project = realpathSync(process.cwd());
-  const referenceDir = resolve('eft');
+  const referenceDir = resolve(referenceDirectory());
   const selected = resolve(file);
   const within = (root: string, candidate: string): boolean => {
     const path = relative(root, candidate);
@@ -625,15 +626,15 @@ function canonicalRepinSource(file: string): string {
   };
   const refused = (): never => {
     throw new Error(
-      'story reference re-pin source must be a capture under the project eft/ directory'
+      'story reference source must be a capture under the project data/reference/ directory'
     );
   };
   // Check lexical containment before resolving: an outside alias pointing into
-  // eft/ is still an outside source input, and must not become committed provenance.
+  // the reference directory is still an outside source input, and must not become committed provenance.
   if (!within(referenceDir, selected)) refused();
   const reference = realpathSync(referenceDir);
   const source = realpathSync(selected);
-  // Symlinked captures/directories must not escape eft/, nor may eft/ itself
+  // Symlinked captures/directories must not escape the reference directory, nor may it
   // redirect outside the project. Canonicalize inside aliases to their real path.
   if (!within(project, reference) || !within(reference, source)) refused();
   const canonical = relative(project, source).split(sep).join('/');
@@ -666,7 +667,7 @@ function fingerprint(file: string): { lock: BasicReferenceLock; quests: JsonReco
  * Load the pinned quest reference.
  *
  * Selection is explicit rather than heuristic, so that regenerating on a
- * workstation whose eft/ has since grown cannot quietly rewrite committed
+ * workstation whose reference directory has since grown cannot quietly rewrite committed
  * objectives:
  * - by default the lock's capture is used and its SHA-256 must still match.
  * - `STORY_REFERENCE=<file>` reads the pinned capture from another path (a moved
@@ -1072,10 +1073,18 @@ export function loadReference(): JsonRecord[] {
     file = lock.file;
   }
   if (!file) {
-    const ranked = rankStoryReferences(storyReferenceCandidates());
+    const candidates = new Set<string>();
+    for (const candidate of storyReferenceCandidates()) {
+      try {
+        candidates.add(canonicalReferenceSource(candidate));
+      } catch {
+        // Unavailable captures and escaped aliases must not be read or ranked.
+      }
+    }
+    const ranked = rankStoryReferences([...candidates]);
     if (ranked.length === 0 || ranked[0].chapters === 0) {
       throw new Error(
-        'No usable story reference found under eft/. Place a quest capture there, or set ' +
+        'No usable story reference found in the local reference directory. Place a quest capture there, or set ' +
           'STORY_REFERENCE to one.'
       );
     }
@@ -1088,7 +1097,7 @@ export function loadReference(): JsonRecord[] {
     file = ranked[0].file;
   }
 
-  if (updating) file = canonicalRepinSource(file);
+  file = canonicalReferenceSource(file);
   const { lock: current, quests } = fingerprint(file);
   if (current.chapterQuests === 0 || current.objectiveTexts === 0) {
     throw new Error(`story reference ${file} resolves no chapter quests or objective texts`);
@@ -1119,7 +1128,7 @@ export function loadReference(): JsonRecord[] {
     if (!existsSync(selected)) {
       throw new Error(`pinned supplemental story reference is missing: ${selected}`);
     }
-    const source = canonicalRepinSource(selected);
+    const source = canonicalReferenceSource(selected);
     const supplement = fingerprint(source);
     assertSharedMode(supplement.lock);
     // Only an explicit replacement manifest can change supplement fingerprints.

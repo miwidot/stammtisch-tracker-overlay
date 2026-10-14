@@ -24,10 +24,11 @@
  * Usage:
  *   tsx scripts/eft-compare.ts [eftDir] [--mode pve|regular] [--descriptions] [--json out.json]
  *
- * eftDir defaults to ./eft. The reference file is auto-detected by the
+ * eftDir defaults to ./data/reference. The reference file is auto-detected by the
  * `quest_list` filename fragment (the enriched variant is preferred).
  */
 
+import { referenceDirectory, resolveReferenceDirectory } from './local-reference.js';
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, isAbsolute } from 'path';
 import {
@@ -153,7 +154,7 @@ export function firstNumber<T>(
 /**
  * Recursively collect quest-reference files (name matches `quest_list` /
  * `quest-list`, `.json`) under `dir`, including subdirectories so versioned
- * captures like `eft/eft-1.1-pve/` are discovered.
+ * captures like `data/reference/<capture>/` are discovered.
  */
 function findQuestListFiles(dir: string): string[] {
   const out: string[] = [];
@@ -172,7 +173,7 @@ function findQuestListFiles(dir: string): string[] {
   return out;
 }
 
-/** Locate the quest reference file under the eft directory. Prefers the most
+/** Locate the quest reference file under the reference directory. Prefers the most
  * recently captured reference: the capture timestamp in each file's envelope
  * (`request.timestamp`) is authoritative, with the filesystem mtime as a
  * deterministic fallback for files that lack one (e.g. after copying/editing,
@@ -181,7 +182,7 @@ function findQuestListFiles(dir: string): string[] {
  * `localization.en` objective text.
  * When `mode` is given, candidates whose capture URL identifies that mode are
  * preferred (still newest-first), so a directory holding captures for several
- * modes (e.g. `eft/eft-1.1-{regular,pve}/`) selects the capture matching the
+ * modes (e.g. `data/reference/<regular-or-pve-capture>/`) selects the capture matching the
  * requested mode instead of rejecting the directory. Candidates whose mode
  * cannot be detected stay in the pool. */
 export function findReferenceFile(eftDir: string, mode?: GameMode): string {
@@ -577,7 +578,7 @@ export interface ModeCliOptions {
  * declared via `booleanFlags` and are surfaced in `flags`.
  */
 export function parseModeArgs(argv: string[], booleanFlags: string[] = []): ModeCliOptions {
-  let eftDir = 'eft';
+  let eftDir = referenceDirectory();
   let mode: GameMode = 'pve';
   let jsonOut: string | undefined;
   const flags = new Set<string>();
@@ -604,7 +605,7 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
   }
 
   return {
-    eftDir: isAbsolute(eftDir) ? eftDir : join(process.cwd(), eftDir),
+    eftDir: resolveReferenceDirectory(eftDir),
     mode,
     jsonOut,
     flags,

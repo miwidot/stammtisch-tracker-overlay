@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -384,6 +384,28 @@ describe('checkEditionTaskReferences', () => {
 });
 
 describe('loadReferenceQuestIds', () => {
+  it('ignores quest and chapter captures reached through an escaped directory alias', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const store = join(dir, 'reference');
+      const outside = join(dir, 'outside');
+      mkdirSync(store);
+      mkdirSync(outside);
+      const valid = '6895bbb0e7dac53c7c08797b';
+      const escaped = '69bbfae89ce356593c0e2f35';
+      writeFileSync(join(store, 'quest_list.json'), JSON.stringify([{ _id: valid }]));
+      writeFileSync(join(outside, 'quest_list.json'), JSON.stringify([{ _id: escaped }]));
+      writeFileSync(
+        join(outside, 'quest_getMainQuestsList.json'),
+        JSON.stringify({ chapters: [{ ChapterId: escaped }] })
+      );
+      symlinkSync(outside, join(store, 'alias'), 'junction');
+      expect(loadReferenceQuestIds(store)).toEqual(new Set([valid]));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('retains usable mode references when another mode has an invalid capture', () => {
     const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
     try {

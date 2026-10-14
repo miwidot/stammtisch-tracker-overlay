@@ -248,7 +248,7 @@ describe('story chapters (EFT-sourced)', () => {
   });
 
   it('pins the source capture that produced the committed chapters', () => {
-    // Generation is local-only (eft/ is gitignored), so the lock is the only
+    // Generation is local-only (data/reference/ is gitignored), so the lock is the only
     // thing that makes the committed output auditable: it records which capture
     // was used, not any of its field values.
     const lock = JSON.parse(readFileSync(join('scripts', 'story-reference.lock.json'), 'utf8')) as {
@@ -264,7 +264,7 @@ describe('story chapters (EFT-sourced)', () => {
       supplementalReferences?: Array<{ file: string; sha256: string; quests: number }>;
       combinedCoverage?: { quests: number; chapterQuests: number; objectiveTexts: number };
     };
-    expect(lock.file).toMatch(/^eft\/.+\.json$/);
+    expect(lock.file).toMatch(/^data\/reference\/.+\.json$/);
     expect(lock.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(lock.bytes).toBeGreaterThan(0);
     expect(lock.quests).toBeGreaterThan(0);
@@ -278,7 +278,7 @@ describe('story chapters (EFT-sourced)', () => {
     expect(lock.supplementalReferences, 'committed supplemental source pins').toHaveLength(2);
     expect(lock.combinedCoverage, 'combined source coverage').toBeDefined();
     for (const supplement of lock.supplementalReferences ?? []) {
-      expect(supplement.file).toMatch(/^eft\/.+\.json$/);
+      expect(supplement.file).toMatch(/^data\/reference\/.+\.json$/);
       expect(supplement.sha256).toMatch(/^[0-9a-f]{64}$/);
       expect(supplement.quests).toBeGreaterThan(0);
     }

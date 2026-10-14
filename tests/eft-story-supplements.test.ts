@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mergeStoryReferences, pendingLockSidecar } from '../scripts/eft-story-generate.js';
@@ -49,11 +57,11 @@ function fixture() {
   const dir = mkdtempSync(join(tmpdir(), 'story-supplements-'));
   const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
   mkdirSync(join(dir, 'scripts'));
-  mkdirSync(join(dir, 'eft'));
+  mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
   const primary = capture([chapter(TOUR, [A, C]), objective(A, B, 'Primary objective')]);
-  writeFileSync(join(dir, 'eft', 'primary.json'), primary);
+  writeFileSync(join(dir, 'data', 'reference', 'primary.json'), primary);
   writeFileSync(
-    join(dir, 'eft', 'first.json'),
+    join(dir, 'data', 'reference', 'first.json'),
     capture([
       objective(`[${C}] Annotated quest`, D, 'First supplement objective'),
       objective(`[${A}] Primary overlap`, B, 'Wrong primary replacement'),
@@ -61,7 +69,7 @@ function fixture() {
     ])
   );
   writeFileSync(
-    join(dir, 'eft', 'second.json'),
+    join(dir, 'data', 'reference', 'second.json'),
     capture(
       [
         objective(C, D, 'Wrong later replacement'),
@@ -72,11 +80,20 @@ function fixture() {
     )
   );
   const run = (
-    options: { update?: boolean; supplements?: string; stage?: boolean; publish?: boolean } = {}
+    options: {
+      update?: boolean;
+      supplements?: string;
+      stage?: boolean;
+      publish?: boolean;
+      automatic?: boolean;
+      reference?: string;
+      rejectEscapedReads?: boolean;
+    } = {}
   ) => {
     const env = { ...process.env };
     delete env.STORY_REFERENCE_SUPPLEMENTS;
-    env.STORY_REFERENCE = 'eft/primary.json';
+    if (options.automatic) delete env.STORY_REFERENCE;
+    else env.STORY_REFERENCE = options.reference ?? 'data/reference/primary.json';
     env.STORY_REFERENCE_UPDATE_LOCK = options.update ? '1' : '0';
     if (options.supplements !== undefined) env.STORY_REFERENCE_SUPPLEMENTS = options.supplements;
     return JSON.parse(
@@ -89,12 +106,28 @@ function fixture() {
           '-e',
           `import { createHash } from 'node:crypto';
            import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(generator)};
+           let escapedReads = 0;
+           ${
+             options.rejectEscapedReads
+               ? `const fs = await import('node:fs');
+                  const { syncBuiltinESMExports } = await import('node:module');
+                  const read = fs.default.readFileSync;
+                  fs.default.readFileSync = (file, ...args) => {
+                    if (String(file).includes('legacy-alias')) {
+                      escapedReads++;
+                      throw new Error('escaped capture was read');
+                    }
+                    return read(file, ...args);
+                  };
+                  syncBuiltinESMExports();`
+               : ''
+           }
            const quests = loadReference();
            const payload = JSON.stringify(quests);
            const binding = createHash('sha256').update(payload).digest('hex');
            ${options.stage || options.publish ? 'commitStoryReferenceLock(binding);' : ''}
            ${options.publish ? 'promoteStoryReferenceLock(binding);' : ''}
-           process.stdout.write(JSON.stringify({ quests, binding }));`,
+           process.stdout.write(JSON.stringify({ quests, binding, escapedReads }));`,
         ],
         { cwd: dir, env, stdio: 'pipe' }
       ).toString()
@@ -107,12 +140,47 @@ function fixture() {
     run,
     lock: () => JSON.parse(readFileSync(lockFile, 'utf8')),
     pin: () =>
-      run({ update: true, supplements: '["eft/first.json","eft/second.json"]', publish: true }),
+      run({
+        update: true,
+        supplements: '["data/reference/first.json","data/reference/second.json"]',
+        publish: true,
+      }),
     cleanup: () => rmSync(dir, { recursive: true, force: true }),
   };
 }
 
 describe('story supplemental references', { timeout: 30_000 }, () => {
+  it('auto-selects a canonical capture without reading a higher-coverage retired alias', () => {
+    const f = fixture();
+    try {
+      writeFileSync(join(f.dir, 'data', 'reference', 'quest_list.json'), f.primary);
+      mkdirSync(join(f.dir, 'eft'));
+      writeFileSync(
+        join(f.dir, 'eft', 'quest_list.json'),
+        capture([
+          chapter(TOUR, [A, C]),
+          objective(A, B, 'Outside primary'),
+          objective(C, D, 'Outside extra objective'),
+        ])
+      );
+      symlinkSync(
+        join(f.dir, 'eft'),
+        join(f.dir, 'data', 'reference', 'legacy-alias'),
+        process.platform === 'win32' ? 'junction' : 'dir'
+      );
+      const selected = f.run({
+        update: true,
+        automatic: true,
+        supplements: '[]',
+        rejectEscapedReads: true,
+      });
+      expect(selected.escapedReads).toBe(0);
+      expect(selected.quests).toEqual(JSON.parse(f.primary).response.body_response.data);
+    } finally {
+      f.cleanup();
+    }
+  });
+
   it('matches raw and annotated ids, preserves primary templates and uses manifest priority deterministically', () => {
     const primary = [chapter(TOUR, [A]), objective(A, B, 'Primary')];
     const first = [objective(`[${A}] overlap`, B, 'Wrong'), objective(`[${C}] new`, D, 'First')];
@@ -126,12 +194,44 @@ describe('story supplemental references', { timeout: 30_000 }, () => {
     expect(JSON.stringify([primary, first, second])).toBe(before);
   });
 
+  it('loads data/reference primary and supplements automatically and rejects changed bytes', () => {
+    const f = fixture();
+    try {
+      const expected = f.pin();
+      const before = readFileSync(f.lockFile, 'utf8');
+      expect(f.run({ automatic: true })).toEqual(expected);
+      expect(readFileSync(f.lockFile, 'utf8')).toBe(before);
+      const supplement = join(f.dir, 'data', 'reference', 'first.json');
+      writeFileSync(supplement, `${readFileSync(supplement, 'utf8')}\n`);
+      expect(() => f.run({ automatic: true })).toThrow(/does not match/);
+      expect(readFileSync(f.lockFile, 'utf8')).toBe(before);
+    } finally {
+      rmSync(f.dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects an explicit retired eft source even when its bytes match the pin', () => {
+    const f = fixture();
+    try {
+      f.pin();
+      const before = readFileSync(f.lockFile, 'utf8');
+      mkdirSync(join(f.dir, 'eft'));
+      writeFileSync(join(f.dir, 'eft', 'primary.json'), f.primary);
+      expect(() => f.run({ reference: 'eft/primary.json' })).toThrow(
+        /source must be a capture under the project data\/reference/
+      );
+      expect(readFileSync(f.lockFile, 'utf8')).toBe(before);
+    } finally {
+      f.cleanup();
+    }
+  });
+
   it('pins each source separately, stages full combined coverage and regenerates from locked supplements', () => {
     const f = fixture();
     try {
       const staged = f.run({
         update: true,
-        supplements: '["eft/first.json","eft/second.json"]',
+        supplements: '["data/reference/first.json","data/reference/second.json"]',
         stage: true,
       });
       expect(existsSync(f.lockFile)).toBe(false);
@@ -148,14 +248,14 @@ describe('story supplemental references', { timeout: 30_000 }, () => {
         objectiveTexts: 1,
         supplementalReferences: [
           {
-            file: 'eft/first.json',
+            file: 'data/reference/first.json',
             quests: 3,
             gameMode: 'pve',
             chapterQuests: 1,
             objectiveTexts: 1,
           },
           {
-            file: 'eft/second.json',
+            file: 'data/reference/second.json',
             quests: 3,
             gameMode: 'regular',
             chapterQuests: 1,
@@ -178,7 +278,7 @@ describe('story supplemental references', { timeout: 30_000 }, () => {
     try {
       f.pin();
       const committed = readFileSync(f.lockFile, 'utf8');
-      const selected = join(f.dir, 'eft', 'first.json');
+      const selected = join(f.dir, 'data', 'reference', 'first.json');
       writeFileSync(selected, `${readFileSync(selected, 'utf8')}\n`);
       expect(() => f.run()).toThrow(/does not match/);
       expect(() => f.run({ update: true })).toThrow(/does not match/);
@@ -196,7 +296,7 @@ describe('story supplemental references', { timeout: 30_000 }, () => {
       const f = fixture();
       try {
         writeFileSync(
-          join(f.dir, 'eft', 'first.json'),
+          join(f.dir, 'data', 'reference', 'first.json'),
           capture([objective(C, D, 'New objective')], mode)
         );
         expect(() => f.pin()).toThrow(/shared between regular and pve/);

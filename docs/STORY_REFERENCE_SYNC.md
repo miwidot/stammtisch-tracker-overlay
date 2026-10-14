@@ -97,7 +97,9 @@ captures can corroborate overlapping data but cannot define shared-mode content.
 `scripts/story-reference.lock.json` records the primary capture's original hash
 and coverage, each supplemental capture's hash and provenance, and
 `combinedCoverage` for the merged quest templates. Capture inputs stay under the
-gitignored `eft/` directory. The generation sidecar binds the entire lock to the
+gitignored `data/reference/` directory. Derived outputs remain in `data/eft/`.
+Top-level `eft/` is retired and is never used as a fallback.
+The generation sidecar binds the entire lock to the
 exact emitted payload before the writer can publish it.
 
 To add or replace supplements in PowerShell 7.4 or newer (required for
@@ -105,8 +107,8 @@ byte-preserving native-command redirection):
 
 ```powershell
 $env:STORY_REFERENCE_UPDATE_LOCK = '1'
-$env:STORY_REFERENCE = 'eft/quest_list.rollinglatest.modified.json'
-$env:STORY_REFERENCE_SUPPLEMENTS = '["eft/story-supplements/pve.quest_list.json","eft/story-supplements/regular.quest_list.json"]'
+$env:STORY_REFERENCE = 'data/reference/quest_list.rollinglatest.modified.json'
+$env:STORY_REFERENCE_SUPPLEMENTS = '["data/reference/story-supplements/pve.quest_list.json","data/reference/story-supplements/regular.quest_list.json"]'
 node --import tsx scripts/eft-story-wiki.ts
 node --import tsx scripts/eft-story-generate.ts > data/eft/story-final.json
 if ($LASTEXITCODE -ne 0) { throw 'Story generation failed' }
@@ -115,7 +117,7 @@ Remove-Item Env:STORY_REFERENCE_UPDATE_LOCK, Env:STORY_REFERENCE, Env:STORY_REFE
 ```
 
 Keep the primary capture at the existing locked path, or explicitly select it
-with `STORY_REFERENCE` when re-pinning. Without an explicit primary selection,
+within `data/reference/` with `STORY_REFERENCE` when re-pinning. Without an explicit primary selection,
 re-pinning uses the generator's coverage ranking. Passing `[]` as the supplement
 list explicitly clears the supplements. Normal regeneration uses the complete
 committed manifest and refuses missing or hash-mismatched inputs.

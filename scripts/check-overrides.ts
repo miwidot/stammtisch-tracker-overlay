@@ -38,6 +38,11 @@
  */
 
 import {
+  referenceDirectory,
+  resolveReferenceDirectory,
+  resolveReferenceFile,
+} from './local-reference.js';
+import {
   compareOverlayFields,
   type OverlayComparisonDetail,
 } from '../src/lib/overlay-comparison.cjs';
@@ -844,7 +849,7 @@ function printReferenceModeCoverage(
 
 export function printReferenceCrossCheck(
   groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>,
-  eftDir = join(rootDir, 'eft')
+  eftDir = resolveReferenceDirectory(referenceDirectory(rootDir), rootDir)
 ): number {
   const eftTasks = loadEftTasks(eftDir);
   if (!eftTasks) {
@@ -1189,7 +1194,9 @@ function printStoryChapterIssues(
   );
   if (!questRefsChecked) {
     console.log(
-      dim('  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)')
+      dim(
+        '  (no data/reference/ reference available: quest-ID resolution skipped, internal consistency only)'
+      )
     );
   }
   console.log();
@@ -1221,7 +1228,8 @@ function* readReferenceCaptures(eftDir: string, files: string[], pattern: RegExp
   for (const file of files) {
     if (!pattern.test(file)) continue;
     try {
-      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
+      const capture = resolveReferenceFile(file, eftDir);
+      const raw = JSON.parse(readFileSync(capture, 'utf-8'));
       yield { raw, envelope: raw?.response?.body_response ?? raw?.response?.decoded_response };
     } catch {
       // Unusable optional captures do not invalidate definitions in other files.
@@ -1265,11 +1273,11 @@ function loadReferenceTaskIds(eftDir: string, files: string[]): string[] {
  *
  * This checks provenance, not current unlock values.
  */
-export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string> | null {
-  if (!existsSync(eftDir)) return null;
-
+export function loadReferenceQuestIds(eftDir?: string): Set<string> | null {
   let files: string[];
   try {
+    eftDir ??= resolveReferenceDirectory(referenceDirectory(rootDir), rootDir);
+    if (!existsSync(eftDir)) return null;
     files = readdirSync(eftDir, { recursive: true }).map(String);
   } catch {
     return null; // Optional references may be unreadable or disappear during a run.

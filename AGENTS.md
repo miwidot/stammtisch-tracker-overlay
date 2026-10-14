@@ -24,7 +24,7 @@ back; that is the normal feedback loop, not a failure.
 
 ## Project Structure & Module Organization
 
-`src/overrides/` holds JSON5 corrections keyed by tarkov.dev IDs, while `src/additions/` contains new data types (for example game editions). `src/schemas/` stores JSON Schemas, and `src/lib/` houses shared TypeScript utilities used by scripts in `scripts/`. Built output lands in `dist/overlay.json`. Tests live in `tests/`, with docs in `docs/`. The `data/` directory is used for local cache/results from validation tooling.
+`src/overrides/` holds JSON5 corrections keyed by tarkov.dev IDs, while `src/additions/` contains new data types (for example game editions). `src/schemas/` stores JSON Schemas, and `src/lib/` houses shared TypeScript utilities used by scripts in `scripts/`. Built output lands in `dist/overlay.json`. Tests live in `tests/`, with docs in `docs/`. The gitignored `data/` directory holds local references, historical evidence, caches, and validation results; see `docs/LOCAL_DATA.md`.
 
 ## Architecture
 
@@ -87,13 +87,13 @@ keyed by BSG perk id. Keep metadata upstream and omit empty or stub effects.
 The `eft:*` scripts cross-check the overlay against a local quest reference -
 values verified in-game and kept out of the repo - which is the authority for
 numeric quest fields (experience, minPlayerLevel, objective counts). The
-reference lives in `eft/` and all derived output in `data/` — both gitignored.
-Versioned captures go in subdirectories (`eft/eft-1.1-pve/`); `findReferenceFile`
+reference lives only in `data/reference/` and all derived output in `data/` — gitignored. Top-level `eft/` is retired; there is no fallback to it. The nested `data/eft/` directory remains the output location for the `eft:*` tools.
+Versioned captures go in subdirectories (`data/reference/<capture>/`); `findReferenceFile`
 scans recursively and auto-detects the most recently captured `quest_list`
 reference, so a fresh dump supersedes an older one without touching the tooling
 call sites (pass an explicit `eftDir` to pin a specific capture).
 Keep the raw reference (captures, dumps) and the tools' field-by-field diff
-output out of the repo; they stay in the gitignored `eft/` and `data/`. Captures
+output out of the repo; they stay in the gitignored `data/`. Captures
 and dumps are provided anonymously and privately to update the data — naming
 that a value comes from an in-game capture or dump is fine. Beyond that,
 capture evidence may be referenced openly: comments, PR and issue text, and
@@ -179,7 +179,7 @@ capture generically instead (for example "a 1.1 PvE capture").
   hash no longer matches, and `STORY_REFERENCE_UPDATE_LOCK=1` is the only way to
   re-pin, so switching source captures always lands as a reviewable lock diff
   next to the regenerated data. `STORY_REFERENCE=<file>` only relaxes the _path_
-  (a moved or renamed copy of the pinned capture); its hash must still match, so
+  (a moved or renamed copy within `data/reference/`); its hash must still match, so
   it cannot swap in a different capture. The generator stages a sidecar binding
   the capture to the exact payload it emits, and `eft-story-write.ts` refuses to
   replace the artifact without one - so an edited or unrelated

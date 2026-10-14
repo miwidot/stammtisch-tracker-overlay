@@ -22,7 +22,7 @@ import { pendingLockSidecar } from '../scripts/eft-story-generate.js';
 
 const writer = fileURLToPath(new URL('../scripts/eft-story-write.ts', import.meta.url));
 const PREVIOUS_ARTIFACT = '{ /* previous artifact */ }\n';
-const PREVIOUS_LOCK = '{ "file": "eft/original.json" }\n';
+const PREVIOUS_LOCK = '{ "file": "data/reference/original.json" }\n';
 const PAYLOAD = '{}'; // Empty maps are schema-valid; these tests concern publication only.
 
 /** Committed artifact + provenance, a generator input, and its matching staged binding. */
@@ -45,7 +45,7 @@ function setupWorkspace(prefix: string) {
   writeFileSync(input, PAYLOAD);
   const pending = JSON.stringify({
     lock: {
-      file: 'eft/new.json',
+      file: 'data/reference/new.json',
       sha256: 'b'.repeat(64),
       bytes: 100,
       clientVersion: 'test',
@@ -584,7 +584,7 @@ describe('story artifact and provenance write failures', () => {
 
   it('retains the publication and snapshot when the provenance pin changed', () => {
     const { dir, artifact, lock, input } = setupWorkspace('story-changed-pin-');
-    const foreignPin = '{ "file": "eft/foreign.json" }\n';
+    const foreignPin = '{ "file": "data/reference/foreign.json" }\n';
     try {
       expect(() =>
         runWriter(

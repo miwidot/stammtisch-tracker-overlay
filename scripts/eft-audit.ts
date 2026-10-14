@@ -33,7 +33,7 @@
  * (src/overrides/tasks.json5) are merged with the mode file the same way the
  * built overlay applies them (mode wins per field).
  *
- * LOCAL-ONLY: requires a reference file in eft/ (gitignored). No-ops cleanly if absent.
+ * LOCAL-ONLY: requires a reference file in data/reference/ (gitignored). Fails with a setup hint if absent.
  *
  * Usage:
  *   tsx scripts/eft-audit.ts [eftDir] [--mode pve|regular] [--json out.json]
@@ -391,7 +391,7 @@ async function main(): Promise<void> {
     printProgress(`Loading quest reference file from ${opts.eftDir}...`);
     const { tasks: eftTasks, refMode } = loadReferenceTasks(
       opts,
-      'Place a quest reference file in eft/ to run the audit.'
+      'Place a quest reference file in data/reference/ to run the audit.'
     );
     printSuccess(`Loaded ${eftTasks.size} quests from the reference file`);
 
