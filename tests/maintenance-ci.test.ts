@@ -87,7 +87,7 @@ describe('maintenance category accounting', () => {
   it.each([
     ['src/lib/tool.ts', 'source'],
     ['scripts/tool.cjs', 'source'],
-    ['monitor/public/app.js', 'source'],
+    ['scripts/next-overlay-tag.cjs', 'source'],
     ['src/schemas/task.schema.json', 'schemas'],
     ['tests/fixture.json', 'tests'],
     ['src/additions/tasksAdd.json5', 'data'],

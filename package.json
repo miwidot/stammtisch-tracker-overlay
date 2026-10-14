@@ -16,8 +16,6 @@
     "eft:story": "mkdir -p data/eft && tsx scripts/eft-story-wiki.ts && tsx scripts/eft-story-generate.ts > data/eft/story-final.json && tsx scripts/eft-story-write.ts",
     "tasks:availability": "tsx scripts/task-availability.ts",
     "wiki:compare": "tsx scripts/wiki-compare.ts",
-    "monitor": "node monitor/server.js",
-    "check:monitor": "node --check monitor/server.js && node --check monitor/lib/tarkov-api.js && node --check monitor/lib/tarkov-transport.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
     "audit:dependencies": "node scripts/audit-dependencies.cjs",
     "fallow:check": "fallow dead-code",
     "fallow:dupes": "fallow dupes",

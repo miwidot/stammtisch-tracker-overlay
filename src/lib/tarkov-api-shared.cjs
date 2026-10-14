@@ -4,9 +4,9 @@ const { createHash } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 
 /**
- * Helpers shared by the TypeScript API client and the standalone CommonJS
- * monitor. Keep the module limited to built-in/runtime APIs so both runtimes
- * can consume it without a build step.
+ * Helpers shared by the TypeScript data tooling and CommonJS release scripts.
+ * Keep the module limited to built-in/runtime APIs so callers can consume it
+ * without a build step.
  */
 
 const DEFAULT_MAX_RESPONSE_BYTES = 32 * 1024 * 1024;

@@ -124,8 +124,8 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Check monitor JavaScript
-        run: npm run check:monitor
+      - name: Check shared data JavaScript
+        run: node --check src/lib/tarkov-api-shared.cjs
 
       - name: Validate source files
         run: npm run validate

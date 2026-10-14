@@ -208,8 +208,8 @@ Fix fallow findings at their root whenever the code can be safely consolidated, 
 
 `npm run fallow:security` reports candidates rather than confirmed vulnerabilities and
 exits 0; CI checks only newly introduced ones (`--gate new --changed-since <base>`), and
-because `main` is not branch-protected a red result reports rather than blocks. The 30
-candidates standing on `main` were triaged and are all tool false positives. Re-check a
+because `main` is not branch-protected a red result reports rather than blocks. The remaining
+candidates were triaged and are all tool false positives. Re-check a
 category only if the guard named below stops holding, and prefer fixing a guard over
 suppressing an item:
 
@@ -228,17 +228,9 @@ suppressing an item:
   interpolation is wrapped in `escapeRegExp`, so wiki text cannot inject metacharacters.
   The two that are not (`normalize.ts` around the count-word replacements) interpolate
   module-local word lists, not input.
-- **SSRF** (`monitor/lib/tarkov-transport.js`, `src/lib/tarkov-api.ts`,
-  `monitor/public/app.js`). Both server-side calls append to a hardcoded
-  `https://json.tarkov.dev` base, so callers cannot select the requested host. The
-  monitor transport also restricts paths to `endpoints` or safe-mode
-  task/item/map/trader/hideout endpoints and their translations. Its isolated
-  `security-sink` suppression is an independently reviewed tool false positive;
-  keep that file limited to this guarded transport policy. The request-derived
-  mode segment passes `normalizeMode` (allowlist with fallback) plus `isSafeModeName`
-  (`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`, no separators). Native fetch redirects retain
-  the upstream service's existing behavior. The third is a same-origin `fetch`
-  in browser code.
+- **SSRF** (`src/lib/tarkov-api.ts`). Server-side calls append to a hardcoded
+  `https://json.tarkov.dev` base, so callers cannot select the requested host.
+  Native fetch redirects retain the upstream service's existing behavior.
 
 CodeQL alerts dismissed as false positives should state the reason that actually holds. For
 wiki-derived text the operative reason is that `eft-story-generate.ts` consumes the scraped

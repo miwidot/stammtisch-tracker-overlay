@@ -26,11 +26,6 @@ tooling that maintainers run locally or in CI.
 - **Build and validation pipeline** (`scripts/build.ts`, `scripts/validate.ts`, `src/lib/`):
   anything that lets untrusted input corrupt the published overlay, bypass schema
   validation, or forge the `$meta.sha256` digest.
-- **Local monitor** (`monitor/`): it binds `127.0.0.1` by default and its rebuild action
-  requires an explicit `REBUILD_TOKEN` bearer token. Auth bypass, a rebuild triggered
-  without a valid token, or a path that escapes the intended output file are in scope.
-  See the Monitor section of [README.md](README.md) for the intended model, including the
-  `TRUSTED_HTTPS_PROXY` requirement when `HOST` is not loopback.
 - **Supply chain**: a dependency advisory that `npm run audit:dependencies` does not
   catch, or a way to influence what CI installs.
 - **Overlay data integrity**: a route by which unreviewed third-party content reaches a
