@@ -11,10 +11,10 @@ permissions:
 
 jobs:
   windows-validation:
-    name: Windows validation (CRLF checkout)
+    name: Windows validation (LF checkout)
     runs-on: windows-latest
     steps:
-      - name: Exercise a CRLF checkout
+      - name: Exercise Windows automatic line endings
         run: git config --global core.autocrlf true
 
       - name: Checkout
@@ -32,8 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify CRLF coverage
-        run: node -e "if (!require('node:fs').readFileSync('docs/MASTER_SAMPLES.md', 'utf8').includes('\r\n')) throw new Error('Expected a CRLF checkout')"
+      - name: Verify LF checkout policy
+        run: node -e "const text = require('node:fs').readFileSync('docs/MASTER_SAMPLES.md', 'utf8'); if (!text.includes('\n') || text.includes('\r')) throw new Error('Expected an LF checkout despite core.autocrlf=true')"
+
+      - name: Check formatting on Windows
+        run: npm run format:check
 
       - name: Audit dependencies
         run: npm run audit:dependencies
