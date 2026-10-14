@@ -198,7 +198,7 @@ describe('story chapters (EFT-sourced)', () => {
     const schema = JSON5.parse(
       readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8')
     ) as object;
-    const ajv = new Ajv({ allErrors: true, strict: false });
+    const ajv = new Ajv({ allErrors: true, strict: false, strictTypes: true });
     const validate = ajv.compile(schema);
 
     const chapter = (coverage: Record<string, unknown>) => ({
