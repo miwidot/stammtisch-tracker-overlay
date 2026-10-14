@@ -68,6 +68,14 @@ progress. The shipped mappings are best effort (see
 derive values and 4 stay unresolved. See [global variables and progression counters](GLOBAL_VARIABLES.md)
 for the data contract, evidence requirements, and safe backward-inference boundary.
 
+A task consuming a group gate is not automatically a contributor. Matching
+aggregate totals or tier reward signatures alone cannot distinguish shared slots,
+faction-specific credit, and migration omissions. The
+[current-source cross-check](GLOBAL_VARIABLE_MECHANICS.md#cross-check-against-current-wiki-and-api-data)
+records which proposed explanations are supported or contradicted. The four
+unresolved mappings still need explicit resolved account values; this docs audit
+does not enable new derivations.
+
 The helpers are source-level exports, not a published npm runtime package. Consumers
 must update their vendored/workspace source to use this entry point. Existing callers
 of `deriveTaskUnlockDefinition` and `evaluateTaskUnlock` can continue using them.

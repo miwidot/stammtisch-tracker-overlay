@@ -10,9 +10,8 @@ flags or stage values. Group membership alone does not establish how tasks
 contribute, how values aggregate, or whether they reset. Trader loyalty is a
 separate condition. Do not infer an additional loyalty gate from cohort metadata.
 
-For the underlying mechanism — how a target resolves to a group or a scalar, what
-the counters were observed to represent, and the open questions that keep those
-observations the registry's pools are based on — see
+For target resolution, the observations behind the registry pools, and the
+remaining uncertainties, see
 [`GlobalVariableValue` task gates](GLOBAL_VARIABLE_MECHANICS.md).
 
 ## What ships today
@@ -26,17 +25,26 @@ to its pool (248 tasks). It is best effort, under the standard in
   pool tasks, and no capture contradicts the pool.
 - **4 groups are `unresolved`/`partial`:** Mechanic tier 3 and 4, Prapor tier 4 and
   Ragman tier 1. Their counter reads below the completed pool count in at least one
-  profile, so counting the pool would unlock tasks too early. See
+  profile, so counting the pool can clear a threshold too early. See
   [Caveats](GLOBAL_VARIABLE_MECHANICS.md#caveats).
 
-The `regular`, `pve` and `pvp-season` blocks are identical because the modes share
-one variable-group catalogue: the `variable_group` payload is identical in the
-PVE, PvP and seasonal captures, and tarkov.dev serves the same 164 gates over the
-same 27 variables in each mode, with every pool task present in each mode's task
-list. Pool membership itself was observed only as far as each capture reaches:
+The `regular`, `pve` and `pvp-season` blocks use the same catalogue as a best-effort
+cross-mode mapping: the `variable_group` payload is identical in the
+PVE, PvP and seasonal captures. The 2026-10-14 live check serves the same 168 gates
+over the same 27 variables in each mode, with every pool task present in each
+mode's task list. Pool membership was observed only as far as each capture reaches:
 the PVE capture contains all 248 pool tasks, the PvP capture 226 and the seasonal
-capture 12, and every observed task sits in the same trader tier as in PVE. The
-rest of the PvP and seasonal membership rests on the shared catalogue.
+capture 12, and every observed task sits in the same trader tier as in PVE.
+Unobserved PvP and seasonal pool membership is extrapolated from the matching
+catalogues, not independently verified by them.
+
+These are consumers, not contributor counts: 158 live gates are on the 248
+registry-pool tasks, and 10 are outside the pools. The earlier 164 count was an
+API snapshot and must not be used to infer membership. Current wiki faction
+requirements support the Mechanic tier-3 paired-count hypothesis, but do not
+identify shared writers; reward-based exclusions and the claimed Ragman quest
+chain conflict with capture/API data. See the
+[current-source cross-check](GLOBAL_VARIABLE_MECHANICS.md#cross-check-against-current-wiki-and-api-data).
 
 Existing `otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
 not use the registry can continue their current integration.
