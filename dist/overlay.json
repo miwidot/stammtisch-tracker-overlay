@@ -732,7 +732,6 @@
       "experience": 3000
     },
     "639dbaf17c898a131e1cffff": {
-      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2",
@@ -1357,7 +1356,6 @@
       ]
     },
     "5967725e86f774601a446662": {
-      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5967725e86f774601a446662.54cb50c76803fa8b248b4571.level.>=.1",
@@ -1611,7 +1609,6 @@
       ]
     },
     "59c124d686f774189b3c843f": {
-      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1",
@@ -2104,7 +2101,6 @@
       ]
     },
     "5b478eca86f7744642012254": {
-      "factionName": "BEAR",
       "neededKeys": [],
       "objectives": {
         "5b478f6886f774464201225a": {
@@ -2163,7 +2159,6 @@
       ]
     },
     "5b478ff486f7744d184ecbbf": {
-      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2",
@@ -2905,7 +2900,6 @@
       ]
     },
     "639135c3744e452011470807": {
-      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2",
@@ -3452,18 +3446,6 @@
           ]
         }
       ]
-    },
-    "639136df4b15ca31f76bc31f": {
-      "factionName": "BEAR"
-    },
-    "6a45208043b8d7604d00b8d5": {
-      "factionName": "USEC"
-    },
-    "5ac244eb86f7741356335af1": {
-      "factionName": "USEC"
-    },
-    "5ae3270f86f77445ba41d4dd": {
-      "factionName": "BEAR"
     },
     "67af4c1cc0e59d55e2010b97": {
       "factionName": "BEAR"
@@ -12046,8 +12028,8 @@
     }
   },
   "$meta": {
-    "version": "1.154",
-    "generated": "2026-10-18T07:34:01.276Z",
-    "sha256": "db35d2a0ad766a3b85419c5b613ae6e06160436f36c9d569b047839d9ae69c2b"
+    "version": "1.155",
+    "generated": "2026-10-19T05:41:32.151Z",
+    "sha256": "c231feb6a4b0f65a4d80846d0aa0b06dd6e90e1353b927710694fdbfd037d6f7"
   }
 }
