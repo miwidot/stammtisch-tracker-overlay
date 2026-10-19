@@ -286,6 +286,17 @@
           },
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_in_the_name_of_humanity",
+                "name": "In the Name of Humanity..."
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_for_the_good_of_the_chosen_obj01",
@@ -307,6 +318,17 @@
           "experience": 30000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_desperate_assault",
+                "name": "Desperate Assault"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_break_the_chain_obj01",
@@ -367,6 +389,17 @@
           "experience": 11000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_uninvited_guests_part_2",
+                "name": "Uninvited Guests - Part 2"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_cast_the_net_obj01",
@@ -506,6 +539,18 @@
           "experience": 35000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_final_stretch",
+                "name": "Final Stretch"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_consequences_of_our_decisions_obj01",
@@ -542,6 +587,17 @@
           "experience": 30000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_final_stretch",
+                "name": "Final Stretch"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_desperate_assault_obj01",
@@ -572,6 +628,17 @@
           "experience": 35000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_break_the_chain",
+                "name": "Break the Chain"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_digital_puzzle_obj01",
@@ -605,6 +672,17 @@
           "experience": 35000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_sheep_in_wolf_s_clothing",
+                "name": "Sheep in Wolf's Clothing"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_final_stretch_obj01",
@@ -641,6 +719,17 @@
           "experience": 30000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_what_s_in_the_bag",
+                "name": "What's in the Bag?"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_forbidden_knowledge_obj01",
@@ -681,6 +770,17 @@
           "experience": 100000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_for_the_good_of_the_chosen",
+                "name": "...for the Good of the Chosen"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_historical_prospects_obj01",
@@ -778,6 +878,17 @@
           "experience": 70000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_price_for_information",
+                "name": "Price for Information"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_in_the_name_of_humanity_obj01",
@@ -914,6 +1025,17 @@
           "kappaRequired": false,
           "factionName": "Any",
           "minPlayerLevel": 20,
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_reverse_gear",
+                "name": "Reverse Gear"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_key_to_understanding_obj01",
@@ -960,6 +1082,17 @@
           "experience": 11000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_cast_the_net",
+                "name": "Cast the Net"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_know_your_enemy_obj01",
@@ -983,6 +1116,17 @@
           "experience": 65000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_digital_puzzle",
+                "name": "Digital Puzzle"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_price_for_information_obj01",
@@ -1204,6 +1348,17 @@
           "experience": 30000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_reverse_gear",
+                "name": "Reverse Gear"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_riding_the_wave_obj01",
@@ -1370,6 +1525,17 @@
           "experience": 30000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_forbidden_knowledge",
+                "name": "Forbidden Knowledge"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_sheep_in_wolf_s_clothing_obj01",
@@ -1431,6 +1597,18 @@
           "experience": 30000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_desperate_assault",
+                "name": "Desperate Assault"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_stay_clear_of_blast_zone_obj01",
@@ -1510,6 +1688,18 @@
           "experience": 11000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_uninvited_guests_part_1",
+                "name": "Uninvited Guests - Part 1"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_unanswered_calls_obj01",
@@ -1548,6 +1738,18 @@
           "experience": 6000,
           "kappaRequired": false,
           "factionName": "Any",
+          "traderRequirements": [
+            {
+              "id": "overlay.placeholder_uninvited_guests_part_1.54cb50c76803fa8b248b4571.level.>=.2",
+              "requirementType": "level",
+              "compareMethod": ">=",
+              "value": 2,
+              "trader": {
+                "id": "54cb50c76803fa8b248b4571",
+                "name": "Prapor"
+              }
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_uninvited_guests_part_1_obj01",
@@ -1607,6 +1809,18 @@
           "experience": 5000,
           "kappaRequired": false,
           "factionName": "Any",
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_uninvited_guests_part_1",
+                "name": "Uninvited Guests - Part 1"
+              },
+              "status": [
+                "active",
+                "complete"
+              ]
+            }
+          ],
           "objectives": [
             {
               "id": "placeholder_uninvited_guests_part_2_obj01",
@@ -15011,6 +15225,17 @@
       "experience": 30000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_honest_review",
+            "name": "Honest Review"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_i_m_something_of_a_btr_myself_obj01",
@@ -15164,6 +15389,17 @@
       "experience": 25000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_a_time_to_throw_stones",
+            "name": "To the Light - A Time to Throw Stones"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_a_time_to_gather_stones_obj01",
@@ -15191,6 +15427,17 @@
       "experience": 55000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_bite_the_dust",
+            "name": "To the Light - Bite the Dust"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_a_time_to_throw_stones_obj01",
@@ -15221,6 +15468,17 @@
       "experience": 10000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_fallen_bird",
+            "name": "To the Light - Fallen Bird"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_bite_the_dust_obj01",
@@ -15385,6 +15643,17 @@
       "experience": 10000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_fallen_bird",
+            "name": "To the Light - Fallen Bird"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_dangerous_ambitions_obj01",
@@ -15408,6 +15677,17 @@
       "experience": 10000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_clip_their_wings",
+            "name": "To the Light - Clip Their Wings"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_fallen_bird_obj01",
@@ -15525,6 +15805,17 @@
       "experience": 10000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_false_call",
+            "name": "To the Light - False Call"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_someone_called_obj01",
@@ -15546,6 +15837,17 @@
       "experience": 65000,
       "kappaRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_a_time_to_gather_stones",
+            "name": "To the Light - A Time to Gather Stones"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
       "objectives": [
         {
           "id": "placeholder_to_the_light_the_other_side_obj01",
@@ -15625,6 +15927,68 @@
       "experience": 35000,
       "kappaRequired": false,
       "factionName": "Any",
+      "traderRequirements": [
+        {
+          "id": "overlay.placeholder_to_the_light_trust_but_verify.54cb57776803fa99248b456e.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 3,
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          }
+        },
+        {
+          "id": "overlay.placeholder_to_the_light_trust_but_verify.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 3,
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          }
+        },
+        {
+          "id": "overlay.placeholder_to_the_light_trust_but_verify.5935c25fb3acc3127c3d8cd9.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 3,
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          }
+        },
+        {
+          "id": "overlay.placeholder_to_the_light_trust_but_verify.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 3,
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          }
+        },
+        {
+          "id": "overlay.placeholder_to_the_light_trust_but_verify.5ac3b934156ae10c4430e83c.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 3,
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          }
+        },
+        {
+          "id": "overlay.placeholder_to_the_light_trust_but_verify.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 3,
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          }
+        }
+      ],
       "otherRequirements": [
         {
           "id": "placeholder_to_the_light_trust_but_verify_req_dialogue",
@@ -16554,8 +16918,8 @@
     }
   },
   "$meta": {
-    "version": "1.159",
-    "generated": "2026-10-19T06:37:17.102Z",
-    "sha256": "38570a65a82b93a663d82d63954dda2c9778fdc73a6c6dccef1de1b1c2728e5f"
+    "version": "1.160",
+    "generated": "2026-10-19T07:36:00.154Z",
+    "sha256": "4590fd2e5d9312e3f4189ad81a6d1ff6f81d44751c821fd3b6e4cef3aea01bbd"
   }
 }
