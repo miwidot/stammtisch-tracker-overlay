@@ -645,7 +645,8 @@
   // 6391d914...) just "Make Amends" and they share objective IDs; the
   // "(after <task>)" suffix is an overlay label so each ID keeps a unique name.
   // The other ten "To the Light - ..." quests (Trust but Verify through The Other
-  // Side) are not added: no source exposes their task or objective IDs yet.
+  // Side) have no known task or objective IDs; they are added below as
+  // placeholders (see the placeholder block at the end of this file).
 
   // To the Light - Getting Acquainted
   // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted
@@ -2966,5 +2967,786 @@
         },
       ],
     },
+  },
+
+  // Placeholder tasks (all modes): quests the wiki
+  // documents but no source exposes BSG task/objective IDs for yet. IDs are
+  // synthetic and identity-based: task 'placeholder_<wiki title slug>',
+  // objectives '<taskId>_objNN' in wiki order, so they never collide with 24-hex
+  // BSG IDs. Every placeholder is tracked in
+  // https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/507; when a
+  // real ID is known, replace the entry, record the placeholder -> real mapping
+  // there and migrate stored progress (plan in the issue). Definitions come from
+  // each linked wiki page. Map, item and trader references use real IDs.
+  //
+  // Only explicit "Unlocks N-M after completion of X" Requirements lines become
+  // taskRequirements; infobox `previous` chains are not proof (AGENTS.md), so
+  // most placeholders appear available. Loyalty-level gates are omitted too:
+  // trader requirement IDs must embed a 24-hex task ID. The issue lists the
+  // wiki chain and LL gates per task.
+
+  // Honest Review
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Honest_Review
+  placeholder_honest_review: {
+    id: 'placeholder_honest_review',
+    name: 'Honest Review',
+    normalizedName: 'honest-review',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Honest_Review',
+    trader: {
+      id: '656f0f98d80a697f855d34b1',
+      name: 'BTR Driver',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    experience: 15000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_honest_review_obj01',
+        description: 'Scout the intersection at the village on Lighthouse',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_honest_review_obj02',
+        description: 'Scout the UN checkpoint at the main road on Lighthouse',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_honest_review_obj03',
+        description: 'Scout the parking between the two main buildings at the water treatment plant on Lighthouse',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_honest_review_obj04',
+        description: 'Share your feedback with the BTR Driver',
+        optional: false,
+      },
+    ],
+  },
+
+  // I'm Something of a BTR Myself
+  // Proof: https://escapefromtarkov.fandom.com/wiki/I'm_Something_of_a_BTR_Myself
+  placeholder_i_m_something_of_a_btr_myself: {
+    id: 'placeholder_i_m_something_of_a_btr_myself',
+    name: "I'm Something of a BTR Myself",
+    normalizedName: 'i-m-something-of-a-btr-myself',
+    wikiLink: "https://escapefromtarkov.fandom.com/wiki/I'm_Something_of_a_BTR_Myself",
+    trader: {
+      id: '656f0f98d80a697f855d34b1',
+      name: 'BTR Driver',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_i_m_something_of_a_btr_myself_obj01',
+        description: 'Eliminate 15 Scavs with any 7.62x54R caliber weapon on Lighthouse',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 15,
+      },
+      {
+        id: 'placeholder_i_m_something_of_a_btr_myself_obj02',
+        description: 'Report back to the BTR Driver',
+        optional: false,
+      },
+    ],
+  },
+
+  // Pay the Fare!
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pay_the_Fare!
+  placeholder_pay_the_fare: {
+    id: 'placeholder_pay_the_fare',
+    name: 'Pay the Fare!',
+    normalizedName: 'pay-the-fare',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Pay_the_Fare!',
+    trader: {
+      id: '5ac3b934156ae10c4430e83c',
+      name: 'Ragman',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    otherRequirements: [
+      {
+        id: 'placeholder_pay_the_fare_req_dialogue',
+        type: 'dialogue',
+        traders: [
+          {
+            id: '5a7c2eca46aef81a7ca2145d',
+            name: 'Mechanic',
+          },
+        ],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_pay_the_fare_obj01',
+        description: 'Find the item in raid: Pipe grip wrench',
+        type: 'findItem',
+        items: [
+          {
+            id: '619cbfccbedcde2f5b3f7bdd',
+            name: 'Pipe grip wrench',
+            shortName: 'PGW',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_pay_the_fare_obj02',
+        description: 'Hand over the item',
+        type: 'giveItem',
+        items: [
+          {
+            id: '619cbfccbedcde2f5b3f7bdd',
+            name: 'Pipe grip wrench',
+            shortName: 'PGW',
+          },
+        ],
+        optional: false,
+        count: 1,
+        foundInRaid: true,
+      },
+      {
+        id: 'placeholder_pay_the_fare_obj03',
+        description: 'Find the item in raid: Ratchet wrench',
+        type: 'findItem',
+        items: [
+          {
+            id: '60391afc25aff57af81f7085',
+            name: 'Ratchet wrench',
+            shortName: 'Ratchet',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_pay_the_fare_obj04',
+        description: 'Hand over the item',
+        type: 'giveItem',
+        items: [
+          {
+            id: '60391afc25aff57af81f7085',
+            name: 'Ratchet wrench',
+            shortName: 'Ratchet',
+          },
+        ],
+        optional: false,
+        count: 1,
+        foundInRaid: true,
+      },
+      {
+        id: 'placeholder_pay_the_fare_obj05',
+        description: 'Find the item in raid: Electric drill',
+        type: 'findItem',
+        items: [
+          {
+            id: '59e35de086f7741778269d84',
+            name: 'Electric drill',
+            shortName: 'Drill',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_pay_the_fare_obj06',
+        description: 'Hand over the item',
+        type: 'giveItem',
+        items: [
+          {
+            id: '59e35de086f7741778269d84',
+            name: 'Electric drill',
+            shortName: 'Drill',
+          },
+        ],
+        optional: false,
+        count: 1,
+        foundInRaid: true,
+      },
+    ],
+  },
+
+  // To the Light - A Time to Gather Stones
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Gather_Stones
+  placeholder_to_the_light_a_time_to_gather_stones: {
+    id: 'placeholder_to_the_light_a_time_to_gather_stones',
+    name: 'To the Light - A Time to Gather Stones',
+    normalizedName: 'to-the-light-a-time-to-gather-stones',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Gather_Stones',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 25000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_a_time_to_gather_stones_obj01',
+        description: 'Hand over 3 found in raid PMC dogtags (Level 30 or higher)',
+        type: 'giveItem',
+        optional: false,
+        foundInRaid: true,
+        count: 3,
+      },
+    ],
+  },
+
+  // To the Light - A Time to Throw Stones
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Throw_Stones
+  placeholder_to_the_light_a_time_to_throw_stones: {
+    id: 'placeholder_to_the_light_a_time_to_throw_stones',
+    name: 'To the Light - A Time to Throw Stones',
+    normalizedName: 'to-the-light-a-time-to-throw-stones',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Throw_Stones',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5b0fc42d86f7744a585f9105',
+      name: 'The Lab',
+    },
+    experience: 55000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_a_time_to_throw_stones_obj01',
+        description: 'Eliminate 2 PMC operatives within one raid in The Lab',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 2,
+      },
+    ],
+  },
+
+  // To the Light - Bite the Dust
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Bite_the_Dust
+  placeholder_to_the_light_bite_the_dust: {
+    id: 'placeholder_to_the_light_bite_the_dust',
+    name: 'To the Light - Bite the Dust',
+    normalizedName: 'to-the-light-bite-the-dust',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Bite_the_Dust',
+    trader: {
+      id: '5935c25fb3acc3127c3d8cd9',
+      name: 'Peacekeeper',
+    },
+    map: null,
+    experience: 10000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_bite_the_dust_obj01',
+        description: 'Hand over the evidence implicating the person behind the disruptions',
+        type: 'giveQuestItem',
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // To the Light - Clip Their Wings
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Clip_Their_Wings
+  placeholder_to_the_light_clip_their_wings: {
+    id: 'placeholder_to_the_light_clip_their_wings',
+    name: 'To the Light - Clip Their Wings',
+    normalizedName: 'to-the-light-clip-their-wings',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Clip_Their_Wings',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 45000,
+    kappaRequired: false,
+    factionName: 'Any',
+    availableDelaySecondsMin: 600,
+    availableDelaySecondsMax: 900,
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_false_call',
+          name: 'To the Light - False Call',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_clip_their_wings_obj01',
+        description: 'Plant a Signal jammer at the weather station on the mountain on Woods (In one raid)',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        items: [
+          {
+            id: '5ac78a9b86f7741cca0bbd8d',
+            name: 'Signal Jammer',
+            shortName: 'Jammer',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_clip_their_wings_obj02',
+        description: 'Plant a Signal jammer at the sawmill guardhouse on Woods (In one raid)',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        items: [
+          {
+            id: '5ac78a9b86f7741cca0bbd8d',
+            name: 'Signal Jammer',
+            shortName: 'Jammer',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_clip_their_wings_obj03',
+        description: 'Use the transit from Woods to Customs (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_to_the_light_clip_their_wings_obj04',
+        description: 'Plant a Signal jammer on the second floor of the roadside construction site on Customs (In one raid)',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        items: [
+          {
+            id: '5ac78a9b86f7741cca0bbd8d',
+            name: 'Signal Jammer',
+            shortName: 'Jammer',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_clip_their_wings_obj05',
+        description: 'Use the transit from Customs to Shoreline (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_to_the_light_clip_their_wings_obj06',
+        description: 'Plant a Signal jammer at the second floor archives in the Health Resort admin building on Shoreline (In one raid)',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        items: [
+          {
+            id: '5ac78a9b86f7741cca0bbd8d',
+            name: 'Signal Jammer',
+            shortName: 'Jammer',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // To the Light - Dangerous Ambitions
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Dangerous_Ambitions
+  placeholder_to_the_light_dangerous_ambitions: {
+    id: 'placeholder_to_the_light_dangerous_ambitions',
+    name: 'To the Light - Dangerous Ambitions',
+    normalizedName: 'to-the-light-dangerous-ambitions',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Dangerous_Ambitions',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 10000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_dangerous_ambitions_obj01',
+        description: 'Hand over the Amulet from Lightkeeper to Peacekeeper',
+        type: 'giveQuestItem',
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // To the Light - Fallen Bird
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Fallen_Bird
+  placeholder_to_the_light_fallen_bird: {
+    id: 'placeholder_to_the_light_fallen_bird',
+    name: 'To the Light - Fallen Bird',
+    normalizedName: 'to-the-light-fallen-bird',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Fallen_Bird',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 10000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_fallen_bird_obj01',
+        description: 'Return to the Hideout',
+        optional: false,
+      },
+    ],
+  },
+
+  // To the Light - False Call
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_False_Call
+  placeholder_to_the_light_false_call: {
+    id: 'placeholder_to_the_light_false_call',
+    name: 'To the Light - False Call',
+    normalizedName: 'to-the-light-false-call',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_False_Call',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '56f40101d2720b2a4d8b45d6',
+      name: 'Customs',
+    },
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    availableDelaySecondsMin: 600,
+    availableDelaySecondsMax: 1800,
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_trust_but_verify',
+          name: 'To the Light - Trust but Verify',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_false_call_obj01',
+        description: 'Eliminate 5 Scavs during 21:00-06:00 on Customs (In one raid)',
+        type: 'shoot',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 5,
+      },
+      {
+        id: 'placeholder_to_the_light_false_call_obj02',
+        description: 'Eliminate 1 PMC operative during 21:00-06:00 on Customs (In one raid)',
+        type: 'shoot',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_false_call_obj03',
+        description: 'Hide a Wi-Fi camera at the AC unit at the convenience store near the bridge on Customs (In one raid)',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_false_call_obj04',
+        description: 'Launch a yellow signal flare at the Shoreline transit on Customs (In one raid)',
+        type: 'useItem',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // To the Light - Someone Called?
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Someone_Called%3F
+  placeholder_to_the_light_someone_called: {
+    id: 'placeholder_to_the_light_someone_called',
+    name: 'To the Light - Someone Called?',
+    normalizedName: 'to-the-light-someone-called',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Someone_Called%3F',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '56f40101d2720b2a4d8b45d6',
+      name: 'Customs',
+    },
+    experience: 10000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_someone_called_obj01',
+        description: 'Return to the Hideout',
+        optional: false,
+      },
+    ],
+  },
+
+  // To the Light - The Other Side
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_The_Other_Side
+  placeholder_to_the_light_the_other_side: {
+    id: 'placeholder_to_the_light_the_other_side',
+    name: 'To the Light - The Other Side',
+    normalizedName: 'to-the-light-the-other-side',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_The_Other_Side',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 65000,
+    kappaRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_the_other_side_obj01',
+        description: 'Stash the TerraGroup "Blue Folders" materials in any marked room on Reserve',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        items: [
+          {
+            id: '6389c8c5dbfd5e4b95197e6b',
+            name: 'TerraGroup "Blue Folders" materials',
+            shortName: 'Blue Folders',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_the_other_side_obj02',
+        description: 'Stash the TerraGroup "Blue Folders" materials in any marked room on Streets of Tarkov',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        items: [
+          {
+            id: '6389c8c5dbfd5e4b95197e6b',
+            name: 'TerraGroup "Blue Folders" materials',
+            shortName: 'Blue Folders',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_the_other_side_obj03',
+        description: 'Stash the TerraGroup "Blue Folders" materials in any marked room on Customs',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        items: [
+          {
+            id: '6389c8c5dbfd5e4b95197e6b',
+            name: 'TerraGroup "Blue Folders" materials',
+            shortName: 'Blue Folders',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // To the Light - Trust but Verify
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Trust_but_Verify
+  placeholder_to_the_light_trust_but_verify: {
+    id: 'placeholder_to_the_light_trust_but_verify',
+    name: 'To the Light - Trust but Verify',
+    normalizedName: 'to-the-light-trust-but-verify',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Trust_but_Verify',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5b0fc42d86f7744a585f9105',
+      name: 'The Lab',
+    },
+    experience: 35000,
+    kappaRequired: false,
+    factionName: 'Any',
+    otherRequirements: [
+      {
+        id: 'placeholder_to_the_light_trust_but_verify_req_dialogue',
+        type: 'dialogue',
+        traders: [
+          {
+            id: '5a7c2eca46aef81a7ca2145d',
+            name: 'Mechanic',
+          },
+        ],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_to_the_light_trust_but_verify_obj01',
+        description: 'Stash the Hard drive with false data in the server room near the weapon testing area in The Lab (In one raid)',
+        type: 'plantQuestItem',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_to_the_light_trust_but_verify_obj02',
+        description: 'Extract from The Lab through the Ventilation Shaft (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+        ],
+        optional: false,
+      },
+    ],
   },
 }
