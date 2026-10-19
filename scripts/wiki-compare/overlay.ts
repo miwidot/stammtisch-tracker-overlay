@@ -29,7 +29,7 @@ export type SuppressionScope = GameMode | 'both';
 const WIKI_COMPARE_MODES: readonly GameMode[] = ['regular', 'pve'];
 
 // Overlay file for filtering already-addressed discrepancies
-export const TASKS_OVERLAY_FILE = path.join(process.cwd(), 'src', 'overrides', 'tasks.json5');
+const TASKS_OVERLAY_FILE = path.resolve('src', 'overrides', 'tasks.json5');
 
 /**
  * Task-override files that apply to a comparison in `scope`.
@@ -61,7 +61,7 @@ function readOverlayFile(file: string): Record<string, Record<string, unknown>> 
   }
 }
 
-export const DIVERGENCES_FILE = path.join(process.cwd(), 'src', 'divergences', 'tasks.json5');
+const DIVERGENCES_FILE = path.resolve('src', 'divergences', 'tasks.json5');
 
 /**
  * `taskId:field` keys for fields recorded as genuinely mode-divergent.
@@ -84,20 +84,10 @@ export function loadDivergentFieldKeys(): Set<string> {
   }
 }
 
-export const TASKS_SUPPRESSIONS_FILE = path.join(
-  process.cwd(),
-  'src',
-  'suppressions',
-  'tasks.json5'
-);
+const TASKS_SUPPRESSIONS_FILE = path.resolve('src', 'suppressions', 'tasks.json5');
 
 // Suppressions file for discrepancies where wiki is wrong and API is correct
-export const WIKI_INCORRECT_FILE = path.join(
-  process.cwd(),
-  'src',
-  'suppressions',
-  'wiki-incorrect.json5'
-);
+const WIKI_INCORRECT_FILE = path.resolve('src', 'suppressions', 'wiki-incorrect.json5');
 
 export type SuppressedFieldsResult = {
   suppressed: Set<string>;

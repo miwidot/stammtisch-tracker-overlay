@@ -225,15 +225,6 @@ export type TaskOtherRequirement =
  */
 export type TraderRequirementCompareMethod = '>=' | '<=' | '>' | '<' | '=';
 
-/**
- * The discriminated trader-requirement semantics served by json.tarkov.dev:
- * `level` is a trader Loyalty Level (LL1-LL4); `reputation` is a trader
- * reputation threshold (scav karma / trader rep). Consumers must switch their
- * requirement evaluation on this field - the value range alone is ambiguous
- * (reputation serves positive, zero, and negative values).
- */
-export type TraderRequirementType = 'level' | 'reputation';
-
 /** Shared fields for trader requirements in json.tarkov.dev's discriminated shape. */
 interface TraderRequirementBase {
   id: string;

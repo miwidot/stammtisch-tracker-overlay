@@ -35,7 +35,7 @@ function compareStrings(a: string, b: string): number {
 }
 
 /** Recursively sort arrays and object keys so comparison ignores ordering. */
-export function normalizeValue(value: unknown): unknown {
+function normalizeValue(value: unknown): unknown {
   if (Array.isArray(value)) {
     const normalized = value.map(normalizeValue);
     return normalized

@@ -146,7 +146,7 @@ export function parseArgs(argv: string[]): ParsedOptions {
   return options;
 }
 
-export function printUsage(): void {
+function printUsage(): void {
   console.log('Usage:');
   console.log('  tsx scripts/wiki-compare.ts [options] [taskName]');
   console.log();
@@ -174,7 +174,7 @@ export function printUsage(): void {
   console.log();
 }
 
-export async function runSingleTask(
+async function runSingleTask(
   tasks: ExtendedTaskData[],
   mapAliasMap: Map<string, string>,
   options: CliOptions
@@ -225,7 +225,7 @@ export async function runSingleTask(
   compareTasks(task, wikiData, mapAliasMap, true, nextTaskMap, taskSuppressions);
 }
 
-export async function runBulkMode(
+async function runBulkMode(
   tasks: ExtendedTaskData[],
   mapAliasMap: Map<string, string>,
   options: CliOptions

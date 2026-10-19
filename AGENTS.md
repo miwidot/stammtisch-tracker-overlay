@@ -213,9 +213,9 @@ candidates were triaged and are all tool false positives. Re-check a
 category only if the guard named below stops holding, and prefer fixing a guard over
 suppressing an item:
 
-- **Path traversal, 16 items** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Every path
-  is `path.join(process.cwd(), …)` over literal segments except the mode segment in
-  `taskOverlayFiles`, which is either a member of the module-local `WIKI_COMPARE_MODES`
+- **Path traversal** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Fixed paths
+  use `path.resolve` with literal segments, relative to the working directory. The variable mode
+  segment in `taskOverlayFiles` is either a member of the module-local `WIKI_COMPARE_MODES`
   constant or a `SuppressionScope` argument threaded down from a caller. That type is a
   compile-time bound only, so the guard that matters is at the input boundary: the sole
   external source is the `--gameMode`/`-g` flag, and `cli.ts` accepts it only when it equals
@@ -315,4 +315,4 @@ Use the MediaWiki API instead — it is not challenged and returns full content 
 - Rendered HTML fragment: `...&prop=text`
 - Plain-text extract: `action=query&prop=extracts&...`
 
-The wiki-compare tool (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API` in `scripts/wiki-compare/types.ts`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
+The wiki-compare tool (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API_URL` in `scripts/wiki-compare/wiki.ts`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).

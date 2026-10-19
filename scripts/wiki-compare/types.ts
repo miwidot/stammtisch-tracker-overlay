@@ -155,7 +155,6 @@ export function getPriority(field: string): Priority {
 }
 
 export const DEFAULT_TASK_NAME = 'Grenadier';
-export const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
 export const RATE_LIMIT_MS = 500;
 
 // Tarkov 1.0 launch date - wiki edits after this are more trustworthy

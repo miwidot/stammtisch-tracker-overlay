@@ -10,11 +10,11 @@ import * as path from 'node:path';
 import { ExtendedTaskData } from './types.js';
 
 // Cache directories
-export const CACHE_DIR = path.join(process.cwd(), 'data', 'cache');
-export const WIKI_CACHE_DIR = path.join(CACHE_DIR, 'wiki');
-export const RESULTS_DIR = path.join(process.cwd(), 'data', 'results');
-export const API_CACHE_FILE = path.join(CACHE_DIR, 'tarkov-api-tasks.json');
-export const SAFE_CACHE_FILE_STEM = /^[A-Za-z0-9_-]{1,128}$/;
+const CACHE_DIR = path.resolve('data', 'cache');
+const WIKI_CACHE_DIR = path.resolve('data', 'cache', 'wiki');
+const RESULTS_DIR = path.resolve('data', 'results');
+const API_CACHE_FILE = path.resolve('data', 'cache', 'tarkov-api-tasks.json');
+const SAFE_CACHE_FILE_STEM = /^[A-Za-z0-9_-]{1,128}$/;
 
 export function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) {
@@ -22,14 +22,14 @@ export function ensureDir(dir: string): void {
   }
 }
 
-export function assertSafeCacheFileStem(value: string): string {
+function assertSafeCacheFileStem(value: string): string {
   if (!SAFE_CACHE_FILE_STEM.test(value)) {
     throw new Error(`Unsafe cache file name: ${value}`);
   }
   return value;
 }
 
-export function getTimestamp(): string {
+function getTimestamp(): string {
   const now = new Date();
   return now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
 }
@@ -93,7 +93,7 @@ export type WikiCache = {
   };
 };
 
-export function getWikiCachePath(taskId: string): string {
+function getWikiCachePath(taskId: string): string {
   return path.join(WIKI_CACHE_DIR, `${assertSafeCacheFileStem(taskId)}.json`);
 }
 

@@ -23,7 +23,7 @@ export type TaskAvailabilityStatus = 'available' | 'blocked' | 'unknown';
 export type TaskStatusValue = string | number;
 
 /** BSG quest status codes accepted by the evaluator when a profile is numeric. */
-export const TASK_STATUS_NAMES: Readonly<Record<number, string>> = {
+const TASK_STATUS_NAMES: Readonly<Record<number, string>> = {
   0: 'locked',
   1: 'availableForStart',
   2: 'active',

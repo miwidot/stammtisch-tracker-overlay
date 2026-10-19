@@ -88,13 +88,6 @@ export function printError(message: string, error?: Error): void {
 }
 
 /**
- * Print a list item with optional icon
- */
-export function printListItem(text: string, indent = 2): void {
-  console.log(`${' '.repeat(indent)}- ${text}`);
-}
-
-/**
  * Format a count summary (e.g., "Still needed (3)"). Trailing status is
  * appended by the call site as ": <status>" when desired.
  */
