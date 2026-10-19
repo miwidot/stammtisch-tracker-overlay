@@ -96,7 +96,7 @@ describe('task correction data', () => {
     expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({ factionName: 'USEC' });
   });
 
-  it.each(SUPPORTED_GAME_MODES)('restricts Gunsmith - AKM to BEAR in %s', (mode) => {
+  it.each(SUPPORTED_GAME_MODES)('keeps upstream BEAR lock on Gunsmith - AKM in %s', (mode) => {
     const overlay = {
       tasks: overrides,
       modes: {
@@ -111,7 +111,7 @@ describe('task correction data', () => {
     const upstream = {
       id: TASK_IDS.gunsmithAkm,
       name: 'Gunsmith - AKM',
-      factionName: 'Any',
+      factionName: 'BEAR',
       minPlayerLevel: 26,
       trader: mechanic,
       traderRequirements: [
@@ -136,6 +136,7 @@ describe('task correction data', () => {
       traderUnlocked: { [mechanic.id]: true },
     };
 
+    expect(effective.factionName).toBe('BEAR');
     expect(effective.minPlayerLevel).toBe(upstream.minPlayerLevel);
     expect(effective.traderRequirements).toEqual(upstream.traderRequirements);
     expect(evaluateTaskUnlock(effective, definition, { ...eligible, faction: 'BEAR' }).status).toBe(

@@ -620,10 +620,9 @@
   // Debtor - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
   // Verified: the 1.1-pve data; wiki agrees.
-  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
-  // BEAR PMCs." (issues #288, #291)
+  // BEAR-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves BEAR in all three modes.
   '639dbaf17c898a131e1cffff': {
-    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2',
@@ -1368,10 +1367,9 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Shaking_Up_the_Teller
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level (was LL2)
-  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
-  // USEC PMCs." (issues #288, #291)
+  // USEC-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves USEC in all three modes.
   '5967725e86f774601a446662': {
-    factionName: 'USEC', // Was: Any
     traderRequirements: [
       // Was: [{ id: "59a9280b86f77477925e27cb", requirementType: "level", compareMethod: ">=", value: 2, trader: Prapor }]
       {
@@ -1618,10 +1616,9 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
-  // BEAR-only quest (issue #291): wiki Requirements - "This quest is only
-  // obtainable by BEAR PMCs."
+  // BEAR-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves BEAR in all three modes.
   '59c124d686f774189b3c843f': {
-    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1',
@@ -2135,10 +2132,9 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
-  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
-  // BEAR PMCs." (issues #288, #291)
+  // BEAR-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves BEAR in all three modes.
   '5b478eca86f7744642012254': {
-    factionName: 'BEAR', // Was: Any
     neededKeys: [], // Was: [W112 key 5a0dc95c86f77452440fc675 on Factory]
     objectives: {
       '5b478f6886f774464201225a': {
@@ -2171,8 +2167,11 @@
   },
   // Supplements - renamed in S1 (2026-08-10), which also replaced the
   // player-level gate with Skier LL2. USEC-only per wiki Requirements ("This
-  // quest is only obtainable by USEC PMCs.") (issues #288, #291). The chemical
-  // vial objective is on Customs, matching the objective text (issue #321).
+  // quest is only obtainable by USEC PMCs.") (issues #288, #291); the
+  // factionName patch (Was: Any) was retired 2026-10-19 once upstream served
+  // USEC in all three modes.
+  // The chemical vial objective is on Customs, matching the objective text
+  // (issue #321).
   // 2026-09-23: the maps fix (Was: Interchange) is now served identically
   // upstream in all three modes, so the patch was retired as a stale no-op.
   // Only the possibleLocations suppression remains: the original Interchange
@@ -2181,7 +2180,6 @@
   // suppression stands until a capture or screenshot confirms them.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
   '5b478ff486f7744d184ecbbf': {
-    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2',
@@ -2967,10 +2965,9 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
-  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
-  // USEC PMCs." (issues #288, #291)
+  // USEC-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves USEC in all three modes.
   '639135c3744e452011470807': {
-    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2',
@@ -3546,51 +3543,20 @@
   //
   // The entries below correct quests tarkov.dev serves as factionName "Any"
   // even though they are faction-locked in-game. Faction-locked quests that
-  // already had an entry in this file (Oil Run, Shaking Up the Teller,
-  // Vitamins, Supplements, Debtor, House Arrest) carry their factionName there
+  // already have an entry elsewhere in this file carry their factionName there
   // instead - duplicate keys are rejected by the duplicate-key test
   // (tests/duplicate-keys.test.ts). Quests whose
   // factionName upstream already serves correctly (Textile - Part 1/2,
   // Drip-Out - Part 1/2, Our Own Land / Counteraction, Green Corridor /
-  // Road Closed) need no override. Each lock is proven by the wiki
+  // Road Closed) need no override. On 2026-10-19 upstream began serving the
+  // correct faction in regular, pve and pvp-season for The Huntsman Path -
+  // Administrator (both variants), Gunsmith - M4A1, Gunsmith - AKM, Oil Run,
+  // Shaking Up the Teller, Vitamins, Supplements, Debtor and House Arrest, so
+  // those patches were retired as stale. Each lock is proven by the wiki
   // Requirements section ("This quest is only obtainable by BEAR/USEC PMCs")
   // or, for The Huntsman Path - Administrator, the wiki's BEAR/USEC Exclusive
   // objective lists.
   // ---------------------------------------------------------------------------
-
-  // The Huntsman Path - Administrator (BEAR variant) - faction-locked pair
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
-  // Issue #288: this quest is two faction variants sharing one name. The wiki
-  // lists the Reserve objectives (this ID) as BEAR Exclusive and the
-  // Lighthouse objectives (6a45208043b8d7604d00b8d5, below) as USEC Exclusive.
-  '639136df4b15ca31f76bc31f': {
-    factionName: 'BEAR', // Was: Any
-  },
-
-  // The Huntsman Path - Administrator (USEC variant) - faction-locked pair
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
-  // Issue #288: Lighthouse objectives ("Launch a yellow signal flare at the
-  // train station on Lighthouse", "Eliminate any 6 targets at the train
-  // station territory on Lighthouse") are USEC Exclusive.
-  '6a45208043b8d7604d00b8d5': {
-    factionName: 'USEC', // Was: Any
-  },
-
-  // Gunsmith - M4A1 - USEC-only per the wiki Requirements section.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_M4A1
-  // Issue #430: regular, pve and pvp-season all incorrectly serve "Any".
-  '5ac244eb86f7741356335af1': {
-    factionName: 'USEC', // Was: Any
-  },
-
-  // Gunsmith - AKM - BEAR-only per the wiki Requirements section (issue #443).
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKM?oldid=362706
-  // Best-effort correction: the wiki added this restriction on 2026-09-30;
-  // regular, pve and pvp-season still serve "Any". Older 1.1 PvE template
-  // evidence predates this wiki update; current client eligibility is unverified.
-  '5ae3270f86f77445ba41d4dd': {
-    factionName: 'BEAR', // Was: Any
-  },
 
   // A Life Lesson - BEAR-only quest
   // Proof: https://escapefromtarkov.fandom.com/wiki/A_Life_Lesson
