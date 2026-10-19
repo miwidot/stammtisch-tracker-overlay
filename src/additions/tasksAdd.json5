@@ -622,4 +622,2349 @@
       ],
     },
   },
+
+  // Lightkeeper access line: To the Light - Getting Acquainted and the Make
+  // Amends re-entry chain. tarkov.dev served all ten of these IDs until early
+  // October 2026, then dropped them from regular, pve and pvp-season task data
+  // (upstream regression: https://github.com/the-hideout/tarkov-data-manager/issues/886).
+  // Each definition below is tarkov.dev's own regular-mode data as archived at
+  // https://web.archive.org/web/20261004024103/https://json.tarkov.dev/regular/tasks
+  // (names from .../regular/tasks_en), reshaped to this schema. Every task,
+  // objective, item, map and trader ID is upstream's; nothing is synthesized.
+  // The wiki pages linked per entry are current (no {{Historical content}}).
+  // Remove these once tarkov.dev serves the IDs again (check-overrides flags it).
+  //
+  // Getting Acquainted keeps upstream's only start edge (Knock-Knock,
+  // 625d7005a4eb80027c4f2e09) even though that task is retired; it is re-added
+  // below as a disabled anchor. The wiki reads Getting Acquainted as following
+  // "To the Light - The Other Side", but that quest has no known ID and the wiki
+  // `previous` field is not proof of an unlock edge (AGENTS.md), so the recorded
+  // edge is kept and consumers resolve it as unknown rather than available.
+  //
+  // Upstream names all three Make Amends hand-ins (6391d90f..., 6391d912...,
+  // 6391d914...) just "Make Amends" and they share objective IDs; the
+  // "(after <task>)" suffix is an overlay label so each ID keeps a unique name.
+  // The other ten "To the Light - ..." quests (Trust but Verify through The Other
+  // Side) are not added: no source exposes their task or objective IDs yet.
+
+  // To the Light - Getting Acquainted
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted
+  '625d700cc48e6c62a440fab5': {
+    id: '625d700cc48e6c62a440fab5',
+    name: 'To the Light - Getting Acquainted',
+    normalizedName: 'getting-acquainted',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 32000,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d7005a4eb80027c4f2e09',
+          name: 'Knock-Knock',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '6391e2f9e705511c8a4a1b85',
+        description: 'Obtain the V3 Flash drive on Lighthouse',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        possibleLocations: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            positions: [
+              {
+                x: -122.0297,
+                y: 37.5548,
+                z: 94.43048,
+              },
+              {
+                x: -116.7881,
+                y: 40.7411,
+                z: 88.89661,
+              },
+              {
+                x: -64.5793,
+                y: 27.5448,
+                z: 112.52942,
+              },
+            ],
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '6391e31bfa894f0a866afdec',
+        description: 'Reflash the Radio transmitter',
+        type: 'findItem',
+        items: [
+          {
+            id: '62e910aaf957f2915e0a5e36',
+            name: 'Digital secure DSP radio transmitter',
+            shortName: 'DSPT',
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '6391e329c115f907b14700b1',
+        description: 'Hand over the flash drive',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '63ab727b1287ef0b827d0c95',
+        description: 'Visit the Lighthouse building',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: 442.23,
+              y: 24.11,
+              z: 460.69,
+            },
+            outline: [
+              {
+                x: 429.81,
+                y: 18.26,
+                z: 447.88,
+              },
+              {
+                x: 429.81,
+                y: 18.26,
+                z: 473.5,
+              },
+              {
+                x: 454.66,
+                y: 18.26,
+                z: 473.5,
+              },
+              {
+                x: 454.66,
+                y: 18.26,
+                z: 447.88,
+              },
+            ],
+            top: 29.97,
+            bottom: 18.26,
+          },
+        ],
+        optional: false,
+      },
+    ],
+  },
+
+  // Make Amends - Buyout
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Buyout
+  '626148251ed3bb5bcc5bd9ed': {
+    id: '626148251ed3bb5bcc5bd9ed',
+    name: 'Make Amends - Buyout',
+    normalizedName: 'make-amends-buyout',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Buyout',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d700cc48e6c62a440fab5',
+          name: 'To the Light - Getting Acquainted',
+        },
+        status: ['complete', 'failed'],
+      },
+    ],
+    traderRequirements: [
+      {
+        id: '63c909122a5ab7dd5d057ff1',
+        requirementType: 'reputation',
+        compareMethod: '<=',
+        value: 0,
+        trader: {
+          id: '638f541a29ffd1183d187f57',
+          name: 'Lightkeeper',
+        },
+      },
+    ],
+    objectives: [
+      {
+        id: '62616a9ca4eb80027c4f2e12',
+        description: 'Hand over RUB',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1000000,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends - Equipment
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Equipment
+  '6261482fa4eb80027c4f2e11': {
+    id: '6261482fa4eb80027c4f2e11',
+    name: 'Make Amends - Equipment',
+    normalizedName: 'make-amends-equipment',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Equipment',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '626148251ed3bb5bcc5bd9ed',
+          name: 'Make Amends - Buyout',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '62616b17e7578c305945c9c9',
+        description: 'Hand over the found in raid SVDS sniper rifles',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5c46fbd72e2216398b5a8c9c',
+            name: 'SVDS 7.62x54R sniper rifle',
+            shortName: 'SVDS',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 4,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends (after Equipment)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends
+  '6391d90f4ed9512be67647df': {
+    id: '6391d90f4ed9512be67647df',
+    name: 'Make Amends (after Equipment)',
+    normalizedName: 'make-amends',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '6261482fa4eb80027c4f2e11',
+          name: 'Make Amends - Equipment',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '6391d9ba4b15ca31f76bc325',
+        description: 'Obtain the V3 Flash drive on Lighthouse',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        possibleLocations: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            positions: [
+              {
+                x: -122.0297,
+                y: 37.5548,
+                z: 94.43048,
+              },
+              {
+                x: -116.7881,
+                y: 40.7411,
+                z: 88.89661,
+              },
+              {
+                x: -64.5793,
+                y: 27.5448,
+                z: 112.52942,
+              },
+            ],
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '6391d9e7ee79ee703e3012e5',
+        description: 'Reflash the Radio transmitter',
+        type: 'findItem',
+        items: [
+          {
+            id: '62e910aaf957f2915e0a5e36',
+            name: 'Digital secure DSP radio transmitter',
+            shortName: 'DSPT',
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '6391d9fd8ba6894d155e77db',
+        description: 'Hand over the flash drive',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '63ab6a89e842787ad2135719',
+        description: 'Visit the Lighthouse building',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: 442.23,
+              y: 24.11,
+              z: 460.69,
+            },
+            outline: [
+              {
+                x: 429.81,
+                y: 18.26,
+                z: 447.88,
+              },
+              {
+                x: 429.81,
+                y: 18.26,
+                z: 473.5,
+              },
+              {
+                x: 454.66,
+                y: 18.26,
+                z: 473.5,
+              },
+              {
+                x: 454.66,
+                y: 18.26,
+                z: 447.88,
+              },
+            ],
+            top: 29.97,
+            bottom: 18.26,
+          },
+        ],
+        optional: false,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '5a7c2eca46aef81a7ca2145d',
+            name: 'Mechanic',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends - Security
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Security
+  '626148334149f1149b5b12ca': {
+    id: '626148334149f1149b5b12ca',
+    name: 'Make Amends - Security',
+    normalizedName: 'make-amends-security',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Security',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '6391d90f4ed9512be67647df',
+          name: 'Make Amends (after Equipment)',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [
+      {
+        id: '63c909122a5ab7dd5d057ff1',
+        requirementType: 'reputation',
+        compareMethod: '<=',
+        value: 0,
+        trader: {
+          id: '638f541a29ffd1183d187f57',
+          name: 'Lightkeeper',
+        },
+      },
+    ],
+    objectives: [
+      {
+        id: '62668b98ddc94657c21a1628',
+        description: 'Place a WI-FI Camera at the yellow bus on the southern bridge approaching the water treatment plant',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: -12.22,
+              y: 7.32,
+              z: -306.14,
+            },
+            outline: [
+              {
+                x: -7.41,
+                y: 6.06,
+                z: -307.59,
+              },
+              {
+                x: -9.71,
+                y: 6.06,
+                z: -310.49,
+              },
+              {
+                x: -17.03,
+                y: 6.06,
+                z: -304.69,
+              },
+              {
+                x: -14.73,
+                y: 6.06,
+                z: -301.79,
+              },
+            ],
+            top: 8.59,
+            bottom: 6.06,
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '62668ba11ed3bb5bcc5bd9ef',
+        description: 'Place a WI-FI Camera at the yellow bulldozer in the south-eastern part of the water treatment plant',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: -195.28,
+              y: 6.15,
+              z: -431.19,
+            },
+            outline: [
+              {
+                x: -193.34,
+                y: 4.89,
+                z: -429.98,
+              },
+              {
+                x: -193.02,
+                y: 4.89,
+                z: -431.51,
+              },
+              {
+                x: -197.22,
+                y: 4.89,
+                z: -432.4,
+              },
+              {
+                x: -197.55,
+                y: 4.89,
+                z: -430.88,
+              },
+            ],
+            top: 7.42,
+            bottom: 4.89,
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '62668ba4aa168e51321d69e0',
+        description: 'Place a WI-FI Camera at the police truck in the western part of the water treatment plant',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: 83.14,
+              y: 6.15,
+              z: -557.8,
+            },
+            outline: [
+              {
+                x: 84.94,
+                y: 4.89,
+                z: -554.83,
+              },
+              {
+                x: 86.06,
+                y: 4.89,
+                z: -555.92,
+              },
+              {
+                x: 81.35,
+                y: 4.89,
+                z: -560.77,
+              },
+              {
+                x: 80.23,
+                y: 4.89,
+                z: -559.68,
+              },
+            ],
+            top: 7.42,
+            bottom: 4.89,
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '62668ba9a4eb80027c4f2e16',
+        description: 'Place a WI-FI Camera at the army truck near the industrial zone in the northern part of the water treatment plant',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: -77.33,
+              y: 12.01,
+              z: -790.08,
+            },
+            outline: [
+              {
+                x: -75.5,
+                y: 10.75,
+                z: -788.97,
+              },
+              {
+                x: -75.55,
+                y: 10.75,
+                z: -791.29,
+              },
+              {
+                x: -79.16,
+                y: 10.75,
+                z: -791.2,
+              },
+              {
+                x: -79.11,
+                y: 10.75,
+                z: -788.88,
+              },
+            ],
+            top: 13.28,
+            bottom: 10.75,
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends - Sweep Up
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Sweep_Up
+  '62614836f7308432be1d44cc': {
+    id: '62614836f7308432be1d44cc',
+    name: 'Make Amends - Sweep Up',
+    normalizedName: 'make-amends-sweep-up',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Sweep_Up',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e5fad2720bc05b8b4567',
+      name: 'Reserve',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '626148334149f1149b5b12ca',
+          name: 'Make Amends - Security',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '626171a0f7308432be1d44cd',
+        description: 'Eliminate Raiders on Reserve',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        shotType: 'kill',
+        targetNames: ['Raider'],
+        optional: false,
+        count: 25,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends (after Sweep Up)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends
+  '6391d912f8e5dd32bf4e3ab2': {
+    id: '6391d912f8e5dd32bf4e3ab2',
+    name: 'Make Amends (after Sweep Up)',
+    normalizedName: 'make-amends-2',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '62614836f7308432be1d44cc',
+          name: 'Make Amends - Sweep Up',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '6391d9ba4b15ca31f76bc325',
+        description: 'Obtain the V3 Flash drive on Lighthouse',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        possibleLocations: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            positions: [
+              {
+                x: -122.0297,
+                y: 37.5548,
+                z: 94.43048,
+              },
+              {
+                x: -116.7881,
+                y: 40.7411,
+                z: 88.89661,
+              },
+              {
+                x: -64.5793,
+                y: 27.5448,
+                z: 112.52942,
+              },
+            ],
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '6391d9e7ee79ee703e3012e5',
+        description: 'Reflash the Radio transmitter',
+        type: 'findItem',
+        items: [
+          {
+            id: '62e910aaf957f2915e0a5e36',
+            name: 'Digital secure DSP radio transmitter',
+            shortName: 'DSPT',
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '6391d9fd8ba6894d155e77db',
+        description: 'Hand over the flash drive',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '63ab6a89e842787ad2135719',
+        description: 'Visit the Lighthouse building',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+        {
+          trader: {
+            id: '5a7c2eca46aef81a7ca2145d',
+            name: 'Mechanic',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends - Software
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Software
+  '6261483ac48e6c62a440fab7': {
+    id: '6261483ac48e6c62a440fab7',
+    name: 'Make Amends - Software',
+    normalizedName: 'make-amends-software',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Software',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '6391d912f8e5dd32bf4e3ab2',
+          name: 'Make Amends (after Sweep Up)',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [
+      {
+        id: '63c909122a5ab7dd5d057ff1',
+        requirementType: 'reputation',
+        compareMethod: '<=',
+        value: 0,
+        trader: {
+          id: '638f541a29ffd1183d187f57',
+          name: 'Lightkeeper',
+        },
+      },
+    ],
+    objectives: [
+      {
+        id: '626676e1c48e6c62a440faba',
+        description: 'Hand over the found in raid Secure Flash drives',
+        type: 'giveItem',
+        items: [
+          {
+            id: '590c621186f774138d11ea29',
+            name: 'Secure Flash drive',
+            shortName: 'Flash drive',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 15,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends - Quarantine
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Quarantine
+  '6261483dc4874104f230c0cd': {
+    id: '6261483dc4874104f230c0cd',
+    name: 'Make Amends - Quarantine',
+    normalizedName: 'make-amends-quarantine',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Quarantine',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5b0fc42d86f7744a585f9105',
+      name: 'The Lab',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '6261483ac48e6c62a440fab7',
+          name: 'Make Amends - Software',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '62692a8a161ea75b3470d90e',
+        description: 'Place a WI-FI Camera inside the quarantine zone in The Lab',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5b0fc42d86f7744a585f9105',
+              name: 'The Lab',
+            },
+            position: {
+              x: -129.05,
+              y: 1.6,
+              z: -358.51,
+            },
+            outline: [
+              {
+                x: -136.6,
+                y: -0.05,
+                z: -363.98,
+              },
+              {
+                x: -136.6,
+                y: -0.05,
+                z: -353.04,
+              },
+              {
+                x: -121.5,
+                y: -0.05,
+                z: -353.04,
+              },
+              {
+                x: -121.5,
+                y: -0.05,
+                z: -363.98,
+              },
+            ],
+            top: 3.25,
+            bottom: -0.05,
+          },
+        ],
+        requiredKeys: [
+          [
+            {
+              id: '5c1d0f4986f7744bb01837fa',
+              name: 'TerraGroup Labs keycard (Black)',
+              shortName: 'Black',
+            },
+          ],
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+    ],
+    neededKeys: [
+      {
+        map: {
+          id: '5b0fc42d86f7744a585f9105',
+          name: 'The Lab',
+        },
+        keys: [
+          {
+            id: '5c1d0f4986f7744bb01837fa',
+            name: 'TerraGroup Labs keycard (Black)',
+            shortName: 'Black',
+          },
+        ],
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Make Amends (after Quarantine)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_Amends
+  '6391d9144b15ca31f76bc323': {
+    id: '6391d9144b15ca31f76bc323',
+    name: 'Make Amends (after Quarantine)',
+    normalizedName: 'make-amends-3',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Make_Amends',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    experience: 0,
+    taskRequirements: [
+      {
+        task: {
+          id: '6261483dc4874104f230c0cd',
+          name: 'Make Amends - Quarantine',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '6391d9ba4b15ca31f76bc325',
+        description: 'Obtain the V3 Flash drive on Lighthouse',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        possibleLocations: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            positions: [
+              {
+                x: -122.0297,
+                y: 37.5548,
+                z: 94.43048,
+              },
+              {
+                x: -116.7881,
+                y: 40.7411,
+                z: 88.89661,
+              },
+              {
+                x: -64.5793,
+                y: 27.5448,
+                z: 112.52942,
+              },
+            ],
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '6391d9e7ee79ee703e3012e5',
+        description: 'Reflash the Radio transmitter',
+        type: 'findItem',
+        items: [
+          {
+            id: '62e910aaf957f2915e0a5e36',
+            name: 'Digital secure DSP radio transmitter',
+            shortName: 'DSPT',
+          },
+        ],
+        optional: false,
+        foundInRaid: false,
+        count: 1,
+      },
+      {
+        id: '6391d9fd8ba6894d155e77db',
+        description: 'Hand over the flash drive',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6331bb0d1aa9f42b804997a6',
+          name: 'Secure Flash drive V3',
+          shortName: 'V3 Flash',
+        },
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '63ab6a89e842787ad2135719',
+        description: 'Visit the Lighthouse building',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+        {
+          trader: {
+            id: '5a7c2eca46aef81a7ca2145d',
+            name: 'Mechanic',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
+
+  // Retired pre-1.1 Lightkeeper access chain, kept only as disabled anchors.
+  // All seven wiki pages carry {{Historical content}} (issue #365), and
+  // tarkov.dev dropped the IDs with the rest of the line (#886 above). They are
+  // re-added from the same archived regular-mode data, unchanged except for
+  // `disabled: true`, because Getting Acquainted's only recorded start edge
+  // points at Knock-Knock: an addition may not reference a task that exists
+  // nowhere, while an edge into a disabled task keeps Getting Acquainted
+  // `unknown` for consumers that filter disabled tasks (docs/TASK_AVAILABILITY.md).
+  // Consumers must keep filtering these out.
+
+  // Network Provider - Part 1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1
+  '625d6ff5ddc94657c21a1625': {
+    id: '625d6ff5ddc94657c21a1625',
+    name: 'Network Provider - Part 1',
+    disabled: true,
+    normalizedName: 'network-provider-part-1',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 18600,
+    taskRequirements: [],
+    traderRequirements: [
+      {
+        id: '66422d1a98c1a9ac7b6902ec',
+        requirementType: 'reputation',
+        compareMethod: '>=',
+        value: 2,
+        trader: {
+          id: '579dc571d53a0658a154fbec',
+          name: 'Fence',
+        },
+      },
+    ],
+    objectives: [
+      {
+        id: '625eb7fe1ed3bb5bcc5bd9e6',
+        description: 'Hand over the found in raid Electronic components',
+        type: 'giveItem',
+        items: [
+          {
+            id: '6389c70ca33d8c4cdf4932c6',
+            name: 'Electronic components',
+            shortName: 'EC',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 4,
+      },
+      {
+        id: '625eb80da4eb80027c4f2e0a',
+        description: 'Hand over the found in raid Military COFDM Wireless Signal Transmitters',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5c052f6886f7746b1e3db148',
+            name: 'Military COFDM Wireless Signal Transmitter',
+            shortName: 'SG-C10',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 4,
+      },
+      {
+        id: '625eb81df7308432be1d44c6',
+        description: 'Hand over the found in raid Gas analyzers',
+        type: 'giveItem',
+        items: [
+          {
+            id: '590a3efd86f77437d351a25b',
+            name: 'Gas analyzer',
+            shortName: 'GasAn',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 4,
+      },
+      {
+        id: '625eb82ac4874104f230c0c6',
+        description: 'Hand over the found in raid Broken GPhone smartphones',
+        type: 'giveItem',
+        items: [
+          {
+            id: '56742c324bdc2d150f8b456d',
+            name: 'Broken GPhone smartphone',
+            shortName: 'GPhone',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 4,
+      },
+    ],
+  },
+
+  // Network Provider - Part 2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_2
+  '625d6ffaf7308432be1d44c5': {
+    id: '625d6ffaf7308432be1d44c5',
+    name: 'Network Provider - Part 2',
+    disabled: true,
+    normalizedName: 'network-provider-part-2',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_2',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 19100,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d6ff5ddc94657c21a1625',
+          name: 'Network Provider - Part 1',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '625ecedaa4eb80027c4f2e0b',
+        description: 'Set up the radio repeater inside the MI-8 helicopter at the water treatment plant on Lighthouse',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: -94.62,
+              y: 1.94,
+              z: -550.69,
+            },
+            outline: [
+              {
+                x: -92.42,
+                y: 0.94,
+                z: -553.16,
+              },
+              {
+                x: -92.42,
+                y: 0.94,
+                z: -548.22,
+              },
+              {
+                x: -96.82,
+                y: 0.94,
+                z: -548.22,
+              },
+              {
+                x: -96.82,
+                y: 0.94,
+                z: -553.16,
+              },
+            ],
+            top: 2.95,
+            bottom: 0.94,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '625ecee6f7308432be1d44c7',
+        description: 'Set up the radio repeater inside the abandoned USEC cottage on Lighthouse',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: -116.49,
+              y: 40.36,
+              z: 88.87,
+            },
+            outline: [
+              {
+                x: -118.53,
+                y: 39.86,
+                z: 87.57,
+              },
+              {
+                x: -118.53,
+                y: 39.86,
+                z: 90.17,
+              },
+              {
+                x: -114.44,
+                y: 39.86,
+                z: 90.17,
+              },
+              {
+                x: -114.44,
+                y: 39.86,
+                z: 87.57,
+              },
+            ],
+            top: 40.86,
+            bottom: 39.86,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '625eceebc4874104f230c0c7',
+        description: 'Set up the radio repeater at a high elevation overlooking the peninsula on Lighthouse',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: 71.11,
+              y: 10.16,
+              z: 392.52,
+            },
+            outline: [
+              {
+                x: 67.79,
+                y: 8.39,
+                z: 382.71,
+              },
+              {
+                x: 61.23,
+                y: 8.39,
+                z: 395.65,
+              },
+              {
+                x: 74.44,
+                y: 8.39,
+                z: 402.34,
+              },
+              {
+                x: 80.99,
+                y: 8.39,
+                z: 389.39,
+              },
+            ],
+            top: 11.94,
+            bottom: 8.39,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '6386410704a59f742a7a3b45',
+        description: 'Set up the radio repeater on the roof of the sunken building at the shore on Lighthouse',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: 127.57,
+              y: 6.99,
+              z: 293,
+            },
+            outline: [
+              {
+                x: 129.68,
+                y: 5.91,
+                z: 291.6,
+              },
+              {
+                x: 129.68,
+                y: 5.91,
+                z: 294.41,
+              },
+              {
+                x: 125.47,
+                y: 5.91,
+                z: 294.41,
+              },
+              {
+                x: 125.47,
+                y: 5.91,
+                z: 291.6,
+              },
+            ],
+            top: 8.08,
+            bottom: 5.91,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Assessment - Part 1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_1
+  '625d6ffcaa168e51321d69d7': {
+    id: '625d6ffcaa168e51321d69d7',
+    name: 'Assessment - Part 1',
+    disabled: true,
+    normalizedName: 'assessment-part-1',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_1',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 23500,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d6ffaf7308432be1d44c5',
+          name: 'Network Provider - Part 2',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '625ed292c4874104f230c0c8',
+        description: 'Eliminate PMC operatives near the Lighthouse peninsula',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: -29.57,
+              y: 23.34,
+              z: 112.69,
+            },
+            outline: [
+              {
+                x: -228.14,
+                y: -3.07,
+                z: -387.88,
+              },
+              {
+                x: -230.99,
+                y: -3.07,
+                z: 612.12,
+              },
+              {
+                x: 169,
+                y: -3.07,
+                z: 613.26,
+              },
+              {
+                x: 171.86,
+                y: -3.07,
+                z: -386.74,
+              },
+            ],
+            top: 49.76,
+            bottom: -3.07,
+          },
+        ],
+        shotType: 'kill',
+        targetNames: ['any PMC operatives'],
+        optional: false,
+        count: 15,
+      },
+    ],
+  },
+
+  // Assessment - Part 2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_2
+  '625d6fff4149f1149b5b12c9': {
+    id: '625d6fff4149f1149b5b12c9',
+    name: 'Assessment - Part 2',
+    disabled: true,
+    normalizedName: 'assessment-part-2',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_2',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e3c2d2720bac5b8b4567',
+      name: 'Woods',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 24200,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d6ffcaa168e51321d69d7',
+          name: 'Assessment - Part 1',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '62602852c48e6c62a440fab6',
+        description: 'Locate and mark the first bunker with an MS2000 marker on Woods',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e3c2d2720bac5b8b4567',
+              name: 'Woods',
+            },
+            position: {
+              x: 222.16,
+              y: 21.38,
+              z: -706.6,
+            },
+            outline: [
+              {
+                x: 218.06,
+                y: 19.94,
+                z: -709.04,
+              },
+              {
+                x: 219.83,
+                y: 19.94,
+                z: -702.44,
+              },
+              {
+                x: 226.26,
+                y: 19.94,
+                z: -704.16,
+              },
+              {
+                x: 224.49,
+                y: 19.94,
+                z: -710.76,
+              },
+            ],
+            top: 22.83,
+            bottom: 19.94,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '62602858efebc4442a7b3876',
+        description: 'Locate and mark the second bunker with an MS2000 marker on Woods',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e3c2d2720bac5b8b4567',
+              name: 'Woods',
+            },
+            position: {
+              x: -156.09,
+              y: 52.27,
+              z: -273.32,
+            },
+            outline: [
+              {
+                x: -158.06,
+                y: 50.64,
+                z: -274.89,
+              },
+              {
+                x: -158.58,
+                y: 50.64,
+                z: -272.96,
+              },
+              {
+                x: -154.13,
+                y: 50.64,
+                z: -271.75,
+              },
+              {
+                x: -153.61,
+                y: 50.64,
+                z: -273.68,
+              },
+            ],
+            top: 53.9,
+            bottom: 50.64,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '6260285c1ed3bb5bcc5bd9e8',
+        description: 'Locate and mark the third bunker with an MS2000 marker on Woods',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e3c2d2720bac5b8b4567',
+              name: 'Woods',
+            },
+            position: {
+              x: -157.6,
+              y: 47.17,
+              z: -233.2,
+            },
+            outline: [
+              {
+                x: -156.91,
+                y: 45.62,
+                z: -230.95,
+              },
+              {
+                x: -155.63,
+                y: 45.62,
+                z: -234.49,
+              },
+              {
+                x: -158.29,
+                y: 45.62,
+                z: -235.46,
+              },
+              {
+                x: -159.57,
+                y: 45.62,
+                z: -231.91,
+              },
+            ],
+            top: 48.72,
+            bottom: 45.62,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '638643e03674202b7d07c9e5',
+        description: 'Locate and mark the fourth bunker with an MS2000 marker on Woods',
+        type: 'mark',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e3c2d2720bac5b8b4567',
+              name: 'Woods',
+            },
+            position: {
+              x: 446.34,
+              y: -13.14,
+              z: 69.18,
+            },
+            outline: [
+              {
+                x: 443.14,
+                y: -14.75,
+                z: 65.68,
+              },
+              {
+                x: 443.14,
+                y: -14.75,
+                z: 72.68,
+              },
+              {
+                x: 449.54,
+                y: -14.75,
+                z: 72.68,
+              },
+              {
+                x: 449.54,
+                y: -14.75,
+                z: 65.68,
+              },
+            ],
+            top: -11.53,
+            bottom: -14.75,
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Assessment - Part 3
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_3
+  '625d7001c4874104f230c0c5': {
+    id: '625d7001c4874104f230c0c5',
+    name: 'Assessment - Part 3',
+    disabled: true,
+    normalizedName: 'assessment-part-3',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_3',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5b0fc42d86f7744a585f9105',
+      name: 'The Lab',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 24800,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d6fff4149f1149b5b12c9',
+          name: 'Assessment - Part 2',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '6260295faa168e51321d69d9',
+        description: 'Eliminate Raiders in The Lab',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+          {
+            id: '6a294a5b5eb5f9a1700417b7',
+            name: 'The Lab (Dark)',
+          },
+        ],
+        shotType: 'kill',
+        targetNames: ['Raider'],
+        optional: false,
+        count: 7,
+      },
+      {
+        id: '62602aaff7308432be1d44c9',
+        description: 'Hand over the found in raid SJ1 TGLabs combat stimulant injector',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5c0e531286f7747fa54205c2',
+            name: 'SJ1 TGLabs combat stimulant injector',
+            shortName: 'SJ1',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 15,
+      },
+      {
+        id: '62602a37c4874104f230c0ca',
+        description: 'Hand over the found in raid SJ6 TGLabs combat stimulant injector',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5c0e531d86f7747fa23f4d42',
+            name: 'SJ6 TGLabs combat stimulant injector',
+            shortName: 'SJ6',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 5,
+      },
+      {
+        id: '62602a44e7578c305945c9c5',
+        description: 'Hand over the found in raid SJ9 TGLabs combat stimulant injector',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5fca13ca637ee0341a484f46',
+            name: 'SJ9 TGLabs combat stimulant injector',
+            shortName: 'SJ9',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+    ],
+  },
+
+  // Key to the Tower
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Key_to_the_Tower
+  '625d70031ed3bb5bcc5bd9e5': {
+    id: '625d70031ed3bb5bcc5bd9e5',
+    name: 'Key to the Tower',
+    disabled: true,
+    normalizedName: 'key-to-the-tower',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Key_to_the_Tower',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 30500,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d7001c4874104f230c0c5',
+          name: 'Assessment - Part 3',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '62602b061ed3bb5bcc5bd9ea',
+        description: 'Hand over the found in raid Piece of plexiglass',
+        type: 'giveItem',
+        items: [
+          {
+            id: '59e366c186f7741778269d85',
+            name: 'Piece of plexiglass',
+            shortName: 'Plexiglass',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 2,
+      },
+      {
+        id: '62602b0ea4eb80027c4f2e0e',
+        description: 'Hand over the found in raid Insulating tape',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5734795124597738002c6176',
+            name: 'Insulating tape',
+            shortName: 'Tape',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: '62602b17f7308432be1d44ca',
+        description: 'Hand over the found in raid Military circuit board',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5d0376a486f7747d8050965c',
+            name: 'Military circuit board',
+            shortName: 'MCB',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 2,
+      },
+      {
+        id: '62602b1ec4874104f230c0cb',
+        description: 'Hand over the found in raid Military COFDM Wireless Signal Transmitter',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5c052f6886f7746b1e3db148',
+            name: 'Military COFDM Wireless Signal Transmitter',
+            shortName: 'SG-C10',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: '62602b26e7578c305945c9c6',
+        description: 'Hand over the found in raid Working LCD',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5d1b304286f774253763a528',
+            name: 'Working LCD',
+            shortName: 'LCD',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: '633d8b5dbc99da1cf0685f36',
+        description: 'Obtain the Radio transmitter body on Lighthouse',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        questItem: {
+          id: '6399f54b0a36db13c823ad21',
+          name: 'Radio transmitter body',
+          shortName: 'Body',
+        },
+        possibleLocations: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            positions: [
+              {
+                x: -125.2112,
+                y: 3.9244,
+                z: -530.8186,
+              },
+              {
+                x: 1.3590012,
+                y: 2.1595,
+                z: -630.85803,
+              },
+              {
+                x: -180.09456,
+                y: 15.249,
+                z: -651.085,
+              },
+              {
+                x: -54.7156,
+                y: 2.5759,
+                z: -525.9251,
+              },
+              {
+                x: -58.669285,
+                y: 2.5451,
+                z: -642.4992,
+              },
+              {
+                x: -100.585,
+                y: 1.5309,
+                z: -491.943,
+              },
+              {
+                x: -68.87,
+                y: 3.1828,
+                z: -694.824,
+              },
+              {
+                x: 40.274002,
+                y: 15.119,
+                z: -619.3407,
+              },
+              {
+                x: 0.42720032,
+                y: 3.3931,
+                z: -654.5141,
+              },
+              {
+                x: -46.276,
+                y: 8.6234,
+                z: -521.0416,
+              },
+              {
+                x: -137.52579,
+                y: 2.5751586,
+                z: -689.62384,
+              },
+            ],
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '633d8b77f2ab4f3f095029d6',
+        description: 'Hand over the Radio transmitter body',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6399f54b0a36db13c823ad21',
+          name: 'Radio transmitter body',
+          shortName: 'Body',
+        },
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Knock-Knock
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Knock-Knock
+  '625d7005a4eb80027c4f2e09': {
+    id: '625d7005a4eb80027c4f2e09',
+    name: 'Knock-Knock',
+    disabled: true,
+    normalizedName: 'knock-knock',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Knock-Knock',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    minPlayerLevel: 0,
+    kappaRequired: false,
+    lightkeeperRequired: true,
+    factionName: 'Any',
+    experience: 31300,
+    taskRequirements: [
+      {
+        task: {
+          id: '625d70031ed3bb5bcc5bd9e5',
+          name: 'Key to the Tower',
+        },
+        status: ['complete'],
+      },
+    ],
+    traderRequirements: [],
+    objectives: [
+      {
+        id: '63ab617b87413d64ae0ac210',
+        description: 'Check if the radio transmitter works near the Lighthouse peninsula',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        zones: [
+          {
+            map: {
+              id: '5704e4dad2720bb55b8b4567',
+              name: 'Lighthouse',
+            },
+            position: {
+              x: 119.3,
+              y: 2.15,
+              z: 520.76,
+            },
+            outline: [
+              {
+                x: 106.88,
+                y: -3.7,
+                z: 507.95,
+              },
+              {
+                x: 106.88,
+                y: -3.7,
+                z: 533.57,
+              },
+              {
+                x: 131.73,
+                y: -3.7,
+                z: 533.57,
+              },
+              {
+                x: 131.73,
+                y: -3.7,
+                z: 507.95,
+              },
+            ],
+            top: 8.01,
+            bottom: -3.7,
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: '62602c89a4eb80027c4f2e0f',
+        description: 'Survive and extract from the location',
+        type: 'extract',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: {
+            id: '638f541a29ffd1183d187f57',
+            name: 'Lightkeeper',
+          },
+          standing: 0.01,
+        },
+      ],
+    },
+  },
 }

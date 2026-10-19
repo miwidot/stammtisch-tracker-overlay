@@ -307,6 +307,18 @@ with older cached task data should still treat a prerequisite with no recorded
 status as unknown rather than inventing a replacement edge or treating it as
 complete.
 
+Exception: Getting Acquainted is not retired. It survived the rework as "To the
+Light - Getting Acquainted", and it and the Make Amends re-entry chain are
+restored in `src/additions/tasksAdd.json5` from tarkov.dev's last archived
+definitions (see
+[tarkov-data-manager#886](https://github.com/the-hideout/tarkov-data-manager/issues/886)).
+The restored entry keeps upstream's Knock-Knock
+(`625d7005a4eb80027c4f2e09`) prerequisite. To keep that reference resolvable,
+the seven retired tasks of the old chain (Network Provider - Part 1 through
+Knock-Knock) are re-added there with `disabled: true`; consumers that filter
+disabled tasks see Getting Acquainted as unknown until the real "To the Light"
+predecessor IDs are known.
+
 The chapter-level `questUnlocks` entries that previously pointed at this task
 were removed from `src/additions/storyChapters.json5` along with it, so the
 "Batya / The Ticket story alternatives" the overlay used to expose for it are
