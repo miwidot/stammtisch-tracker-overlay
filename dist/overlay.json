@@ -6663,24 +6663,43 @@
           "traderId": "5ac3b934156ae10c4430e83c",
           "loyaltyLevel": 1
         },
-        "verification": "unresolved",
-        "coverage": "partial",
+        "verification": "verified",
+        "coverage": "complete",
         "derivation": {
-          "type": "distinctTaskCompletions",
-          "taskIds": [
-            "5ae448bf86f7744d733e55ee",
-            "5ae448f286f77448d73c0131",
-            "5ae4490786f7744ca822adcc",
-            "5ae4493486f7744efa289417",
-            "5ae4493d86f7744b8e15aa8f",
-            "5ae449b386f77446d8741719",
-            "5ae449c386f7744bde357697",
-            "5c10f94386f774227172c572",
-            "60e71dc0a94be721b065bbfc"
+          "type": "taskGroupCompletions",
+          "groups": [
+            [
+              "5ae448bf86f7744d733e55ee"
+            ],
+            [
+              "5ae448f286f77448d73c0131"
+            ],
+            [
+              "5ae4490786f7744ca822adcc"
+            ],
+            [
+              "5ae449b386f77446d8741719"
+            ],
+            [
+              "5ae449c386f7744bde357697"
+            ],
+            [
+              "5c10f94386f774227172c572"
+            ],
+            [
+              "60e71dc0a94be721b065bbfc"
+            ],
+            {
+              "anyOf": [
+                "5ae4493486f7744efa289417",
+                "5ae4493d86f7744b8e15aa8f"
+              ]
+            }
           ]
         },
         "proof": [
-          "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md"
+          "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md",
+          "https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json"
         ]
       },
       "6a4b4e6a30dac4b01af220aa": {
@@ -7404,24 +7423,43 @@
           "traderId": "5ac3b934156ae10c4430e83c",
           "loyaltyLevel": 1
         },
-        "verification": "unresolved",
-        "coverage": "partial",
+        "verification": "verified",
+        "coverage": "complete",
         "derivation": {
-          "type": "distinctTaskCompletions",
-          "taskIds": [
-            "5ae448bf86f7744d733e55ee",
-            "5ae448f286f77448d73c0131",
-            "5ae4490786f7744ca822adcc",
-            "5ae4493486f7744efa289417",
-            "5ae4493d86f7744b8e15aa8f",
-            "5ae449b386f77446d8741719",
-            "5ae449c386f7744bde357697",
-            "5c10f94386f774227172c572",
-            "60e71dc0a94be721b065bbfc"
+          "type": "taskGroupCompletions",
+          "groups": [
+            [
+              "5ae448bf86f7744d733e55ee"
+            ],
+            [
+              "5ae448f286f77448d73c0131"
+            ],
+            [
+              "5ae4490786f7744ca822adcc"
+            ],
+            [
+              "5ae449b386f77446d8741719"
+            ],
+            [
+              "5ae449c386f7744bde357697"
+            ],
+            [
+              "5c10f94386f774227172c572"
+            ],
+            [
+              "60e71dc0a94be721b065bbfc"
+            ],
+            {
+              "anyOf": [
+                "5ae4493486f7744efa289417",
+                "5ae4493d86f7744b8e15aa8f"
+              ]
+            }
           ]
         },
         "proof": [
-          "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md"
+          "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md",
+          "https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json"
         ]
       },
       "6a4b4e6a30dac4b01af220aa": {
@@ -8145,24 +8183,43 @@
           "traderId": "5ac3b934156ae10c4430e83c",
           "loyaltyLevel": 1
         },
-        "verification": "unresolved",
-        "coverage": "partial",
+        "verification": "verified",
+        "coverage": "complete",
         "derivation": {
-          "type": "distinctTaskCompletions",
-          "taskIds": [
-            "5ae448bf86f7744d733e55ee",
-            "5ae448f286f77448d73c0131",
-            "5ae4490786f7744ca822adcc",
-            "5ae4493486f7744efa289417",
-            "5ae4493d86f7744b8e15aa8f",
-            "5ae449b386f77446d8741719",
-            "5ae449c386f7744bde357697",
-            "5c10f94386f774227172c572",
-            "60e71dc0a94be721b065bbfc"
+          "type": "taskGroupCompletions",
+          "groups": [
+            [
+              "5ae448bf86f7744d733e55ee"
+            ],
+            [
+              "5ae448f286f77448d73c0131"
+            ],
+            [
+              "5ae4490786f7744ca822adcc"
+            ],
+            [
+              "5ae449b386f77446d8741719"
+            ],
+            [
+              "5ae449c386f7744bde357697"
+            ],
+            [
+              "5c10f94386f774227172c572"
+            ],
+            [
+              "60e71dc0a94be721b065bbfc"
+            ],
+            {
+              "anyOf": [
+                "5ae4493486f7744efa289417",
+                "5ae4493d86f7744b8e15aa8f"
+              ]
+            }
           ]
         },
         "proof": [
-          "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md"
+          "https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md",
+          "https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json"
         ]
       },
       "6a4b4e6a30dac4b01af220aa": {
@@ -17242,8 +17299,8 @@
     }
   },
   "$meta": {
-    "version": "1.161",
-    "generated": "2026-10-19T09:12:20.462Z",
-    "sha256": "3a3e94413db27d3e018c29b3d9a33812f29f576648652d5eeb53731cb547146a"
+    "version": "1.162",
+    "generated": "2026-10-19T13:55:33.989Z",
+    "sha256": "16546ec040d434146adcb8862837623ee15fc03156706932e23e37ca1a196c7f"
   }
 }
