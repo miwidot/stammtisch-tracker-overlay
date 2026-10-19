@@ -301,7 +301,8 @@ function applyTraderRequirements(
 ```
 
 - **Synthetic requirement IDs** use the `overlay.` prefix (for example,
-  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`). The prefix identifies
+  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`, where `<taskId>` is a
+  24-hex task ID or a `placeholder_<slug>` task ID). The prefix identifies
   the ID as synthetic; it does not imply that the requirement itself was
   authored by the overlay. Overlay-only requirements use this form, and the
   API adapter also assigns it when an upstream requirement is missing an ID.

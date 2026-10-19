@@ -270,7 +270,7 @@ function stringProblem(schema: RecordData, value: string): string | undefined {
 
 // Keep patterns literal; schema changes require explicit validator coverage.
 const TRADER_REQUIREMENT_ID_PATTERN =
-  /^(?:[0-9a-f]{24}(?:-[0-9a-f]{24})?|overlay\.[0-9a-f]{24}\.[0-9a-f]{24}\.(?:level\.>=\.[1-4]|reputation\.(?:>=|<=|>|<|=)\.-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)(?:\.occurrence\.(?:[2-9]|[1-9][0-9]+))?)$/;
+  /^(?:[0-9a-f]{24}(?:-[0-9a-f]{24})?|overlay\.(?:[0-9a-f]{24}|placeholder_[a-z0-9_]+)\.[0-9a-f]{24}\.(?:level\.>=\.[1-4]|reputation\.(?:>=|<=|>|<|=)\.-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)(?:\.occurrence\.(?:[2-9]|[1-9][0-9]+))?)$/;
 const PUBLISHED_PATTERNS = new Map([
   [TRADER_REQUIREMENT_ID_PATTERN.source, TRADER_REQUIREMENT_ID_PATTERN],
 ]);

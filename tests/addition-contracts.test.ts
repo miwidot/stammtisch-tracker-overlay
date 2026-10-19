@@ -636,3 +636,26 @@ it('checks requirement merge IDs against the published literal pattern', () => {
     ])
   );
 });
+
+it('accepts placeholder-task synthetic merge IDs under the published literal pattern', () => {
+  const diagnostics = validateAdditionContracts(
+    'tasksAdd',
+    {
+      placeholder_some_quest: {
+        traderRequirements: [
+          {
+            id: 'overlay.placeholder_some_quest.54cb50c76803fa8b248b4571.level.>=.2',
+            trader: { id: 'trader', name: 'Trader' },
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+          },
+        ],
+      },
+    },
+    context({ partial: true })
+  );
+  expect(diagnostics).not.toEqual(
+    expect.arrayContaining([expect.objectContaining({ field: 'traderRequirements.0.id' })])
+  );
+});

@@ -12,11 +12,16 @@
   // there and migrate stored progress (plan in the issue). Definitions come from
   // each linked wiki page. Map, item and trader references use real IDs.
   //
-  // Only explicit "Unlocks N-M after completion of X" Requirements lines become
-  // taskRequirements; infobox `previous` chains are not proof (AGENTS.md), so
-  // most placeholders appear available. Loyalty-level gates are omitted too:
-  // trader requirement IDs must embed a 24-hex task ID. The issue lists the
-  // wiki chain and LL gates per task.
+  // Gates are best-effort and placeholder-only: besides explicit "Unlocks N-M
+  // after completion of X" Requirements lines, each placeholder is gated on its
+  // wiki infobox `previous` quest (status ['active', 'complete'] when the wiki
+  // says "Accept X", so finishing X keeps the gate met; else 'complete').
+  // AGENTS.md treats `previous` as narrative order, not proof; it is used here
+  // only because these entries are synthetic anyway and leaving them ungated
+  // shows the whole line as available. Chain roots keep
+  // the wiki loyalty-level gates as traderRequirements with synthetic ids
+  // 'overlay.<placeholder id>.<traderId>.level.>=.N'. Replace both with
+  // upstream data when the real IDs land; the issue lists each gate.
 
   // ...for the Good of the Chosen
   // Proof: https://escapefromtarkov.fandom.com/wiki/...for_the_Good_of_the_Chosen
@@ -35,6 +40,15 @@
     },
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_in_the_name_of_humanity',
+          name: 'In the Name of Humanity...',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_for_the_good_of_the_chosen_obj01',
@@ -59,6 +73,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_desperate_assault',
+          name: 'Desperate Assault',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_break_the_chain_obj01',
@@ -122,6 +145,15 @@
     experience: 11000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_uninvited_guests_part_2',
+          name: 'Uninvited Guests - Part 2',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_cast_the_net_obj01',
@@ -264,6 +296,15 @@
     experience: 35000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_final_stretch',
+          name: 'Final Stretch',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_consequences_of_our_decisions_obj01',
@@ -303,6 +344,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_final_stretch',
+          name: 'Final Stretch',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_desperate_assault_obj01',
@@ -336,6 +386,15 @@
     experience: 35000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_break_the_chain',
+          name: 'Break the Chain',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_digital_puzzle_obj01',
@@ -372,6 +431,15 @@
     experience: 35000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_sheep_in_wolf_s_clothing',
+          name: "Sheep in Wolf's Clothing",
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_final_stretch_obj01',
@@ -411,6 +479,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_what_s_in_the_bag',
+          name: "What's in the Bag?",
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_forbidden_knowledge_obj01',
@@ -454,6 +531,15 @@
     experience: 100000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_for_the_good_of_the_chosen',
+          name: '...for the Good of the Chosen',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_historical_prospects_obj01',
@@ -554,6 +640,15 @@
     experience: 70000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_price_for_information',
+          name: 'Price for Information',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_in_the_name_of_humanity_obj01',
@@ -693,6 +788,15 @@
     kappaRequired: false,
     factionName: 'Any',
     minPlayerLevel: 20,
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_reverse_gear',
+          name: 'Reverse Gear',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_key_to_understanding_obj01',
@@ -742,6 +846,15 @@
     experience: 11000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_cast_the_net',
+          name: 'Cast the Net',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_know_your_enemy_obj01',
@@ -768,6 +881,15 @@
     experience: 65000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_digital_puzzle',
+          name: 'Digital Puzzle',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_price_for_information_obj01',
@@ -993,6 +1115,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_reverse_gear',
+          name: 'Reverse Gear',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_riding_the_wave_obj01',
@@ -1162,6 +1293,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_forbidden_knowledge',
+          name: 'Forbidden Knowledge',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_sheep_in_wolf_s_clothing_obj01',
@@ -1226,6 +1366,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_desperate_assault',
+          name: 'Desperate Assault',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_stay_clear_of_blast_zone_obj01',
@@ -1308,6 +1457,15 @@
     experience: 11000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_uninvited_guests_part_1',
+          name: 'Uninvited Guests - Part 1',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_unanswered_calls_obj01',
@@ -1349,6 +1507,18 @@
     experience: 6000,
     kappaRequired: false,
     factionName: 'Any',
+    traderRequirements: [
+      {
+        id: 'overlay.placeholder_uninvited_guests_part_1.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 2,
+        trader: {
+          id: '54cb50c76803fa8b248b4571',
+          name: 'Prapor',
+        },
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_uninvited_guests_part_1_obj01',
@@ -1411,6 +1581,15 @@
     experience: 5000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_uninvited_guests_part_1',
+          name: 'Uninvited Guests - Part 1',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_uninvited_guests_part_2_obj01',

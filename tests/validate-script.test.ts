@@ -740,6 +740,75 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('accepts placeholder-task synthetic ids and rejects malformed placeholder slugs', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    const entry = (id: string) => `{
+      placeholder_some_quest: {
+        traderRequirements: [
+          {
+            id: '${id}',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+          }
+        ]
+      }
+    }`;
+    try {
+      writeFileSync(
+        filePath,
+        entry('overlay.placeholder_some_quest.54cb50c76803fa8b248b4571.level.>=.2'),
+        'utf-8'
+      );
+      const accepted = validateFile(filePath, 'overrides/tasks.json5', validators);
+      expect(accepted.errors).toBeUndefined();
+      expect(accepted.valid).toBe(true);
+      writeFileSync(
+        filePath,
+        entry('overlay.placeholder_Some-Quest.54cb50c76803fa8b248b4571.level.>=.2'),
+        'utf-8'
+      );
+      const rejected = validateFile(filePath, 'overrides/tasks.json5', validators);
+      expect(rejected.valid).toBe(false);
+      expect(rejected.errors?.some((error) => error.includes('must match pattern'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects placeholder synthetic ids that encode a different placeholder task', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        placeholder_some_quest: {
+          traderRequirements: [
+            {
+              id: 'overlay.placeholder_other_quest.54cb50c76803fa8b248b4571.level.>=.2',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 2,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+    try {
+      const result = validateTraderRequirementIds(filePath, 'additions/tasksAdd.json5');
+      expect(result.valid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors?.[0]).toContain("task id 'placeholder_other_quest'");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('accepts synthetic ids derived from the entry they label', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
     const filePath = join(tempDir, 'tasks.json5');

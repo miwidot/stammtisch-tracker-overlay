@@ -2979,11 +2979,16 @@
   // there and migrate stored progress (plan in the issue). Definitions come from
   // each linked wiki page. Map, item and trader references use real IDs.
   //
-  // Only explicit "Unlocks N-M after completion of X" Requirements lines become
-  // taskRequirements; infobox `previous` chains are not proof (AGENTS.md), so
-  // most placeholders appear available. Loyalty-level gates are omitted too:
-  // trader requirement IDs must embed a 24-hex task ID. The issue lists the
-  // wiki chain and LL gates per task.
+  // Gates are best-effort and placeholder-only: besides explicit "Unlocks N-M
+  // after completion of X" Requirements lines, each placeholder is gated on its
+  // wiki infobox `previous` quest (status ['active', 'complete'] when the wiki
+  // says "Accept X", so finishing X keeps the gate met; else 'complete').
+  // AGENTS.md treats `previous` as narrative order, not proof; it is used here
+  // only because these entries are synthetic anyway and leaving them ungated
+  // shows the whole line as available. Chain roots keep
+  // the wiki loyalty-level gates as traderRequirements with synthetic ids
+  // 'overlay.<placeholder id>.<traderId>.level.>=.N'. Replace both with
+  // upstream data when the real IDs land; the issue lists each gate.
 
   // Honest Review
   // Proof: https://escapefromtarkov.fandom.com/wiki/Honest_Review
@@ -3066,6 +3071,15 @@
     experience: 30000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_honest_review',
+          name: 'Honest Review',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_i_m_something_of_a_btr_myself_obj01',
@@ -3225,6 +3239,15 @@
     experience: 25000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_a_time_to_throw_stones',
+          name: 'To the Light - A Time to Throw Stones',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_a_time_to_gather_stones_obj01',
@@ -3255,6 +3278,15 @@
     experience: 55000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_bite_the_dust',
+          name: 'To the Light - Bite the Dust',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_a_time_to_throw_stones_obj01',
@@ -3288,6 +3320,15 @@
     experience: 10000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_fallen_bird',
+          name: 'To the Light - Fallen Bird',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_bite_the_dust_obj01',
@@ -3456,6 +3497,15 @@
     experience: 10000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_fallen_bird',
+          name: 'To the Light - Fallen Bird',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_dangerous_ambitions_obj01',
@@ -3482,6 +3532,15 @@
     experience: 10000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_clip_their_wings',
+          name: 'To the Light - Clip Their Wings',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_fallen_bird_obj01',
@@ -3603,6 +3662,15 @@
     experience: 10000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_false_call',
+          name: 'To the Light - False Call',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_someone_called_obj01',
@@ -3627,6 +3695,15 @@
     experience: 65000,
     kappaRequired: false,
     factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_to_the_light_a_time_to_gather_stones',
+          name: 'To the Light - A Time to Gather Stones',
+        },
+        status: ['complete'],
+      },
+    ],
     objectives: [
       {
         id: 'placeholder_to_the_light_the_other_side_obj01',
@@ -3709,6 +3786,68 @@
     experience: 35000,
     kappaRequired: false,
     factionName: 'Any',
+    traderRequirements: [
+      {
+        id: 'overlay.placeholder_to_the_light_trust_but_verify.54cb57776803fa99248b456e.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 3,
+        trader: {
+          id: '54cb57776803fa99248b456e',
+          name: 'Therapist',
+        },
+      },
+      {
+        id: 'overlay.placeholder_to_the_light_trust_but_verify.58330581ace78e27b8b10cee.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 3,
+        trader: {
+          id: '58330581ace78e27b8b10cee',
+          name: 'Skier',
+        },
+      },
+      {
+        id: 'overlay.placeholder_to_the_light_trust_but_verify.5935c25fb3acc3127c3d8cd9.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 3,
+        trader: {
+          id: '5935c25fb3acc3127c3d8cd9',
+          name: 'Peacekeeper',
+        },
+      },
+      {
+        id: 'overlay.placeholder_to_the_light_trust_but_verify.5a7c2eca46aef81a7ca2145d.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 3,
+        trader: {
+          id: '5a7c2eca46aef81a7ca2145d',
+          name: 'Mechanic',
+        },
+      },
+      {
+        id: 'overlay.placeholder_to_the_light_trust_but_verify.5ac3b934156ae10c4430e83c.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 3,
+        trader: {
+          id: '5ac3b934156ae10c4430e83c',
+          name: 'Ragman',
+        },
+      },
+      {
+        id: 'overlay.placeholder_to_the_light_trust_but_verify.5c0647fdd443bc2504c2d371.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 3,
+        trader: {
+          id: '5c0647fdd443bc2504c2d371',
+          name: 'Jaeger',
+        },
+      },
+    ],
     otherRequirements: [
       {
         id: 'placeholder_to_the_light_trust_but_verify_req_dialogue',
