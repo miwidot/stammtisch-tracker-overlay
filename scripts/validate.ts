@@ -10,6 +10,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import {
+  assertDisjointCounterGroups,
   isDirectExecution,
   getProjectPaths,
   loadJson5File,
@@ -22,6 +23,7 @@ import {
   SYNTHETIC_REQUIREMENT_ID_PREFIX,
   icons,
   type LocaleOverlay,
+  type ProgressionCounterRegistry,
   type SchemaValidationResult,
   type StoryChapter,
 } from '../src/lib/index.js';
@@ -157,6 +159,9 @@ export function validateFile(
 
     if (valid && displayPath === 'additions/storyChapters.json5') {
       assertStoryObjectiveParents(data as Record<string, StoryChapter>);
+    }
+    if (valid && displayPath === 'additions/progressionCounters.json5') {
+      assertDisjointCounterGroups(data as ProgressionCounterRegistry);
     }
 
     return { file: displayPath, valid, errors };

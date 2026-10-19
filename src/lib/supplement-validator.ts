@@ -196,9 +196,25 @@ function upstreamTaskId(task: RecordData): string {
   return task.id;
 }
 
+function groupMembers(group: unknown, variableId: string): unknown[] {
+  const members =
+    Array.isArray(group) || typeof group !== 'object' || group === null
+      ? group
+      : (group as RecordData).anyOf;
+  if (!Array.isArray(members))
+    throw new Error(
+      `Expected derivation.groups entries to be lists or { anyOf } for ${variableId}`
+    );
+  return members;
+}
+
 function counterTasks(raw: unknown, variableId: string): unknown[] {
-  const ids = record(record(raw).derivation).taskIds;
-  if (!Array.isArray(ids)) throw new Error(`Expected derivation.taskIds for ${variableId}`);
+  const derivation = record(record(raw).derivation);
+  const ids = Array.isArray(derivation.groups)
+    ? derivation.groups.flatMap((group: unknown) => groupMembers(group, variableId))
+    : derivation.taskIds;
+  if (!Array.isArray(ids))
+    throw new Error(`Expected derivation.taskIds or derivation.groups for ${variableId}`);
   return [...new Set(ids)];
 }
 

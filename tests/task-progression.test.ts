@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import Ajv from 'ajv';
 import { readFileSync } from 'node:fs';
 import {
+  assertDisjointCounterGroups,
+  counterGroups,
   evaluateTaskProgression,
   normalizeTaskStatus,
   type ProgressionCounterDefinition,
@@ -74,6 +76,22 @@ describe('progress-based task eligibility', () => {
     { derivation: { type: 'distinctTaskCompletions', taskIds: ['a', 'a'] } },
     { derivation: { type: 'distinctTaskCompletions', taskIds: [] } },
     { derivation: { type: 'distinctTaskCompletions', taskIds: new Array(2) } },
+    { derivation: { type: 'taskGroupCompletions', groups: [] } },
+    { derivation: { type: 'taskGroupCompletions', groups: [[]] } },
+    { derivation: { type: 'taskGroupCompletions', groups: [['a', 'a']] } },
+    {
+      derivation: {
+        type: 'taskGroupCompletions',
+        groups: [
+          ['a', 'b'],
+          ['b', 'c'],
+        ],
+      },
+    },
+    { derivation: { type: 'taskGroupCompletions', groups: [['a'], ['']] } },
+    { derivation: { type: 'taskGroupCompletions', groups: ['a', 'b'] } },
+    { derivation: { type: 'taskGroupCompletions', taskIds: ['a'] } },
+    { derivation: { type: 'taskGroupCompletions', groups: [['a']], taskIds: ['a'] } },
     { unknownSemantics: true },
   ])('fails closed for an incomplete/untrusted rule: %j', (override) => {
     const counters = {
@@ -95,6 +113,128 @@ describe('progress-based task eligibility', () => {
       });
     }
   );
+
+  describe('task-group derivations', () => {
+    const grouped: TaskProgressionOptions = {
+      ...options,
+      counters: {
+        pve: {
+          pool: {
+            ...mapping,
+            derivation: { type: 'taskGroupCompletions', groups: [['a', 'b'], ['c']] },
+          },
+        },
+      },
+    };
+    const withStatuses = (taskStatuses: Record<string, unknown>) =>
+      ({ ...state, taskStatuses }) as TaskUnlockState;
+
+    it('counts a group once, and only when every member is complete', () => {
+      const pair = evaluateTaskProgression(
+        task,
+        withStatuses({ a: 4, b: 4, c: 'active' }),
+        grouped
+      );
+      expect(pair.counters.pool).toMatchObject({
+        source: 'tasks',
+        value: 1,
+        completedTaskIds: ['a', 'b'],
+        incompleteTaskIds: ['c'],
+      });
+      expect(pair.status).toBe('blocked');
+      const half = evaluateTaskProgression(
+        task,
+        withStatuses({ a: 4, b: 'active', c: 4 }),
+        grouped
+      );
+      expect(half.counters.pool).toMatchObject({
+        source: 'tasks',
+        value: 1,
+        completedTaskIds: ['a', 'c'],
+        incompleteTaskIds: ['b'],
+      });
+      expect(
+        evaluateTaskProgression(task, withStatuses({ a: 4, b: 4, c: 4 }), grouped).status
+      ).toBe('available');
+    });
+
+    it('settles a group with an incomplete member even when a sibling is unknown', () => {
+      expect(
+        evaluateTaskProgression(task, withStatuses({ b: 'active', c: 4 }), grouped).counters.pool
+      ).toMatchObject({ source: 'tasks', value: 1, unknownTaskIds: ['a'] });
+      expect(
+        evaluateTaskProgression(task, withStatuses({ b: 4, c: 4 }), grouped).counters.pool
+      ).toMatchObject({ source: 'unresolved', unknownTaskIds: ['a'] });
+    });
+
+    describe('anyOf groups', () => {
+      const alternatives: TaskProgressionOptions = {
+        ...options,
+        counters: {
+          pve: {
+            pool: {
+              ...mapping,
+              derivation: { type: 'taskGroupCompletions', groups: [{ anyOf: ['a', 'b'] }, ['c']] },
+            },
+          },
+        },
+      };
+      const pool = (taskStatuses: Record<string, unknown>) =>
+        evaluateTaskProgression(task, withStatuses(taskStatuses), alternatives).counters.pool;
+
+      it('earns one point once any member is complete, never more', () => {
+        expect(pool({ a: 4, b: 'active', c: 'active' })).toMatchObject({
+          source: 'tasks',
+          value: 1,
+        });
+        expect(pool({ a: 'active', b: 4, c: 4 })).toMatchObject({ source: 'tasks', value: 2 });
+        expect(pool({ a: 4, b: 4, c: 'active' })).toMatchObject({ source: 'tasks', value: 1 });
+        expect(pool({ a: 'active', b: 'active', c: 4 })).toMatchObject({
+          source: 'tasks',
+          value: 1,
+        });
+      });
+
+      it('is settled by a complete member, and unknown while only unknown members could decide', () => {
+        expect(pool({ a: 4, c: 'active' })).toMatchObject({
+          source: 'tasks',
+          value: 1,
+          unknownTaskIds: ['b'],
+        });
+        expect(pool({ a: 'active', c: 4 })).toMatchObject({
+          source: 'unresolved',
+          unknownTaskIds: ['b'],
+        });
+      });
+
+      it.each([
+        [[{ anyOf: ['a'] }]],
+        [[{ anyOf: ['a', 'a'] }]],
+        [[{ anyOf: ['a', 'b'], extra: true }]],
+        [[{ allOf: ['a', 'b'] }]],
+        [[{ anyOf: ['a', 'b'] }, ['b']]],
+      ])('rejects a malformed or overlapping anyOf group: %j', (groups) => {
+        const derivation = { type: 'taskGroupCompletions', groups };
+        expect(counterGroups(derivation)).toBeUndefined();
+      });
+    });
+
+    it('rejects a source registry that puts one task in two groups', () => {
+      const derivation = { type: 'taskGroupCompletions' as const, groups: [['a', 'b'], ['b']] };
+      expect(() =>
+        assertDisjointCounterGroups({ pve: { pool: { ...mapping, derivation } } })
+      ).toThrow('pve/pool: malformed derivation, or a task appears in more than one group');
+      expect(() => assertDisjointCounterGroups(grouped.counters!)).not.toThrow();
+    });
+
+    it('rejects a source entry whose derivation is only inherited', () => {
+      const { derivation, ...rest } = mapping;
+      const inherited = Object.assign(Object.create({ derivation }), rest);
+      expect(() => assertDisjointCounterGroups({ pve: { pool: inherited } })).toThrow(
+        'pve/pool: malformed derivation'
+      );
+    });
+  });
 
   it('counts synonymous completion statuses once and keeps definite non-completion at zero', () => {
     const supplied = {
@@ -269,6 +409,10 @@ describe('published counter schema', () => {
   it('allows an empty registry and mode-scoped evidence', () => {
     expect(validate({})).toBe(true);
     expect(validate(options.counters)).toBe(true);
+    const derivation = { type: 'taskGroupCompletions', groups: [['a', 'b'], ['c']] };
+    expect(validate({ pve: { pool: { ...mapping, derivation } } })).toBe(true);
+    const alternatives = { type: 'taskGroupCompletions', groups: [{ anyOf: ['a', 'b'] }, ['c']] };
+    expect(validate({ pve: { pool: { ...mapping, derivation: alternatives } } })).toBe(true);
   });
   it.each([
     { pvp: { pool: mapping } },
@@ -278,6 +422,23 @@ describe('published counter schema', () => {
         pool: { ...mapping, derivation: { type: 'distinctTaskCompletions', taskIds: ['a', 'a'] } },
       },
     },
+    { pve: { pool: { ...mapping, derivation: { type: 'taskGroupCompletions', groups: [] } } } },
+    { pve: { pool: { ...mapping, derivation: { type: 'taskGroupCompletions', groups: [[]] } } } },
+    {
+      pve: {
+        pool: { ...mapping, derivation: { type: 'taskGroupCompletions', groups: [['a', 'a']] } },
+      },
+    },
+    {
+      pve: {
+        pool: { ...mapping, derivation: { type: 'taskGroupCompletions', taskIds: ['a'] } },
+      },
+    },
+    ...[[{ anyOf: ['a'] }], [{ anyOf: ['a', 'a'] }], [{ anyOf: ['a', 'b'], extra: true }]].map(
+      (groups) => ({
+        pve: { pool: { ...mapping, derivation: { type: 'taskGroupCompletions', groups } } },
+      })
+    ),
     { pve: { pool: { ...mapping, proof: ['not a link'] } } },
     { pve: { pool: { ...mapping, proof: ['https://example.com/r', 'https://example.com/r'] } } },
   ])('rejects malformed published definitions: %j', (registry) =>

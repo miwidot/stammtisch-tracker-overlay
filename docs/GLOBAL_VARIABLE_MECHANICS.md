@@ -39,7 +39,8 @@ the profile's value for 23 of the 27 groups and matches the pool size for 20 of
 27; the groups it fails on are listed in [Caveats](#caveats) and are not
 explained. An aggregate match cannot show which tasks contribute or by how much,
 so the mapping is best effort rather than proven: the registry publishes the 23
-consistent groups and keeps the 4 contradicted ones unresolved. See
+consistent pools plus Mechanic tier 3's faction-pair derivation, and keeps the
+other 3 groups unresolved. See
 [the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the standard.
 
 Under that reading the group's child variables would be individual per-task
@@ -108,8 +109,9 @@ when reading client data or a future API publication that includes equality gate
 `evaluateTaskProgression` leaves the value unknown when neither an explicit
 resolved account value nor an eligible verified registry derivation supplies it.
 The numeric evaluator receives `undefined`, never an invented `0`. Missing raw
-`profile.Variables` does not prevent the 23 verified mappings from deriving
-values when the consumer supplies complete contributor history.
+`profile.Variables` does not prevent the 24 verified mappings (23 distinct-task
+pools and Mechanic tier 3's faction-pair grouping) from deriving values when the
+consumer supplies enough contributor history to settle every group.
 
 In the 1.1 PVE reference, 109 distinct targets appear across 300
 `GlobalVariableValue` conditions: **36 are group IDs and 73 are plain
@@ -174,6 +176,8 @@ And `contributors` is not interchangeable with the tier pool: for four groups th
 counter reads below the completed pool count, so counting every completed pool
 task would overshoot and report a task available too early. For the other 23 the
 registry treats the pool as the contributor set on a best-effort basis.
+Mechanic tier 3 instead counts four faction pairs once each plus eight singletons;
+the other three shortfall groups remain unresolved.
 
 ### Evidence
 
@@ -243,10 +247,11 @@ the other is not established.
 Children ≠ Pool is not by itself a contradiction. Surplus children (Prapor tier 2
 and 3, Ragman tier 3, Skier tier 4) do not stop the counter from equalling the
 completed pool count, and in every retained profile it does for these four, so
-the registry publishes them on a best-effort basis. What keeps a group unresolved
-is a counter that disagrees with its completed pool count: Mechanic tier 3 and
-Ragman tier 1 (fewer children than tasks) and Mechanic tier 4 and Prapor tier 4
-(not fewer). See [Unreconciled groups](#unreconciled-groups).
+the registry publishes them on a best-effort basis. Four full-pool counts are
+contradicted: Mechanic tier 3 and Ragman tier 1 (fewer children than tasks), and
+Mechanic tier 4 and Prapor tier 4 (not fewer). Mechanic tier 3 now uses a
+faction-pair derivation that fits the retained aggregates; the other three remain
+unresolved. See [Unreconciled groups](#unreconciled-groups).
 
 ## The second family: plain variables
 
@@ -320,13 +325,19 @@ consistent:
   contributes twice, and the profiles say nothing about alternate producers,
   initial values or resets. It is the best available evidence, and nothing
   contradicts it.
-- **Contradicted (4 groups), kept `unresolved`/`partial`.** The counter reads below
+- **Faction alternatives (Mechanic tier 3), published `verified`/`complete` with
+  `taskGroupCompletions`.** Counting each of four BEAR/USEC Gunsmith pairs once,
+  plus the other eight tasks individually, fits the informative PvE and PvP
+  aggregates. The current faction requirements support using `anyOf` for all four
+  pairs; shared writers and backfill behavior remain hypotheses. See
+  [paired-count hypotheses](#mechanic-tier-3-and-ragman-tier-1-paired-count-hypotheses).
+- **Contradicted (3 groups), kept `unresolved`/`partial`.** The counter reads below
   the completed pool count, so counting the pool can clear a threshold too early. The
   cause is unknown: some tasks may not contribute, or a reset may have lowered the
   counter after every pool task had contributed. See [Caveats](#caveats).
 
-If a capture or user report contradicts a consistent group, move it to the
-second state.
+If a capture or user report contradicts a published mapping, move it to the
+contradicted category and set it to `unresolved`/`partial`.
 
 Ragman's single tier-4 task is **not** in these totals: it has no counter group,
 which is why the table above has no Ragman tier-4 row. Do not add it as a
@@ -337,7 +348,8 @@ The overlay already has the vehicle for that annotation: the
 published as `overlay.progressionCounters` and consumed by
 `evaluateTaskProgression`. A `distinctTaskCompletions` derivation over a pool's
 task IDs is exactly the shape above, and the registry now carries it for the 23
-consistent groups. See
+consistent groups. Mechanic tier 3 instead uses `taskGroupCompletions`, with
+four `anyOf` faction pairs and eight singletons. See
 [the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the fields and
 the best-effort standard.
 
@@ -406,8 +418,9 @@ threshold and report a task available too early. The reason is undetermined. A
 shortfall in child count fits two of the four (Mechanic tier 3 and Ragman tier 1),
 but for the other two the children are not fewer than the pool at all, and in any
 of the four an unresolved reset could equally explain a low reading after every
-member had contributed. Treat all four as `unknown` rather than substituting a
-full-pool count.
+member had contributed. Mechanic tier 3 now uses a best-effort faction-pair
+derivation instead of the full-pool count. Treat Ragman tier 1, Mechanic tier 4 and
+Prapor tier 4 as `unknown` without an explicit account value.
 
 Each pool has 1–7 tasks carrying no counter gate, and the staggered waves are
 reachable from those tasks in all 27 pools — but only once those tasks are
@@ -432,8 +445,8 @@ is pointless. Taking `C(Pool, N)` for each group-gated task in the table, using 
 own threshold `N` and its pool size, the median is 56 and the maximum is
 `C(16,5) = 4368` at Mechanic tier 3. Both are reproducible from the table, but
 treat them as illustrations of magnitude rather than counts of valid histories:
-Mechanic tier 3 is one of the four unreconciled groups, so its `16` is only a pool
-size.
+Mechanic tier 3 has 16 pool tasks but only 12 contributor groups under its
+published faction-pair derivation.
 
 This does **not** license picking an `N`-subset and recording it as completed
 history. The gate supplies no identity evidence, so any such subset is invented:
@@ -448,7 +461,10 @@ no member fails another member and the only `Fail` conditions on pool tasks are
 route planner may choose freely by cost; a history reconstructor may not choose at
 all.
 
-That guarantee does **not** extend to the four unreconciled groups. There an
+For Mechanic tier 3, plan by contributor group: completing either eligible faction
+variant earns the pair's point, and completing both must not add another point.
+
+That guarantee does **not** extend to the three unresolved groups. There an
 available pool task may not advance the counter at all, so completing `N` of them
 can leave the threshold unmet and a planner would report false progress. Restrict
 route planning to verified contributors.
@@ -464,7 +480,8 @@ route planning to verified contributors.
   set**: schedule `max(0, N - have)` further contributors, not `N` — counting from
   the threshold rather than the shortfall schedules work the player has already
   done. Any available contributors will do, so pick by cost; greedy selection is
-  sufficient given the seed/wave structure. For the four unreconciled groups an
+  sufficient given the seed/wave structure. Count Mechanic tier-3 faction pairs
+  once each. For the three unresolved groups an
   available task may not advance the counter, so do not plan routes or report
   progress across them.
 - A missing account value must evaluate to `unknown`, never `available`.
@@ -477,8 +494,9 @@ route planning to verified contributors.
   tier 4 (3 vs 4), Prapor tier 4 (6 vs 7), Ragman tier 1 (8 vs 9). In every case
   the counter reads lower, which is inconsistent with the pool being counted
   one-per-task. What the retained captures narrow down per group is in
-  [Unreconciled groups](#unreconciled-groups); no contributor identity is
-  established for any of them.
+  [Unreconciled groups](#unreconciled-groups). The published Mechanic tier-3
+  faction-pair derivation reconciles its aggregates; no individual writer is
+  established for any of the four.
 - **Seven groups where children ≠ pool size**, including Prapor tier 2
   (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). The surplus children are
   plausibly retired or mode-specific markers, which is unverified. For the four
@@ -533,8 +551,23 @@ rule or show that fresh completions will reproduce the same shortfall.
 
 Neither observed aggregate fits `distinctTaskCompletions` over the full pool.
 A paired-count derivation fits both informative profiles, but is not the only
-explanation. Publishing it would change the registry contract and should document
-which histories support it and whether any retained evidence contradicts it.
+explanation. Mechanic tier 3 is published as a best-effort mapping: its four pairs
+have independent faction-eligibility evidence, and each pair uses `anyOf`, so a
+current player's single eligible variant can earn its point. The PvE aggregate is
+8 singletons + 4 pairs = 12; the PvP aggregate is 3 singletons + 4 pairs = 7.
+Those profiles completed both variants, so they do not isolate the current
+single-variant write rule or prove that each pair shares a child. Seasonal
+membership is extrapolated from the matching catalogue, as documented in
+[the registry scope](GLOBAL_VARIABLES.md#what-ships-today). No retained aggregate
+contradicts this mapping; re-check it with current-faction before/after captures.
+
+Ragman tier 1 remains `unresolved`/`partial` with its full pool as candidates.
+Its full-pool count is contradicted, and there is no corresponding faction or
+dependency evidence favoring an all-members pair over a single contributor or a
+backfill omission. The two tasks are independent, so neither a quest-chain claim
+nor their matching captured rewards settles that choice. A partly completed pair
+has not been isolated. Do not publish one of these competing mappings as an
+established rule on the aggregate match alone.
 
 ### Prapor tier 4: one-point shortfall, cause unidentified
 
@@ -577,8 +610,10 @@ best-effort evidence, but a reward signature does not identify a counter writer.
   [MPX](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_MPX).
   Counting each pair once fits 12/16 in PVE and 7/11 in PvP. It does not distinguish
   a shared child from crediting only the player's faction variant during backfill.
-  All eight remain `factionName: "Any"` upstream; the overlay already corrects AKM
-  and M4A1. The other six have no faction override. Current wiki eligibility is
+  All eight were `factionName: "Any"` upstream at that check. On 2026-10-19,
+  upstream serves BEAR for AKM and USEC for M4A1 in all three modes, so their
+  faction overrides were retired in #506. The other six had no faction override.
+  Current wiki eligibility is
   not proof of how older completed IDs were credited. The suggested lower-tier
   MP-133/Model 870 and AKS-74U/HK MP5 pairings are not supported by faction
   restrictions on their current wiki pages; MP-133 and Model 870 also occupy
@@ -617,12 +652,12 @@ best-effort evidence, but a reward signature does not identify a counter writer.
   Escort and Special Order require `>= 2`; Intimidator requires `>= 1`, not `>= 5`.
 
 The shipped registry is `src/additions/progressionCounters.json5`, using
-`derivation.taskIds`; it has no `countPoolTasks` field. Counter resolution is
+`derivation.taskIds` or `derivation.groups`; it has no `countPoolTasks` field. Counter resolution is
 `resolveCounter` in `src/lib/task-progression.ts`, not `deriveCounterValue` in
 `src/lib/globalVariables.ts`. There is no `npm run triage` command. A future pool
 audit should distinguish consumers from producers and flag tier/reward
 disagreements for investigation, rather than make them automatic inclusion or
-exclusion rules. A paired-count rule would need matching schema, types, runtime
+exclusion rules. The grouped derivation has matching schema, types, runtime
 validation, and unknown-history semantics; a simple `.some(completed)` alone
 would turn missing history into an invented zero.
 
@@ -631,11 +666,15 @@ would turn missing history into an invented zero.
 - Prapor tier 4: a 1.1 profile that completes The Art of Explosion (or Best Job in
   the World, or Special Order) as the only change between two captures.
 - Mechanic tier 4: the same for each of its four completed tasks.
-- Paired groups: a profile completing exactly one Gunsmith task of a pair, or only
-  one of Inventory Files and A Big Loss, then the other. If the first completion
-  moves the counter and the second does not, that supports one shared point for
-  the tested pair in that account/run. Repeat across pairs and fresh/migrated
-  histories before describing it as a general rule.
+- Mechanic tier 3: isolate a current-faction Gunsmith completion between captures
+  and check that it advances the counter by one. Repeat for both factions and all
+  four pairs, across fresh and migrated histories. A current player cannot
+  complete both faction variants to test the second completion in the same run.
+- Ragman tier 1: isolate Inventory Files and A Big Loss individually, then both.
+  If the first completion moves the counter and the second does not, that supports
+  one shared point for that account/run; a pair requiring both would not fit.
+  Repeat with the other completion order and fresh/migrated histories before
+  describing it as a general rule.
 
 ## Reproducing
 

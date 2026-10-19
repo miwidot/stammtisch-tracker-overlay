@@ -55,8 +55,66 @@ function unresolved(reason: string): ProgressionCounterEvaluation {
   return { source: 'unresolved', reason };
 }
 
+function uniqueIds(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    Array.from(value).every(nonEmpty) &&
+    new Set(value).size === value.length
+  );
+}
+
+/** One counter point: earned once every member is complete, or once any member is if `any`. */
+export interface CounterGroup {
+  ids: string[];
+  any: boolean;
+}
+
+/** A group is a task-ID list (all members) or `{ anyOf }` (alternatives such as faction variants). */
+function counterGroup(value: unknown): CounterGroup | undefined {
+  if (uniqueIds(value)) return { ids: Array.from(value), any: false };
+  if (!record(value) || Object.keys(value).some((name) => name !== 'anyOf')) return undefined;
+  const ids = own(value, 'anyOf');
+  return uniqueIds(ids) && ids.length > 1 ? { ids: Array.from(ids), any: true } : undefined;
+}
+
+/**
+ * Contributor groups for a derivation: one point per group. `distinctTaskCompletions` is the
+ * singleton case. Undefined unless the derivation is well formed and no task belongs to two groups.
+ */
+export function counterGroups(derivation: unknown): CounterGroup[] | undefined {
+  if (!record(derivation)) return undefined;
+  const type = own(derivation, 'type');
+  const key = type === 'distinctTaskCompletions' ? 'taskIds' : 'groups';
+  if (
+    (type !== 'distinctTaskCompletions' && type !== 'taskGroupCompletions') ||
+    Object.keys(derivation).some((name) => !['type', key].includes(name))
+  )
+    return undefined;
+  const value = own(derivation, key);
+  if (type === 'distinctTaskCompletions')
+    return uniqueIds(value) ? value.map((id) => ({ ids: [id], any: false })) : undefined;
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const groups = Array.from(value).map(counterGroup);
+  if (!groups.every((group) => group !== undefined)) return undefined;
+  const ids = groups.flatMap((group) => group.ids);
+  return new Set(ids).size === ids.length ? groups : undefined;
+}
+
+/** Schema validation cannot express cross-group uniqueness, so the source check enforces it. */
+export function assertDisjointCounterGroups(registry: ProgressionCounterRegistry): void {
+  for (const [mode, entries] of Object.entries(registry)) {
+    for (const [variableId, entry] of Object.entries(entries ?? {})) {
+      if (!counterGroups(own(entry, 'derivation')))
+        throw new Error(
+          `${mode}/${variableId}: malformed derivation, or a task appears in more than one group`
+        );
+    }
+  }
+}
+
 /** Validate externally supplied registry entries even when schema validation was skipped. */
-function contributorIds(definition: unknown, revision: unknown): string[] | undefined {
+function contributorGroups(definition: unknown, revision: unknown): CounterGroup[] | undefined {
   if (
     !record(definition) ||
     !nonEmpty(revision) ||
@@ -71,27 +129,9 @@ function contributorIds(definition: unknown, revision: unknown): string[] | unde
     )
   )
     return undefined;
-  const derivation = own(definition, 'derivation');
-  if (
-    !record(derivation) ||
-    own(derivation, 'type') !== 'distinctTaskCompletions' ||
-    Object.keys(derivation).some((key) => !['type', 'taskIds'].includes(key))
-  )
-    return undefined;
-  const ids = own(derivation, 'taskIds');
   const proof = own(definition, 'proof');
-  if (
-    !Array.isArray(ids) ||
-    ids.length === 0 ||
-    !Array.from(ids).every(nonEmpty) ||
-    new Set(ids).size !== ids.length ||
-    !Array.isArray(proof) ||
-    proof.length === 0 ||
-    !Array.from(proof).every((link) => nonEmpty(link) && /^https?:\/\/\S+$/.test(link)) ||
-    new Set(proof).size !== proof.length
-  )
-    return undefined;
-  return ids;
+  if (!uniqueIds(proof) || !proof.every((link) => /^https?:\/\/\S+$/.test(link))) return undefined;
+  return counterGroups(own(definition, 'derivation'));
 }
 
 /** A mixed status list expresses uncertainty, not an additional completion. */
@@ -104,7 +144,7 @@ function completionState(value: unknown): 'complete' | 'incomplete' | 'unknown' 
   return 'unknown';
 }
 
-/** Count once per verified contributor; missing task history is never implicitly zero. */
+/** Count one point per verified contributor group; missing task history is never implicitly zero. */
 function resolveCounter(
   variableId: string,
   state: TaskUnlockState,
@@ -120,30 +160,47 @@ function resolveCounter(
   const mode = own(options, 'mode');
   if (!nonEmpty(mode) || !SUPPORTED_GAME_MODES.includes(mode as GameMode))
     return unresolved('game mode is invalid');
-  const ids = contributorIds(
+  const groups = contributorGroups(
     own(own(own(options, 'counters'), mode), variableId),
     own(options, 'revision')
   );
-  if (!ids) return unresolved('no complete verified mapping for this mode and revision');
+  if (!groups) return unresolved('no complete verified mapping for this mode and revision');
   const taskStatuses = own(state, 'taskStatuses');
-  const completedTaskIds: string[] = [];
-  const incompleteTaskIds: string[] = [];
-  const unknownTaskIds: string[] = [];
-  for (const id of ids) {
-    const status = completionState(own(taskStatuses, id));
-    if (status === 'complete') completedTaskIds.push(id);
-    else if (status === 'incomplete') incompleteTaskIds.push(id);
-    else unknownTaskIds.push(id);
-  }
-  const progress = { completedTaskIds, incompleteTaskIds, unknownTaskIds };
-  return unknownTaskIds.length
-    ? { ...unresolved('contributor task history is missing or ambiguous'), ...progress }
-    : {
-        source: 'tasks',
-        value: completedTaskIds.length,
-        reason: 'verified distinct task completions',
-        ...progress,
-      };
+  const states = new Map(
+    groups
+      .flatMap(({ ids }) => ids)
+      .map((id) => [id, completionState(own(taskStatuses, id))] as const)
+  );
+  const idsIn = (wanted: string) => [...states].filter(([, s]) => s === wanted).map(([id]) => id);
+  const progress = {
+    completedTaskIds: idsIn('complete'),
+    incompleteTaskIds: idsIn('incomplete'),
+    unknownTaskIds: idsIn('unknown'),
+  };
+  const points = groups.map((group) => groupPoint(group, states));
+  if (points.includes(undefined))
+    return { ...unresolved('contributor task history is missing or ambiguous'), ...progress };
+  return {
+    source: 'tasks',
+    value: points.filter(Boolean).length,
+    reason: 'verified contributor group completions',
+    ...progress,
+  };
+}
+
+/**
+ * Whether a group earns its point, or undefined while unknown members could still decide it. An
+ * all-members group is settled at zero by any incomplete member; an any-member group is settled
+ * at one by any complete member.
+ */
+function groupPoint(
+  { ids, any }: CounterGroup,
+  states: Map<string, 'complete' | 'incomplete' | 'unknown'>
+): boolean | undefined {
+  const members = ids.map((id) => states.get(id));
+  const decisive = any ? 'complete' : 'incomplete';
+  if (members.includes(decisive)) return any;
+  return members.includes('unknown') ? undefined : !any;
 }
 
 /**

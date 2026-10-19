@@ -887,17 +887,21 @@ export interface PrestigeOverride {
 }
 
 /** Built overlay output structure */
-/** Evidence-scoped mapping from a condition target to distinct task completions. */
+/** Evidence-scoped mapping from a condition target to task or group completions. */
 export interface ProgressionCounterDefinition {
   /** Explicit compatibility revision; callers must select the same revision. */
   revision: string;
   verification: 'verified' | 'unresolved';
   coverage: 'complete' | 'partial';
-  derivation: {
-    type: 'distinctTaskCompletions';
-    /** Candidates only unless verification and coverage permit evaluation. */
-    taskIds: string[];
-  };
+  /** Candidates only unless verification and coverage permit evaluation. */
+  derivation:
+    | { type: 'distinctTaskCompletions'; taskIds: string[] }
+    /**
+     * One point per group; a task belongs to at most one group. A task-ID list earns its point
+     * once every member is complete; `{ anyOf }` once any member is (alternatives such as faction
+     * variants). The published Mechanic faction pairs all use `anyOf`.
+     */
+    | { type: 'taskGroupCompletions'; groups: Array<string[] | { anyOf: string[] }> };
   /** Public evidence for the mapping, including contribution and reset semantics. */
   proof: string[];
 }

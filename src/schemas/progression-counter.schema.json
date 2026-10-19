@@ -54,24 +54,14 @@
           "enum": ["complete", "partial"]
         },
         "derivation": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["type", "taskIds"],
-          "properties": {
-            "type": {
-              "const": "distinctTaskCompletions"
+          "oneOf": [
+            {
+              "$ref": "#/definitions/distinctTaskCompletions"
             },
-            "taskIds": {
-              "type": "array",
-              "minItems": 1,
-              "uniqueItems": true,
-              "items": {
-                "type": "string",
-                "minLength": 1,
-                "pattern": "\\S"
-              }
+            {
+              "$ref": "#/definitions/taskGroupCompletions"
             }
-          }
+          ]
         },
         "proof": {
           "type": "array",
@@ -81,6 +71,71 @@
             "type": "string",
             "minLength": 1,
             "pattern": "^https?://\\S+$"
+          }
+        }
+      }
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "distinctTaskCompletions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "taskIds"],
+      "properties": {
+        "type": {
+          "const": "distinctTaskCompletions"
+        },
+        "taskIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/taskId"
+          }
+        }
+      }
+    },
+    "taskGroupCompletions": {
+      "description": "One point per group. A task-ID list earns its point once every task is complete; an anyOf group earns it once any task is complete. A task may appear in only one group; the validator enforces this across groups.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "groups"],
+      "properties": {
+        "type": {
+          "const": "taskGroupCompletions"
+        },
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/definitions/taskId"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["anyOf"],
+                "properties": {
+                  "anyOf": {
+                    "type": "array",
+                    "minItems": 2,
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "#/definitions/taskId"
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       }

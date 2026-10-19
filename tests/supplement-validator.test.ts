@@ -216,6 +216,27 @@ describe('supplement upstream coverage', () => {
     expect(result).toMatchObject({ actionable: 0, staleProblems: 0 });
     expect(result.messages.join('\n')).toContain('NOT COMPARABLE variable not referenced');
   });
+  it('resolves every member of task-group derivations', () => {
+    const counters = {
+      counter: { derivation: { groups: [['exists'], { anyOf: ['other', 'missing'] }] } },
+    };
+    const result = validateProgressionCounters(counters, {
+      tasks: [{ id: 'exists' }, { id: 'other' }],
+    });
+    expect(result.actionable).toBe(1);
+    expect(result.messages.join('\n')).toContain('task reference missing missing upstream');
+  });
+  it.each([['a'], [null], [{ allOf: ['a'] }], [{ anyOf: 'a' }]])(
+    'names the variable for a malformed group %j',
+    (group) => {
+      expect(() =>
+        validateProgressionCounters(
+          { counter: { derivation: { groups: [group] } } },
+          { tasks: [{ id: 'a' }] }
+        )
+      ).toThrow('Expected derivation.groups entries to be lists or { anyOf } for counter');
+    }
+  );
   it('accepts the live ID-keyed tasks collection', () => {
     expect(
       validateProgressionCounters(
