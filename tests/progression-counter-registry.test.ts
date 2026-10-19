@@ -4,6 +4,7 @@ import {
   evaluateTaskProgression,
   loadJson5File,
   SUPPORTED_GAME_MODES,
+  TARKOV_TRADER_NAMES_BY_ID,
   type ProgressionCounterRegistry,
   type TaskData,
 } from '../src/lib/index.js';
@@ -49,6 +50,25 @@ const gate = (variableId: string): TaskData => ({
 
 describe.each(SUPPORTED_GAME_MODES)('published progression counters in %s', (mode) => {
   const options = { mode, revision: '1.1.0', counters };
+  it('publishes 27 unique named trader/tier pools using canonical trader IDs', () => {
+    const entries = Object.values(counters[mode]!);
+    expect(entries).toHaveLength(27);
+    const identities = entries.map((entry) => {
+      expect(entry.pool).toBeDefined();
+      expect(TARKOV_TRADER_NAMES_BY_ID[entry.pool!.traderId]).toBeDefined();
+      expect([1, 2, 3, 4]).toContain(entry.pool!.loyaltyLevel);
+      return `${entry.pool!.traderId}:${entry.pool!.loyaltyLevel}`;
+    });
+    expect(new Set(identities).size).toBe(27);
+    expect(counters[mode]!['6a3c0fefbea2d2ad581c090b']!.pool).toEqual({
+      traderId: '5a7c2eca46aef81a7ca2145d',
+      loyaltyLevel: 2,
+    });
+    expect(counters[mode]![ragman]!.pool).toEqual({
+      traderId: '5ac3b934156ae10c4430e83c',
+      loyaltyLevel: 1,
+    });
+  });
 
   it.each(['Bear', 'Usec'] as const)(
     'credits every %s Gunsmith variant independently',

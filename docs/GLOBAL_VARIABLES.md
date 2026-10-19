@@ -89,6 +89,12 @@ modes, derivations, duplicate contributor IDs, and missing proof links;
 `npm run validate` also rejects a task listed in two groups. Runtime
 validation also fails closed when a consumer bypasses source validation.
 
+- `pool` (optional): `{ traderId, loyaltyLevel }` identifies the trader and LL1–LL4 task
+  pool for player-facing explanations. Trader IDs use `TARKOV_TRADER_NAMES_BY_ID`. All 27 published
+  pools in each mode include this identity, including the three unresolved pools. It does not add
+  a trader-loyalty requirement, identify proven contributors, or change counting eligibility.
+  Consumers may display unresolved candidates with an explicit caveat, but must not derive their
+  progress from this description.
 - `revision`: a maintainer-assigned identifier for the applicable game rules.
   It is not automatically the overlay version. Consumers must deliberately select
   the same identifier; omitted or mismatched revisions cannot derive a value.
@@ -110,6 +116,17 @@ validation also fails closed when a consumer bypasses source validation.
   No multi-task all-members group is currently published as verified.
 - `proof`: public evidence links for the rule and its scope. These are review
   evidence, not a guarantee that a supplied mapping is true.
+
+### Consumer rollout for pool descriptions
+
+Deploy consumer support before publishing registry entries with `pool`: older strict validators
+reject extra entry fields, including when evaluating otherwise verified derivations. The updated
+schema and evaluator accept entries both with and without the optional identity. TarkovTracker
+projects it separately from usable counters, preserves existing in-game confirmation signatures,
+and presents instructions such as "Complete at least 3 LL2 tasks for Mechanic" with contributor
+links. Refresh its precomputed payloads after the overlay release and verify the served overlay
+identity before claiming those descriptions are live. Pool identities do not change the `1.1.0`
+counting revision, derivations, verification, or coverage.
 
 ### Evidence standard
 

@@ -72,6 +72,24 @@
             "minLength": 1,
             "pattern": "^https?://\\S+$"
           }
+        },
+        "pool": {
+          "description": "Informational trader/tier identity. Never an additional loyalty gate or evidence that a derivation is verified.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["traderId", "loyaltyLevel"],
+          "properties": {
+            "traderId": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "loyaltyLevel": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            }
+          }
         }
       }
     },

@@ -38,6 +38,29 @@ const state: TaskUnlockState = {
 };
 
 describe('progress-based task eligibility', () => {
+  it('accepts optional pool descriptions without changing legacy evaluation', () => {
+    const counters = {
+      pve: { pool: { ...mapping, pool: { traderId: 'mechanic', loyaltyLevel: 2 } } },
+    };
+    expect(evaluateTaskProgression(task, state, { ...options, counters })).toEqual(
+      evaluateTaskProgression(task, state, options)
+    );
+  });
+  it.each([
+    null,
+    {},
+    { traderId: '', loyaltyLevel: 2 },
+    { traderId: 'm', loyaltyLevel: 0 },
+    { traderId: 'm', loyaltyLevel: 5 },
+    { traderId: 'm', loyaltyLevel: 2.5 },
+    { traderId: 'm', loyaltyLevel: '2' },
+    { traderId: 'm', loyaltyLevel: 2, extra: true },
+  ])('rejects malformed informational pool metadata at runtime: %j', (pool) => {
+    const counters = {
+      pve: { pool: { ...mapping, pool } },
+    } as unknown as TaskProgressionOptions['counters'];
+    expect(evaluateTaskProgression(task, state, { ...options, counters }).status).toBe('unknown');
+  });
   it('recomputes verified distinct completions without mutating progress', () => {
     const before = structuredClone(state);
     expect(evaluateTaskProgression(task, state, options)).toMatchObject({
@@ -408,6 +431,9 @@ describe('published counter schema', () => {
   const validate = new Ajv({ strict: true }).compile(schema);
   it('allows an empty registry and mode-scoped evidence', () => {
     expect(validate({})).toBe(true);
+    expect(
+      validate({ pve: { pool: { ...mapping, pool: { traderId: 'mechanic', loyaltyLevel: 2 } } } })
+    ).toBe(true);
     expect(validate(options.counters)).toBe(true);
     const derivation = { type: 'taskGroupCompletions', groups: [['a', 'b'], ['c']] };
     expect(validate({ pve: { pool: { ...mapping, derivation } } })).toBe(true);
@@ -415,6 +441,16 @@ describe('published counter schema', () => {
     expect(validate({ pve: { pool: { ...mapping, derivation: alternatives } } })).toBe(true);
   });
   it.each([
+    ...[
+      null,
+      {},
+      { traderId: '', loyaltyLevel: 2 },
+      { traderId: 'm', loyaltyLevel: 0 },
+      { traderId: 'm', loyaltyLevel: 5 },
+      { traderId: 'm', loyaltyLevel: 2.5 },
+      { traderId: 'm', loyaltyLevel: '2' },
+      { traderId: 'm', loyaltyLevel: 2, extra: true },
+    ].map((pool) => ({ pve: { pool: { ...mapping, pool } } })),
     { pvp: { pool: mapping } },
     { pve: { pool: { ...mapping, coverage: 'maybe' } } },
     {

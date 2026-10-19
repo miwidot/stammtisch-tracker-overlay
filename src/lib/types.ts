@@ -880,6 +880,8 @@ export interface PrestigeOverride {
 /** Built overlay output structure */
 /** Evidence-scoped mapping from a condition target to task or group completions. */
 export interface ProgressionCounterDefinition {
+  /** Informational pool identity; never an extra trader-loyalty gate or counting evidence. */
+  pool?: { traderId: string; loyaltyLevel: number };
   /** Explicit compatibility revision; callers must select the same revision. */
   revision: string;
   verification: 'verified' | 'unresolved';

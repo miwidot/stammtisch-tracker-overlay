@@ -113,6 +113,26 @@ export function assertDisjointCounterGroups(registry: ProgressionCounterRegistry
   }
 }
 
+function validPool(pool: unknown): boolean {
+  if (!record(pool)) return false;
+  return [
+    Object.keys(pool).length === 2,
+    nonEmpty(own(pool, 'traderId')),
+    [1, 2, 3, 4].includes(own(pool, 'loyaltyLevel') as number),
+  ].every(Boolean);
+}
+
+function validPoolMetadata(definition: Record<string, unknown>): boolean {
+  return !Object.hasOwn(definition, 'pool') || validPool(definition.pool);
+}
+
+function validDefinitionKeys(definition: Record<string, unknown>): boolean {
+  const allowed = ['revision', 'verification', 'coverage', 'derivation', 'proof', 'pool'];
+  return (
+    Object.keys(definition).every((key) => allowed.includes(key)) && validPoolMetadata(definition)
+  );
+}
+
 /** Validate externally supplied registry entries even when schema validation was skipped. */
 function contributorGroups(definition: unknown, revision: unknown): CounterGroup[] | undefined {
   if (
@@ -123,12 +143,7 @@ function contributorGroups(definition: unknown, revision: unknown): CounterGroup
     own(definition, 'coverage') !== 'complete'
   )
     return undefined;
-  if (
-    Object.keys(definition).some(
-      (key) => !['revision', 'verification', 'coverage', 'derivation', 'proof'].includes(key)
-    )
-  )
-    return undefined;
+  if (!validDefinitionKeys(definition)) return undefined;
   const proof = own(definition, 'proof');
   if (!uniqueIds(proof) || !proof.every((link) => /^https?:\/\/\S+$/.test(link))) return undefined;
   return counterGroups(own(definition, 'derivation'));
