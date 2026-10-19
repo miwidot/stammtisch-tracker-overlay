@@ -269,6 +269,1407 @@
         "6761f28a022f60bb320f3e95": {
           "disabled": true
         }
+      },
+      "tasksAdd": {
+        "placeholder_for_the_good_of_the_chosen": {
+          "id": "placeholder_for_the_good_of_the_chosen",
+          "name": "...for the Good of the Chosen",
+          "normalizedName": "for-the-good-of-the-chosen",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/...for_the_Good_of_the_Chosen",
+          "trader": {
+            "id": "638f541a29ffd1183d187f57",
+            "name": "Lightkeeper"
+          },
+          "map": {
+            "id": "5704e4dad2720bb55b8b4567",
+            "name": "Lighthouse"
+          },
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_for_the_good_of_the_chosen_obj01",
+              "description": "Report back to Lightkeeper",
+              "optional": false
+            }
+          ]
+        },
+        "placeholder_break_the_chain": {
+          "id": "placeholder_break_the_chain",
+          "name": "Break the Chain",
+          "normalizedName": "break-the-chain",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Break_the_Chain",
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "map": null,
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_break_the_chain_obj01",
+              "description": "Destroy the transmitter on the factory chimney near the unfinished construction site on Customs",
+              "maps": [
+                {
+                  "id": "56f40101d2720b2a4d8b45d6",
+                  "name": "Customs"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_break_the_chain_obj02",
+              "description": "Destroy the transmitter on the power line tower on Customs",
+              "maps": [
+                {
+                  "id": "56f40101d2720b2a4d8b45d6",
+                  "name": "Customs"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_break_the_chain_obj03",
+              "description": "Destroy the transmitter on top of the mountain on Woods",
+              "maps": [
+                {
+                  "id": "5704e3c2d2720bac5b8b4567",
+                  "name": "Woods"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_break_the_chain_obj04",
+              "description": "Destroy the transmitter on the cell tower on Woods",
+              "maps": [
+                {
+                  "id": "5704e3c2d2720bac5b8b4567",
+                  "name": "Woods"
+                }
+              ],
+              "optional": false
+            }
+          ]
+        },
+        "placeholder_cast_the_net": {
+          "id": "placeholder_cast_the_net",
+          "name": "Cast the Net",
+          "normalizedName": "cast-the-net",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Cast_the_Net",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "map": null,
+          "experience": 11000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_cast_the_net_obj01",
+              "description": "Plant a WI-FI Camera in the Ural truck near the hydroelectric power station on Shoreline",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "items": [
+                {
+                  "id": "5b4391a586f7745321235ab2",
+                  "name": "WI-FI Camera",
+                  "shortName": "Camera"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_cast_the_net_obj02",
+              "description": "Plant a WI-FI Camera in the excavator at the stream near the smugglers' base on Shoreline",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "items": [
+                {
+                  "id": "5b4391a586f7745321235ab2",
+                  "name": "WI-FI Camera",
+                  "shortName": "Camera"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_cast_the_net_obj03",
+              "description": "Plant a WI-FI Camera on the concrete mixer truck at the collapsed crane on Streets of Tarkov",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "items": [
+                {
+                  "id": "5b4391a586f7745321235ab2",
+                  "name": "WI-FI Camera",
+                  "shortName": "Camera"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_cast_the_net_obj04",
+              "description": "Plant a WI-FI Camera on the bio toilet near the Rodina cinema on Streets of Tarkov",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "items": [
+                {
+                  "id": "5b4391a586f7745321235ab2",
+                  "name": "WI-FI Camera",
+                  "shortName": "Camera"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_cast_the_net_obj05",
+              "description": "Plant a WI-FI Camera in the cargo truck cabin near Mira Ave on Ground Zero",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                }
+              ],
+              "items": [
+                {
+                  "id": "5b4391a586f7745321235ab2",
+                  "name": "WI-FI Camera",
+                  "shortName": "Camera"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_cast_the_net_obj06",
+              "description": "Plant a WI-FI Camera inside the yellow bus in the underground tunnel on Ground Zero",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                }
+              ],
+              "items": [
+                {
+                  "id": "5b4391a586f7745321235ab2",
+                  "name": "WI-FI Camera",
+                  "shortName": "Camera"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_consequences_of_our_decisions": {
+          "id": "placeholder_consequences_of_our_decisions",
+          "name": "Consequences of Our Decisions",
+          "normalizedName": "consequences-of-our-decisions",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Consequences_of_Our_Decisions",
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "map": {
+            "id": "5714dc692459777137212e12",
+            "name": "Streets of Tarkov"
+          },
+          "experience": 35000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_consequences_of_our_decisions_obj01",
+              "description": "Decrypt the data from the secret facility laptop",
+              "optional": false
+            },
+            {
+              "id": "placeholder_consequences_of_our_decisions_obj02",
+              "description": "Read the data recovered from Fence's laptop",
+              "optional": false
+            },
+            {
+              "id": "placeholder_consequences_of_our_decisions_obj03",
+              "description": "Hand over the laptop",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_desperate_assault": {
+          "id": "placeholder_desperate_assault",
+          "name": "Desperate Assault",
+          "normalizedName": "desperate-assault",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Desperate_Assault",
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "map": {
+            "id": "5b0fc42d86f7744a585f9105",
+            "name": "The Lab"
+          },
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_desperate_assault_obj01",
+              "description": "Eliminate 15 Black Division operatives in The Lab",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5b0fc42d86f7744a585f9105",
+                  "name": "The Lab"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 15
+            }
+          ]
+        },
+        "placeholder_digital_puzzle": {
+          "id": "placeholder_digital_puzzle",
+          "name": "Digital Puzzle",
+          "normalizedName": "digital-puzzle",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Digital_Puzzle",
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "map": null,
+          "experience": 35000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_digital_puzzle_obj01",
+              "description": "Hand over the data from the Black Division rugged laptop",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "6a6692d4beccfa243d0bb575",
+                  "name": "Data from Black Division laptop",
+                  "shortName": "BD data"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_final_stretch": {
+          "id": "placeholder_final_stretch",
+          "name": "Final Stretch",
+          "normalizedName": "final-stretch",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Final_Stretch",
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "map": {
+            "id": "5714dc692459777137212e12",
+            "name": "Streets of Tarkov"
+          },
+          "experience": 35000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_final_stretch_obj01",
+              "description": "Locate and obtain the laptop from Fence's stash on Streets of Tarkov",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_final_stretch_obj02",
+              "description": "Hand over the found item",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_forbidden_knowledge": {
+          "id": "placeholder_forbidden_knowledge",
+          "name": "Forbidden Knowledge",
+          "normalizedName": "forbidden-knowledge",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Forbidden_Knowledge",
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "map": null,
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_forbidden_knowledge_obj01",
+              "description": "Locate and obtain 3 14-4 KORD SSDs",
+              "type": "findQuestItem",
+              "questItem": {
+                "id": "6a5f9c49b8281c31a1062aea",
+                "name": "14-4 KORD SSD",
+                "shortName": "BD SSD"
+              },
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_forbidden_knowledge_obj02",
+              "description": "Hand over the found intel",
+              "type": "giveQuestItem",
+              "questItem": {
+                "id": "6a5f9c49b8281c31a1062aea",
+                "name": "14-4 KORD SSD",
+                "shortName": "BD SSD"
+              },
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_historical_prospects": {
+          "id": "placeholder_historical_prospects",
+          "name": "Historical Prospects",
+          "normalizedName": "historical-prospects",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Historical_Prospects",
+          "trader": {
+            "id": "638f541a29ffd1183d187f57",
+            "name": "Lightkeeper"
+          },
+          "map": null,
+          "experience": 100000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_historical_prospects_obj01",
+              "description": "Eliminate 3 PMC operatives during 22:00-08:00 on Customs",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "56f40101d2720b2a4d8b45d6",
+                  "name": "Customs"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_historical_prospects_obj02",
+              "description": "Stash 3 PMC dogtags in the marked room on Customs",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "56f40101d2720b2a4d8b45d6",
+                  "name": "Customs"
+                }
+              ],
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_historical_prospects_obj03",
+              "description": "Eliminate 3 PMC operatives during 22:00-08:00 on Woods",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5704e3c2d2720bac5b8b4567",
+                  "name": "Woods"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_historical_prospects_obj04",
+              "description": "Stash 3 PMC dogtags at the abandoned village marked circle on Woods",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5704e3c2d2720bac5b8b4567",
+                  "name": "Woods"
+                }
+              ],
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_historical_prospects_obj05",
+              "description": "Eliminate 3 PMC operatives during 22:00-08:00 on Streets of Tarkov",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_historical_prospects_obj06",
+              "description": "Stash 3 PMC dogtags in the marked circle in Nikitskaya St. 8 second floor apartment on Streets of Tarkov",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false,
+              "count": 3
+            }
+          ]
+        },
+        "placeholder_in_the_name_of_humanity": {
+          "id": "placeholder_in_the_name_of_humanity",
+          "name": "In the Name of Humanity...",
+          "normalizedName": "in-the-name-of-humanity",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/In_the_Name_of_Humanity...",
+          "trader": {
+            "id": "638f541a29ffd1183d187f57",
+            "name": "Lightkeeper"
+          },
+          "map": null,
+          "experience": 70000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj01",
+              "description": "Eliminate any 3 targets during 20:00-08:00 on Interchange (In one raid)",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj02",
+              "description": "Locate the hidden keycard panel in the Burger Spot bathroom on Interchange (In one raid)",
+              "type": "visit",
+              "maps": [
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj03",
+              "description": "Locate the hidden TerraGroup saferoom on Interchange (In one raid)",
+              "type": "visit",
+              "maps": [
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj04",
+              "description": "Locate and access Container 14 on Interchange (In one raid)",
+              "type": "visit",
+              "maps": [
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj05",
+              "description": "Obtain the carbon fiber case from Container 14 on Interchange (In one raid)",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj06",
+              "description": "Use the transit from Interchange to Streets of Tarkov (In one raid)",
+              "type": "extract",
+              "maps": [
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                },
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj07",
+              "description": "Eliminate any 3 targets during 20:00-08:00 on Streets of Tarkov (In one raid)",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 3
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj08",
+              "description": "Stash the carbon fiber case on the 3rd floor balcony of the Pinewood Hotel restaurant on Streets of Tarkov (In one raid)",
+              "type": "plantQuestItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_in_the_name_of_humanity_obj09",
+              "description": "Launch a yellow signal flare at the tram that collapsed into the sewers on Streets of Tarkov (In one raid)",
+              "type": "useItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_key_to_understanding": {
+          "id": "placeholder_key_to_understanding",
+          "name": "Key to Understanding",
+          "normalizedName": "key-to-understanding",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Key_to_Understanding",
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "map": null,
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "minPlayerLevel": 20,
+          "objectives": [
+            {
+              "id": "placeholder_key_to_understanding_obj01",
+              "description": "Locate and obtain the Black Division encryption keys",
+              "type": "findItem",
+              "items": [
+                {
+                  "id": "6a5f9cfcc409750b6e065592",
+                  "name": "Black Division encryption keys",
+                  "shortName": "BD keys"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_key_to_understanding_obj02",
+              "description": "Hand over the found item",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "6a5f9cfcc409750b6e065592",
+                  "name": "Black Division encryption keys",
+                  "shortName": "BD keys"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_know_your_enemy": {
+          "id": "placeholder_know_your_enemy",
+          "name": "Know Your Enemy",
+          "normalizedName": "know-your-enemy",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Know_Your_Enemy",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "map": null,
+          "experience": 11000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_know_your_enemy_obj01",
+              "description": "Hand over 5 any Black Division plate carriers",
+              "type": "giveItem",
+              "optional": false,
+              "count": 5
+            }
+          ]
+        },
+        "placeholder_price_for_information": {
+          "id": "placeholder_price_for_information",
+          "name": "Price for Information",
+          "normalizedName": "price-for-information",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Price_for_Information",
+          "trader": {
+            "id": "638f541a29ffd1183d187f57",
+            "name": "Lightkeeper"
+          },
+          "map": null,
+          "experience": 65000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_price_for_information_obj01",
+              "description": "Use the transit from Shoreline to Lighthouse (In one raid)",
+              "type": "extract",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                },
+                {
+                  "id": "5704e4dad2720bb55b8b4567",
+                  "name": "Lighthouse"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_price_for_information_obj02",
+              "description": "Use the transit from Lighthouse to Reserve (In one raid)",
+              "type": "extract",
+              "maps": [
+                {
+                  "id": "5704e4dad2720bb55b8b4567",
+                  "name": "Lighthouse"
+                },
+                {
+                  "id": "5704e5fad2720bc05b8b4567",
+                  "name": "Reserve"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_price_for_information_obj03",
+              "description": "Use the transit from Reserve to Woods (In one raid)",
+              "type": "extract",
+              "maps": [
+                {
+                  "id": "5704e5fad2720bc05b8b4567",
+                  "name": "Reserve"
+                },
+                {
+                  "id": "5704e3c2d2720bac5b8b4567",
+                  "name": "Woods"
+                }
+              ],
+              "optional": false
+            },
+            {
+              "id": "placeholder_price_for_information_obj04",
+              "description": "Eliminate any 10 targets except Black Division while completing the other objectives",
+              "type": "shoot",
+              "shotType": "kill",
+              "optional": false,
+              "count": 10
+            }
+          ]
+        },
+        "placeholder_reverse_gear": {
+          "id": "placeholder_reverse_gear",
+          "name": "Reverse Gear",
+          "normalizedName": "reverse-gear",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Reverse_Gear",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "map": null,
+          "experience": 11000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "availableDelaySecondsMin": 0,
+          "availableDelaySecondsMax": 7200,
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_know_your_enemy",
+                "name": "Know Your Enemy"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "placeholder_reverse_gear_obj01",
+              "description": "Locate and obtain the Wi-Fi Camera from the Ural truck near the hydroelectric power station on Shoreline",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj02",
+              "description": "Hand over the camera",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj03",
+              "description": "Locate and obtain the Wi-Fi Camera from the excavator at the stream near the smugglers' base on Shoreline",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj04",
+              "description": "Hand over the camera",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj05",
+              "description": "Locate and obtain the Wi-Fi Camera from the concrete mixer truck at the collapsed crane on Streets of Tarkov",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj06",
+              "description": "Hand over the camera",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj07",
+              "description": "Locate and obtain the Wi-Fi Camera from the bio toilet near the Rodina cinema on Streets of Tarkov",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj08",
+              "description": "Hand over the camera",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj09",
+              "description": "Locate and obtain the Wi-Fi Camera from the cargo truck cabin near Mira Ave on Ground Zero",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj10",
+              "description": "Hand over the camera",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj11",
+              "description": "Locate and obtain the Wi-Fi Camera from yellow bus in the underground tunnel on Ground Zero",
+              "type": "findQuestItem",
+              "maps": [
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_reverse_gear_obj12",
+              "description": "Hand over the camera",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_riding_the_wave": {
+          "id": "placeholder_riding_the_wave",
+          "name": "Riding the Wave",
+          "normalizedName": "riding-the-wave",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Riding_the_Wave",
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "map": null,
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_riding_the_wave_obj01",
+              "description": "Hand over the found in raid item: First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "68947a4be4bf255d1b0ca746",
+                  "name": "First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)",
+                  "shortName": "Siege-R"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj02",
+              "description": "Hand over the found in raid item: Spiritus Systems LV-119 Plate Carrier (Black Division V2)",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "689479eb30cc5ba7be00f5ff",
+                  "name": "Spiritus Systems LV-119 Plate Carrier (Black Division V2)",
+                  "shortName": "LV-119"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj03",
+              "description": "Hand over the found in raid item: Ferro Concepts FCPC V5 Plate Carrier (Black Division)",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "689479cb47e5acd1e10be986",
+                  "name": "Ferro Concepts FCPC V5 Plate Carrier (Black Division)",
+                  "shortName": "FCPC V5"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj04",
+              "description": "Hand over the found in raid item: Spiritus Systems LV-119 Plate Carrier (Black Division V1)",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "689479a4a733b1602007e2eb",
+                  "name": "Spiritus Systems LV-119 Plate Carrier (Black Division V1)",
+                  "shortName": "LV-119"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj05",
+              "description": "Hand over the found in raid item: Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black)",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "68947a8ce4bf255d1b0ca759",
+                  "name": "Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black)",
+                  "shortName": "Modular Pack 45"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj06",
+              "description": "Hand over the found in raid item: Mystery Ranch 2 Day Assault Pack (Black)",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "68947ab5a733b1602007e2fe",
+                  "name": "Mystery Ranch 2 Day Assault Pack (Black)",
+                  "shortName": "2 Day Assault"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj07",
+              "description": "Hand over the found in raid item: Mystery Ranch NICE Frame Load Sling",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "68947ad3e4bf255d1b0ca75c",
+                  "name": "Mystery Ranch NICE Frame Load Sling",
+                  "shortName": "NICE Load Sling"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj08",
+              "description": "Hand over the found in raid item: Avon M53A1 gas mask",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "689b880fff8b4adc420f5b56",
+                  "name": "Avon M53A1 gas mask",
+                  "shortName": "M53A1"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj09",
+              "description": "Hand over the found in raid item: Gentex Ops-Core SOTR respirator",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "689b404db49f27df1c0873f6",
+                  "name": "Gentex Ops-Core SOTR respirator",
+                  "shortName": "SOTR"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            },
+            {
+              "id": "placeholder_riding_the_wave_obj10",
+              "description": "Hand over the found in raid item: Gatorz Specter MILSPEC ballistic glasses",
+              "type": "giveItem",
+              "items": [
+                {
+                  "id": "689b3fffa1295e322207a677",
+                  "name": "Gatorz Specter MILSPEC ballistic glasses",
+                  "shortName": "Specter"
+                }
+              ],
+              "optional": false,
+              "foundInRaid": true,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_sheep_in_wolf_s_clothing": {
+          "id": "placeholder_sheep_in_wolf_s_clothing",
+          "name": "Sheep in Wolf's Clothing",
+          "normalizedName": "sheep-in-wolf-s-clothing",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Sheep_in_Wolf's_Clothing",
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "map": null,
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_sheep_in_wolf_s_clothing_obj01",
+              "description": "Eliminate 4 Black Division operatives while wearing a Black Division plate carrier on Shoreline",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 4
+            },
+            {
+              "id": "placeholder_sheep_in_wolf_s_clothing_obj02",
+              "description": "Eliminate 4 Black Division operatives while wearing a Black Division plate carrier on Streets of Tarkov",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 4
+            },
+            {
+              "id": "placeholder_sheep_in_wolf_s_clothing_obj03",
+              "description": "Eliminate 4 Black Division operatives while wearing a Black Division plate carrier on Ground Zero",
+              "type": "shoot",
+              "maps": [
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                }
+              ],
+              "shotType": "kill",
+              "optional": false,
+              "count": 4
+            }
+          ]
+        },
+        "placeholder_stay_clear_of_blast_zone": {
+          "id": "placeholder_stay_clear_of_blast_zone",
+          "name": "Stay Clear of Blast Zone",
+          "normalizedName": "stay-clear-of-blast-zone",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Stay_Clear_of_Blast_Zone",
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "map": {
+            "id": "5704e554d2720bac5b8b456e",
+            "name": "Shoreline"
+          },
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_stay_clear_of_blast_zone_obj01",
+              "description": "Plant a TP-200 TNT brick at the Health Resort west side fence breach on Shoreline",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "items": [
+                {
+                  "id": "60391b0fb847c71012789415",
+                  "name": "TP-200 TNT brick",
+                  "shortName": "TP-200"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_stay_clear_of_blast_zone_obj02",
+              "description": "Plant a TP-200 TNT brick at the Health Resort north side fence breach on Shoreline",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "items": [
+                {
+                  "id": "60391b0fb847c71012789415",
+                  "name": "TP-200 TNT brick",
+                  "shortName": "TP-200"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_stay_clear_of_blast_zone_obj03",
+              "description": "Plant a TP-200 TNT brick at the Health Resort east side fence breach on Shoreline",
+              "type": "plantItem",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "items": [
+                {
+                  "id": "60391b0fb847c71012789415",
+                  "name": "TP-200 TNT brick",
+                  "shortName": "TP-200"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_unanswered_calls": {
+          "id": "placeholder_unanswered_calls",
+          "name": "Unanswered Calls",
+          "normalizedName": "unanswered-calls",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Unanswered_Calls",
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "map": {
+            "id": "653e6760052c01c1c805532f",
+            "name": "Ground Zero"
+          },
+          "experience": 11000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_unanswered_calls_obj01",
+              "description": "Stash Therapist's letter at the reception desk on the second floor of the TerraGroup office on Ground Zero (in one raid)",
+              "type": "plantQuestItem",
+              "maps": [
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                }
+              ],
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_unanswered_calls_obj02",
+              "description": "Extract from the location through the Nakatani Basement Stairs or Emercom Checkpoint exfil (in one raid)",
+              "type": "extract",
+              "optional": false
+            }
+          ]
+        },
+        "placeholder_uninvited_guests_part_1": {
+          "id": "placeholder_uninvited_guests_part_1",
+          "name": "Uninvited Guests - Part 1",
+          "normalizedName": "uninvited-guests-part-1",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_1",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "map": {
+            "id": "5704e554d2720bac5b8b456e",
+            "name": "Shoreline"
+          },
+          "experience": 6000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_uninvited_guests_part_1_obj01",
+              "description": "Locate and obtain the case with military equipment",
+              "type": "findQuestItem",
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_uninvited_guests_part_1_obj02",
+              "description": "Investigate the shack next to the sordi tower on Shoreline",
+              "type": "visit",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "optional": true
+            },
+            {
+              "id": "placeholder_uninvited_guests_part_1_obj03",
+              "description": "Investigate the second floor of the weather station building on Shoreline",
+              "type": "visit",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "optional": true
+            },
+            {
+              "id": "placeholder_uninvited_guests_part_1_obj04",
+              "description": "Investigate the hydroelectric power station on Shoreline",
+              "type": "visit",
+              "maps": [
+                {
+                  "id": "5704e554d2720bac5b8b456e",
+                  "name": "Shoreline"
+                }
+              ],
+              "optional": true
+            }
+          ]
+        },
+        "placeholder_uninvited_guests_part_2": {
+          "id": "placeholder_uninvited_guests_part_2",
+          "name": "Uninvited Guests - Part 2",
+          "normalizedName": "uninvited-guests-part-2",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_2",
+          "trader": {
+            "id": "656f0f98d80a697f855d34b1",
+            "name": "BTR Driver"
+          },
+          "map": null,
+          "experience": 5000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "objectives": [
+            {
+              "id": "placeholder_uninvited_guests_part_2_obj01",
+              "description": "Obtain and hand over the case with military equipment",
+              "type": "giveQuestItem",
+              "optional": false,
+              "count": 1
+            }
+          ]
+        },
+        "placeholder_what_s_in_the_bag": {
+          "id": "placeholder_what_s_in_the_bag",
+          "name": "What's in the Bag?",
+          "normalizedName": "what-s-in-the-bag",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/What's_in_the_Bag%3F",
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "map": null,
+          "experience": 30000,
+          "kappaRequired": false,
+          "factionName": "Any",
+          "availableDelaySecondsMin": 3600,
+          "availableDelaySecondsMax": 7200,
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "placeholder_key_to_understanding",
+                "name": "Key to Understanding"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ],
+          "objectives": [
+            {
+              "id": "placeholder_what_s_in_the_bag_obj01",
+              "description": "Locate and obtain the Briefcase with documents",
+              "type": "findQuestItem",
+              "questItem": {
+                "id": "6a3563dacdaebb512e0a009c",
+                "name": "Briefcase with documents",
+                "shortName": "Briefcase"
+              },
+              "optional": false,
+              "count": 1
+            },
+            {
+              "id": "placeholder_what_s_in_the_bag_obj02",
+              "description": "Hand over the found item",
+              "type": "giveQuestItem",
+              "questItem": {
+                "id": "6a3563dacdaebb512e0a009c",
+                "name": "Briefcase with documents",
+                "shortName": "Briefcase"
+              },
+              "optional": false,
+              "count": 1
+            }
+          ]
+        }
       }
     }
   },
@@ -13533,6 +14934,736 @@
           }
         ]
       }
+    },
+    "placeholder_honest_review": {
+      "id": "placeholder_honest_review",
+      "name": "Honest Review",
+      "normalizedName": "honest-review",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Honest_Review",
+      "trader": {
+        "id": "656f0f98d80a697f855d34b1",
+        "name": "BTR Driver"
+      },
+      "map": {
+        "id": "5704e4dad2720bb55b8b4567",
+        "name": "Lighthouse"
+      },
+      "experience": 15000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_honest_review_obj01",
+          "description": "Scout the intersection at the village on Lighthouse",
+          "type": "visit",
+          "maps": [
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Lighthouse"
+            }
+          ],
+          "optional": false
+        },
+        {
+          "id": "placeholder_honest_review_obj02",
+          "description": "Scout the UN checkpoint at the main road on Lighthouse",
+          "type": "visit",
+          "maps": [
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Lighthouse"
+            }
+          ],
+          "optional": false
+        },
+        {
+          "id": "placeholder_honest_review_obj03",
+          "description": "Scout the parking between the two main buildings at the water treatment plant on Lighthouse",
+          "type": "visit",
+          "maps": [
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Lighthouse"
+            }
+          ],
+          "optional": false
+        },
+        {
+          "id": "placeholder_honest_review_obj04",
+          "description": "Share your feedback with the BTR Driver",
+          "optional": false
+        }
+      ]
+    },
+    "placeholder_i_m_something_of_a_btr_myself": {
+      "id": "placeholder_i_m_something_of_a_btr_myself",
+      "name": "I'm Something of a BTR Myself",
+      "normalizedName": "i-m-something-of-a-btr-myself",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/I'm_Something_of_a_BTR_Myself",
+      "trader": {
+        "id": "656f0f98d80a697f855d34b1",
+        "name": "BTR Driver"
+      },
+      "map": {
+        "id": "5704e4dad2720bb55b8b4567",
+        "name": "Lighthouse"
+      },
+      "experience": 30000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_i_m_something_of_a_btr_myself_obj01",
+          "description": "Eliminate 15 Scavs with any 7.62x54R caliber weapon on Lighthouse",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Lighthouse"
+            }
+          ],
+          "shotType": "kill",
+          "optional": false,
+          "count": 15
+        },
+        {
+          "id": "placeholder_i_m_something_of_a_btr_myself_obj02",
+          "description": "Report back to the BTR Driver",
+          "optional": false
+        }
+      ]
+    },
+    "placeholder_pay_the_fare": {
+      "id": "placeholder_pay_the_fare",
+      "name": "Pay the Fare!",
+      "normalizedName": "pay-the-fare",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Pay_the_Fare!",
+      "trader": {
+        "id": "5ac3b934156ae10c4430e83c",
+        "name": "Ragman"
+      },
+      "map": null,
+      "experience": 30000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "otherRequirements": [
+        {
+          "id": "placeholder_pay_the_fare_req_dialogue",
+          "type": "dialogue",
+          "traders": [
+            {
+              "id": "5a7c2eca46aef81a7ca2145d",
+              "name": "Mechanic"
+            }
+          ]
+        }
+      ],
+      "objectives": [
+        {
+          "id": "placeholder_pay_the_fare_obj01",
+          "description": "Find the item in raid: Pipe grip wrench",
+          "type": "findItem",
+          "items": [
+            {
+              "id": "619cbfccbedcde2f5b3f7bdd",
+              "name": "Pipe grip wrench",
+              "shortName": "PGW"
+            }
+          ],
+          "optional": false,
+          "foundInRaid": true,
+          "count": 1
+        },
+        {
+          "id": "placeholder_pay_the_fare_obj02",
+          "description": "Hand over the item",
+          "type": "giveItem",
+          "items": [
+            {
+              "id": "619cbfccbedcde2f5b3f7bdd",
+              "name": "Pipe grip wrench",
+              "shortName": "PGW"
+            }
+          ],
+          "optional": false,
+          "count": 1,
+          "foundInRaid": true
+        },
+        {
+          "id": "placeholder_pay_the_fare_obj03",
+          "description": "Find the item in raid: Ratchet wrench",
+          "type": "findItem",
+          "items": [
+            {
+              "id": "60391afc25aff57af81f7085",
+              "name": "Ratchet wrench",
+              "shortName": "Ratchet"
+            }
+          ],
+          "optional": false,
+          "foundInRaid": true,
+          "count": 1
+        },
+        {
+          "id": "placeholder_pay_the_fare_obj04",
+          "description": "Hand over the item",
+          "type": "giveItem",
+          "items": [
+            {
+              "id": "60391afc25aff57af81f7085",
+              "name": "Ratchet wrench",
+              "shortName": "Ratchet"
+            }
+          ],
+          "optional": false,
+          "count": 1,
+          "foundInRaid": true
+        },
+        {
+          "id": "placeholder_pay_the_fare_obj05",
+          "description": "Find the item in raid: Electric drill",
+          "type": "findItem",
+          "items": [
+            {
+              "id": "59e35de086f7741778269d84",
+              "name": "Electric drill",
+              "shortName": "Drill"
+            }
+          ],
+          "optional": false,
+          "foundInRaid": true,
+          "count": 1
+        },
+        {
+          "id": "placeholder_pay_the_fare_obj06",
+          "description": "Hand over the item",
+          "type": "giveItem",
+          "items": [
+            {
+              "id": "59e35de086f7741778269d84",
+              "name": "Electric drill",
+              "shortName": "Drill"
+            }
+          ],
+          "optional": false,
+          "count": 1,
+          "foundInRaid": true
+        }
+      ]
+    },
+    "placeholder_to_the_light_a_time_to_gather_stones": {
+      "id": "placeholder_to_the_light_a_time_to_gather_stones",
+      "name": "To the Light - A Time to Gather Stones",
+      "normalizedName": "to-the-light-a-time-to-gather-stones",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Gather_Stones",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": null,
+      "experience": 25000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_a_time_to_gather_stones_obj01",
+          "description": "Hand over 3 found in raid PMC dogtags (Level 30 or higher)",
+          "type": "giveItem",
+          "optional": false,
+          "foundInRaid": true,
+          "count": 3
+        }
+      ]
+    },
+    "placeholder_to_the_light_a_time_to_throw_stones": {
+      "id": "placeholder_to_the_light_a_time_to_throw_stones",
+      "name": "To the Light - A Time to Throw Stones",
+      "normalizedName": "to-the-light-a-time-to-throw-stones",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Throw_Stones",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": {
+        "id": "5b0fc42d86f7744a585f9105",
+        "name": "The Lab"
+      },
+      "experience": 55000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_a_time_to_throw_stones_obj01",
+          "description": "Eliminate 2 PMC operatives within one raid in The Lab",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "5b0fc42d86f7744a585f9105",
+              "name": "The Lab"
+            }
+          ],
+          "shotType": "kill",
+          "optional": false,
+          "count": 2
+        }
+      ]
+    },
+    "placeholder_to_the_light_bite_the_dust": {
+      "id": "placeholder_to_the_light_bite_the_dust",
+      "name": "To the Light - Bite the Dust",
+      "normalizedName": "to-the-light-bite-the-dust",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Bite_the_Dust",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": null,
+      "experience": 10000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_bite_the_dust_obj01",
+          "description": "Hand over the evidence implicating the person behind the disruptions",
+          "type": "giveQuestItem",
+          "optional": false,
+          "count": 1
+        }
+      ]
+    },
+    "placeholder_to_the_light_clip_their_wings": {
+      "id": "placeholder_to_the_light_clip_their_wings",
+      "name": "To the Light - Clip Their Wings",
+      "normalizedName": "to-the-light-clip-their-wings",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Clip_Their_Wings",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": null,
+      "experience": 45000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "availableDelaySecondsMin": 600,
+      "availableDelaySecondsMax": 900,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_false_call",
+            "name": "To the Light - False Call"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_clip_their_wings_obj01",
+          "description": "Plant a Signal jammer at the weather station on the mountain on Woods (In one raid)",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5704e3c2d2720bac5b8b4567",
+              "name": "Woods"
+            }
+          ],
+          "items": [
+            {
+              "id": "5ac78a9b86f7741cca0bbd8d",
+              "name": "Signal Jammer",
+              "shortName": "Jammer"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_clip_their_wings_obj02",
+          "description": "Plant a Signal jammer at the sawmill guardhouse on Woods (In one raid)",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5704e3c2d2720bac5b8b4567",
+              "name": "Woods"
+            }
+          ],
+          "items": [
+            {
+              "id": "5ac78a9b86f7741cca0bbd8d",
+              "name": "Signal Jammer",
+              "shortName": "Jammer"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_clip_their_wings_obj03",
+          "description": "Use the transit from Woods to Customs (In one raid)",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "5704e3c2d2720bac5b8b4567",
+              "name": "Woods"
+            },
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "optional": false
+        },
+        {
+          "id": "placeholder_to_the_light_clip_their_wings_obj04",
+          "description": "Plant a Signal jammer on the second floor of the roadside construction site on Customs (In one raid)",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "items": [
+            {
+              "id": "5ac78a9b86f7741cca0bbd8d",
+              "name": "Signal Jammer",
+              "shortName": "Jammer"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_clip_their_wings_obj05",
+          "description": "Use the transit from Customs to Shoreline (In one raid)",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            },
+            {
+              "id": "5704e554d2720bac5b8b456e",
+              "name": "Shoreline"
+            }
+          ],
+          "optional": false
+        },
+        {
+          "id": "placeholder_to_the_light_clip_their_wings_obj06",
+          "description": "Plant a Signal jammer at the second floor archives in the Health Resort admin building on Shoreline (In one raid)",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5704e554d2720bac5b8b456e",
+              "name": "Shoreline"
+            }
+          ],
+          "items": [
+            {
+              "id": "5ac78a9b86f7741cca0bbd8d",
+              "name": "Signal Jammer",
+              "shortName": "Jammer"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        }
+      ]
+    },
+    "placeholder_to_the_light_dangerous_ambitions": {
+      "id": "placeholder_to_the_light_dangerous_ambitions",
+      "name": "To the Light - Dangerous Ambitions",
+      "normalizedName": "to-the-light-dangerous-ambitions",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Dangerous_Ambitions",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": null,
+      "experience": 10000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_dangerous_ambitions_obj01",
+          "description": "Hand over the Amulet from Lightkeeper to Peacekeeper",
+          "type": "giveQuestItem",
+          "optional": false,
+          "count": 1
+        }
+      ]
+    },
+    "placeholder_to_the_light_fallen_bird": {
+      "id": "placeholder_to_the_light_fallen_bird",
+      "name": "To the Light - Fallen Bird",
+      "normalizedName": "to-the-light-fallen-bird",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Fallen_Bird",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": null,
+      "experience": 10000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_fallen_bird_obj01",
+          "description": "Return to the Hideout",
+          "optional": false
+        }
+      ]
+    },
+    "placeholder_to_the_light_false_call": {
+      "id": "placeholder_to_the_light_false_call",
+      "name": "To the Light - False Call",
+      "normalizedName": "to-the-light-false-call",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_False_Call",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": {
+        "id": "56f40101d2720b2a4d8b45d6",
+        "name": "Customs"
+      },
+      "experience": 30000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "availableDelaySecondsMin": 600,
+      "availableDelaySecondsMax": 1800,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "placeholder_to_the_light_trust_but_verify",
+            "name": "To the Light - Trust but Verify"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ],
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_false_call_obj01",
+          "description": "Eliminate 5 Scavs during 21:00-06:00 on Customs (In one raid)",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "shotType": "kill",
+          "optional": false,
+          "count": 5
+        },
+        {
+          "id": "placeholder_to_the_light_false_call_obj02",
+          "description": "Eliminate 1 PMC operative during 21:00-06:00 on Customs (In one raid)",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "shotType": "kill",
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_false_call_obj03",
+          "description": "Hide a Wi-Fi camera at the AC unit at the convenience store near the bridge on Customs (In one raid)",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "items": [
+            {
+              "id": "5b4391a586f7745321235ab2",
+              "name": "WI-FI Camera",
+              "shortName": "Camera"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_false_call_obj04",
+          "description": "Launch a yellow signal flare at the Shoreline transit on Customs (In one raid)",
+          "type": "useItem",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        }
+      ]
+    },
+    "placeholder_to_the_light_someone_called": {
+      "id": "placeholder_to_the_light_someone_called",
+      "name": "To the Light - Someone Called?",
+      "normalizedName": "to-the-light-someone-called",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Someone_Called%3F",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": {
+        "id": "56f40101d2720b2a4d8b45d6",
+        "name": "Customs"
+      },
+      "experience": 10000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_someone_called_obj01",
+          "description": "Return to the Hideout",
+          "optional": false
+        }
+      ]
+    },
+    "placeholder_to_the_light_the_other_side": {
+      "id": "placeholder_to_the_light_the_other_side",
+      "name": "To the Light - The Other Side",
+      "normalizedName": "to-the-light-the-other-side",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_The_Other_Side",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": null,
+      "experience": 65000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_the_other_side_obj01",
+          "description": "Stash the TerraGroup \"Blue Folders\" materials in any marked room on Reserve",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5704e5fad2720bc05b8b4567",
+              "name": "Reserve"
+            }
+          ],
+          "items": [
+            {
+              "id": "6389c8c5dbfd5e4b95197e6b",
+              "name": "TerraGroup \"Blue Folders\" materials",
+              "shortName": "Blue Folders"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_the_other_side_obj02",
+          "description": "Stash the TerraGroup \"Blue Folders\" materials in any marked room on Streets of Tarkov",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5714dc692459777137212e12",
+              "name": "Streets of Tarkov"
+            }
+          ],
+          "items": [
+            {
+              "id": "6389c8c5dbfd5e4b95197e6b",
+              "name": "TerraGroup \"Blue Folders\" materials",
+              "shortName": "Blue Folders"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_the_other_side_obj03",
+          "description": "Stash the TerraGroup \"Blue Folders\" materials in any marked room on Customs",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "items": [
+            {
+              "id": "6389c8c5dbfd5e4b95197e6b",
+              "name": "TerraGroup \"Blue Folders\" materials",
+              "shortName": "Blue Folders"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        }
+      ]
+    },
+    "placeholder_to_the_light_trust_but_verify": {
+      "id": "placeholder_to_the_light_trust_but_verify",
+      "name": "To the Light - Trust but Verify",
+      "normalizedName": "to-the-light-trust-but-verify",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Trust_but_Verify",
+      "trader": {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "map": {
+        "id": "5b0fc42d86f7744a585f9105",
+        "name": "The Lab"
+      },
+      "experience": 35000,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "otherRequirements": [
+        {
+          "id": "placeholder_to_the_light_trust_but_verify_req_dialogue",
+          "type": "dialogue",
+          "traders": [
+            {
+              "id": "5a7c2eca46aef81a7ca2145d",
+              "name": "Mechanic"
+            }
+          ]
+        }
+      ],
+      "objectives": [
+        {
+          "id": "placeholder_to_the_light_trust_but_verify_obj01",
+          "description": "Stash the Hard drive with false data in the server room near the weapon testing area in The Lab (In one raid)",
+          "type": "plantQuestItem",
+          "maps": [
+            {
+              "id": "5b0fc42d86f7744a585f9105",
+              "name": "The Lab"
+            }
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "placeholder_to_the_light_trust_but_verify_obj02",
+          "description": "Extract from The Lab through the Ventilation Shaft (In one raid)",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "5b0fc42d86f7744a585f9105",
+              "name": "The Lab"
+            }
+          ],
+          "optional": false
+        }
+      ]
     }
   },
   "locales": {
@@ -14423,8 +16554,8 @@
     }
   },
   "$meta": {
-    "version": "1.157",
-    "generated": "2026-10-19T06:03:32.166Z",
-    "sha256": "e274ca0199ac84a5f226ea737f50fcfcf1037427638009df1ec5e28eb659950e"
+    "version": "1.158",
+    "generated": "2026-10-19T06:26:05.809Z",
+    "sha256": "7a128e91f20385307ee923fe20bf16370f080fa22978a6511e080bae14154dcc"
   }
 }
