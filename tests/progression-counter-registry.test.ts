@@ -110,31 +110,41 @@ describe.each(SUPPORTED_GAME_MODES)('published progression counters in %s', (mod
     expect(result.counters[mechanic]).toMatchObject({ source: 'tasks', value: 12 });
   });
 
-  it('requires account state for the unresolved Ragman tier-1 pool', () => {
-    const ragmanIds = [
+  it('counts the Ragman tier-1 Inventory Files/A Big Loss pair once', () => {
+    const inventoryFiles = '5ae4493486f7744efa289417';
+    const aBigLoss = '5ae4493d86f7744b8e15aa8f';
+    const others = [
       '5ae448bf86f7744d733e55ee',
       '5ae448f286f77448d73c0131',
       '5ae4490786f7744ca822adcc',
-      '5ae4493486f7744efa289417',
-      '5ae4493d86f7744b8e15aa8f',
       '5ae449b386f77446d8741719',
       '5ae449c386f7744bde357697',
       '5c10f94386f774227172c572',
       '60e71dc0a94be721b065bbfc',
     ];
-    const state = {
-      taskStatuses: Object.fromEntries(ragmanIds.map((id) => [id, 'complete'])),
-      traderUnlocked: { trader: true },
-    };
-    expect(evaluateTaskProgression(gate(ragman), state, options)).toMatchObject({
-      status: 'unknown',
-      counters: { [ragman]: { source: 'unresolved' } },
+    const count = (complete: string[]) =>
+      evaluateTaskProgression(
+        gate(ragman),
+        {
+          taskStatuses: Object.fromEntries(
+            [...others, inventoryFiles, aBigLoss].map((id) => [
+              id,
+              complete.includes(id) ? 'complete' : 'active',
+            ])
+          ),
+          traderUnlocked: { trader: true },
+        },
+        options
+      ).counters[ragman];
+    expect(count([...others, inventoryFiles, aBigLoss])).toMatchObject({
+      source: 'tasks',
+      value: 8,
     });
-    expect(
-      evaluateTaskProgression(gate(ragman), { ...state, globalVariables: { [ragman]: 8 } }, options)
-    ).toMatchObject({
-      status: 'available',
-      counters: { [ragman]: { source: 'account', value: 8 } },
+    expect(count([inventoryFiles])).toMatchObject({ source: 'tasks', value: 1 });
+    expect(count([aBigLoss])).toMatchObject({ source: 'tasks', value: 1 });
+    expect(count([inventoryFiles, aBigLoss, others[0]!])).toMatchObject({
+      source: 'tasks',
+      value: 2,
     });
   });
 });

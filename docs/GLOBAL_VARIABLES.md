@@ -23,15 +23,18 @@ to its pool (248 tasks). It is best effort, under the standard in
 - **23 groups are `verified`/`complete` with `distinctTaskCompletions`.** In every retained 1.1 PMC profile (one
   PVE, two PvP, two seasonal) the group's counter equals the number of completed
   pool tasks, and no capture contradicts the pool.
-- **Mechanic tier 3 is `verified`/`complete` with `taskGroupCompletions`.** Four
-  BEAR/USEC Gunsmith pairs each earn one point when either variant is complete;
-  eight other tasks each earn one point. This fits the informative PvE and PvP
+- **Mechanic tier 3 and Ragman tier 1 are `verified`/`complete` with
+  `taskGroupCompletions`.** Four BEAR/USEC Gunsmith pairs each earn one point when
+  either variant is complete; eight other tasks each earn one point. In Ragman
+  tier 1, Inventory Files (BEAR) and A Big Loss (USEC) earn one point together
+  and the other seven tasks one each. Both pools have fewer counter children
+  than tasks. This fits the informative PvE and PvP
   aggregates and the current faction requirements. Shared writers and historical
   backfill rules remain hypotheses, and fresh single-variant completions have not
   been isolated in before/after captures. See
   [paired-count hypotheses](GLOBAL_VARIABLE_MECHANICS.md#mechanic-tier-3-and-ragman-tier-1-paired-count-hypotheses).
-- **3 groups are `unresolved`/`partial`:** Mechanic tier 4, Prapor tier 4 and
-  Ragman tier 1. Their counter reads below the completed pool count in at least one
+- **2 groups are `unresolved`/`partial`:** Mechanic tier 4 and Prapor tier 4.
+  Their counter reads below the completed pool count in at least one
   profile, so counting the pool can clear a threshold too early. See
   [Caveats](GLOBAL_VARIABLE_MECHANICS.md#caveats).
 
@@ -48,8 +51,9 @@ catalogues, not independently verified by them.
 These are consumers, not contributor counts: 158 live gates are on the 248
 registry-pool tasks, and 10 are outside the pools. The earlier 164 count was an
 API snapshot and must not be used to infer membership. Current wiki faction
-requirements support the Mechanic tier-3 paired-count hypothesis, but do not
-identify shared writers; reward-based exclusions and the claimed Ragman quest
+requirements support the Mechanic tier-3 paired-count hypothesis and the SPT quest config
+supports the Ragman tier-1 pair, but neither identifies shared writers;
+reward-based exclusions and the claimed Ragman quest
 chain conflict with capture/API data. See the
 [current-source cross-check](GLOBAL_VARIABLE_MECHANICS.md#cross-check-against-current-wiki-and-api-data).
 
@@ -91,7 +95,7 @@ validation also fails closed when a consumer bypasses source validation.
 
 - `pool` (optional): `{ traderId, loyaltyLevel }` identifies the trader and LL1–LL4 task
   pool for player-facing explanations. Trader IDs use `TARKOV_TRADER_NAMES_BY_ID`. All 27 published
-  pools in each mode include this identity, including the three unresolved pools. It does not add
+  pools in each mode include this identity, including the two unresolved pools. It does not add
   a trader-loyalty requirement, identify proven contributors, or change counting eligibility.
   Consumers may display unresolved candidates with an explicit caveat, but must not derive their
   progress from this description.
@@ -111,8 +115,11 @@ validation also fails closed when a consumer bypasses source validation.
   appear in two groups. A task-ID list contributes exactly one once **every**
   member is complete. An `{ "anyOf": [...] }` group with at least two unique task
   IDs contributes exactly one once **any** member is complete. A single task is a
-  one-member list. Mechanic tier 3 uses `anyOf` for all four faction pairs;
-  completing both variants in a legacy profile still earns only one point.
+  one-member list. Mechanic tier 3 uses `anyOf` for all four faction pairs and
+  Ragman tier 1 for Inventory Files/A Big Loss; completing both variants in a
+  legacy profile still earns only one point. Faction pairs in pools with one
+  child per task (Jaeger tiers 1 and 3, Prapor tier 1, Skier tier 2) stay
+  per-task: their counters matched the full completed count.
   No multi-task all-members group is currently published as verified.
 - `proof`: public evidence links for the rule and its scope. These are review
   evidence, not a guarantee that a supplied mapping is true.

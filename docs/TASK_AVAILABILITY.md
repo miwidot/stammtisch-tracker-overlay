@@ -64,17 +64,18 @@ Task completion alone cannot resolve all of them.
 
 For verified mappings, `result.counters` explains each value and its contributor
 progress. The shipped mappings are best effort (see
-[what ships today](GLOBAL_VARIABLES.md#what-ships-today)): 24 trader-tier groups
-derive values and 3 stay unresolved. Mechanic tier 3 counts each of four faction
-pairs once when either variant is complete, plus eight singletons. See [global variables and progression counters](GLOBAL_VARIABLES.md)
+[what ships today](GLOBAL_VARIABLES.md#what-ships-today)): 25 trader-tier groups
+derive values and 2 stay unresolved. Mechanic tier 3 counts each of four faction
+pairs once when either variant is complete, plus eight singletons; Ragman tier 1
+counts Inventory Files/A Big Loss once, plus seven singletons. See [global variables and progression counters](GLOBAL_VARIABLES.md)
 for the data contract, evidence requirements, and safe backward-inference boundary.
 
 A task consuming a group gate is not automatically a contributor. Matching
 aggregate totals or tier reward signatures alone cannot distinguish shared slots,
 faction-specific credit, and migration omissions. The
 [current-source cross-check](GLOBAL_VARIABLE_MECHANICS.md#cross-check-against-current-wiki-and-api-data)
-records which proposed explanations are supported or contradicted. The three
-unresolved mappings (Ragman tier 1, Mechanic tier 4 and Prapor tier 4) still need
+records which proposed explanations are supported or contradicted. The two
+unresolved mappings (Mechanic tier 4 and Prapor tier 4) still need
 explicit resolved account values.
 
 The helpers are source-level exports, not a published npm runtime package. Consumers

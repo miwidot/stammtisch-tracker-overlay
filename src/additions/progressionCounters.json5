@@ -2,11 +2,15 @@
   // Best-effort trader-tier pools for the 27 published tier-group variables.
   // 23 groups match their pool's completed count in every retained 1.1 profile
   // (PVE and PvP) and are published verified/complete with
-  // distinctTaskCompletions. Mechanic T3 matches once each faction pair counts
-  // as one point and is published verified/complete with taskGroupCompletions.
+  // distinctTaskCompletions. Mechanic T3 and Ragman T1 have fewer counter
+  // children than tasks and match once each BEAR/USEC pair (SPT quest config
+  // bearOnlyQuests/usecOnlyQuests) counts as one point; they are published
+  // verified/complete with taskGroupCompletions. Other faction pairs (Jaeger T1
+  // and T3, Prapor T1, Skier T2) sit in pools with one child per task whose
+  // counters matched the full completed count, so they keep counting per task.
   // This best-effort mapping fits the retained aggregates and current faction
   // eligibility; it does not prove shared writers or how old tasks were backfilled.
-  // Ragman T1, Mechanic T4 and Prapor T4 stay unresolved/partial: their full-pool
+  // Mechanic T4 and Prapor T4 stay unresolved/partial: their full-pool
   // counts are contradicted and the missing contributions are unidentified.
   // Flip an entry back to unresolved/partial if a capture or
   // user report contradicts it.
@@ -424,24 +428,29 @@
     '6a4b339f18db62e03b4f7ded': {
       revision: '1.1.0',
       pool: { traderId: '5ac3b934156ae10c4430e83c', loyaltyLevel: 1 },
-      verification: 'unresolved',
-      coverage: 'partial',
+      verification: 'verified',
+      coverage: 'complete',
+      // Inventory Files and A Big Loss are a BEAR/USEC pair (SPT quest config),
+      // and the 9-task pool has 8 children. Counting the pair once fits the
+      // retained PvE (8 for 9 completed) and PvP (2 for 3 completed) totals,
+      // so a profile that finished both before the faction lock earns one point.
       derivation: {
-        type: 'distinctTaskCompletions',
-        taskIds: [
-          '5ae448bf86f7744d733e55ee',
-          '5ae448f286f77448d73c0131',
-          '5ae4490786f7744ca822adcc',
-          '5ae4493486f7744efa289417',
-          '5ae4493d86f7744b8e15aa8f',
-          '5ae449b386f77446d8741719',
-          '5ae449c386f7744bde357697',
-          '5c10f94386f774227172c572',
-          '60e71dc0a94be721b065bbfc',
+        type: 'taskGroupCompletions',
+        groups: [
+          ['5ae448bf86f7744d733e55ee'],
+          ['5ae448f286f77448d73c0131'],
+          ['5ae4490786f7744ca822adcc'],
+          ['5ae449b386f77446d8741719'],
+          ['5ae449c386f7744bde357697'],
+          ['5c10f94386f774227172c572'],
+          ['60e71dc0a94be721b065bbfc'],
+          // Inventory Files (BEAR) / A Big Loss (USEC)
+          { anyOf: ['5ae4493486f7744efa289417', '5ae4493d86f7744b8e15aa8f'] },
         ],
       },
       proof: [
         'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+        'https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json',
       ],
     },
     // Ragman Tier 2 (10 tasks)
@@ -1084,24 +1093,29 @@
     '6a4b339f18db62e03b4f7ded': {
       revision: '1.1.0',
       pool: { traderId: '5ac3b934156ae10c4430e83c', loyaltyLevel: 1 },
-      verification: 'unresolved',
-      coverage: 'partial',
+      verification: 'verified',
+      coverage: 'complete',
+      // Inventory Files and A Big Loss are a BEAR/USEC pair (SPT quest config),
+      // and the 9-task pool has 8 children. Counting the pair once fits the
+      // retained PvE (8 for 9 completed) and PvP (2 for 3 completed) totals,
+      // so a profile that finished both before the faction lock earns one point.
       derivation: {
-        type: 'distinctTaskCompletions',
-        taskIds: [
-          '5ae448bf86f7744d733e55ee',
-          '5ae448f286f77448d73c0131',
-          '5ae4490786f7744ca822adcc',
-          '5ae4493486f7744efa289417',
-          '5ae4493d86f7744b8e15aa8f',
-          '5ae449b386f77446d8741719',
-          '5ae449c386f7744bde357697',
-          '5c10f94386f774227172c572',
-          '60e71dc0a94be721b065bbfc',
+        type: 'taskGroupCompletions',
+        groups: [
+          ['5ae448bf86f7744d733e55ee'],
+          ['5ae448f286f77448d73c0131'],
+          ['5ae4490786f7744ca822adcc'],
+          ['5ae449b386f77446d8741719'],
+          ['5ae449c386f7744bde357697'],
+          ['5c10f94386f774227172c572'],
+          ['60e71dc0a94be721b065bbfc'],
+          // Inventory Files (BEAR) / A Big Loss (USEC)
+          { anyOf: ['5ae4493486f7744efa289417', '5ae4493d86f7744b8e15aa8f'] },
         ],
       },
       proof: [
         'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+        'https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json',
       ],
     },
     // Ragman Tier 2 (10 tasks)
@@ -1744,24 +1758,29 @@
     '6a4b339f18db62e03b4f7ded': {
       revision: '1.1.0',
       pool: { traderId: '5ac3b934156ae10c4430e83c', loyaltyLevel: 1 },
-      verification: 'unresolved',
-      coverage: 'partial',
+      verification: 'verified',
+      coverage: 'complete',
+      // Inventory Files and A Big Loss are a BEAR/USEC pair (SPT quest config),
+      // and the 9-task pool has 8 children. Counting the pair once fits the
+      // retained PvE (8 for 9 completed) and PvP (2 for 3 completed) totals,
+      // so a profile that finished both before the faction lock earns one point.
       derivation: {
-        type: 'distinctTaskCompletions',
-        taskIds: [
-          '5ae448bf86f7744d733e55ee',
-          '5ae448f286f77448d73c0131',
-          '5ae4490786f7744ca822adcc',
-          '5ae4493486f7744efa289417',
-          '5ae4493d86f7744b8e15aa8f',
-          '5ae449b386f77446d8741719',
-          '5ae449c386f7744bde357697',
-          '5c10f94386f774227172c572',
-          '60e71dc0a94be721b065bbfc',
+        type: 'taskGroupCompletions',
+        groups: [
+          ['5ae448bf86f7744d733e55ee'],
+          ['5ae448f286f77448d73c0131'],
+          ['5ae4490786f7744ca822adcc'],
+          ['5ae449b386f77446d8741719'],
+          ['5ae449c386f7744bde357697'],
+          ['5c10f94386f774227172c572'],
+          ['60e71dc0a94be721b065bbfc'],
+          // Inventory Files (BEAR) / A Big Loss (USEC)
+          { anyOf: ['5ae4493486f7744efa289417', '5ae4493d86f7744b8e15aa8f'] },
         ],
       },
       proof: [
         'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+        'https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json',
       ],
     },
     // Ragman Tier 2 (10 tasks)
