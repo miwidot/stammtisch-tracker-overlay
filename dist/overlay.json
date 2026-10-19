@@ -6195,6 +6195,10 @@
     "regular": {
       "6a43a01ccc83aceedd35f09c": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6218,6 +6222,10 @@
       },
       "6a43a095bfef0cd74c298963": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6242,6 +6250,10 @@
       },
       "6a43a13633c97d216dfc85de": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6267,6 +6279,10 @@
       },
       "6a43a16dde81644a7951f31b": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6286,6 +6302,10 @@
       },
       "6a3171c927ca9591bf4db1c4": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6308,6 +6328,10 @@
       },
       "6a3c0fefbea2d2ad581c090b": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6333,6 +6357,10 @@
       },
       "6a3cf95c6b35530c4a4f532e": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6394,6 +6422,10 @@
       },
       "6a3d1c0990e9ffe15463e961": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 4
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -6412,6 +6444,10 @@
       },
       "6a5ba40fe5c4eaef5610f232": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6434,6 +6470,10 @@
       },
       "6a5ba450a7851e16ce0bde44": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6459,6 +6499,10 @@
       },
       "6a5ba48b8cfd0bddb3d4d2e1": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6480,6 +6524,10 @@
       },
       "6a5ba4c57cbb93b629051591": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6502,6 +6550,10 @@
       },
       "6a20540cf1b67a977cc5a088": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6526,6 +6578,10 @@
       },
       "6a2688488bba18e0b0187a04": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6552,6 +6608,10 @@
       },
       "6a32651a811905ed0cac0973": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6574,6 +6634,10 @@
       },
       "6a326525789ae12ecb0b2807": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 4
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -6595,6 +6659,10 @@
       },
       "6a4b339f18db62e03b4f7ded": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 1
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -6617,6 +6685,10 @@
       },
       "6a4b4e6a30dac4b01af220aa": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6640,6 +6712,10 @@
       },
       "6a4b9c9a60b56d421cceea18": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6660,6 +6736,10 @@
       },
       "6a59f3ba06c8949abad30871": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6682,6 +6762,10 @@
       },
       "6a5a111de1f417ac80a163e5": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6707,6 +6791,10 @@
       },
       "6a5a115181116e807b55f258": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6728,6 +6816,10 @@
       },
       "6a5a1192efde11cc7105b18f": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6745,6 +6837,10 @@
       },
       "6a4e4ab3ecd1145894d00990": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6767,6 +6863,10 @@
       },
       "6a4e4aed3ded7a18126603f6": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6789,6 +6889,10 @@
       },
       "6a4e4b28629dc64c4001967c": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6810,6 +6914,10 @@
       },
       "6a56925b1c30ba5a77c7c518": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6828,6 +6936,10 @@
     "pve": {
       "6a43a01ccc83aceedd35f09c": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6851,6 +6963,10 @@
       },
       "6a43a095bfef0cd74c298963": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6875,6 +6991,10 @@
       },
       "6a43a13633c97d216dfc85de": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6900,6 +7020,10 @@
       },
       "6a43a16dde81644a7951f31b": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6919,6 +7043,10 @@
       },
       "6a3171c927ca9591bf4db1c4": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6941,6 +7069,10 @@
       },
       "6a3c0fefbea2d2ad581c090b": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -6966,6 +7098,10 @@
       },
       "6a3cf95c6b35530c4a4f532e": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7027,6 +7163,10 @@
       },
       "6a3d1c0990e9ffe15463e961": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 4
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -7045,6 +7185,10 @@
       },
       "6a5ba40fe5c4eaef5610f232": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7067,6 +7211,10 @@
       },
       "6a5ba450a7851e16ce0bde44": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7092,6 +7240,10 @@
       },
       "6a5ba48b8cfd0bddb3d4d2e1": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7113,6 +7265,10 @@
       },
       "6a5ba4c57cbb93b629051591": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7135,6 +7291,10 @@
       },
       "6a20540cf1b67a977cc5a088": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7159,6 +7319,10 @@
       },
       "6a2688488bba18e0b0187a04": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7185,6 +7349,10 @@
       },
       "6a32651a811905ed0cac0973": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7207,6 +7375,10 @@
       },
       "6a326525789ae12ecb0b2807": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 4
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -7228,6 +7400,10 @@
       },
       "6a4b339f18db62e03b4f7ded": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 1
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -7250,6 +7426,10 @@
       },
       "6a4b4e6a30dac4b01af220aa": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7273,6 +7453,10 @@
       },
       "6a4b9c9a60b56d421cceea18": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7293,6 +7477,10 @@
       },
       "6a59f3ba06c8949abad30871": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7315,6 +7503,10 @@
       },
       "6a5a111de1f417ac80a163e5": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7340,6 +7532,10 @@
       },
       "6a5a115181116e807b55f258": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7361,6 +7557,10 @@
       },
       "6a5a1192efde11cc7105b18f": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7378,6 +7578,10 @@
       },
       "6a4e4ab3ecd1145894d00990": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7400,6 +7604,10 @@
       },
       "6a4e4aed3ded7a18126603f6": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7422,6 +7630,10 @@
       },
       "6a4e4b28629dc64c4001967c": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7443,6 +7655,10 @@
       },
       "6a56925b1c30ba5a77c7c518": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7461,6 +7677,10 @@
     "pvp-season": {
       "6a43a01ccc83aceedd35f09c": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7484,6 +7704,10 @@
       },
       "6a43a095bfef0cd74c298963": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7508,6 +7732,10 @@
       },
       "6a43a13633c97d216dfc85de": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7533,6 +7761,10 @@
       },
       "6a43a16dde81644a7951f31b": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5c0647fdd443bc2504c2d371",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7552,6 +7784,10 @@
       },
       "6a3171c927ca9591bf4db1c4": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7574,6 +7810,10 @@
       },
       "6a3c0fefbea2d2ad581c090b": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7599,6 +7839,10 @@
       },
       "6a3cf95c6b35530c4a4f532e": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7660,6 +7904,10 @@
       },
       "6a3d1c0990e9ffe15463e961": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5a7c2eca46aef81a7ca2145d",
+          "loyaltyLevel": 4
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -7678,6 +7926,10 @@
       },
       "6a5ba40fe5c4eaef5610f232": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7700,6 +7952,10 @@
       },
       "6a5ba450a7851e16ce0bde44": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7725,6 +7981,10 @@
       },
       "6a5ba48b8cfd0bddb3d4d2e1": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7746,6 +8006,10 @@
       },
       "6a5ba4c57cbb93b629051591": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7768,6 +8032,10 @@
       },
       "6a20540cf1b67a977cc5a088": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7792,6 +8060,10 @@
       },
       "6a2688488bba18e0b0187a04": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7818,6 +8090,10 @@
       },
       "6a32651a811905ed0cac0973": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7840,6 +8116,10 @@
       },
       "6a326525789ae12ecb0b2807": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb50c76803fa8b248b4571",
+          "loyaltyLevel": 4
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -7861,6 +8141,10 @@
       },
       "6a4b339f18db62e03b4f7ded": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 1
+        },
         "verification": "unresolved",
         "coverage": "partial",
         "derivation": {
@@ -7883,6 +8167,10 @@
       },
       "6a4b4e6a30dac4b01af220aa": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7906,6 +8194,10 @@
       },
       "6a4b9c9a60b56d421cceea18": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "5ac3b934156ae10c4430e83c",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7926,6 +8218,10 @@
       },
       "6a59f3ba06c8949abad30871": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7948,6 +8244,10 @@
       },
       "6a5a111de1f417ac80a163e5": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7973,6 +8273,10 @@
       },
       "6a5a115181116e807b55f258": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -7994,6 +8298,10 @@
       },
       "6a5a1192efde11cc7105b18f": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "58330581ace78e27b8b10cee",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -8011,6 +8319,10 @@
       },
       "6a4e4ab3ecd1145894d00990": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 1
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -8033,6 +8345,10 @@
       },
       "6a4e4aed3ded7a18126603f6": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 2
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -8055,6 +8371,10 @@
       },
       "6a4e4b28629dc64c4001967c": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 3
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -8076,6 +8396,10 @@
       },
       "6a56925b1c30ba5a77c7c518": {
         "revision": "1.1.0",
+        "pool": {
+          "traderId": "54cb57776803fa99248b456e",
+          "loyaltyLevel": 4
+        },
         "verification": "verified",
         "coverage": "complete",
         "derivation": {
@@ -16918,8 +17242,8 @@
     }
   },
   "$meta": {
-    "version": "1.160",
-    "generated": "2026-10-19T07:36:00.154Z",
-    "sha256": "4590fd2e5d9312e3f4189ad81a6d1ff6f81d44751c821fd3b6e4cef3aea01bbd"
+    "version": "1.161",
+    "generated": "2026-10-19T09:12:20.462Z",
+    "sha256": "3a3e94413db27d3e018c29b3d9a33812f29f576648652d5eeb53731cb547146a"
   }
 }
