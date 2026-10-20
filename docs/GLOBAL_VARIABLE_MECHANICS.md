@@ -162,7 +162,20 @@ Tier 2–4 tasks do not always carry one, though. Counter-gated tasks usually
 don't, and eight tier-2 tasks (four Prapor, four Jaeger) have an empty
 `AvailableForStart`, so `tierAccessory` is their only loyalty gate and
 tarkov.dev serves them with none. `src/overrides/tasks.json5` supplies that
-gate as a `traderRequirements` level entry. So the shape of the unlock is:
+gate as a `traderRequirements` level entry.
+
+`tierAccessory` is also the trader task-list grouping in the client UI. Locale
+keys `UI/Quests/TraderAccessoryGroup/Tier1`–`Tier4` render as "Loyalty Level
+1"–"Loyalty Level 4", and `UI/Quests/TraderAccessoryGroup/Chain` renders as
+"Essential Tasks" for `tierAccessory: 0`. Those tasks sit outside the tier
+pools and are gated by ordinary conditions. Example: Wet Job - Part 1
+(`5a27bb8386f7741c770d2d0a`) has `tierAccessory: 0` and a lone Peacekeeper
+`TraderLoyalty` 2 start condition. A 1.2.5 PvP Seasonal client lists it under
+"Essential Tasks" as locked, with "Loyalty level with Peacekeeper: 2" as its
+only unlock requirement. A `TraderLoyalty` condition on a `tierAccessory: 0`
+task does not place it in that trader's tier pool or counter group.
+
+For counter-gated tier-pool tasks, the shape of the unlock is:
 
 ```text
 (explicit TraderLoyalty condition, if the task has one)
