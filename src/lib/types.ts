@@ -904,8 +904,18 @@ export type ProgressionCounterRegistry = Partial<
   Record<GameMode, Record<string, ProgressionCounterDefinition>>
 >;
 
+/**
+ * The client's per-task `tierAccessory`: 0 is the "Essential Tasks" trader-list group and 1-4
+ * are "Loyalty Level 1-4". Display grouping only, never an availability gate.
+ */
+export type TraderTaskGroup = 0 | 1 | 2 | 3 | 4;
+
+/** Mode -> task id -> group. A missing task means its group is unknown. */
+export type TraderTaskGroupRegistry = Partial<Record<GameMode, Record<string, TraderTaskGroup>>>;
+
 export interface OverlayOutput {
   progressionCounters?: ProgressionCounterRegistry;
+  traderTaskGroups?: TraderTaskGroupRegistry;
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
   items?: Record<string, unknown>;
@@ -1031,6 +1041,7 @@ export const SHARED_SCHEMA_FILES = [
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
+  { pattern: 'additions/traderTaskGroups.json5', schemaFile: 'trader-task-group.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/maps.json5', schemaFile: 'map-override.schema.json' },
   ...SUPPORTED_GAME_MODES.flatMap((mode) => [

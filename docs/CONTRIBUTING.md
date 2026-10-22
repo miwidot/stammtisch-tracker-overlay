@@ -31,11 +31,11 @@ Additions live in `src/additions/` and should include the full object.
 ## Project Data Layout
 
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
-- `src/additions/`: New entities and missing fields (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
+- `src/additions/`: New entities and missing fields (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
 - `dist/overlay.json`: Generated output from `npm run build`. Only the release workflow commits it (after each merge to `main`); pull requests must leave it unchanged.
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
-  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
+  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`).
 
 ---
 

@@ -129,6 +129,7 @@ describe('overlay.schema.json', () => {
       ...SHARED_SCHEMA_FILES,
       'story-chapter.schema.json',
       'progression-counter.schema.json',
+      'trader-task-group.schema.json',
       'locale-override.schema.json',
       'seasonal-perk.schema.json',
       'craft-additions.schema.json',

@@ -13,6 +13,7 @@ const shared = new Set([
   'additions/craftsAdd.json5',
   'additions/seasonalPerks.json5',
   'additions/progressionCounters.json5',
+  'additions/traderTaskGroups.json5',
   'additions/editions.json5',
   'additions/storyChapters.json5',
   'overrides/modes/regular/prestige.json5',

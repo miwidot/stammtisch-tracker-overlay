@@ -173,7 +173,9 @@ pools and are gated by ordinary conditions. Example: Wet Job - Part 1
 `TraderLoyalty` 2 start condition. A 1.2.5 PvP Seasonal client lists it under
 "Essential Tasks" as locked, with "Loyalty level with Peacekeeper: 2" as its
 only unlock requirement. A `TraderLoyalty` condition on a `tierAccessory: 0`
-task does not place it in that trader's tier pool or counter group.
+task does not place it in that trader's tier pool or counter group. The overlay
+publishes each task's group as `traderTaskGroups` (see
+[INTEGRATION.md](INTEGRATION.md#trader-task-groups)).
 
 For counter-gated tier-pool tasks, the shape of the unlock is:
 

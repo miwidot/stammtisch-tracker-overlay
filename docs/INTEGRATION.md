@@ -167,6 +167,11 @@ that a CDN response is authentic.
       }
     }
   },
+  "traderTaskGroups": {
+    "regular": { "<task-id>": 0, "<other-task-id>": 1 },
+    "pve": { "<task-id>": 0 },
+    "pvp-season": { "<task-id>": 0 }
+  },
   "editions": {
     "standard": { "id": "standard", "title": "Standard Edition", ... },
     "unheard": { "id": "unheard", "title": "The Unheard Edition", ... }
@@ -761,6 +766,28 @@ const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
 const allTasks = [...tasksFromApi, ...addedTasks];
 ```
 
+### Trader Task Groups
+
+`traderTaskGroups` gives the in-game trader task-list group for each task, keyed
+by mode, then task id. The value is the client's `tierAccessory`: `0` is
+**Essential Tasks** and `1`–`4` are **Loyalty Level 1–4**. Operational (daily)
+tasks are a separate client group and are not listed.
+
+```typescript
+const group = overlay.traderTaskGroups?.[gameMode]?.[task.id]; // 0-4 or undefined
+const heading =
+  group === undefined ? 'Other' : group === 0 ? 'Essential Tasks' : `Loyalty Level ${group}`;
+```
+
+- **Display only:** A group is never an availability gate. Keep using
+  `traderRequirements`, `otherRequirements` and `progressionCounters` for unlocks.
+- **Missing entry:** A task without an entry has an unknown group, not Essential.
+  Show it ungrouped rather than guessing.
+- **Scope:** Values come from 1.1 PvE, PvP and Seasonal quest-list captures, which
+  agreed in every mode where a task appeared. Each mode block covers the tasks
+  tarkov.dev serves in that mode with a captured value. See the header of
+  `src/additions/traderTaskGroups.json5`.
+
 ### Story Chapters
 
 Story chapters are an addition — tarkov.dev serves no storyline data — so read
@@ -945,6 +972,8 @@ interface Overlay {
   hideout?: Record<string, HideoutOverride>;
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
+  // Mode -> task id -> 0 (Essential Tasks) | 1-4 (Loyalty Level N); display grouping only.
+  traderTaskGroups?: Partial<Record<GameMode, Record<string, 0 | 1 | 2 | 3 | 4>>>;
   // Seasonal (pvp-season) data tarkov.dev does not serve; see the sections above.
   seasonalPerks?: Record<string, SeasonalPerk>;
   craftsAdd?: Record<string, Craft>;
