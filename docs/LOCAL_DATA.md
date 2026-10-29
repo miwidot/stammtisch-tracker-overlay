@@ -4,10 +4,10 @@ Keep private captures and historical evidence under the gitignored `data/` root.
 Historical snapshots remain useful when newer captures have less coverage; never
 replace an older snapshot just because a newer one exists.
 
-- `data/reference/`: decoded captures (including original wire bodies), combined
-  mode datasets, enriched quests, and story supplements. A separate raw tree is
-  unnecessary when its payload and noncredential metadata are already represented
-  in decoded captures. Preserve capture and mode distinctions.
+- `data/reference/`: decoded captures (including original wire bodies), enriched
+  quests, and story supplements. A separate raw tree is unnecessary when its
+  payload and noncredential metadata are already represented in decoded
+  captures. Preserve capture and mode distinctions.
 - `data/cache/`: current API and wiki tool caches.
 - `data/eft/` and `data/task-availability/`: current derived tool outputs.
 - `data/history.zip`: historical API/wiki snapshots, comparisons, research notes,
@@ -26,6 +26,12 @@ Its byte hash is `representationSha256`; `sha256` records the removed original.
 verifies it after excluding Cookie, Authorization, and Set-Cookie headers.
 Decoded captures already redact those credentials; transport bodies and all
 other original fields must match exactly before a raw copy can be removed.
+For `storage: decoded-response`, read `response[responseField]` in the decoded
+file at `path`. `representationSha256` verifies that file; `semanticSha256`
+verifies the full JSON response with object keys normalized and array order
+preserved. `gameMode` must match the capture independently; equal payloads from
+another mode do not establish coverage. The old combined path remains in
+`originalPath`/`previousPath`, so historical lookups retain their context.
 For ordinary files, read `duplicateOf ?? path`. Entries marked
 `storage: removed-housekeeping` record a deliberate removal and its reason.
 Do not assume a former path still exists. Archived scripts and notes can retain
@@ -53,11 +59,14 @@ captures into `history.zip` with their original bytes rather than discarding the
 protected references before removing a file. Verify every retained ZIP member's
 SHA-256 against its catalog entry before deleting loose copies.
 
-Deduplicate only byte-identical files, after hashing both copies. Preserve pinned
-story references, selected mode references, live cache/output paths, and every
-unique byte sequence. Equal entity IDs across snapshots do not make the snapshots
-interchangeable. Preserve envelopes, localization, versions, modes, and incomplete
-captures; merged datasets cannot replace their source evidence.
+Prove duplicate bytes or a documented exact JSON representation before removing
+a copy. Combined datasets can be removed only when their complete response,
+including all fields and array order, matches a decoded capture of the same mode.
+Preserve combined-only historical values or annotations if any fail that check.
+Preserve pinned story references, selected mode references, live cache/output
+paths, envelopes, localization, versions, modes, and incomplete captures. Equal
+entity IDs across snapshots do not make the snapshots interchangeable; a merged
+dataset cannot replace its source evidence.
 
 `data/` is the only active local data root. Capture tools default to
 `data/reference/`; there is no fallback to top-level `eft/`. Keep derived outputs

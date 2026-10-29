@@ -702,9 +702,11 @@ would turn missing history into an invented zero.
 ## Reproducing
 
 All reference-side figures come from the gitignored local capture under
-`data/reference/combined/<mode>/`, using `variable_group.json`, `quests.json`,
-`dialogue.json` and `profile_list.json`. Public-side figures come from
-`json.tarkov.dev/pve/tasks`, `json.tarkov.dev/pve/traders` and
+`data/reference/decoded/`, using the variable-group, quest-list, dialogue and
+profile-list responses. `data/catalog.json` maps the former combined filenames
+(`variable_group.json`, `quests.json`, `dialogue.json`, `profile_list.json`) to
+the equivalent decoded response and its independently matched mode. Public-side
+figures come from `json.tarkov.dev/pve/tasks`, `json.tarkov.dev/pve/traders` and
 `dist/overlay.json`.
 
 The published condition can be listed without any local capture:
