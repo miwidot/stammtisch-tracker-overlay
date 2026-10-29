@@ -2398,10 +2398,13 @@
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
     objectives: {
-      // 2026-08-25: objective text reworded (any map, not the listed four)
+      // 1.1 PvE and PvP captures keep a Location condition (Reserve, Streets of
+      // Tarkov, Shoreline, Lighthouse) with count 50, and upstream serves those
+      // four maps in every mode, so only the count is added to the text.
+      // "All over the Tarkov territory" with no Location condition is the 1.0
+      // template (count 30). The wiki objective was corrected to the four maps.
       '5d2701b586f77469f1599fe2': {
-        description: 'Eliminate 50 Scavs all over the Tarkov territory', // Was: Eliminate Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline
-        maps: [], // Was: Streets of Tarkov, Reserve, Lighthouse, Shoreline (now any map)
+        description: 'Eliminate 50 Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline', // Was: Eliminate Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline
       },
     },
   },
