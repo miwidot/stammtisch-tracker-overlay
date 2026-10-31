@@ -1023,6 +1023,16 @@
         },
         "type": "array"
       },
+      "objectivesRemove": {
+        "description": "Upstream objective IDs to drop from the task, for objectives the game no longer has or never had in this mode. Consumers filter these out of the upstream objective list; shared and mode removals union.",
+        "items": {
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
       "taskRequirements": {
         "$ref": "task-shared.schema.json#/definitions/taskRequirements",
         "description": "Task prerequisites/requirements"

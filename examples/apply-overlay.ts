@@ -69,6 +69,8 @@ interface TaskOverride {
   disabled?: boolean;
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
+  /** Upstream objective IDs to drop. */
+  objectivesRemove?: string[];
 }
 
 interface Edition {
@@ -259,6 +261,29 @@ async function fetchOverlay(): Promise<Overlay> {
   return overlay as Overlay;
 }
 
+/** Keys applied separately (objectives) or never copied onto the task. */
+const NON_FIELD_KEYS = new Set(['objectives', 'objectivesAdd', 'objectivesRemove', 'disabled']);
+
+/** Patch objectives by ID, drop erroneous upstream ones, then append missing ones. */
+function applyObjectiveOverrides(task: Task, taskOverride: TaskOverride): Task['objectives'] {
+  let objectives = task.objectives;
+  if (taskOverride.objectives && objectives) {
+    // Shallow merge each objective with its patch (supports count, description, maps, items)
+    objectives = objectives.map((objective) => ({
+      ...objective,
+      ...taskOverride.objectives![objective.id],
+    }));
+  }
+  if (taskOverride.objectivesRemove?.length && objectives) {
+    const removed = new Set(taskOverride.objectivesRemove);
+    objectives = objectives.filter((objective) => !removed.has(objective.id));
+  }
+  if (taskOverride.objectivesAdd) {
+    objectives = [...(objectives || []), ...taskOverride.objectivesAdd];
+  }
+  return objectives;
+}
+
 /**
  * Apply overlay corrections to a single task
  *
@@ -276,13 +301,7 @@ function applyTaskOverride(task: Task, taskOverride: TaskOverride | undefined): 
 
   // Apply top-level field overrides (shallow merge)
   for (const [key, value] of Object.entries(taskOverride)) {
-    if (
-      key === 'objectives' ||
-      key === 'objectivesAdd' ||
-      key === 'disabled' ||
-      UNSAFE_KEYS.has(key)
-    )
-      continue;
+    if (NON_FIELD_KEYS.has(key) || UNSAFE_KEYS.has(key)) continue;
 
     // Type-safe property assignment
     if (key === 'minPlayerLevel' && typeof value === 'number') {
@@ -295,21 +314,7 @@ function applyTaskOverride(task: Task, taskOverride: TaskOverride | undefined): 
     }
   }
 
-  // Apply objective-level patches (ID-keyed)
-  if (taskOverride.objectives && task.objectives) {
-    result.objectives = task.objectives.map((objective) => {
-      const patch = taskOverride.objectives![objective.id];
-      if (!patch) return objective;
-
-      // Shallow merge the objective with its patch (supports count, description, maps, items)
-      return { ...objective, ...patch };
-    });
-  }
-
-  // Append missing objectives
-  if (taskOverride.objectivesAdd) {
-    result.objectives = [...(result.objectives || []), ...taskOverride.objectivesAdd];
-  }
+  result.objectives = applyObjectiveOverrides(task, taskOverride);
 
   return result;
 }

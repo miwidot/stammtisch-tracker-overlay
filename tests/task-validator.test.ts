@@ -613,6 +613,79 @@ describe('validateTaskOverride', () => {
     });
   });
 
+  describe('objectivesRemove validation', () => {
+    const extract = { id: '5a68764c86f77474c4269f3c', description: 'Survive and extract' };
+
+    it('keeps a removal while upstream still serves the objective', () => {
+      const apiTask = createApiTask({ objectives: [extract] });
+      const result = validateTaskOverride('test-task-id', { objectivesRemove: [extract.id] }, [
+        apiTask,
+      ]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(result.details).toEqual([
+        expect.objectContaining({ field: `objectivesRemove:${extract.id}`, status: 'needed' }),
+      ]);
+    });
+
+    it('reports a removal as redundant once upstream drops the objective', () => {
+      const apiTask = createApiTask({ objectives: [{ id: 'other', description: 'Other' }] });
+      const result = validateTaskOverride('test-task-id', { objectivesRemove: [extract.id] }, [
+        apiTask,
+      ]);
+
+      expect(result.status).toBe('FIXED');
+      expect(result.details[0]).toMatchObject({ status: 'fixed' });
+      expect(result.details[0].message).toContain('NO LONGER IN API');
+    });
+
+    it('cannot judge a removal without a valid upstream objective collection', () => {
+      // A sparse list could hide the removed objective in a hole.
+      const sparse = [, extract] as unknown as TaskData['objectives'];
+      for (const objectives of [undefined, sparse]) {
+        const apiTask = createApiTask({ objectives });
+        const result = validateTaskOverride(
+          'test-task-id',
+          { objectivesRemove: ['b'.repeat(24)] },
+          [apiTask]
+        );
+
+        expect(result.status).toBe('NEEDED');
+        expect(result.details[0]).toMatchObject({ status: 'check' });
+      }
+    });
+
+    it('flags an objective that is both patched and removed', () => {
+      const apiTask = createApiTask({ objectives: [extract] });
+      const result = validateTaskOverride(
+        'test-task-id',
+        { objectives: { [extract.id]: { count: 2 } }, objectivesRemove: [extract.id] },
+        [apiTask]
+      );
+
+      expect(
+        result.details.find((d) => d.field === `objectivesRemove:${extract.id}:conflict`)
+      ).toMatchObject({ status: 'check' });
+    });
+
+    it('flags a removed objective re-added under objectivesAdd instead of calling it stale', () => {
+      const apiTask = createApiTask({ objectives: [extract] });
+      const result = validateTaskOverride(
+        'test-task-id',
+        {
+          objectivesRemove: [extract.id],
+          objectivesAdd: [{ id: extract.id, description: 'Replacement' }],
+        },
+        [apiTask]
+      );
+
+      expect(result.details.some((d) => d.status === 'fixed')).toBe(false);
+      expect(
+        result.details.find((d) => d.field === `objectivesRemove:${extract.id}:conflict`)?.message
+      ).toContain('re-added');
+    });
+  });
+
   describe('objectivesAdd validation', () => {
     it('returns FIXED when an added objective appears in API (by ID)', () => {
       const apiTask = createApiTask({

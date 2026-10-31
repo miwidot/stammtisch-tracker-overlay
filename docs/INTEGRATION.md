@@ -236,7 +236,7 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
 
   // Apply top-level fields
   for (const [key, value] of Object.entries(taskOverride)) {
-    if (key === 'objectives' || key === 'objectivesAdd') continue; // Handle separately
+    if (key === 'objectives' || key === 'objectivesAdd' || key === 'objectivesRemove') continue; // Handle separately
     (result as any)[key] = value;
   }
 
@@ -246,6 +246,12 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
       const patch = (taskOverride.objectives as Record<string, any>)[obj.id];
       return patch ? { ...obj, ...patch } : obj;
     });
+  }
+
+  // Drop erroneous upstream objectives (by ID)
+  if (Array.isArray(taskOverride.objectivesRemove) && result.objectives) {
+    const removed = new Set(taskOverride.objectivesRemove);
+    result.objectives = result.objectives.filter((obj) => !removed.has(obj.id));
   }
 
   // Append missing objectives
@@ -262,6 +268,16 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
 If tarkov.dev is missing objectives (like new Collector items), you can append
 them using `objectivesAdd` in the overlay. The merge example above already
 handles this by appending `objectivesAdd` to the objective list.
+
+### With Removed Objectives
+
+If tarkov.dev serves an objective the game does not have (for example one that
+a mode dropped), `objectivesRemove` lists the upstream objective IDs to drop.
+Filter them out of the upstream objectives before appending `objectivesAdd`,
+as the merge example above does. `mergeTaskOverride` unions shared and
+mode-specific removals, so a mode can remove more objectives than the shared
+layer but cannot restore one it removes. Consumers that ignore the field keep
+showing the erroneous objective, which is the pre-overlay behaviour.
 
 ---
 
@@ -1035,6 +1051,7 @@ interface TaskOverride {
   map?: { id: string; name: string } | null;
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
+  objectivesRemove?: string[]; // upstream objective IDs to drop
   // ... other fields
 }
 

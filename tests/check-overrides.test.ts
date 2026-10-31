@@ -749,6 +749,65 @@ describe('task retirement across shared and mode layering', () => {
     expect(result.details.find((detail) => detail.field === 'experience')?.status).toBe('fixed');
   });
 
+  it('judges each shared objective removal separately across modes', () => {
+    const live = 'a'.repeat(24);
+    const gone = 'b'.repeat(24);
+    const tasks = modes(1);
+    for (const mode of Object.keys(tasks) as Array<keyof typeof tasks>) {
+      tasks[mode] = [createApiTask({ id: 't', objectives: [{ id: live, description: 'Live' }] })];
+    }
+    const [result] = validateSharedTaskOverrides({ t: { objectivesRemove: [live, gone] } }, tasks);
+    const status = (id: string) =>
+      result.details.find((detail) => detail.field === `objectivesRemove:${id}`)?.status;
+    expect(status(live)).toBe('needed');
+    expect(status(gone)).toBe('fixed');
+  });
+
+  it('flags removals that contradict a patch in the same shared entry or across layers', () => {
+    const id = 'a'.repeat(24);
+    const tasks = modes(1);
+    for (const mode of Object.keys(tasks)) {
+      tasks[mode] = [createApiTask({ id: 't', objectives: [{ id, description: 'X', count: 1 }] })];
+    }
+    const [sharedResult] = validateSharedTaskOverrides(
+      { t: { objectives: { [id]: { count: 2 } }, objectivesRemove: [id] } },
+      tasks
+    );
+    expect(
+      sharedResult.details.find((detail) => detail.field === `objectivesRemove:${id}:conflict`)
+    ).toMatchObject({ status: 'check' });
+
+    const [modeResult] = validateModeTaskOverrides(
+      { t: { objectivesRemove: [id] } },
+      { t: { objectives: { [id]: { count: 2 } } } },
+      tasks['pvp-season']
+    );
+    expect(modeResult.stillNeeded).toBe(true);
+    expect(
+      modeResult.details.find((detail) => detail.field === `objectivesRemove:${id}:conflict`)
+    ).toMatchObject({ status: 'check' });
+  });
+
+  it('treats a mode removal already applied by the shared layer as redundant', () => {
+    const task = createApiTask({
+      id: 't',
+      objectives: [
+        { id: 'a'.repeat(24), description: 'Shared removal' },
+        { id: 'b'.repeat(24), description: 'Mode removal' },
+      ],
+    });
+    const [result] = validateModeTaskOverrides(
+      { t: { objectivesRemove: ['a'.repeat(24), 'b'.repeat(24)] } },
+      { t: { objectivesRemove: ['a'.repeat(24)] } },
+      [task]
+    );
+    const status = (id: string) =>
+      result.details.find((detail) => detail.field === `objectivesRemove:${id}`)?.status;
+    expect(status('a'.repeat(24))).toBe('fixed');
+    expect(status('b'.repeat(24))).toBe('needed');
+    expect(result.stillNeeded).toBe(true);
+  });
+
   it('does not retire shared corrections that match regular but are needed in PvE', () => {
     const tasks = modes(2);
     tasks.pve = [createApiTask({ id: 't', experience: 1 })];

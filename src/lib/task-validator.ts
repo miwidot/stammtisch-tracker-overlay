@@ -500,6 +500,7 @@ const COMPARABLE_FIELDS = new Set([
   'traderRequirements',
   'objectives',
   'objectivesAdd',
+  'objectivesRemove',
 ]);
 
 /** Missing or malformed collections cannot establish that a clearing patch is redundant. */
@@ -743,9 +744,74 @@ function validateObjectiveAdditions(
   override: TaskOverride,
   apiTask: ComparisonTaskData
 ): ValidationDetail[] {
-  return (override.objectivesAdd ?? []).flatMap((added) =>
-    objectiveAdditionDetails(added as unknown as Record<string, unknown>, apiTask)
-  );
+  // A re-added removed ID is reported once, as a removal conflict.
+  const removed = new Set(override.objectivesRemove ?? []);
+  return (override.objectivesAdd ?? [])
+    .filter((added) => !removed.has(added.id))
+    .flatMap((added) =>
+      objectiveAdditionDetails(added as unknown as Record<string, unknown>, apiTask)
+    );
+}
+
+/**
+ * Removing an objective while the same override (or layered shared + mode
+ * override) also patches or re-adds it is contradictory: consumers would drop
+ * the patch, or swap the upstream objective for the overlay's copy. A
+ * replacement belongs in an `objectives` patch instead.
+ */
+export function objectiveRemovalConflicts(override: TaskOverride): ValidationDetail[] {
+  const patched = new Set(Object.keys(override.objectives ?? {}));
+  const added = new Set((override.objectivesAdd ?? []).map((objective) => objective.id));
+  return (override.objectivesRemove ?? []).flatMap((id): ValidationDetail[] => {
+    const reasons = [
+      patched.has(id) ? 'patched under objectives' : undefined,
+      added.has(id)
+        ? 're-added under objectivesAdd (write a replacement as an objectives patch)'
+        : undefined,
+    ].filter(Boolean);
+    return reasons.length
+      ? [
+          {
+            field: `objectivesRemove:${id}:conflict`,
+            status: 'check',
+            message: `removed objective ${id}: also ${reasons.join(' and ')} - CHECK MANUALLY`,
+          },
+        ]
+      : [];
+  });
+}
+
+/**
+ * A removal stays needed while upstream still serves the objective; once the ID
+ * is gone upstream the entry is redundant. Patching an objective the same
+ * override removes is contradictory and needs a manual decision.
+ */
+function validateObjectiveRemovals(
+  override: TaskOverride,
+  apiTask: ComparisonTaskData
+): ValidationDetail[] {
+  const presence = (override.objectivesRemove ?? []).map((id): ValidationDetail => {
+    const field = `objectivesRemove:${id}`;
+    if (!validObjectiveCollection(apiTask.objectives)) {
+      return {
+        field,
+        status: 'check',
+        message: `removed objective ${id}: UNVERIFIED upstream objectives unavailable`,
+      };
+    }
+    return apiTask.objectives.some((objective) => objective.id === id)
+      ? {
+          field,
+          status: 'needed',
+          message: `removed objective ${id}: still served upstream - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
+        }
+      : {
+          field,
+          status: 'fixed',
+          message: `removed objective ${id}: NO LONGER IN API - REMOVE FROM objectivesRemove`,
+        };
+  });
+  return [...presence, ...objectiveRemovalConflicts(override)];
 }
 
 function taskFieldComparison(
@@ -753,7 +819,9 @@ function taskFieldComparison(
   task: ComparisonTaskData,
   semantic: ValidationDetail[]
 ): OverlayComparisonDetail[] {
-  const { objectivesAdd, ...fields } = override;
+  // objectivesRemove is judged by objective presence (validateObjectiveRemovals),
+  // not as a field upstream could carry.
+  const { objectivesAdd, objectivesRemove: _removed, ...fields } = override;
   let details = compareOverlayFields(fields, task);
   for (const verdict of semantic.filter((row) => row.status === 'fixed')) {
     details = applySemanticEvidence(verdict.field, override, task, details);
@@ -867,6 +935,7 @@ function collectValidationDetails(
   }
   details.push(...validateObjectiveOverrides(override, apiTask));
   details.push(...validateObjectiveAdditions(override, apiTask));
+  details.push(...validateObjectiveRemovals(override, apiTask));
   return details;
 }
 

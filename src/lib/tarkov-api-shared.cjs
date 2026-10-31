@@ -200,42 +200,64 @@ function requireCollection(value, path, isRecord) {
   return value;
 }
 
+/** Read one layer's value for `field`, failing when it has the wrong container type. */
+function layerValue(layer, field, isValid, kind) {
+  const value = layer[field];
+  if (value !== undefined && !isValid(value)) {
+    throw new Error(`Task override ${field} must be ${kind}`);
+  }
+  return value;
+}
+
+/** Objective patches merge per objective ID; each patch merges shallowly. */
+function mergeObjectivePatches(shared, modeSpecific) {
+  const merged = new Map(Object.entries(shared || {}));
+  for (const [objectiveId, objectivePatch] of Object.entries(modeSpecific || {})) {
+    const existingPatch = merged.get(objectiveId);
+    merged.set(
+      objectiveId,
+      isRecord(existingPatch) && isRecord(objectivePatch)
+        ? { ...existingPatch, ...objectivePatch }
+        : objectivePatch
+    );
+  }
+  return Object.fromEntries(merged);
+}
+
+/**
+ * How each structured field combines across the shared and mode layers. Other
+ * fields are replaced by the mode layer. Additions concatenate; removals union,
+ * so a mode can remove more upstream objectives than the shared layer but
+ * cannot restore one the shared layer removes.
+ */
+const LAYERED_TASK_FIELDS = [
+  { field: 'objectives', isValid: isRecord, kind: 'objects', combine: mergeObjectivePatches },
+  {
+    field: 'objectivesAdd',
+    isValid: Array.isArray,
+    kind: 'arrays',
+    combine: (shared, mode) => [...(shared || []), ...(mode || [])],
+  },
+  {
+    field: 'objectivesRemove',
+    isValid: Array.isArray,
+    kind: 'arrays',
+    combine: (shared, mode) => [...new Set([...(shared || []), ...(mode || [])])],
+  },
+];
+
 /** Merge shared and mode-specific task patches without losing nested fields. */
 function mergeTaskOverride(base, next) {
   const shared = isRecord(base) ? base : {};
   const modeSpecific = isRecord(next) ? next : {};
   const merged = { ...shared, ...modeSpecific };
-
-  if (shared.objectives !== undefined || modeSpecific.objectives !== undefined) {
-    if (
-      (shared.objectives !== undefined && !isRecord(shared.objectives)) ||
-      (modeSpecific.objectives !== undefined && !isRecord(modeSpecific.objectives))
-    ) {
-      throw new Error('Task override objectives must be objects');
+  for (const { field, isValid, kind, combine } of LAYERED_TASK_FIELDS) {
+    const sharedValue = layerValue(shared, field, isValid, kind);
+    const modeValue = layerValue(modeSpecific, field, isValid, kind);
+    if (sharedValue !== undefined || modeValue !== undefined) {
+      merged[field] = combine(sharedValue, modeValue);
     }
-    const mergedObjectives = new Map(Object.entries(shared.objectives || {}));
-    for (const [objectiveId, objectivePatch] of Object.entries(modeSpecific.objectives || {})) {
-      const existingPatch = mergedObjectives.get(objectiveId);
-      mergedObjectives.set(
-        objectiveId,
-        isRecord(existingPatch) && isRecord(objectivePatch)
-          ? { ...existingPatch, ...objectivePatch }
-          : objectivePatch
-      );
-    }
-    merged.objectives = Object.fromEntries(mergedObjectives);
   }
-
-  if (shared.objectivesAdd !== undefined || modeSpecific.objectivesAdd !== undefined) {
-    if (
-      (shared.objectivesAdd !== undefined && !Array.isArray(shared.objectivesAdd)) ||
-      (modeSpecific.objectivesAdd !== undefined && !Array.isArray(modeSpecific.objectivesAdd))
-    ) {
-      throw new Error('Task override objectivesAdd must be arrays');
-    }
-    merged.objectivesAdd = [...(shared.objectivesAdd || []), ...(modeSpecific.objectivesAdd || [])];
-  }
-
   return merged;
 }
 
@@ -640,7 +662,13 @@ function validIdentityRecord(value) {
 }
 
 function validObjectiveCollection(value) {
-  if (!Array.isArray(value) || !value.every(validIdentityRecord)) return false;
+  if (!Array.isArray(value)) return false;
+  // `every` skips holes, so a sparse list would otherwise pass while missing
+  // entries, and could not establish that an objective is absent.
+  for (let index = 0; index < value.length; index += 1) {
+    if (!(index in value)) return false;
+  }
+  if (!value.every(validIdentityRecord)) return false;
   const ids = value.map((record) => record.id);
   return new Set(ids).size === ids.length;
 }

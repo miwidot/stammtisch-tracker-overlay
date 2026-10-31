@@ -444,6 +444,27 @@ If tarkov.dev is missing the objective entirely, add it using `objectivesAdd`:
 }
 ```
 
+If tarkov.dev serves an objective the game does not have (in every mode, or in
+one mode via `src/overrides/modes/<mode>/tasks.json5`), drop it by ID with
+`objectivesRemove`. Back the removal with an in-game capture or other proof
+that the objective is absent, and keep the removed text in a `Was:` comment.
+`check-overrides` reports the removal as redundant once upstream stops serving
+the objective. Don't remove an objective and also patch or re-add the same ID:
+to replace an upstream objective's values, patch it under `objectives` instead.
+`check-overrides` flags the combination, including across shared and mode files.
+
+```json5
+{
+  // Task Name - Objective the game no longer has
+  // Proof: [link or "verified against a <version> <mode> capture"]
+  'task-id-here': {
+    objectivesRemove: [
+      'objective-id-here', // Was: Survive and extract from the location
+    ],
+  },
+}
+```
+
 ---
 
 ## Local Development

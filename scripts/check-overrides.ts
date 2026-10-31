@@ -47,7 +47,8 @@ import {
   type OverlayComparisonDetail,
 } from '../src/lib/overlay-comparison.cjs';
 import { checkAdditionContracts } from './check-addition-contracts.js';
-import { validObjectiveCollection } from '../src/lib/tarkov-api-shared.cjs';
+import { mergeTaskOverride, validObjectiveCollection } from '../src/lib/tarkov-api-shared.cjs';
+import { objectiveRemovalConflicts } from '../src/lib/task-validator.js';
 import {
   aggregateEntityRetirement,
   type EntityModeEvidence,
@@ -1569,13 +1570,16 @@ function checkSuppressions(apiTasks: TaskData[], apiTasksByMode: TasksByMode): G
 
 function applySharedTask(task: TaskData, patch: TaskOverride = {}): ComparisonTaskData {
   const source = comparisonTask(task);
-  const { objectives, objectivesAdd, ...fields } = patch;
+  const { objectives, objectivesAdd, objectivesRemove, ...fields } = patch;
   const result = { ...source, ...fields };
   if (!validObjectiveCollection(source.objectives)) return result;
-  const patched = source.objectives!.map((objective) => ({
-    ...objective,
-    ...objectives?.[objective.id],
-  }));
+  const removed = new Set(objectivesRemove ?? []);
+  const patched = source
+    .objectives!.filter((objective) => !removed.has(objective.id))
+    .map((objective) => ({
+      ...objective,
+      ...objectives?.[objective.id],
+    }));
   result.objectives = [...patched, ...(objectivesAdd ?? [])] as ComparisonTaskData['objectives'];
   return result;
 }
@@ -1587,17 +1591,33 @@ export function validateModeTaskOverrides(
   tasks: TaskData[]
 ): ValidationResult[] {
   const inherited = tasks.map((task) => applySharedTask(task, shared[task.id]));
-  return validateAllOverrides(overrides, inherited).map((result) => ({
-    ...result,
-    details: result.details.map((detail) => ({
-      ...detail,
-      message: `Shared-applied baseline: ${detail.message}`,
-    })),
-    comparison: result.comparison?.map((row) => ({
-      ...row,
-      reason: `${row.reason}; shared overlay is applied before this mode correction`,
-    })),
-  }));
+  return validateAllOverrides(overrides, inherited).map((result) => {
+    // Conflicts that only appear once the shared layer is applied (a shared
+    // patch or addition of an objective this mode removes).
+    const ownConflicts = new Set(
+      objectiveRemovalConflicts(overrides[result.id] ?? {}).map((detail) => detail.field)
+    );
+    const layeredConflicts = shared[result.id]
+      ? objectiveRemovalConflicts(
+          mergeTaskOverride(shared[result.id], overrides[result.id])
+        ).filter((detail) => !ownConflicts.has(detail.field))
+      : [];
+    const details = [...result.details, ...layeredConflicts];
+    const stillNeeded = result.stillNeeded || layeredConflicts.length > 0;
+    return {
+      ...result,
+      stillNeeded,
+      status: stillNeeded && result.status === 'FIXED' ? 'NEEDED' : result.status,
+      details: details.map((detail) => ({
+        ...detail,
+        message: `Shared-applied baseline: ${detail.message}`,
+      })),
+      comparison: result.comparison?.map((row) => ({
+        ...row,
+        reason: `${row.reason}; shared overlay is applied before this mode correction`,
+      })),
+    };
+  });
 }
 
 type TaskCorrectionUnit = { field: string; patch: TaskOverride };
@@ -1614,12 +1634,18 @@ function objectiveCorrectionUnits(
 }
 
 function taskCorrectionUnits(patch: TaskOverride): TaskCorrectionUnit[] {
-  const { objectives, ...fields } = patch;
+  const { objectives, objectivesRemove, ...fields } = patch;
   const units = Object.entries(fields).map(([field, value]) => ({
     field,
     patch: { [field]: value } as TaskOverride,
   }));
-  return [...units, ...objectiveCorrectionUnits(objectives ?? {})];
+  // One unit per removed ID, so a live removal cannot hide one that is already
+  // redundant in every mode.
+  const removals = (objectivesRemove ?? []).map((id) => ({
+    field: `objectivesRemove:${id}`,
+    patch: { objectivesRemove: [id] } as TaskOverride,
+  }));
+  return [...units, ...objectiveCorrectionUnits(objectives ?? {}), ...removals];
 }
 
 function coversCorrection(shared: unknown, mode: unknown): boolean {
@@ -1638,7 +1664,9 @@ function matchingModeUnit(
   unit: TaskCorrectionUnit,
   modePatch: TaskOverride = {}
 ): TaskCorrectionUnit | undefined {
-  if (unit.field === 'objectivesAdd') return undefined;
+  // Additions concatenate and removals union across layers, so a mode entry
+  // never masks the shared one.
+  if (unit.field === 'objectivesAdd' || unit.field.startsWith('objectivesRemove')) return undefined;
   return taskCorrectionUnits(modePatch).find((candidate) => candidate.field === unit.field);
 }
 
@@ -1766,9 +1794,14 @@ export function validateSharedTaskOverrides(
 ): ValidationResult[] {
   return Object.entries(shared).map(([id, patch]) => {
     if (absentFromEveryMode(id, tasksByMode)) return removedSharedTask(id);
-    const details = taskCorrectionUnits(patch).map((unit) =>
-      sharedUnitDetail(id, unit, tasksByMode, patchesByMode)
-    );
+    const details = [
+      ...taskCorrectionUnits(patch).map((unit) =>
+        sharedUnitDetail(id, unit, tasksByMode, patchesByMode)
+      ),
+      // Units are judged one at a time, so check the whole patch for removals
+      // that contradict its own patches or additions.
+      ...objectiveRemovalConflicts(patch),
+    ];
     const stillNeeded = details.some((detail) => detail.status !== 'fixed');
     const name =
       Object.values(tasksByMode)

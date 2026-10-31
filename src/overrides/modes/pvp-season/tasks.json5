@@ -41,4 +41,17 @@
   '6761f28a022f60bb320f3e95': {
     disabled: true, // Was: active (pvp-season has no prestige track)
   },
+
+  // Health Care Privacy - Part 2 - extract objective the Seasonal client lacks
+  // Proof: local in-game captures (1.2.0.0, 1.2.5.0 and 1.3.0.0 pvp-season):
+  //        the quest template carries only the find and hand-over objectives
+  //        (5a68760f86f7743cc55d8709, 5a68763786f77474c33a40a1). The 1.1.0.1
+  //        PvP and PvE captures still carry the extract, so the removal is
+  //        Seasonal-only. Finding recorded in
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/pull/523.
+  '5a68663e86f774501078f78a': {
+    objectivesRemove: [
+      '5a68764c86f77474c4269f3c', // Was: Survive and extract from the location
+    ],
+  },
 }

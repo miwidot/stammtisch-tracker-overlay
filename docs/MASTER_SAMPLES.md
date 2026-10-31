@@ -232,6 +232,7 @@ Notes:
         count: 1, // Optional | UI (logic)
       },
     ], // Optional | UI (logic); overlay appends this into objectives and does not return objectivesAdd as-is
+    objectivesRemove: ['5a68764c86f77474c4269f3c'], // Optional | UI (logic); upstream objective IDs (24-hex) dropped from objectives
   },
 }
 ```

@@ -20,6 +20,8 @@ export interface TaskOverride {
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
+  /** Upstream objective IDs to drop from the task (erroneous upstream objectives). */
+  objectivesRemove?: string[];
   taskRequirements?: TaskRequirement[];
   taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
