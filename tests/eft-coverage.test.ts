@@ -1,3 +1,7 @@
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'fs';
+import JSON5 from 'json5';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { describe, expect, it, vi } from 'vitest';
 import {
   applyTaskOverride,
@@ -171,11 +175,44 @@ describe('overlay helpers', () => {
     expect([...presetBaseItems(items)]).toEqual([['preset', 'base']]);
   });
 
-  it('loads shared and mode task additions keyed by id', () => {
-    const additions = loadTaskAdditions('pvp-season');
-    expect(additions.get('placeholder_honest_review')?.name).toBe('Honest Review');
-    expect(additions.has('placeholder_uninvited_guests_part_1')).toBe(true);
-    expect(loadTaskAdditions('regular').has('placeholder_uninvited_guests_part_1')).toBe(false);
+  it('loads shared and mode task additions keyed by id, mode entries winning', () => {
+    const root = mkdtempSync(join(tmpdir(), 'eft-additions-'));
+    const write = (dir: string, entries: Record<string, unknown>) => {
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'tasksAdd.json5'), JSON.stringify(entries));
+    };
+    write(join(root, 'additions'), {
+      a: { id: 'shared_a', name: 'Shared A' },
+      b: { id: 'shared_b', name: 'Shared B' },
+      bad: { name: 'no id' },
+    });
+    write(join(root, 'additions', 'modes', 'pvp-season'), {
+      b: { id: 'shared_b', name: 'Season B' },
+      c: { id: 'season_c', name: 'Season C' },
+    });
+    const season = loadTaskAdditions('pvp-season', root);
+    expect([...season.keys()].sort()).toEqual(['season_c', 'shared_a', 'shared_b']);
+    expect(season.get('shared_b')?.name).toBe('Season B');
+    expect([...loadTaskAdditions('regular', root).keys()].sort()).toEqual(['shared_a', 'shared_b']);
+    expect(loadTaskAdditions('pve', join(root, 'missing')).size).toBe(0);
+  });
+
+  it('reads every live task addition with its own id as the key', () => {
+    // Contract only: the set of additions changes as placeholders gain real ids.
+    const read = (...parts: string[]): Record<string, TaskAddition> => {
+      const file = join('src', 'additions', ...parts, 'tasksAdd.json5');
+      return existsSync(file) ? JSON5.parse(readFileSync(file, 'utf8')) : {};
+    };
+    for (const mode of ['regular', 'pve', 'pvp-season'] as const) {
+      const files = [read(), read('modes', mode)];
+      for (const file of files) {
+        for (const [key, addition] of Object.entries(file)) expect(addition.id).toBe(key);
+      }
+      const expected = new Map(
+        files.flatMap((file) => Object.values(file)).map((addition) => [addition.id, addition])
+      );
+      expect(loadTaskAdditions(mode)).toEqual(expected);
+    }
   });
 
   it('normalizes names for comparison', () => {

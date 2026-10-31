@@ -13,7 +13,7 @@
  *   npm run eft:import -- <decoded-session-dir>
  *
  * The session name defaults to the source folder name without a trailing
- * microsecond suffix (`2026-10-29_12-23-11_147005` -> `2026-10-29_12-23-11`).
+ * microsecond suffix (`2026-01-01_00-00-00_000000` -> `2026-01-01_00-00-00`).
  */
 
 import {

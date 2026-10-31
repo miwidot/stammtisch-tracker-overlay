@@ -1,4 +1,13 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  symlinkSync,
+  utimesSync,
+  writeFileSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { describe, expect, it, vi } from 'vitest';
@@ -95,7 +104,7 @@ function writeCapture(
     JSON.stringify({
       request: {
         url: 'https://gw-pvp-season.escapefromtarkov.com/client/quest/list',
-        timestamp: options.timestamp ?? '2026-10-29T12:00:00',
+        timestamp: options.timestamp ?? '2026-01-01T12:00:00',
         headers: { 'App-Version': options.version ?? 'EFT Client 1.3.0.0' },
       },
       response: { body_response: { data: quests } },
@@ -203,6 +212,49 @@ describe('eft:diff', () => {
     expect(() => latestTwo('pve', root)).toThrow('Need two pve references');
     expect(selectFiles(['x', 'y'], 'pve')).toEqual(['x', 'y']);
     expect(() => selectFiles(['x'], 'pve')).toThrow('exactly two');
+  });
+
+  it('treats a capture and its enriched variant as one reference', () => {
+    const root = tempDir();
+    const older = writeCapture(join(root, '1'), [quest(A)], { timestamp: '2026-01-01T00:00:00' });
+    const raw = writeCapture(join(root, '2'), [quest(B)], { timestamp: '2026-01-02T00:00:00' });
+    const enriched = join(
+      root,
+      '2',
+      '[043]_pvp-season_client_quest_list.rollinglatest.modified.json'
+    );
+    const envelope = JSON.parse(readFileSync(raw, 'utf8'));
+    envelope.response.body_response.data = [quest(`[${B}] Named`)];
+    writeFileSync(enriched, JSON.stringify(envelope));
+    expect(latestTwo('pvp-season', root)).toEqual([older, enriched]);
+    // A byte copy of the skipped raw file elsewhere is still the same capture.
+    mkdirSync(join(root, 'copy'));
+    writeFileSync(join(root, 'copy', 'pvp-season.quest_list.json'), readFileSync(raw));
+    expect(latestTwo('pvp-season', root)).toEqual([older, enriched]);
+  });
+
+  it('groups a variant pair without capture timestamps by base name', () => {
+    const root = tempDir();
+    const strip = (file: string) => {
+      const envelope = JSON.parse(readFileSync(file, 'utf8'));
+      delete envelope.request.timestamp;
+      writeFileSync(file, JSON.stringify(envelope));
+      return file;
+    };
+    const older = strip(writeCapture(join(root, '1'), [quest(A)]));
+    utimesSync(older, new Date('2026-01-01'), new Date('2026-01-01'));
+    const raw = strip(writeCapture(join(root, '2'), [quest(B)]));
+    const enriched = join(
+      root,
+      '2',
+      '[043]_pvp-season_client_quest_list.rollinglatest.modified.json'
+    );
+    const envelope = JSON.parse(readFileSync(raw, 'utf8'));
+    envelope.response.body_response.data = [quest(`[${B}] Named`)];
+    writeFileSync(enriched, JSON.stringify(envelope));
+    const pair = latestTwo('pvp-season', root);
+    expect(pair[0]).toBe(older);
+    expect([raw, enriched]).toContain(pair[1]);
   });
 });
 
@@ -320,7 +372,7 @@ describe('eft:import', () => {
     expect(() => parseImportArgs(['dir', '--name'])).toThrow('needs a value');
     expect(() => parseImportArgs([])).toThrow('Pass the decoded');
     expect(() => parseImportArgs(['a', 'b'])).toThrow('Unexpected argument');
-    expect(sessionName('/x/2026-10-29_12-23-11_147005')).toBe('2026-10-29_12-23-11');
+    expect(sessionName('/x/2026-01-01_00-00-00_000000')).toBe('2026-01-01_00-00-00');
     expect(() => sessionName('/x/bad name')).toThrow('Invalid session name');
   });
 
@@ -364,5 +416,16 @@ describe('eft:import', () => {
     expect(() => resolveReferenceWriteDirectory(join(root, 'elsewhere'), root)).toThrow(
       'data/reference'
     );
+  });
+
+  it('refuses a write target whose existing parent links outside the store', () => {
+    const root = tempDir();
+    const outside = tempDir();
+    mkdirSync(join(root, 'data', 'reference'), { recursive: true });
+    // A junction needs no symlink privilege on Windows and is a plain symlink elsewhere.
+    symlinkSync(outside, join(root, 'data', 'reference', 'decoded'), 'junction');
+    expect(() =>
+      resolveReferenceWriteDirectory(join(root, 'data', 'reference', 'decoded', 'session'), root)
+    ).toThrow('data/reference');
   });
 });

@@ -22,7 +22,7 @@
 
 import { createHash } from 'crypto';
 import { readFileSync, statSync, writeFileSync } from 'fs';
-import { relative } from 'path';
+import { basename, dirname, relative } from 'path';
 
 import {
   isDirectExecution,
@@ -181,6 +181,14 @@ export function diffReferences(older: Side, newer: Side, includeText: boolean): 
 const fileDigest = (file: string): string =>
   createHash('sha256').update(readFileSync(file)).digest('hex');
 
+/** Sort order that puts a capture's enriched ("rollinglatest.modified") variant first. */
+const enrichedFirst = (a: string, b: string): number =>
+  Number(/rollinglatest\.modified/i.test(b)) - Number(/rollinglatest\.modified/i.test(a));
+
+/** File name without the enriched-variant suffix, shared by a raw/enriched pair. */
+const captureBaseName = (file: string): string =>
+  basename(file).replace(/\.rollinglatest\.modified(?=\.json$)/i, '');
+
 /** The two most recent distinct references of `mode` under `directory` (older first). */
 export function latestTwo(
   mode: GameMode,
@@ -190,14 +198,22 @@ export function latestTwo(
   // file mtime; a usable reference whose mode is undetectable stays a candidate.
   const ranked = findQuestListFiles(directory)
     .filter((file) => [mode, null].includes(modeFromReferenceFile(file) as GameMode | null))
-    .map((file) => ({ file, ts: captureTimestamp(file) ?? statSync(file).mtimeMs }))
-    .sort((a, b) => b.ts - a.ts);
-  const distinct = new Map<string, string>();
-  for (const { file } of ranked) {
-    const digest = fileDigest(file);
-    if (!distinct.has(digest)) distinct.set(digest, file);
+    .map((file) => ({ file, capture: captureTimestamp(file) }))
+    .map(({ file, capture }) => ({ file, capture, ts: capture ?? statSync(file).mtimeMs }))
+    .sort((a, b) => b.ts - a.ts || enrichedFirst(a.file, b.file));
+  // A capture's raw quest list and its enriched variant are one capture: they share
+  // a directory and capture timestamp (or, without one, a base name) but differ in
+  // bytes. Identical copies are also one reference. Keep the first (enriched on a
+  // tie) file of each, and record the keys of every file seen, kept or skipped, so
+  // a copy of a skipped raw file elsewhere cannot come back as a second reference.
+  const seen = new Set<string>();
+  const files: string[] = [];
+  for (const { file, capture } of ranked) {
+    const keys = [fileDigest(file), `${dirname(file)}|${capture ?? captureBaseName(file)}`];
+    const duplicate = keys.some((key) => seen.has(key));
+    keys.forEach((key) => seen.add(key));
+    if (!duplicate) files.push(file);
   }
-  const files = [...distinct.values()];
   if (files.length < 2) {
     throw new Error(
       `Need two ${mode} references under data/reference/ to compare, found ${files.length}`

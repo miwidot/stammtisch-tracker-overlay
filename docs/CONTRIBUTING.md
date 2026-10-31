@@ -488,21 +488,31 @@ npm test
 
 ### Running CI locally
 
-`scripts/ci-local.ps1` runs every step of `.github/workflows/ci.yml` without
-GitHub runners (PowerShell 7 and Node.js required). It tests the same merge
-commit CI would, in a temporary worktree, so your working tree is untouched. It
-runs the Validate & Build job, then the Windows LF-checkout job in a fresh clone
-with `core.autocrlf=true`. It exits 1 if any step fails and writes the full log
-to `%TEMP%\tdo-ci\<branch>.log`.
+`scripts/ci-local.ps1` runs the validation steps of `.github/workflows/ci.yml`
+without GitHub runners (PowerShell 7 and Node.js required). It tests the same
+merge commit CI would, in a temporary worktree, so your working tree is
+untouched. It runs the Validate & Build job, then the Windows LF-checkout job in
+a fresh clone with `core.autocrlf=true`. That second job is Windows evidence
+only on a Windows host; elsewhere it is labelled as an approximation. It exits 1
+if any step fails and writes the full log to `tdo-ci/<name>-<pid>.log` in your
+temp directory, where `<name>` is the branch with characters other than letters,
+digits, `_` and `-` replaced by `_` (for example `feat_x-1234.log`; the script
+prints the path). Each run uses its own work directories and log, and a later
+run removes checkouts left behind by a run that was killed.
 
 ```powershell
 pwsh scripts/ci-local.ps1 -Branch feat/x          # pushed branch, merged onto origin/main
-pwsh scripts/ci-local.ps1 -Branch feat/x -Local   # unpushed local branch
+pwsh scripts/ci-local.ps1 -Branch feat/x -Local   # committed, unpushed local branch
 pwsh scripts/ci-local.ps1                         # origin/main itself (push run)
 ```
 
-Run it before pushing review fixes; each push to a pull request starts a new
-billed CI run. Validate & Build runs on Ubuntu in CI and on your OS here.
+Without `-Branch` it reproduces a push to `main`: it skips the PR-only check
+that rejects `dist/` changes and builds with the next overlay tag as
+`OVERLAY_VERSION`. It does not upload the release artifact.
+
+Commit review fixes and run it with `-Local` before pushing them; each push to a
+pull request starts a new CI run. Validate & Build runs on Ubuntu in CI and on
+your OS here.
 
 ---
 

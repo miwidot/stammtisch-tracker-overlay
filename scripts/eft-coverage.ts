@@ -277,16 +277,18 @@ export function normalizeReferenceQuest(
 
 const { srcDir } = getProjectPaths();
 
-function loadOptionalJson5<T>(...segments: string[]): Record<string, T> {
-  const file = join(srcDir, ...segments);
+function loadOptionalJson5<T>(root: string, ...segments: string[]): Record<string, T> {
+  const file = join(root, ...segments);
   return existsSync(file) ? loadJson5File<Record<string, T>>(file) : {};
 }
 
 /** Shared task additions, then mode additions (mode wins per key, as built). */
-export function loadTaskAdditions(mode: GameMode): Map<string, TaskAddition> {
+export function loadTaskAdditions(mode: GameMode, root = srcDir): Map<string, TaskAddition> {
   const additions = [
-    ...Object.values(loadOptionalJson5<TaskAddition>('additions', 'tasksAdd.json5')),
-    ...Object.values(loadOptionalJson5<TaskAddition>('additions', 'modes', mode, 'tasksAdd.json5')),
+    ...Object.values(loadOptionalJson5<TaskAddition>(root, 'additions', 'tasksAdd.json5')),
+    ...Object.values(
+      loadOptionalJson5<TaskAddition>(root, 'additions', 'modes', mode, 'tasksAdd.json5')
+    ),
   ].filter((addition) => isRecord(addition) && typeof addition.id === 'string');
   return new Map(additions.map((addition) => [addition.id, addition]));
 }
@@ -1174,7 +1176,7 @@ async function main(): Promise<void> {
       apiTasks,
       effectiveOverrides(opts.mode),
       loadTaskAdditions(opts.mode),
-      collectStoryQuestIds(loadOptionalJson5('additions', 'storyChapters.json5')),
+      collectStoryQuestIds(loadOptionalJson5(srcDir, 'additions', 'storyChapters.json5')),
       presetBaseItems(items)
     );
     printReport(report, opts.flags.has('--all'));
