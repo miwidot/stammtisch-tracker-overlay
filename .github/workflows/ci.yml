@@ -9,13 +9,28 @@ on:
 permissions:
   contents: read
 
+# Each new push to a pull request cancels that PR's previous run; pushes to main
+# get their own group so every main commit is validated and released.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Jobs use GitHub-hosted runners unless the repository variables CI_WINDOWS_RUNNER /
+# CI_LINUX_RUNNER name a self-hosted runner label (see docs/CI_RUNNERS.md). Pull
+# requests from forks or Dependabot always use hosted runners, so third-party
+# code never runs on the owner's machine.
 jobs:
   windows-validation:
     name: Windows validation (LF checkout)
-    runs-on: windows-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) && vars.CI_WINDOWS_RUNNER || 'windows-latest' }}
+    # Job-scoped git config, so a self-hosted runner's global config is untouched.
+    env:
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'true'
     steps:
       - name: Exercise Windows automatic line endings
-        run: git config --global core.autocrlf true
+        run: if ((git config --get core.autocrlf) -ne 'true') { throw 'Expected core.autocrlf=true for this job' }
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -57,7 +72,7 @@ jobs:
 
   validate:
     name: Validate & Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) && vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout
