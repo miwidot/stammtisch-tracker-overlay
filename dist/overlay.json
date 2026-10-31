@@ -268,6 +268,11 @@
       "tasks": {
         "6761f28a022f60bb320f3e95": {
           "disabled": true
+        },
+        "5a68663e86f774501078f78a": {
+          "objectivesRemove": [
+            "5a68764c86f77474c4269f3c"
+          ]
         }
       },
       "tasksAdd": {
@@ -1731,10 +1736,7 @@
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
           },
-          "map": {
-            "id": "5704e554d2720bac5b8b456e",
-            "name": "Shoreline"
-          },
+          "map": null,
           "experience": 6000,
           "kappaRequired": false,
           "factionName": "Any",
@@ -1793,8 +1795,54 @@
                 }
               ],
               "optional": true
+            },
+            {
+              "id": "placeholder_uninvited_guests_part_1_obj05",
+              "description": "Bring the case with military equipment to the BTR driver",
+              "type": "taskStatus",
+              "task": "placeholder_uninvited_guests_part_2",
+              "status": [
+                "complete"
+              ],
+              "optional": false
             }
-          ]
+          ],
+          "finishRewards": {
+            "items": [
+              {
+                "count": 18000,
+                "item": {
+                  "id": "5449016a4bdc2d6f028b456f",
+                  "name": "Roubles",
+                  "shortName": "RUB"
+                }
+              },
+              {
+                "count": 1,
+                "item": {
+                  "id": "5beed0f50db834001c062b12",
+                  "name": "RPK-16 5.45x39 light machine gun",
+                  "shortName": "RPK-16"
+                }
+              },
+              {
+                "count": 3,
+                "item": {
+                  "id": "55d480c04bdc2d1d4e8b456a",
+                  "name": "AK-74 5.45x39 6L23 30-round magazine",
+                  "shortName": "6L23"
+                }
+              },
+              {
+                "count": 1,
+                "item": {
+                  "id": "57372d1b2459776862260581",
+                  "name": "5.45x39mm PP gs ammo pack (120 pcs)",
+                  "shortName": "PP"
+                }
+              }
+            ]
+          }
         },
         "placeholder_uninvited_guests_part_2": {
           "id": "placeholder_uninvited_guests_part_2",
@@ -2578,59 +2626,9 @@
           },
           "value": 1
         }
-      ],
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5935c25fb3acc3127c3d8cd9",
-              "name": "Peacekeeper"
-            },
-            "standing": 0.1
-          }
-        ],
-        "items": [
-          {
-            "count": 585,
-            "item": {
-              "id": "5696686a4bdc2da3298b456a",
-              "name": "Dollars",
-              "shortName": "USD"
-            }
-          },
-          {
-            "count": 3,
-            "item": {
-              "id": "5734779624597737e04bf329",
-              "name": "CPU fan",
-              "shortName": "CPU fan"
-            }
-          }
-        ]
-      }
+      ]
     },
     "5a03153686f77442d90e2171": {
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5935c25fb3acc3127c3d8cd9",
-              "name": "Peacekeeper"
-            },
-            "standing": 0.25
-          }
-        ],
-        "items": [
-          {
-            "count": 1171,
-            "item": {
-              "id": "5696686a4bdc2da3298b456a",
-              "name": "Dollars",
-              "shortName": "USD"
-            }
-          }
-        ]
-      },
       "objectives": {
         "5c9a17c686f7747dbe2da3c1": {
           "description": "Eliminate 15 targets with headshots while using an AUG on Factory",
@@ -2650,29 +2648,6 @@
         }
       }
     },
-    "5a0327ba86f77456b9154236": {
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5935c25fb3acc3127c3d8cd9",
-              "name": "Peacekeeper"
-            },
-            "standing": 0.1
-          }
-        ],
-        "items": [
-          {
-            "count": 585,
-            "item": {
-              "id": "5696686a4bdc2da3298b456a",
-              "name": "Dollars",
-              "shortName": "USD"
-            }
-          }
-        ]
-      }
-    },
     "5a03296886f774569778596a": {
       "traderRequirements": [
         {
@@ -2685,59 +2660,7 @@
           },
           "value": 2
         }
-      ],
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5935c25fb3acc3127c3d8cd9",
-              "name": "Peacekeeper"
-            },
-            "standing": 0.25
-          }
-        ],
-        "items": [
-          {
-            "count": 1171,
-            "item": {
-              "id": "5696686a4bdc2da3298b456a",
-              "name": "Dollars",
-              "shortName": "USD"
-            }
-          },
-          {
-            "count": 2,
-            "item": {
-              "id": "62a0a16d0b9d3c46de5b6e97",
-              "name": "Military flash drive",
-              "shortName": "MFD"
-            }
-          }
-        ]
-      }
-    },
-    "5a27bafb86f7741c73584017": {
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5935c25fb3acc3127c3d8cd9",
-              "name": "Peacekeeper"
-            },
-            "standing": 0.1
-          }
-        ],
-        "items": [
-          {
-            "count": 570,
-            "item": {
-              "id": "5696686a4bdc2da3298b456a",
-              "name": "Dollars",
-              "shortName": "USD"
-            }
-          }
-        ]
-      }
+      ]
     },
     "68ee1c18b4e5bc9a68018cd7": {
       "traderRequirements": [
@@ -3962,8 +3885,7 @@
       ],
       "objectives": {
         "5d2701b586f77469f1599fe2": {
-          "description": "Eliminate 50 Scavs all over the Tarkov territory",
-          "maps": []
+          "description": "Eliminate 50 Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline"
         }
       }
     },
@@ -4903,6 +4825,38 @@
             "name": "Peacekeeper"
           },
           "value": 1
+        }
+      ],
+      "objectivesAdd": [
+        {
+          "id": "66aa5c8ba8c36eaef492ef92",
+          "description": "Survive and extract from Streets of Tarkov (or transit to another location)",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "5714dc692459777137212e12",
+              "name": "Streets of Tarkov"
+            }
+          ],
+          "exitStatus": [
+            "Survived",
+            "Runner",
+            "Transit"
+          ],
+          "optional": false,
+          "count": 1
+        },
+        {
+          "id": "66b0e57eddc25d8d17e3e3c0",
+          "description": "Scout the area round the Rodina cinema on Streets of Tarkov (In one raid)",
+          "type": "visit",
+          "maps": [
+            {
+              "id": "5714dc692459777137212e12",
+              "name": "Streets of Tarkov"
+            }
+          ],
+          "optional": true
         }
       ]
     },
@@ -15530,6 +15484,195 @@
         ]
       }
     },
+    "6a763df2161e4b45b1015663": {
+      "id": "6a763df2161e4b45b1015663",
+      "name": "A Familiar Face...",
+      "normalizedName": "a-familiar-face",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/A_Familiar_Face...",
+      "trader": {
+        "id": "58330581ace78e27b8b10cee",
+        "name": "Skier"
+      },
+      "map": {
+        "id": "5704e4dad2720bb55b8b4567",
+        "name": "Lighthouse"
+      },
+      "minPlayerLevel": 7,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "experience": 15000,
+      "taskRequirements": [],
+      "traderRequirements": [
+        {
+          "id": "6ae3200ac11e11de972d874b",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "value": 2,
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "6a763e19bd8de85aeadb9ae9",
+          "description": "Extract from Lighthouse through the Armored Train while wearing a Kirasa-N or NFM THOR CRV body armor",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Lighthouse"
+            }
+          ],
+          "exitName": "EXFIL_Train",
+          "exitStatus": [
+            "Survived",
+            "Runner"
+          ],
+          "wearing": [
+            [
+              {
+                "id": "5b44d22286f774172b0c9de8",
+                "name": "BNTI Kirasa-N body armor",
+                "shortName": "Kirasa-N"
+              }
+            ],
+            [
+              {
+                "id": "67ab2f28dafe3b22670c9116",
+                "name": "BNTI Kirasa-N body armor (Green)",
+                "shortName": "Kirasa-N"
+              }
+            ],
+            [
+              {
+                "id": "68a89146212dbbeead0d5636",
+                "name": "NFM THOR Concealable Reinforced Vest body armor (Head Eyes)",
+                "shortName": "THOR CRV"
+              }
+            ],
+            [
+              {
+                "id": "609e8540d5c319764c2bc2e9",
+                "name": "NFM THOR Concealable Reinforced Vest body armor",
+                "shortName": "THOR CRV"
+              }
+            ]
+          ],
+          "optional": false,
+          "count": 1
+        }
+      ],
+      "finishRewards": {
+        "items": [
+          {
+            "count": 1800,
+            "item": {
+              "id": "569668774bdc2da2298b4568",
+              "name": "Euros",
+              "shortName": "EUR"
+            }
+          },
+          {
+            "count": 2,
+            "item": {
+              "id": "69413241b1ce1e5fbb09ed0a",
+              "name": "CENS ProFlex DX5 tactical earplug",
+              "shortName": "ProFlex"
+            }
+          }
+        ]
+      }
+    },
+    "6aba40a15ef26da1360746b8": {
+      "id": "6aba40a15ef26da1360746b8",
+      "name": "Halloween: Rumors",
+      "normalizedName": "halloween-rumors",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Halloween:_Rumors",
+      "trader": {
+        "id": "58330581ace78e27b8b10cee",
+        "name": "Skier"
+      },
+      "map": {
+        "id": "6a8dd1325e15a5ea2e010820",
+        "name": "Infected Factory"
+      },
+      "minPlayerLevel": 1,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "experience": 26000,
+      "taskRequirements": [],
+      "objectives": [
+        {
+          "id": "6aba42ae69be4c987df71326",
+          "description": "Visit the Infected Factory",
+          "type": "visit",
+          "maps": [
+            {
+              "id": "6a8dd1325e15a5ea2e010820",
+              "name": "Infected Factory"
+            }
+          ],
+          "optional": false
+        },
+        {
+          "id": "6aba42cb7c802e27296e2815",
+          "description": "Eliminate the infected on Infected Factory",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "6a8dd1325e15a5ea2e010820",
+              "name": "Infected Factory"
+            }
+          ],
+          "optional": false,
+          "count": 10,
+          "shotType": "kill",
+          "targetNames": [
+            "Infected"
+          ]
+        }
+      ],
+      "finishRewards": {
+        "items": [
+          {
+            "count": 1800,
+            "item": {
+              "id": "569668774bdc2da2298b4568",
+              "name": "Euros",
+              "shortName": "EUR"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "67124dcfa3541f2a1f0e788b",
+              "name": "MPS Auto Assault-12 Gen 2 12ga automatic shotgun",
+              "shortName": "AA-12 Gen 2"
+            }
+          },
+          {
+            "count": 3,
+            "item": {
+              "id": "6709133fa532466d5403fb7c",
+              "name": "AA-12 12ga 20-round drum magazine",
+              "shortName": "AA-12"
+            }
+          },
+          {
+            "count": 4,
+            "item": {
+              "id": "6570247ebfc87b3a34093229",
+              "name": "12/70 SuperFormance HP slug ammo pack (25 pcs)",
+              "shortName": "SFormance"
+            }
+          }
+        ]
+      }
+    },
     "placeholder_honest_review": {
       "id": "placeholder_honest_review",
       "name": "Honest Review",
@@ -15546,6 +15689,8 @@
       "experience": 15000,
       "kappaRequired": false,
       "factionName": "Any",
+      "availableDelaySecondsMin": 15,
+      "availableDelaySecondsMax": 15,
       "objectives": [
         {
           "id": "placeholder_honest_review_obj01",
@@ -15582,6 +15727,20 @@
             }
           ],
           "optional": false
+        },
+        {
+          "id": "placeholder_honest_review_obj05",
+          "description": "Return to the Hideout",
+          "type": "extract",
+          "exitStatus": [
+            "Survived",
+            "Runner",
+            "Killed",
+            "MissingInAction",
+            "Left"
+          ],
+          "optional": false,
+          "count": 1
         },
         {
           "id": "placeholder_honest_review_obj04",
@@ -18529,8 +18688,8 @@
     }
   },
   "$meta": {
-    "version": "1.167",
-    "generated": "2026-10-27T18:58:05.059Z",
-    "sha256": "fbc6c07849f0ac1eb09994e78ec6fd8b87141181132a0a65154ac8f86c54388f"
+    "version": "1.168",
+    "generated": "2026-10-31T20:29:21.272Z",
+    "sha256": "22c38ef3691942ef0dfda594a7a410b00f89c8433af45c845fef426d8efbca1a"
   }
 }
