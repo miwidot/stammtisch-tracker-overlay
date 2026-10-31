@@ -1491,6 +1491,12 @@
 
   // Uninvited Guests - Part 1
   // Proof: https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_1
+  // Real BSG id 6a4f528221e50974ab006f6f, in-game name "[KORD BREACH] Uninvited
+  // Guests - Part 1" (1.3.0.0 pvp-season capture; objective mapping in #507).
+  // Kept as a placeholder until the #507 alias migration lands. The capture
+  // confirms the Prapor LL2 gate (an explicit TraderLoyalty condition); its
+  // other start condition is the Escape Ground Zero tutorial quest (story, not
+  // a task). The investigate objectives are sub-conditions of the case objective.
   placeholder_uninvited_guests_part_1: {
     id: 'placeholder_uninvited_guests_part_1',
     name: 'Uninvited Guests - Part 1',
@@ -1500,10 +1506,7 @@
       id: '54cb50c76803fa8b248b4571',
       name: 'Prapor',
     },
-    map: {
-      id: '5704e554d2720bac5b8b456e',
-      name: 'Shoreline',
-    },
+    map: null, // Was: Shoreline (capture location: any)
     experience: 6000,
     kappaRequired: false,
     factionName: 'Any',
@@ -1563,7 +1566,51 @@
         ],
         optional: true,
       },
+      {
+        // Added from the capture (6a4f54cffbc043d36ba11ae2): a Quest condition
+        // completed when the hand-over quest (6a4f53f6be2cd3a87c0b708d, not in
+        // the capture; by its objective text, Part 2) is complete.
+        id: 'placeholder_uninvited_guests_part_1_obj05',
+        description: 'Bring the case with military equipment to the BTR driver',
+        type: 'taskStatus',
+        task: 'placeholder_uninvited_guests_part_2', // Uninvited Guests - Part 2
+        status: ['complete'],
+        optional: false,
+      },
     ],
+    finishRewards: {
+      // Was: unset (capture rewards; the wiki agrees)
+      items: [
+        {
+          count: 18000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        },
+        {
+          count: 1,
+          item: {
+            id: '5beed0f50db834001c062b12',
+            name: 'RPK-16 5.45x39 light machine gun',
+            shortName: 'RPK-16',
+          },
+        },
+        {
+          count: 3,
+          item: {
+            id: '55d480c04bdc2d1d4e8b456a',
+            name: 'AK-74 5.45x39 6L23 30-round magazine',
+            shortName: '6L23',
+          },
+        },
+        {
+          count: 1,
+          item: {
+            id: '57372d1b2459776862260581',
+            name: '5.45x39mm PP gs ammo pack (120 pcs)',
+            shortName: 'PP',
+          },
+        },
+      ],
+    },
   },
 
   // Uninvited Guests - Part 2

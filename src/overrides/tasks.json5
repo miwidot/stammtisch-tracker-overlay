@@ -890,8 +890,12 @@
 
   // Master Key (old: Spa Tour - Part 5) - Change rewards
   // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
-  // S1: exp 3000, +0.1, 673 Dollars (Intelligence Center L2), 3 CPU fans;
-  // RB-AO key reward removed. Base dollars derived from IC2 (673 / 1.15 = 585).
+  // S1: exp 3000, +0.1, 550 Dollars, 3 CPU fans; RB-AO key reward removed.
+  // 2026-10-31: finishRewards override removed. Was: 585 Dollars, +0.1, 3 CPU fans.
+  // Upstream now serves +0.1 and the
+  // reduced items; the 585 Dollars derived from the wiki's IC2 figure
+  // (673 / 1.15) is contradicted by every capture (1.1.0.1 PvP and PvE templates
+  // give 550, as upstream does). The override also dropped upstream's offer unlock.
   '5a0449d586f77474e66227b7': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
     // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
@@ -906,36 +910,16 @@
         value: 1,
       }, // Was: []
     ],
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.02 (upstream now serves 0.1)
-      ],
-      items: [
-        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 550 Dollars
-        {
-          count: 3,
-          item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' },
-        },
-      ],
-    },
   },
 
-  // One-Way Ticket (old: Spa Tour - Part 1) - Change rewards + Change objective
+  // One-Way Ticket (old: Spa Tour - Part 1) - Change objective
   // Proof: https://escapefromtarkov.fandom.com/wiki/One-Way_Ticket
   // S1: kill 15 targets with headshots using an AUG on Factory; exp 10000, +0.25,
-  // 1347 Dollars (IC2, base = 1347 / 1.15 = 1171); MPX/RIP/room key rewards removed.
+  // 1100 Dollars; MPX/RIP/room key rewards removed.
+  // 2026-10-31: finishRewards override removed. Was: 1171 Dollars, +0.25.
+  // Upstream now serves +0.25 and 1100 Dollars, which the 1.1.0.1 PvP and PvE captures confirm; the 1171
+  // derived from the wiki's IC2 figure (1347 / 1.15) is contradicted.
   '5a03153686f77442d90e2171': {
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03 (upstream now serves 0.25)
-      ],
-      items: [
-        {
-          count: 1171,
-          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
-        }, // Was: 1100 Dollars
-      ],
-    },
     objectives: {
       '5c9a17c686f7747dbe2da3c1': {
         description: 'Eliminate 15 targets with headshots while using an AUG on Factory', // Was: Eliminate any target with headshots using a Steyr AUG on Factory
@@ -951,35 +935,30 @@
     },
   },
 
-  // Fuel Shortage (old: Spa Tour - Part 3) - Change rewards
+  // Fuel Shortage (old: Spa Tour - Part 3) - no override needed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Shortage
-  // S1: hand over 5 Household goods + 5 Flammable materials (upstream now
-  // serves the S1 category objectives); exp 3000, +0.1,
-  // 673 Dollars (IC2, base = 673 / 1.15 = 585); Vector/mags/M67/Toolset rewards removed.
-  '5a0327ba86f77456b9154236': {
-    // No loyalty gate. The wiki Requirements line reads "Must be Loyalty Level 1
-    // to start this quest" (naming no trader, so it would be attributed to the
-    // quest giver by inference), but both 1.1 captures serve this task with an
-    // empty `AvailableForStart` - no `TraderLoyalty`, no `GlobalVariableValue`, no
-    // condition of any kind - and the API serves `traderRequirements: []`. The
-    // "wiki is the source because the gate hides in a global variable" argument
-    // does not apply where the client carries no start condition at all, so the
-    // gate stays out until something corroborates it.
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.03 (upstream now serves 0.1)
-      ],
-      items: [
-        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 550 Dollars
-      ],
-    },
-  },
+  // S1: hand over 5 Household goods + 5 Flammable materials; exp 3000, +0.1,
+  // 550 Dollars; Vector/mags/M67/Toolset rewards removed. Upstream serves all of
+  // this. 2026-10-31: the finishRewards override was removed. Was: 585 Dollars,
+  // +0.1. Its 585 Dollars,
+  // derived from the wiki's IC2 figure (673 / 1.15), is contradicted by every
+  // capture (1.1.0.1 through 1.3.0.0, PvP, PvE and pvp-season templates give 550).
+  // No loyalty gate: the wiki Requirements line reads "Must be Loyalty Level 1
+  // to start this quest" (naming no trader), but the 1.1 captures serve this
+  // task with an empty `AvailableForStart` - no `TraderLoyalty`, no
+  // `GlobalVariableValue`, no condition of any kind - and the API serves
+  // `traderRequirements: []`. The "wiki is the source because the gate hides in
+  // a global variable" argument does not apply where the client carries no
+  // start condition at all, so the gate stays out until something corroborates it.
 
-  // I Need More Power (old: Spa Tour - Part 4) - Change rewards
+  // I Need More Power (old: Spa Tour - Part 4) - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
-  // S1: hand over 3 Metal/Expeditionary fuel tanks (upstream now serves the S1
-  // objective); exp 10000, +0.25, 1347 Dollars (IC2, base = 1347 / 1.15 = 1171),
-  // 2 Military flash drives.
+  // S1: hand over 3 Metal/Expeditionary fuel tanks; exp 10000, +0.25,
+  // 1100 Dollars, 2 Military flash drives. 2026-10-31: finishRewards override
+  // removed. Was: 1171 Dollars, 2 MFD, +0.25. Upstream now serves +0.25 and
+  // these items; the 1171 Dollars derived from the wiki's IC2 figure
+  // (1347 / 1.15) is contradicted by the 1.1.0.1 PvP and PvE captures (1100),
+  // and the override dropped upstream's offer unlock.
   '5a03296886f774569778596a': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
     // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
@@ -993,42 +972,20 @@
         value: 2,
       }, // Was: []
     ],
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03 (upstream now serves 0.25)
-      ],
-      items: [
-        {
-          count: 1171,
-          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
-        }, // Was: 1100 Dollars
-        {
-          count: 2,
-          item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' },
-        },
-      ],
-    },
   },
 
-  // Chemical Experiments (old: Spa Tour - Part 7) - Change rewards
+  // Chemical Experiments (old: Spa Tour - Part 7) - no override needed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_Experiments
-  // S1: stash a Corrugated hose in the med lab on Customs (upstream now serves
-  // the restructured objective); exp 3000, +0.1, 570 Dollars (655 with IC2);
-  // RB-ST key and Jaeger -0.01 removed.
-  '5a27bafb86f7741c73584017': {
-    // No loyalty gate. The wiki Requirements line reads "Obtain level 1 loyalty
-    // with Peacekeeper", but both 1.1 captures serve this task with an empty
-    // `AvailableForStart` (no condition of any kind) and the API serves
-    // `traderRequirements: []`. See Fuel Shortage above for the same call.
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.04 (+ -0.01 Jaeger) (upstream now serves 0.1)
-      ],
-      items: [
-        { count: 570, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 550 Dollars
-      ],
-    },
-  },
+  // S1: stash a Corrugated hose in the med lab on Customs; exp 3000, +0.1,
+  // 550 Dollars; RB-ST key and Jaeger -0.01 removed. Upstream serves all of this.
+  // 2026-10-31: the finishRewards override was removed. Was: 570 Dollars, +0.1.
+  // Its 570 Dollars is
+  // contradicted by every capture (1.1.0.1 through 1.3.0.0, PvP, PvE and
+  // pvp-season templates give 550).
+  // No loyalty gate. The wiki Requirements line reads "Obtain level 1 loyalty
+  // with Peacekeeper", but the 1.1 captures serve this task with an empty
+  // `AvailableForStart` (no condition of any kind) and the API serves
+  // `traderRequirements: []`. See Fuel Shortage above for the same call.
 
   // Special Order (old: No Questions Asked) - Change rewards
   // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Order
@@ -3351,6 +3308,9 @@
   //
   // 2026-08-10: renamed in S1
   // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  // 2026-10-31: tarkov.dev omits the last two objectives. Added from the
+  // captures (1.1.0.1 PvE, 1.2.5.0 and 1.3.0.0 pvp-season); the wiki agrees and
+  // marks the cinema objective (a sub-condition of the extract) optional.
   '66aa58245ab22944110db6e9': {
     traderRequirements: [
       {
@@ -3360,6 +3320,25 @@
         trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+    objectivesAdd: [
+      // Was: absent
+      {
+        id: '66aa5c8ba8c36eaef492ef92',
+        description: 'Survive and extract from Streets of Tarkov (or transit to another location)',
+        type: 'extract',
+        maps: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }],
+        exitStatus: ['Survived', 'Runner', 'Transit'],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '66b0e57eddc25d8d17e3e3c0',
+        description: 'Scout the area round the Rodina cinema on Streets of Tarkov (In one raid)',
+        type: 'visit',
+        maps: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }],
+        optional: true,
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Secrets_of_Polikhim

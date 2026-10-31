@@ -636,6 +636,7 @@ export const TARKOV_MAP_NAMES_BY_ID: Readonly<Partial<Record<string, string>>> =
   '65b8d6f5cdde2479cb2a3125': 'Ground Zero 21+',
   '68236e8153654e8c1200798a': 'Ground Zero Tutorial',
   '69af492a4819ea4ba10a69c5': 'Icebreaker',
+  '6a8dd1325e15a5ea2e010820': 'Infected Factory',
   '5714dbc024597771384a510d': 'Interchange',
   '5704e4dad2720bb55b8b4567': 'Lighthouse',
   '59fc81d786f774390775787e': 'Night Factory',
