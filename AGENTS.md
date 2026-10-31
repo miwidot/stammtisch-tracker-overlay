@@ -81,6 +81,7 @@ keyed by BSG perk id. Keep metadata upstream and omit empty or stub effects.
 - `npm test` runs the Vitest suite (also run in CI); `npm run test:watch` keeps it running.
 - `npm run format` / `npm run format:check` run Prettier over the TypeScript, JSON/JSON5, and Markdown sources (`format:check` also runs in CI).
 - Example single test: `npx vitest run tests/file-loader.test.ts`.
+- `pwsh scripts/ci-local.ps1 -Branch <branch>` runs every `ci.yml` step locally on the PR merge commit (see `docs/CONTRIBUTING.md`). Use it as CI evidence when hosted runners are unavailable, and before pushing review fixes.
 
 ### Reference cross-check tooling (local-only)
 

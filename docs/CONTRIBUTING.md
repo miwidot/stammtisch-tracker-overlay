@@ -486,6 +486,24 @@ npm run build
 npm test
 ```
 
+### Running CI locally
+
+`scripts/ci-local.ps1` runs every step of `.github/workflows/ci.yml` without
+GitHub runners (PowerShell 7 and Node.js required). It tests the same merge
+commit CI would, in a temporary worktree, so your working tree is untouched. It
+runs the Validate & Build job, then the Windows LF-checkout job in a fresh clone
+with `core.autocrlf=true`. It exits 1 if any step fails and writes the full log
+to `%TEMP%\tdo-ci\<branch>.log`.
+
+```powershell
+pwsh scripts/ci-local.ps1 -Branch feat/x          # pushed branch, merged onto origin/main
+pwsh scripts/ci-local.ps1 -Branch feat/x -Local   # unpushed local branch
+pwsh scripts/ci-local.ps1                         # origin/main itself (push run)
+```
+
+Run it before pushing review fixes; each push to a pull request starts a new
+billed CI run. Validate & Build runs on Ubuntu in CI and on your OS here.
+
 ---
 
 ## Master Samples
