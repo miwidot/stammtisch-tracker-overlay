@@ -50,9 +50,9 @@
   "devDependencies": {
     "@types/node": "24.19.2",
     "ajv": "^8.20.0",
-    "fallow": "3.34.0",
+    "fallow": "3.35.0",
     "json5": "^2.2.3",
-    "markdownlint-cli2": "^0.23.3",
+    "markdownlint-cli2": "^0.24.0",
     "prettier": "3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
@@ -61,6 +61,7 @@
   "overrides": {
     "katex": "0.18.9",
     "smol-toml": "1.9.0",
-    "markdown-it": "15.0.3"
+    "markdown-it": "15.0.3",
+    "re2js": "2.8.8"
   }
 }
