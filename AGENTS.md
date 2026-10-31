@@ -152,6 +152,35 @@ capture generically instead (for example "a 1.1 PvE capture").
     corroborated wiki Requirements section. A candidate cohort tier must not
     automatically become an extra runtime gate.
 
+- `npm run eft:coverage` is the full check of what consumers see against the
+  reference. It covers every reference quest, not only those tarkov.dev serves:
+  each is classified as upstream (compared after applying effective overrides),
+  addition, placeholder (matched by name and trader, printing the placeholder ->
+  real id and objective mapping for issue #507), story, hidden helper, or
+  missing. Per quest it compares name, trader, map, experience, explicit Level,
+  Quest prerequisites and statuses, availability delay, explicit TraderLoyalty
+  and GlobalVariableValue gates, objective presence/counts/text, and finish
+  rewards (weapon presets compared by base item). The field-authority rules
+  above still apply: absent Level/TraderLoyalty conditions are never flagged,
+  and prerequisite targets tarkov.dev cannot represent are info, not edges to
+  add. A quest absent from the reference proves nothing (quest lists are
+  account-scoped). Check the reference's client version before acting on rows
+  from an older capture.
+- `npm run eft:diff -- --mode <mode>` compares the quest definitions of the two
+  newest references for a mode (or two given files), ignoring per-account
+  progress: added/removed quests and changed fields, localization summarized
+  unless `--text`. Quest lists are account-scoped, so an added or removed quest
+  may only mean the two accounts could see different quests; compare captures
+  from the same account before treating it as a game change.
+- `npm run eft:import -- <decoded-session-dir>` files a decoded capture's
+  `pve`/`pvp`/`pvp-season` folders under `data/reference/decoded/<session>/`
+  without overwriting different files.
+- `npm run eft:remote -- --mode regular|pvp-season` saves the remote session's
+  live quest list (RemoteSession LAN API, `REMOTE_SESSION_URL` or `--url`) to
+  `data/reference/remote/<mode>/` as a reference the other tools read. It makes
+  one paced game request, skips writing when definitions are unchanged, and
+  stores no host, session or account identifiers. Never commit the URL.
+
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the
   numeric `eft:*` tools this one produces committed additions, not a gitignored
@@ -232,6 +261,17 @@ suppressing an item:
 - **SSRF** (`src/lib/tarkov-api.ts`). Server-side calls append to a hardcoded
   `https://json.tarkov.dev` base, so callers cannot select the requested host.
   Native fetch redirects retain the upstream service's existing behavior.
+- **SSRF** (`scripts/eft-remote.ts`). The remote-session URL is the operator's
+  own `--url`/`REMOTE_SESSION_URL`, which is intended local CLI behaviour. The
+  guard is `lanOrigin`: an IP literal must be loopback, private or link-local; a
+  hostname must look local and every address it resolves to must be a LAN
+  address. The path is fixed to `/api/<mode>/tasks`. The request is made with
+  `node:http(s)` through `lanOnlyLookup`, which pins the socket to an address
+  that passed `isLanAddress` (a changed DNS answer cannot redirect it), and no
+  redirects are followed. Fallow supports only a file-level suppression for this
+  sink type, so the file carries a reviewer-approved
+  `fallow-ignore-file security-sink`; re-review any new outbound request added to
+  that file by hand.
 
 CodeQL alerts dismissed as false positives should state the reason that actually holds. For
 wiki-derived text the operative reason is that `eft-story-generate.ts` consumes the scraped

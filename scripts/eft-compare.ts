@@ -49,6 +49,7 @@ import {
 } from '../src/lib/index.js';
 
 import { normalizeTaskStatus } from '../src/lib/task-unlocks.js';
+import { canonicalQuestId } from './lib/quest-definitions.js';
 
 // ---------------------------------------------------------------------------
 // Reference-file parsing
@@ -91,14 +92,10 @@ interface EftQuest {
 
 /** Hex object id, optionally wrapped as `[<id>]` or `[<id> name]` by the
  * enriched reference variant. */
-const ID_PATTERN = /[0-9a-f]{24}/;
 const HEX_ID_KEY = /^[0-9a-f]{24}$/;
 
 /** Unwrap a possibly-bracketed id (`[60e7... name] Long Line` -> `60e7...`). */
-function unwrapId(value: string): string {
-  const match = ID_PATTERN.exec(value);
-  return match ? match[0] : value;
-}
+const unwrapId = canonicalQuestId;
 
 /** Normalized authoritative values for a single quest from the reference file. */
 interface EftTask {
@@ -239,11 +236,14 @@ function readReferenceEnvelope(file: string): ReferenceEnvelope {
   try {
     const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
       request?: { url?: string; timestamp?: string };
+      source?: { mode?: unknown };
     };
     const ts = raw?.request?.timestamp;
     const ms = typeof ts === 'string' ? Date.parse(ts) : Number.NaN;
     envelope = {
-      mode: modeFromRequestUrl(raw?.request?.url),
+      // Captures identify their mode by gateway URL; saved remote-session
+      // snapshots (eft:remote) carry no request URL and record it in `source`.
+      mode: modeFromRequestUrl(raw?.request?.url) ?? modeFromSessionMode(raw?.source?.mode),
       timestamp: Number.isNaN(ms) ? null : ms,
     };
   } catch {
@@ -566,6 +566,8 @@ export function crossCheckOverrides(
 /** Options shared by the eft:* CLI tools. */
 export interface ModeCliOptions {
   eftDir: string;
+  /** Every positional argument, each resolved under data/reference/ (eftDir is the last). */
+  positionals?: string[];
   mode: GameMode;
   jsonOut?: string;
   /** Boolean flags (from `booleanFlags`) present on the CLI. */
@@ -582,6 +584,7 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
   let mode: GameMode = 'pve';
   let jsonOut: string | undefined;
   const flags = new Set<string>();
+  const positionals: string[] = [];
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -601,11 +604,13 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
       flags.add(arg);
     } else if (!arg.startsWith('--')) {
       eftDir = arg;
+      positionals.push(resolveReferenceDirectory(arg));
     }
   }
 
   return {
     eftDir: resolveReferenceDirectory(eftDir),
+    positionals,
     mode,
     jsonOut,
     flags,
@@ -796,6 +801,32 @@ export function modeFromRequestUrl(url: string | undefined): GameMode | null {
 }
 
 /**
+ * Map a game-session mode name (`pvp`, `pvp-season`, `pve`) to the tarkov.dev
+ * mode. Remote-session snapshots record the session's mode instead of a
+ * gateway URL; `pvp` is tarkov.dev's `regular`.
+ */
+export function modeFromSessionMode(mode: unknown): GameMode | null {
+  if (mode === 'pvp' || mode === 'regular') return 'regular';
+  if (mode === 'pvp-season' || mode === 'pve') return mode;
+  return null;
+}
+
+/** Client version recorded by a capture (`App-Version` header) or snapshot. */
+export function referenceAppVersion(file: string): string | null {
+  try {
+    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
+      request?: { headers?: Record<string, unknown> };
+      source?: { appVersion?: unknown };
+    };
+    const header = raw?.request?.headers?.['App-Version'];
+    const version = typeof header === 'string' ? header : raw?.source?.appVersion;
+    return typeof version === 'string' && version.length > 0 ? version : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Detect which game mode a reference file represents from its request URL
  * metadata. Returns null when no reference file is present or the mode can't be
  * determined, so callers can decide how strict to be.
@@ -811,4 +842,14 @@ export function detectReferenceMode(eftDir: string): GameMode | null {
   return mode === 'unusable' ? null : mode;
 }
 
-export { parseEftTasks, compare, readQuestArray, type EftTask, type Discrepancy };
+export {
+  parseEftTasks,
+  compare,
+  readQuestArray,
+  findQuestListFiles,
+  modeFromReferenceFile,
+  captureTimestamp,
+  type EftQuest,
+  type EftTask,
+  type Discrepancy,
+};
