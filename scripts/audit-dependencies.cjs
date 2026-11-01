@@ -10,18 +10,7 @@ const { AUDIT_LEVEL, assessAuditRun } = require('./audit-policy.cjs');
 // longer matches a reported advisory produces a warning to remove it, and a
 // non-breaking fix reported by npm for an accepted package fails the audit so
 // the dependency is updated instead.
-const ACCEPTED_ADVISORIES = {
-  'GHSA-vfj7-8cjw-p6xm': {
-    package: 'braces',
-    reason:
-      'No patched braces release exists (braces <= 3.0.3). It is reached only through the ' +
-      'markdownlint-cli2 devDependency (markdownlint-cli2 -> micromatch -> braces), where it ' +
-      'expands glob patterns built from repo-controlled config and CLI arguments during lint. ' +
-      'Nothing untrusted reaches it, and it is absent from production dependencies and the ' +
-      'published overlay.',
-    expires: '2026-11-03',
-  },
-};
+const ACCEPTED_ADVISORIES = {};
 
 // npm 11.17 exports .npmrc's allow-scripts into lifecycle environments, then
 // rejects that same policy as an environment override in the nested npm audit.
