@@ -1043,6 +1043,9 @@ export const SHARED_SCHEMA_FILES = [
 
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
+  { pattern: 'overrides/items.json5', schemaFile: 'entity-overrides.schema.json' },
+  { pattern: 'overrides/traders.json5', schemaFile: 'entity-overrides.schema.json' },
+  { pattern: 'overrides/hideout.json5', schemaFile: 'entity-overrides.schema.json' },
   { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
   { pattern: 'additions/traderTaskGroups.json5', schemaFile: 'trader-task-group.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
@@ -1064,5 +1067,6 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   },
   { pattern: 'overrides/locales/*.json5', schemaFile: 'locale-override.schema.json' },
   { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
+  { pattern: 'suppressions/wiki-incorrect.json5', schemaFile: 'wiki-incorrect.schema.json' },
   { pattern: 'divergences/tasks.json5', schemaFile: 'task-divergence.schema.json' },
 ];

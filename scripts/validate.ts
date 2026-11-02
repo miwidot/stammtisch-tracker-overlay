@@ -6,7 +6,7 @@
  */
 
 import Ajv from 'ajv';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import {
@@ -15,7 +15,6 @@ import {
   getProjectPaths,
   loadJson5File,
   loadJsonFile,
-  listJson5Files,
   fetchTarkovEnvelope,
   SCHEMA_CONFIGS,
   SHARED_SCHEMA_FILES,
@@ -139,16 +138,15 @@ export function validateFile(
   try {
     const data = loadJson5File(filePath);
 
+    const validator = getValidator(displayPath, validators);
+    // Unknown source data must not receive the same success result as checked data.
+    if (!validator) {
+      return { file: displayPath, valid: false, errors: ['No schema registered for source file'] };
+    }
+
     // Skip empty plain objects - they're valid by convention.
     // Arrays/primitives/null should still be validated against schema.
     if (isRecord(data) && Object.keys(data).length === 0) {
-      return { file: displayPath, valid: true };
-    }
-
-    const validator = getValidator(displayPath, validators);
-
-    // No schema for this file type - consider valid
-    if (!validator) {
       return { file: displayPath, valid: true };
     }
 
@@ -411,67 +409,32 @@ export function validateLocaleEntityIds(
   }
 }
 
+function* listSourceJson5Files(directory: string, prefix = ''): Generator<string> {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const relativePath = `${prefix}${entry.name}`;
+    if (entry.isDirectory()) {
+      yield* listSourceJson5Files(join(directory, entry.name), `${relativePath}/`);
+    } else if (entry.name.endsWith('.json5')) {
+      yield relativePath;
+    }
+  }
+}
+
 /**
  * Validate all source files
  */
 export async function validateSourceFiles(): Promise<SchemaValidationResult[]> {
   const validators = initializeValidators();
-  const results: SchemaValidationResult[] = [];
-
-  // Validate overrides directory
-  const overridesDir = join(srcDir, 'overrides');
-  for (const file of listJson5Files(overridesDir)) {
-    const filePath = join(overridesDir, file);
-    results.push(validateTaskSourceFile(filePath, `overrides/${file}`, validators));
-  }
-
-  // Validate additions directory
-  const additionsDir = join(srcDir, 'additions');
-  for (const file of listJson5Files(additionsDir)) {
-    const filePath = join(additionsDir, file);
-    results.push(validateTaskSourceFile(filePath, `additions/${file}`, validators));
-  }
-
-  // Validate per-locale overrides (one file per locale, filename = locale code)
   const localeIdIndex = await buildLocaleEntityIdIndex();
-  const localesDir = join(srcDir, 'overrides', 'locales');
-  for (const file of listJson5Files(localesDir)) {
-    const filePath = join(localesDir, file);
-    const displayPath = `overrides/locales/${file}`;
-    const result = validateFile(filePath, displayPath, validators);
-    if (result.valid) {
-      const idResult = validateLocaleEntityIds(filePath, displayPath, localeIdIndex);
-      result.valid = idResult.valid;
-      result.errors = idResult.errors;
-    }
-    results.push(result);
-  }
-
-  const suppressionsFile = join(srcDir, 'suppressions', 'tasks.json5');
-  results.push(validateFile(suppressionsFile, 'suppressions/tasks.json5', validators));
-
-  // Validate the mode-divergence registry (tooling-only; never built into dist)
-  const divergencesFile = join(srcDir, 'divergences', 'tasks.json5');
-  if (existsSync(divergencesFile)) {
-    results.push(validateFile(divergencesFile, 'divergences/tasks.json5', validators));
-  }
-
-  // Validate mode-specific overrides
-  for (const mode of SUPPORTED_GAME_MODES) {
-    const modeOverridesDir = join(srcDir, 'overrides', 'modes', mode);
-    for (const file of listJson5Files(modeOverridesDir)) {
-      const filePath = join(modeOverridesDir, file);
-      results.push(validateTaskSourceFile(filePath, `overrides/modes/${mode}/${file}`, validators));
-    }
-
-    const modeAdditionsDir = join(srcDir, 'additions', 'modes', mode);
-    for (const file of listJson5Files(modeAdditionsDir)) {
-      const filePath = join(modeAdditionsDir, file);
-      results.push(validateTaskSourceFile(filePath, `additions/modes/${mode}/${file}`, validators));
-    }
-  }
-
-  return results;
+  // Keep the required-file check even when the recursive walk cannot discover it.
+  const files = new Set(['suppressions/tasks.json5', ...listSourceJson5Files(srcDir)]);
+  return [...files].map((relativePath) => {
+    const filePath = join(srcDir, relativePath);
+    const result = validateTaskSourceFile(filePath, relativePath, validators);
+    return result.valid && relativePath.startsWith('overrides/locales/')
+      ? validateLocaleEntityIds(filePath, relativePath, localeIdIndex)
+      : result;
+  });
 }
 
 /**

@@ -124,6 +124,12 @@ npm run typecheck
 npm test
 ```
 
+Validation rejects source files without a registered schema, including empty
+files. Item, trader and hideout corrections validate the documented ID-to-object
+envelope while keeping API-specific fields extensible. Wiki-incorrect suppressions
+validate ID-to-field-name arrays and are checked alongside task suppressions;
+unknown files, including nested JSON5 files anywhere under `src/`, fail validation too.
+
 ## Contributing
 
 Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).

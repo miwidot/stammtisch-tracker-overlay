@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { join } from 'path';
+import { join, relative, sep } from 'path';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import {
@@ -23,6 +23,25 @@ import {
   validateTraderRequirementIds,
 } from '../scripts/validate.js';
 
+function stubLocaleFetch() {
+  const taskIds: string[] = JSON.parse(
+    readFileSync(new URL('./fixtures/locale-api-task-ids.json', import.meta.url), 'utf8')
+  );
+  const endpoints = new Map([
+    ['tasks', { tasks: Object.fromEntries(taskIds.map((id) => [id, { id }])) }],
+    ['items', { items: {} }],
+    ['maps', { maps: {} }],
+    ['traders', {}],
+  ]);
+  const fetch = vi.fn(async (url: string) => {
+    const endpoint = new URL(url).pathname.split('/').at(-1)!;
+    if (!endpoints.has(endpoint)) throw new Error(`Unexpected validation endpoint: ${url}`);
+    return new Response(JSON.stringify({ data: endpoints.get(endpoint) }));
+  });
+  vi.stubGlobal('fetch', fetch);
+  return fetch;
+}
+
 describe('scripts/validate helpers', () => {
   it('initializes validators for configured schema patterns', () => {
     const validators = initializeValidators();
@@ -31,6 +50,45 @@ describe('scripts/validate helpers', () => {
       expect(getValidator(config.pattern, validators)).not.toBeNull();
     }
     expect(getValidator('unknown.json5', validators)).toBeNull();
+  });
+
+  it.each([
+    'overrides/items.json5',
+    'overrides/traders.json5',
+    'overrides/hideout.json5',
+    'suppressions/wiki-incorrect.json5',
+  ])('rejects malformed source envelopes for %s', (displayPath) => {
+    const dir = mkdtempSync(join(tmpdir(), 'validate-envelope-'));
+    const file = join(dir, 'input.json5');
+    const validators = initializeValidators();
+    try {
+      for (const data of [null, [], { unexpected: true }, { '5a0327ba86f77456b9154236': 42 }]) {
+        writeFileSync(file, JSON.stringify(data));
+        expect(validateFile(file, displayPath, validators).valid, JSON.stringify(data)).toBe(false);
+      }
+      const entry = displayPath.startsWith('suppressions/')
+        ? ['traderRequirements']
+        : { name: 'Corrected name', customField: { nested: true } };
+      writeFileSync(file, JSON.stringify({ '5a0327ba86f77456b9154236': entry }));
+      expect(validateFile(file, displayPath, validators).valid).toBe(true);
+      writeFileSync(file, '{}');
+      expect(validateFile(file, displayPath, validators).valid).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects unregistered source files instead of reporting unchecked data as valid', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'validate-unregistered-'));
+    const file = join(dir, 'input.json5');
+    try {
+      writeFileSync(file, '{}');
+      const result = validateFile(file, 'overrides/unregistered.json5', initializeValidators());
+      expect(result.valid).toBe(false);
+      expect(result.errors?.[0]).toContain('No schema registered');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it.each(SUPPORTED_GAME_MODES)('validates standalone task additions in %s', (mode) => {
@@ -177,6 +235,7 @@ describe('scripts/validate helpers', () => {
         (file) => `overrides/locales/${file}`
       ),
       'suppressions/tasks.json5',
+      'suppressions/wiki-incorrect.json5',
       'divergences/tasks.json5',
       ...SUPPORTED_GAME_MODES.flatMap((mode) => [
         ...listJson5Files(join(srcDir, 'overrides', 'modes', mode)).map(
@@ -188,34 +247,39 @@ describe('scripts/validate helpers', () => {
       ]),
     ].sort();
 
-    // This checks source traversal and schema validation deterministically. The
-    // separate `npm run validate` CI step checks the current live locale IDs.
-    const taskIds: string[] = JSON.parse(
-      readFileSync(new URL('./fixtures/locale-api-task-ids.json', import.meta.url), 'utf8')
-    );
-    const endpoints = new Map([
-      ['tasks', { tasks: Object.fromEntries(taskIds.map((id) => [id, { id }])) }],
-      ['items', { items: {} }],
-      ['maps', { maps: {} }],
-      ['traders', {}],
-    ]);
-    const fetch = vi.fn(async (url: string) => {
-      const endpoint = new URL(url).pathname.split('/').at(-1)!;
-      if (!endpoints.has(endpoint)) throw new Error(`Unexpected validation endpoint: ${url}`);
-      return new Response(JSON.stringify({ data: endpoints.get(endpoint) }));
-    });
-    vi.stubGlobal('fetch', fetch);
+    const fetch = stubLocaleFetch();
     try {
       const results = await validateSourceFiles();
       const files = results.map((result) => result.file).sort();
 
       expect(files).toEqual(expectedFiles);
       expect(results.every((result) => result.valid)).toBe(true);
-      expect(fetch).toHaveBeenCalledTimes(SUPPORTED_GAME_MODES.length * endpoints.size);
+      expect(fetch).toHaveBeenCalledTimes(SUPPORTED_GAME_MODES.length * 4);
     } finally {
       vi.unstubAllGlobals();
     }
   });
+
+  it.each(['suppressions', 'divergences', 'overrides', 'additions', '.'])(
+    'rejects unregistered nested source files under %s',
+    async (parent) => {
+      const { srcDir } = getProjectPaths();
+      const nestedDir = mkdtempSync(join(srcDir, parent, '__validation-'));
+      const filePath = join(nestedDir, 'input.json5');
+      const displayPath = relative(srcDir, filePath).split(sep).join('/');
+      try {
+        writeFileSync(filePath, '{}');
+        stubLocaleFetch();
+        const results = await validateSourceFiles();
+        const invalid = results.filter((result) => !result.valid);
+        expect(invalid.map((result) => result.file)).toEqual([displayPath]);
+        expect(invalid[0].errors?.[0]).toContain('No schema registered');
+      } finally {
+        rmSync(nestedDir, { recursive: true, force: true });
+        vi.unstubAllGlobals();
+      }
+    }
+  );
 
   it('returns an invalid result when JSON5 parsing fails', () => {
     const validators = initializeValidators();
@@ -649,7 +713,7 @@ describe('scripts/validate helpers', () => {
     );
 
     try {
-      const result = validateTaskSourceFile(filePath, 'overrides/not-tasks.json5', validators);
+      const result = validateTaskSourceFile(filePath, 'overrides/items.json5', validators);
 
       expect(result.valid).toBe(true);
       expect(result.errors).toBeUndefined();
