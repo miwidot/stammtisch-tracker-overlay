@@ -9,6 +9,8 @@ import Ajv from 'ajv';
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
+import { assertTaskIdAliases } from '../src/lib/task-id-aliases.js';
+import type { TaskIdAliases } from '../src/lib/types.js';
 import {
   assertDisjointCounterGroups,
   isDirectExecution,
@@ -146,7 +148,11 @@ export function validateFile(
 
     // Skip empty plain objects - they're valid by convention.
     // Arrays/primitives/null should still be validated against schema.
-    if (isRecord(data) && Object.keys(data).length === 0) {
+    if (
+      displayPath !== 'additions/taskIdAliases.json5' &&
+      isRecord(data) &&
+      Object.keys(data).length === 0
+    ) {
       return { file: displayPath, valid: true };
     }
 
@@ -160,6 +166,9 @@ export function validateFile(
     }
     if (valid && displayPath === 'additions/progressionCounters.json5') {
       assertDisjointCounterGroups(data as ProgressionCounterRegistry);
+    }
+    if (valid && displayPath === 'additions/taskIdAliases.json5') {
+      assertTaskIdAliases(data as unknown as TaskIdAliases);
     }
 
     return { file: displayPath, valid, errors };

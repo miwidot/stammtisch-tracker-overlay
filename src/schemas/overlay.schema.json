@@ -4,6 +4,7 @@
   "additionalProperties": false,
   "description": "Root schema for compiled overlay output",
   "properties": {
+    "taskIdAliases": { "$ref": "task-id-aliases.schema.json" },
     "$meta": {
       "description": "Build metadata",
       "properties": {

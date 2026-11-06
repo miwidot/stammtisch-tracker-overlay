@@ -916,7 +916,19 @@ export type TraderTaskGroup = 0 | 1 | 2 | 3 | 4;
 /** Mode -> task id -> group. A missing task means its group is unknown. */
 export type TraderTaskGroupRegistry = Partial<Record<GameMode, Record<string, TraderTaskGroup>>>;
 
+export interface TaskIdAliasMapping {
+  tasks: Record<string, string>;
+  objectives: Record<string, { id: string; taskId: string }>;
+}
+
+/** Permanent identity mappings. No cross-mode fallback or inferred mappings. */
+export interface TaskIdAliases {
+  schemaVersion: 1;
+  modes: Record<GameMode, TaskIdAliasMapping>;
+}
+
 export interface OverlayOutput {
+  taskIdAliases?: TaskIdAliases;
   progressionCounters?: ProgressionCounterRegistry;
   traderTaskGroups?: TraderTaskGroupRegistry;
   tasks?: Record<string, TaskOverride>;
@@ -1043,6 +1055,7 @@ export const SHARED_SCHEMA_FILES = [
 
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
+  { pattern: 'additions/taskIdAliases.json5', schemaFile: 'task-id-aliases.schema.json' },
   { pattern: 'overrides/items.json5', schemaFile: 'entity-overrides.schema.json' },
   { pattern: 'overrides/traders.json5', schemaFile: 'entity-overrides.schema.json' },
   { pattern: 'overrides/hideout.json5', schemaFile: 'entity-overrides.schema.json' },

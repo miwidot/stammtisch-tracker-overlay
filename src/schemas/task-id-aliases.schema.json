@@ -1,0 +1,48 @@
+{
+  "$id": "task-id-aliases.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "modes"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "modes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regular", "pve", "pvp-season"],
+      "properties": {
+        "regular": { "$ref": "#/definitions/mapping" },
+        "pve": { "$ref": "#/definitions/mapping" },
+        "pvp-season": { "$ref": "#/definitions/mapping" }
+      }
+    }
+  },
+  "definitions": {
+    "id": { "type": "string", "pattern": "^[0-9a-f]{24}$" },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tasks", "objectives"],
+      "properties": {
+        "tasks": {
+          "type": "object",
+          "propertyNames": { "pattern": "^placeholder_[a-z0-9_]+$" },
+          "additionalProperties": { "$ref": "#/definitions/id" }
+        },
+        "objectives": {
+          "type": "object",
+          "propertyNames": { "pattern": "^placeholder_[a-z0-9_]+_obj[0-9]+$" },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "taskId"],
+            "properties": {
+              "id": { "$ref": "#/definitions/id" },
+              "taskId": { "$ref": "#/definitions/id" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -121,6 +121,7 @@ describe('overlay.schema.json', () => {
     });
 
     const referencedSchemas = [
+      'task-id-aliases.schema.json',
       'edition.schema.json',
       'item-additions.schema.json',
       'prestige-override.schema.json',

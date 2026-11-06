@@ -9,6 +9,7 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
 import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
+import { assertTaskIdAliases } from '../src/lib/task-id-aliases.js';
 import {
   getLatestTagVersion,
   getProjectPaths,
@@ -66,6 +67,7 @@ function loadSourceFiles(): Omit<OverlayOutput, '$meta'> {
     output.locales = locales;
   }
 
+  assertTaskIdAliases(output.taskIdAliases);
   return output;
 }
 

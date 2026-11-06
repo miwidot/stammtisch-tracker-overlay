@@ -171,6 +171,9 @@ export async function checkSupplements(
 ): Promise<Counts> {
   const counts = { actionable: 0, staleProblems: 0 };
   const load: LoadSupplement = (name) => loadSupplement(sourceDir, name);
+  console.log(
+    'taskIdAliases: NOT COMPARABLE — historical identity ledger; validate mappings against recorded evidence, not current upstream absence'
+  );
   await checkPerks(load, fetchEnvelope, counts);
   const counters = load('progressionCounters');
   await Promise.all(

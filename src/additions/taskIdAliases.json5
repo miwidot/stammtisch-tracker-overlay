@@ -1,0 +1,10 @@
+{
+  // Activation is a separate, coordinated release after Tracker, API and database support.
+  // Keep mappings permanently once activated; never infer identity from objective order.
+  schemaVersion: 1,
+  modes: {
+    regular: { tasks: {}, objectives: {} },
+    pve: { tasks: {}, objectives: {} },
+    'pvp-season': { tasks: {}, objectives: {} },
+  },
+}
