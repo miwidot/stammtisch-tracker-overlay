@@ -12533,6 +12533,23 @@
       "traderUnlocks": []
     }
   },
+  "taskIdAliases": {
+    "schemaVersion": 1,
+    "modes": {
+      "regular": {
+        "tasks": {},
+        "objectives": {}
+      },
+      "pve": {
+        "tasks": {},
+        "objectives": {}
+      },
+      "pvp-season": {
+        "tasks": {},
+        "objectives": {}
+      }
+    }
+  },
   "tasksAdd": {
     "new_beginning_prestige_5": {
       "id": "new_beginning_prestige_5",
@@ -18688,8 +18705,8 @@
     }
   },
   "$meta": {
-    "version": "1.173",
-    "generated": "2026-11-02T06:58:13.723Z",
-    "sha256": "a64c3b9e0818c692dd4957257ecb8e4453061d7c14d14b9a1b531a589e468d56"
+    "version": "1.174",
+    "generated": "2026-11-06T17:45:08.222Z",
+    "sha256": "86098beb11e64ca402226e1c18f01c85b317cac4ab2baa248af7b2047430be10"
   }
 }
