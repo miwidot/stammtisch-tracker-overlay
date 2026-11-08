@@ -1009,8 +1009,68 @@ describe('validateTaskOverride', () => {
     });
   });
 
+  describe.each(['startRewards', 'finishRewards'] as const)('%s replacement semantics', (field) => {
+    const item = { item: { id: 'item', name: 'Item' }, count: 1 };
+    const second = { item: { id: 'second', name: 'Second' }, count: 2 };
+    function check(patch: TaskOverride[typeof field], source: TaskData[typeof field]) {
+      return validateTaskOverride('test-task-id', { [field]: patch }, [
+        createApiTask({ [field]: source }),
+      ]);
+    }
+    it('retains removal of a trader offer unlock', () => {
+      const backpack = {
+        id: 'backpack-offer',
+        item: { id: 'backpack', name: 'Backpack' },
+        trader: { id: 'ragman', name: 'Ragman' },
+        level: 2,
+      };
+      const armor = { ...backpack, id: 'armor-offer', item: { id: 'armor', name: 'Armor' } };
+      const result = check({ offerUnlock: [backpack] }, { offerUnlock: [backpack, armor] });
+      expect(result.details).toContainEqual(expect.objectContaining({ field, status: 'needed' }));
+      expect(result.comparison).toContainEqual(
+        expect.objectContaining({ field: `${field}.offerUnlock`, status: 'different' })
+      );
+    });
+    it('retains an explicit empty replacement', () => {
+      const result = check({ items: [] }, { items: [item] });
+      expect(result.details).toContainEqual(expect.objectContaining({ field, status: 'needed' }));
+      expect(result.comparison).toContainEqual(
+        expect.objectContaining({ field, status: 'different' })
+      );
+    });
+    it('retains omission of a nonempty sibling collection', () => {
+      const result = check(
+        { items: [item] },
+        { items: [item], traderUnlock: [{ id: 'trader', name: 'Trader' }] }
+      );
+      expect(result.details).toContainEqual(expect.objectContaining({ field, status: 'needed' }));
+      expect(result.comparison).toContainEqual(
+        expect.objectContaining({ field: `${field}.traderUnlock`, status: 'different' })
+      );
+    });
+    it('allows reordering and extra upstream reference metadata', () => {
+      const result = check(
+        { items: [second, item] },
+        { items: [{ ...item, item: { ...item.item, shortName: 'I' } }, second], traderUnlock: [] }
+      );
+      expect(result.details).toContainEqual(expect.objectContaining({ field, status: 'fixed' }));
+      expect(result.comparison).toContainEqual(expect.objectContaining({ field, status: 'same' }));
+    });
+    it('leaves unavailable upstream rewards unverified', () => {
+      const result = check({ items: [] }, undefined);
+      expect(result.details).toContainEqual(expect.objectContaining({ field, status: 'check' }));
+      expect(result.comparison).toContainEqual(
+        expect.objectContaining({ field, status: 'unverified' })
+      );
+    });
+    it('marks a removal fixed only once upstream has the same collection', () => {
+      const result = check({ items: [item] }, { items: [item] });
+      expect(result.details).toContainEqual(expect.objectContaining({ field, status: 'fixed' }));
+    });
+  });
+
   describe('startRewards validation', () => {
-    it('returns FIXED when override is a subset of API startRewards', () => {
+    it('returns NEEDED when override removes an API start reward', () => {
       const apiTask = createApiTask({
         startRewards: {
           items: [
@@ -1026,7 +1086,7 @@ describe('validateTaskOverride', () => {
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(result.details.some((d) => d.field === 'startRewards' && d.status === 'fixed')).toBe(
+      expect(result.details.some((d) => d.field === 'startRewards' && d.status === 'needed')).toBe(
         true
       );
     });
@@ -1091,7 +1151,7 @@ describe('validateTaskOverride', () => {
   });
 
   describe('finishRewards validation', () => {
-    it('returns FIXED when override is a subset of API rewards', () => {
+    it('returns NEEDED when override removes an API finish reward', () => {
       const apiTask = createApiTask({
         finishRewards: {
           items: [
@@ -1107,7 +1167,7 @@ describe('validateTaskOverride', () => {
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(result.details.some((d) => d.field === 'finishRewards' && d.status === 'fixed')).toBe(
+      expect(result.details.some((d) => d.field === 'finishRewards' && d.status === 'needed')).toBe(
         true
       );
     });

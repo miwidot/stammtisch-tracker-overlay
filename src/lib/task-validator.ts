@@ -114,6 +114,50 @@ function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
   };
 }
 
+/** Narrow a reward block to a record without accepting null or array values. */
+function rewardRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+/** Reward blocks replace upstream, including sibling collections omitted by the patch. */
+function replacementRewards(supplied: unknown, source: unknown): unknown {
+  const patch = rewardRecord(supplied);
+  const upstream = rewardRecord(source);
+  if (!patch || !upstream) return supplied;
+  const replacement = { ...patch };
+  for (const [key, value] of Object.entries(upstream)) {
+    if (Array.isArray(value) && value.length > 0 && !Object.hasOwn(replacement, key))
+      replacement[key] = [];
+  }
+  return replacement;
+}
+
+/** Compare a complete reward replacement, including collections it clears upstream. */
+function rewardComparison(
+  field: 'startRewards' | 'finishRewards',
+  override: TaskOverride,
+  task: ComparisonTaskData
+): OverlayComparisonDetail[] {
+  const source = task[field];
+  const replacement = replacementRewards(override[field], source);
+  return compareOverlayFields({ [field]: replacement }, { [field]: source });
+}
+
+/** Classify reward replacement evidence without treating removals as stale subsets. */
+function rewardValidator(field: 'startRewards' | 'finishRewards'): FieldValidator {
+  return (override, task) => {
+    if (override[field] === undefined) return null;
+    const root = rewardComparison(field, override, task).find((row) => row.field === field)!;
+    return {
+      field,
+      status: root.status === 'same' ? 'fixed' : root.status === 'different' ? 'needed' : 'check',
+      message: `${field}: ${root.status.toUpperCase()} replacement rewards; ${root.reason}`,
+    };
+  };
+}
+
 /** Validate an override for a task whose objectives span multiple maps. */
 function validateMultiMapOverride(
   overrideValue: TaskOverride['map'],
@@ -578,8 +622,8 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('wikiLink'),
   validateMap,
   createFieldValidator('experience'),
-  createFieldValidator('startRewards', { arrayMode: 'subset' }),
-  createFieldValidator('finishRewards', { arrayMode: 'subset' }),
+  rewardValidator('startRewards'),
+  rewardValidator('finishRewards'),
   createFieldValidator('factionName'),
   createFieldValidator('requiredPrestige'),
   createFieldValidator('kappaRequired'),
@@ -814,6 +858,7 @@ function validateObjectiveRemovals(
   return [...presence, ...objectiveRemovalConflicts(override)];
 }
 
+/** Build field evidence using replacement semantics for rewards and semantic requirement matching. */
 function taskFieldComparison(
   override: TaskOverride,
   task: ComparisonTaskData,
@@ -823,6 +868,14 @@ function taskFieldComparison(
   // not as a field upstream could carry.
   const { objectivesAdd, objectivesRemove: _removed, ...fields } = override;
   let details = compareOverlayFields(fields, task);
+  for (const field of ['startRewards', 'finishRewards'] as const) {
+    if (override[field] === undefined) continue;
+    const replaced = new Set(fieldRows(details, field));
+    details = [
+      ...details.filter((row) => !replaced.has(row)),
+      ...rewardComparison(field, override, task),
+    ];
+  }
   for (const verdict of semantic.filter((row) => row.status === 'fixed')) {
     details = applySemanticEvidence(verdict.field, override, task, details);
   }
@@ -852,6 +905,7 @@ function hasSemanticRequirementValues(field: string, supplied: unknown, source: 
   );
 }
 
+/** Replace generic requirement rows with canonical requirement-identity comparisons. */
 function applySemanticEvidence(
   field: string,
   patch: TaskOverride,
@@ -867,27 +921,7 @@ function applySemanticEvidence(
       ...compareRequirementValues(field, supplied as unknown[], source as unknown[]),
     ];
   }
-  if (field === 'startRewards' || field === 'finishRewards')
-    return rewardSubsetEvidence(rows, field);
   return rows;
-}
-
-function rewardSubsetEvidence(
-  rows: OverlayComparisonDetail[],
-  field: string
-): OverlayComparisonDetail[] {
-  const relevant = fieldRows(rows, field);
-  if (relevant.some((row) => row.status === 'invalid' || row.status === 'unverified')) return rows;
-  const approved = new Set(relevant);
-  return rows.map((row) =>
-    approved.has(row) && row.status === 'different'
-      ? {
-          ...row,
-          status: 'same',
-          reason: 'Every supplied reward value matches a semantic subset of upstream rewards',
-        }
-      : row
-  );
 }
 
 function comparisonFieldPath(field: string): string {
