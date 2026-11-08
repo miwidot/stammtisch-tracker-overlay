@@ -273,6 +273,56 @@
           "objectivesRemove": [
             "5a68764c86f77474c4269f3c"
           ]
+        },
+        "5ae4495086f77443c122bc40": {
+          "finishRewards": {
+            "traderStanding": [],
+            "items": [
+              {
+                "item": {
+                  "id": "5449016a4bdc2d6f028b456f",
+                  "name": "Roubles",
+                  "shortName": "RUB"
+                },
+                "count": 165000,
+                "attributes": {}
+              },
+              {
+                "item": {
+                  "id": "6038d614d10cbf667352dd44",
+                  "name": "Hazard 4 Takedown sling backpack (MultiCam)",
+                  "shortName": "Takedown"
+                },
+                "count": 1,
+                "attributes": {}
+              }
+            ],
+            "offerUnlock": [
+              {
+                "id": "6a703395bcdb93e2a6c16d26",
+                "level": 2,
+                "item": {
+                  "id": "6038d614d10cbf667352dd44",
+                  "name": "Hazard 4 Takedown sling backpack (MultiCam)",
+                  "shortName": "Takedown"
+                },
+                "count": 1,
+                "contains": [],
+                "attributes": [],
+                "trader": {
+                  "id": "5ac3b934156ae10c4430e83c",
+                  "name": "Ragman"
+                }
+              }
+            ],
+            "skillLevelReward": [],
+            "traderUnlock": [],
+            "craftUnlock": [],
+            "achievement": [],
+            "customization": [],
+            "traderDialogueUnlock": [],
+            "locationUnlock": []
+          }
         }
       },
       "tasksAdd": {
@@ -18705,8 +18755,8 @@
     }
   },
   "$meta": {
-    "version": "1.174",
-    "generated": "2026-11-06T17:45:08.222Z",
-    "sha256": "86098beb11e64ca402226e1c18f01c85b317cac4ab2baa248af7b2047430be10"
+    "version": "1.175",
+    "generated": "2026-11-08T12:32:53.279Z",
+    "sha256": "b0d524d87481dbe05894a9a1c4ea42ab12ffb0906b80c5463e8ab4345210b9d7"
   }
 }
