@@ -10,7 +10,8 @@ replace an older snapshot just because a newer one exists.
   captures. Preserve capture and mode distinctions. `npm run eft:import` files a
   decoded session under `decoded/<session>/`; `npm run eft:remote` saves live
   remote-session quest lists under `remote/<mode>/`, written only when their
-  quest definitions change.
+  quest definitions change, and `npm run eft:extracts` saves `locations` /
+  `globals` definitions there the same way.
 - `data/cache/`: current API and wiki tool caches.
 - `data/eft/` and `data/task-availability/`: current derived tool outputs.
 - `data/history.zip`: historical API/wiki snapshots, comparisons, research notes,

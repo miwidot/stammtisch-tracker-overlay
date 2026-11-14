@@ -51,6 +51,12 @@
     "craftsAdd": {
       "$ref": "craft-additions.schema.json"
     },
+    "extractRequirements": {
+      "$ref": "extract-requirements.schema.json"
+    },
+    "extractCues": {
+      "$ref": "extract-cues.schema.json"
+    },
     "tasks": {
       "$ref": "task-override.schema.json"
     },

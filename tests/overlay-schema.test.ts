@@ -135,6 +135,8 @@ describe('overlay.schema.json', () => {
       'seasonal-perk.schema.json',
       'craft-additions.schema.json',
       'map-override.schema.json',
+      'extract-requirements.schema.json',
+      'extract-cues.schema.json',
     ];
 
     for (const schemaFile of referencedSchemas) {

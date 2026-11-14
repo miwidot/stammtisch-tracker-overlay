@@ -181,6 +181,20 @@ capture generically instead (for example "a 1.1 PvE capture").
   one paced game request, skips writing when definitions are unchanged, and
   stores no host, session or account identifiers. Never commit the URL.
 
+- `npm run eft:extracts` saves the remote session's archived `locations` and
+  `globals` definitions for Regular and Seasonal beside those quest lists, then
+  regenerates `src/additions/extractRequirements.json5`: one rule list per
+  tarkov.dev extract, joined on map ID and raw exit name (trimmed when
+  tarkov.dev trims it), with `RequirementReferences` expanded. Rules equal in
+  both captures are shared; otherwise `pvp` / `seasonal` keep their own. PvE
+  has no session, so its values come from the regular definitions' `*PVE`
+  fields. The file records only client builds and a definitions hash. Pass
+  `--offline` to regenerate from saved definitions, or `--allow-stale` to accept
+  an archived copy the worker could not refresh (for a mode whose session is not
+  active). Hand-curated flare, smoke and key cues stay in
+  `src/additions/extractCues.json5`; a test requires every cue to name a
+  generated extract with the same raw exit name.
+
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the
   numeric `eft:*` tools this one produces committed additions, not a gitignored
@@ -265,7 +279,10 @@ suppressing an item:
   own `--url`/`REMOTE_SESSION_URL`, which is intended local CLI behaviour. The
   guard is `lanOrigin`: an IP literal must be loopback, private or link-local; a
   hostname must look local and every address it resolves to must be a LAN
-  address. The path is fixed to `/api/<mode>/tasks`. The request is made with
+  address. The paths are fixed: `/api/<mode>/tasks`, plus `/api/<mode>/locations`
+  and `/api/<mode>/globals` for `scripts/eft-extracts.ts`, which reuses the exported
+  `getLanJson` only after `lanOrigin` approves the operator's URL and adds no sink of
+  its own. The request is made with
   `node:http(s)` through `lanOnlyLookup`, which pins the socket to an address
   that passed `isLanAddress` (a changed DNS answer cannot redirect it), and no
   redirects are followed. Fallow supports only a file-level suppression for this

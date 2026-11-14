@@ -1,0 +1,44 @@
+{
+  "$id": "extract-cues.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Curated extract cues",
+  "description": "Hand-curated scene cues the game definitions do not describe (signal flares, green smoke, keys), keyed by tarkov.dev map ID, then tarkov.dev extract ID. Every entry names its public reference.",
+  "type": "object",
+  "propertyNames": { "pattern": "^[0-9a-f]{24}$" },
+  "additionalProperties": {
+    "type": "object",
+    "propertyNames": { "pattern": "^[0-9a-f]{40}$" },
+    "additionalProperties": { "$ref": "#/definitions/entry" }
+  },
+  "definitions": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "cues", "reference"],
+      "properties": {
+        "name": {
+          "description": "Raw exit name, matching extractRequirements.",
+          "type": "string",
+          "minLength": 1
+        },
+        "cues": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/cue" }
+        },
+        "reference": { "type": "string", "pattern": "^https://" }
+      }
+    },
+    "cue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["green_flare", "flare", "green_smoke", "key"] },
+        "item": { "type": "string", "pattern": "^[0-9a-f]{24}$" }
+      },
+      "if": { "properties": { "type": { "const": "key" } } },
+      "then": { "required": ["item"] }
+    }
+  }
+}

@@ -224,7 +224,7 @@ function parseJsonBody(chunks: Buffer[]): unknown {
 }
 
 /** GET JSON over http(s) through `lanOnlyLookup`; redirects are not followed. */
-function getLanJson(url: string): Promise<{ status: number; body: unknown }> {
+export function getLanJson(url: string): Promise<{ status: number; body: unknown }> {
   const target = new URL(url);
   const request = target.protocol === 'https:' ? httpsRequest : httpRequest;
   return new Promise((resolvePromise, reject) => {

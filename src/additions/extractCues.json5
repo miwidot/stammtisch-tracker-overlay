@@ -1,0 +1,97 @@
+{
+  // Curated extract scene cues the game definitions do not describe - not served by the
+  // tarkov.dev API. Hand-edited; `npm run eft:extracts` never writes this file.
+  //
+  // The location definitions behind extractRequirements.json5 carry each exit's mechanical
+  // requirement, but not the in-world cues a player acts on: which sniper extracts need a
+  // green signal flare, which exits show green smoke when open, and which doors need a key.
+  // Each entry is keyed by tarkov.dev map ID, then tarkov.dev extract ID, and names the raw
+  // exit name it was checked against. A cue never implies the exit is open in a given raid.
+  //
+  // Cue types: green_flare (fire a green flare first), flare (a flare whose color is not
+  // confirmed), green_smoke (an availability signal, not an item to bring), key (with item).
+
+  // Customs
+  '56f40101d2720b2a4d8b45d6': {
+    // Railroad Passage (Flare)
+    '1dd5cede4fa747d279b076872c45fc59a4c3b916': {
+      name: 'ex_customs_pmc_flare',
+      cues: [{ type: 'green_flare' }],
+      reference: 'https://tarkov.help/en/map/customs/home',
+    },
+    // ZB-1013: Factory emergency exit key, alongside its activation requirement
+    '3f7e27d7bae8ffb6e3004af071b18bf0e7d896b8': {
+      name: 'ex_customs_pmc_zb1013',
+      cues: [{ type: 'key', item: '5448ba0b4bdc2d02308b456c' }],
+      reference: 'https://tarkov.help/en/map/customs/home',
+    },
+    // Old Gas Station
+    c936f6e98a38c78963a308892b708474c54f4718: {
+      name: 'ex_customs_pmc_gasstation',
+      cues: [{ type: 'green_smoke' }],
+      reference: 'https://tarkov.help/en/map/customs/extractions/old-gas-station-extraction-point',
+    },
+  },
+
+  // Woods
+  '5704e3c2d2720bac5b8b4567': {
+    // ZB-016
+    '66f71d2b38d7af05a0fa888343dda2d5df97b314': {
+      name: 'ZB-016',
+      cues: [{ type: 'green_smoke' }],
+      reference: 'https://tarkov.help/en/map/woods/extractions/zb-016-extraction-point',
+    },
+    // Power Line Passage (Flare)
+    d71465c84357271657810c0395fd1e69b7636e4a: {
+      name: 'wood_sniper_exit',
+      cues: [{ type: 'green_flare' }],
+      reference: 'https://tarkov.help/en/map/woods/home',
+    },
+    // ZB-014: green smoke and the ZB-014 key
+    c89cb6207811316f70945ed1de3e5e0d9f8cfc96: {
+      name: 'ZB-014',
+      cues: [{ type: 'green_smoke' }, { type: 'key', item: '591afe0186f77431bd616a11' }],
+      reference: 'https://tarkov.help/en/map/woods/extractions/zb-014-extraction-point',
+    },
+  },
+
+  // Interchange
+  '5714dbc024597771384a510d': {
+    // Path to River (Flare): marked as a flare extract by its public label; color unconfirmed
+    '1e65f8bedbd9322074ae387892f0972883bdb794': {
+      name: 'ex_interchange_pmc_sniper',
+      cues: [{ type: 'flare' }],
+      reference: 'https://json.tarkov.dev/regular/maps_en',
+    },
+  },
+
+  // Streets of Tarkov
+  '5714dc692459777137212e12': {
+    // Klimov Street
+    d93214582e40ec0c37a7f55ba8777447f43e9b2f: {
+      name: 'E9_sniper',
+      cues: [{ type: 'green_flare' }],
+      reference: 'https://tarkov.help/en/map/streets/extractions/extract-klimov-street',
+    },
+  },
+
+  // Ground Zero
+  '653e6760052c01c1c805532f': {
+    // Mira Ave
+    '22f281b913a76b31fe574b792b65c115fd8bb656': {
+      name: 'Sniper_exit',
+      cues: [{ type: 'green_flare' }],
+      reference: 'https://tarkov.help/en/map/ground-zero/home',
+    },
+  },
+
+  // Ground Zero 21+
+  '65b8d6f5cdde2479cb2a3125': {
+    // Mira Ave
+    d9e23573110e4fe1dbe4a47bc3ba7e316e09cfbc: {
+      name: 'Sniper_exit',
+      cues: [{ type: 'green_flare' }],
+      reference: 'https://tarkov.help/en/map/ground-zero/home',
+    },
+  },
+}

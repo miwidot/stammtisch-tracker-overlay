@@ -17,6 +17,9 @@ const shared = new Set([
   'additions/taskIdAliases.json5',
   'additions/editions.json5',
   'additions/storyChapters.json5',
+  // No tarkov.dev endpoint serves these; check-supplements reports them as not comparable.
+  'additions/extractRequirements.json5',
+  'additions/extractCues.json5',
   'overrides/modes/regular/prestige.json5',
 ]);
 

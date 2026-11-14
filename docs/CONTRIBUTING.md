@@ -31,11 +31,11 @@ Additions live in `src/additions/` and should include the full object.
 ## Project Data Layout
 
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
-- `src/additions/`: New entities and missing fields (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`).
+- `src/additions/`: New entities and missing fields (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`, `extractRequirements`, `extractCues`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
 - `dist/overlay.json`: Generated output from `npm run build`. Only the release workflow commits it (after each merge to `main`); pull requests must leave it unchanged.
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
-  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`).
+  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`, `extractRequirements`, `extractCues`).
 
 ---
 
@@ -107,6 +107,8 @@ Edit the appropriate file in `src/overrides/`:
 - New items → `src/additions/itemsAdd.json5` (schema `item-additions.schema.json`)
 - Raw seasonal (`pvp-season`) perk effects missing upstream → `src/additions/seasonalPerks.json5` (schema `seasonal-perk.schema.json`)
 - New hideout crafts missing from the API → `src/additions/craftsAdd.json5` (schema `craft-additions.schema.json`)
+- Extract requirement rules → regenerate `src/additions/extractRequirements.json5` with `npm run eft:extracts` (schema `extract-requirements.schema.json`); never hand-edit it
+- Extract scene cues the game data does not describe (signal flares, green smoke, keys) → `src/additions/extractCues.json5` (schema `extract-cues.schema.json`), each with a public `reference`
 
 `seasonalPerks` supplements raw effects absent from `pvp-season/season`; keep
 perk metadata and translations upstream (`season` and `season_en`). Omit

@@ -943,6 +943,10 @@ export interface OverlayOutput {
   seasonalPerks?: Record<string, SeasonalPerk>;
   /** Hideout crafts missing from tarkov.dev, in tarkov.dev's craft shape. */
   craftsAdd?: Record<string, CraftAddition>;
+  /** Extract requirement rules generated from the game's location definitions (eft:extracts). */
+  extractRequirements?: Record<string, unknown>;
+  /** Hand-curated extract scene cues (flares, smoke, keys) keyed by map then extract ID. */
+  extractCues?: Record<string, unknown>;
   /** One sparse overlay section for every mode advertised by tarkov.dev. */
   modes: Record<GameMode, ModeOverlay>;
   /** Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...) */
@@ -1074,6 +1078,11 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/craftsAdd.json5', schemaFile: 'craft-additions.schema.json' },
   { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
   { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
+  {
+    pattern: 'additions/extractRequirements.json5',
+    schemaFile: 'extract-requirements.schema.json',
+  },
+  { pattern: 'additions/extractCues.json5', schemaFile: 'extract-cues.schema.json' },
   {
     pattern: 'overrides/modes/regular/prestige.json5',
     schemaFile: 'prestige-override.schema.json',

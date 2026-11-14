@@ -150,8 +150,23 @@ async function discoverEndpoints(fetchEnvelope: FetchEnvelope): Promise<string[]
   }
 }
 
+/** Supplements with no upstream counterpart, and the endpoint names that would need review. */
+const UNSUPPORTED_SUPPLEMENTS: Record<string, RegExp> = {
+  editions: /edition/i,
+  storyChapters: /\b(?:story|chapters?|storyChapters)\b/i,
+  extractRequirements: /exfil|extract[-_ ]?(?:requirement|rule)/i,
+  extractCues: /exfil|extract[-_ ]?cue/i,
+};
+
+/** Map-then-extract sections count extracts; other supplements count top-level records. */
+function supplementEntryCount(name: string, data: Record<string, unknown>): number {
+  if (!name.startsWith('extract')) return Object.keys(data).length;
+  const maps = (name === 'extractRequirements' ? data.maps : data) as Record<string, object>;
+  return Object.values(maps ?? {}).reduce((sum, extracts) => sum + Object.keys(extracts).length, 0);
+}
+
 function reportUnsupported(name: string, endpoints: string[], load: LoadSupplement): void {
-  const pattern = name === 'editions' ? /edition/i : /\b(?:story|chapters?|storyChapters)\b/i;
+  const pattern = UNSUPPORTED_SUPPLEMENTS[name]!;
   const candidates = endpoints.filter((endpoint) => pattern.test(endpoint));
   if (candidates.length) {
     console.log(
@@ -160,7 +175,7 @@ function reportUnsupported(name: string, endpoints: string[], load: LoadSuppleme
     return;
   }
   console.log(
-    `${name}: NOT COMPARABLE — no corresponding endpoint advertised; ${Object.keys(load(name)).length} supplemental entries (not a clean upstream comparison)`
+    `${name}: NOT COMPARABLE — no corresponding endpoint advertised; ${supplementEntryCount(name, load(name))} supplemental entries (not a clean upstream comparison)`
   );
 }
 
@@ -182,7 +197,7 @@ export async function checkSupplements(
     )
   );
   const endpoints = await discoverEndpoints(fetchEnvelope);
-  for (const name of ['editions', 'storyChapters']) reportUnsupported(name, endpoints, load);
+  for (const name of Object.keys(UNSUPPORTED_SUPPLEMENTS)) reportUnsupported(name, endpoints, load);
   return counts;
 }
 
