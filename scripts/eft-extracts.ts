@@ -3,7 +3,8 @@
  *
  * tarkov.dev serves extract positions and a vehicle's transfer item, but not equipment
  * restrictions, opening chances, train/timer windows, cooperation or activation requirements.
- * The game client's `/client/locations` definitions carry them per exit, and
+ * The game client's `/client/locations` definitions carry them per exit, including
+ * the extraction-intel items in its separate `secretExits` list, and
  * `/client/globals` (`config.RequirementReferences`) expands shared references such as
  * Alpinist's Paracord, Red Rebel and empty body-armor slot.
  *
@@ -221,18 +222,52 @@ function requirementReferences(definitions: SavedDefinitions): References {
   return isRecord(references) ? (references as References) : {};
 }
 
+/** Secret exits require one extraction-intel item; their Id is the item, not the extract ID. */
+function secretExitRules(exit: Exit): ExtractRule[] {
+  if (typeof exit.Id !== 'string' || !/^[0-9a-f]{24}$/.test(exit.Id)) {
+    return [{ type: 'unknown' }];
+  }
+  return [{ type: 'transfer', item: exit.Id, count: 1, countPve: 1 }];
+}
+
+const exitDefinitions = (value: unknown): Exit[] =>
+  Array.isArray(value) ? value.filter(isRecord) : [];
+
+/** The consumer treats omitted PvE counts and vehicle flags as these defaults. */
+const exitRuleIdentity = (rule: ExtractRule): string => {
+  const normalized =
+    rule.type === 'transfer'
+      ? { ...rule, countPve: rule.countPve ?? rule.count, vehicle: rule.vehicle ?? false }
+      : rule;
+  return JSON.stringify(normalized, Object.keys(normalized).sort());
+};
+
+const mergeExitRules = (existing: ExtractRule[], incoming: ExtractRule[]): ExtractRule[] => [
+  ...new Map([...existing, ...incoming].map((rule) => [exitRuleIdentity(rule), rule])).values(),
+];
+
 function addLocationRules(
   result: ModeRules,
   mapId: string,
   location: JsonRecord,
   context: { catalog: Catalog; references: References }
 ): void {
-  const exits = Array.isArray(location.exits) ? location.exits.filter(isRecord) : [];
-  for (const exit of exits as Exit[]) {
+  // Both definitions contribute requirements if an exit appears in both lists.
+  const entries = [
+    ...exitDefinitions(location.exits).map((exit) => ({
+      exit,
+      rules: exitRules(exit, context.references),
+    })),
+    ...exitDefinitions(location.secretExits).map((exit) => ({
+      exit,
+      rules: secretExitRules(exit),
+    })),
+  ];
+  for (const { exit, rules } of entries) {
     if (typeof exit.Name !== 'string' || !exit.Name) continue;
-    const rules = exitRules(exit, context.references);
     for (const id of extractIds(context.catalog, mapId, exit.Name)) {
-      result.set(id, { mapId, name: exit.Name.trim(), rules });
+      const combined = mergeExitRules(result.get(id)?.rules ?? [], rules);
+      result.set(id, { mapId, name: exit.Name.trim(), rules: combined });
     }
   }
 }

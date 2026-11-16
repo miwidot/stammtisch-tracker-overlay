@@ -687,6 +687,27 @@ interpreted as missing extracts.
 
 ---
 
+## Extract Requirement Data
+
+`extractRequirements.maps[mapId][extractId]` contains generated requirements joined
+to tarkov.dev's raw exit names. `npm run eft:extracts` reads both `exits` and
+`secretExits` from the game's location definitions. A secret exit's `Id` identifies
+one extraction-intel item, not the exit: it becomes a `transfer` rule with a count
+of one in PvP and PvE. If both lists describe the same exit, their requirements
+are combined without duplicates. Missing or malformed secret item IDs remain `unknown`; absence never means
+an exit is unrestricted. The [wiki extraction-intel list](https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel#Extraction_intel)
+corroborates the item-to-exit associations.
+
+Shared `rules` apply to both captured modes; differing definitions retain `pvp`
+and `seasonal` lists. PvE uses the regular capture's PvE fields. `sources` records
+the build and definitions hash of each capture. These are definitions, not live
+raid availability. Scene cues such as keys and flares remain separately sourced
+in `extractCues`; third-party requirements must not be presented as game-derived
+rules. See [the requirements audit](./EXTRACT_REQUIREMENTS_AUDIT.md) for remaining
+gaps and public evidence.
+
+---
+
 ## Applying Prestige Corrections
 
 tarkov.dev exposes prestige levels as a `prestige` array, each item shaped like

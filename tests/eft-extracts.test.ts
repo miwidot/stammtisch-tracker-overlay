@@ -135,6 +135,59 @@ describe('eft:extracts output', () => {
   };
   const boiler = { ...base, Name: 'ex_customs_coop_boiler', PassageRequirement: 'ScavCooperation' };
 
+  it('generates secret-exit intel requirements, preserves mode differences and keeps malformed IDs unknown', () => {
+    const secret = { Name: 'secret_boat', Id: '675aaab74bca0b001d02f356', ExfiltrationTime: 8 };
+    const withSecrets = (secrets: unknown[], exits: unknown[] = []): SavedDefinitions => ({
+      appVersion: 'EFT Client 1.3.0.2.48779',
+      data: { locations: { [CUSTOMS]: { exits, secretExits: secrets } } },
+    });
+    const secretCatalog = extractCatalog([
+      {
+        [CUSTOMS]: {
+          id: CUSTOMS,
+          extracts: [
+            { id: 'a'.repeat(40), name: secret.Name },
+            { id: 'b'.repeat(40), name: 'malformed' },
+          ],
+        },
+      },
+    ]);
+    const regular = withSecrets([secret, { Name: 'malformed', Id: 'not-an-item' }]);
+    const seasonal = withSecrets([{ ...secret, Id: '675aaa9a3107dac100063331' }]);
+    const output = buildExtractRequirements({ regular, 'pvp-season': seasonal }, secretCatalog);
+    expect(output.maps[CUSTOMS]?.['a'.repeat(40)]).toEqual({
+      name: secret.Name,
+      pvp: [{ type: 'transfer', item: secret.Id, count: 1, countPve: 1 }],
+      seasonal: [{ type: 'transfer', item: '675aaa9a3107dac100063331', count: 1, countPve: 1 }],
+    });
+    expect(output.maps[CUSTOMS]?.['b'.repeat(40)]).toEqual({
+      name: 'malformed',
+      pvp: [{ type: 'unknown' }],
+    });
+    // Neither list may erase a requirement when both describe the same extract.
+    const ordinary = withSecrets([secret], [{ ...secret, PassageRequirement: 'ScavCooperation' }]);
+    expect(
+      buildExtractRequirements({ regular: ordinary }, secretCatalog).maps[CUSTOMS]?.['a'.repeat(40)]
+    ).toEqual({
+      name: secret.Name,
+      pvp: [{ type: 'coop' }, { type: 'transfer', item: secret.Id, count: 1, countPve: 1 }],
+    });
+    for (const countPve of [1, undefined]) {
+      const duplicated = withSecrets(
+        [secret],
+        [{ ...secret, PassageRequirement: 'TransferItem', Count: 1, CountPVE: countPve }]
+      );
+      expect(
+        buildExtractRequirements({ regular: duplicated }, secretCatalog).maps[CUSTOMS]?.[
+          'a'.repeat(40)
+        ]
+      ).toEqual({
+        name: secret.Name,
+        pvp: [{ type: 'transfer', item: secret.Id, count: 1, countPve: 1 }],
+      });
+    }
+  });
+
   it('joins exits to tarkov.dev IDs, shares equal modes and splits differing ones', () => {
     const regular = definitions([car, boiler]);
     const seasonal = definitions([{ ...car, Count: 25000 }, boiler]);
