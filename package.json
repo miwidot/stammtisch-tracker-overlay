@@ -51,13 +51,13 @@
   "devDependencies": {
     "@types/node": "24.19.2",
     "ajv": "^8.20.0",
-    "fallow": "3.38.0",
+    "fallow": "3.40.0",
     "json5": "^2.2.3",
     "markdownlint-cli2": "^0.24.0",
     "prettier": "3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   },
   "overrides": {
     "katex": "0.18.9",
