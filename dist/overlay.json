@@ -19593,8 +19593,8 @@
     }
   },
   "$meta": {
-    "version": "1.177",
-    "generated": "2026-11-14T07:25:34.095Z",
-    "sha256": "2cc3632919a6d68cebd870b67e9cb236dbf5de8a97001f1248efa3d6ea9565af"
+    "version": "1.178",
+    "generated": "2026-11-16T10:48:38.731Z",
+    "sha256": "7b77e71785a43b831c4d68d4bebbaf18bc3dcd428059ed89a50865dea920702f"
   }
 }
