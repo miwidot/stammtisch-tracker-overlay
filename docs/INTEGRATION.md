@@ -703,8 +703,18 @@ and `seasonal` lists. PvE uses the regular capture's PvE fields. `sources` recor
 the build and definitions hash of each capture. These are definitions, not live
 raid availability. Scene cues such as keys and flares remain separately sourced
 in `extractCues`; third-party requirements must not be presented as game-derived
-rules. See [the requirements audit](./EXTRACT_REQUIREMENTS_AUDIT.md) for remaining
-gaps and public evidence.
+rules. `scripts/eft-extracts-curated.ts` supplies cited public-source baselines for
+exits absent from the definitions or missing their passage requirement field.
+The generator checks each exact map ID, extract ID and raw name against the
+catalog. Baselines remove only an omitted passage requirement's `unknown` rule;
+captured chance, timer and other conditions are preserved. An explicit unsupported
+passage type, or an unresolved secret exit, remains unknown. Each capture mode is
+handled separately, so curation cannot erase mode differences. `sources` describes
+the capture inputs, not the public-source baselines. These baselines are best-effort
+across PvP, PvE and Seasonal; public guides do not independently verify all modes.
+See [the requirements audit](./EXTRACT_REQUIREMENTS_AUDIT.md) for evidence and the
+13 deliberately unresolved markers. Consumers should acknowledge public references
+in their source descriptions, including on maps without scene cues.
 
 ---
 

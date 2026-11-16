@@ -30,13 +30,17 @@ corroborates all ten associations.
 
 Counts describe drawable markers, so Gate 3's PMC and Scav polygons count
 separately. After excluding Ground Zero's foreign-map coordinates, 61 markers per
-mode still lack complete game-derived rules. The public-source audit identifies
-48 of those; it leaves 12 unlisted markers and one conflicting availability claim
-for review. This audit does not turn third-party descriptions into captured rules.
+mode lacked complete game-derived rules after the secret-exit fix. The generator
+now fills 48 of those from the cited public-source baselines in
+`scripts/eft-extracts-curated.ts` (47 IDs, because Gate 3 shares an ID between
+factions). Twelve unlisted markers and one conflicting availability claim remain
+unknown. Public-source baselines are separate from the captured inputs and their
+hashes; generation preserves all captured conditions and explicit unsupported
+passage types. Availability in a particular raid is still not guaranteed.
 
 The wiki's extraction tables describe the following 44 markers without special
-item or equipment requirements. They remain candidates for explicitly sourced
-curated rules. This does not mean they appear in every player's extraction list
+item or equipment requirements. They now have explicitly sourced curated
+baselines. This does not mean they appear in every player's extraction list
 or are open in every raid.
 
 | Source                                                                                      | Extracts                                                                                                                                                                       |
@@ -55,9 +59,9 @@ Four more markers have useful specific evidence:
 - Factory Cellars and Med Tent Gate: the [current Factory table](https://escapefromtarkov.fandom.com/wiki/Factory#Extractions)
   requires the Factory emergency exit key (`5448ba0b4bdc2d02308b456c`) to open
   the door. Gate 0 is listed without a key requirement; old pre-rework guides
-  should not override that table. These two key cues can be added to
-  `extractCues`, but the missing mechanical baseline still needs a separate
-  curated-rule representation before its unknown marker can be cleared.
+  should not override that table. Both now have key cues in `extractCues` and
+  curated mechanical baselines, so the key remains visible without an unrelated
+  question mark.
 - Customs Old Gas Station (Scav): the [Customs table](https://escapefromtarkov.fandom.com/wiki/Customs#Extractions)
   explicitly distinguishes always-available Scav access from the PMC opening cue.
   The PMC green-flare condition must not be copied onto the Scav marker.

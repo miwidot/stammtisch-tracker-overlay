@@ -7,7 +7,10 @@
 // `rules` applies to every mode; `pvp` / `seasonal` appear only when the two captures
 // differ. PvE reads the regular definitions' *Pve values. A chance is the configured
 // opening chance, not live raid status. `unknown` marks an exit whose requirement the
-// definitions do not describe. Curated scene cues live in extractCues.json5.
+// definitions and public references do not resolve. Public-source gap baselines are
+// maintained with per-extract citations in scripts/eft-extracts-curated.ts; `sources`
+// identifies only the capture inputs, not those baselines. Curated scene cues live
+// in extractCues.json5. None of these sources establishes live raid availability.
 {
   sources: {
     regular: {
@@ -21,13 +24,17 @@
   },
   maps: {
     '55f2d3fd4bdc2d5f408b4567': {
+      '1733510cd360e7a13af356612afad7214aae64e4': {
+        name: 'Office Window',
+        rules: [],
+      },
+      '29b887a73725274d657c8a5366614b9b900387e2': {
+        name: 'Camera Bunker Door',
+        rules: [],
+      },
       '4b93f765fc6e0b6379679b3c827074d4e57ff680': {
         name: 'Gate m',
-        rules: [
-          {
-            type: 'unknown',
-          },
-        ],
+        rules: [],
       },
       '51efd2aabf8b603f7a5d54327aa3d8a94e22af6b': {
         name: 'factory_secret_ark',
@@ -42,40 +49,32 @@
       },
       '99c2f21880da0baf75d431a5f45b462fde2f79b1': {
         name: 'Gate 0',
-        rules: [
-          {
-            type: 'unknown',
-          },
-        ],
+        rules: [],
       },
       b1e817c36812ebf2a8b1ac141ca88449a0b0469c: {
         name: 'Gate_o',
-        rules: [
-          {
-            type: 'unknown',
-          },
-        ],
+        rules: [],
       },
       f16ce849a9d153a8813b6bf6a049d530f1cc44c2: {
         name: 'Gate 3',
-        rules: [
-          {
-            type: 'unknown',
-          },
-        ],
+        rules: [],
       },
       f261d229a5b13a3292a4a49dced2a4949dfc342b: {
         name: 'Cellars',
-        rules: [
-          {
-            type: 'unknown',
-          },
-        ],
+        rules: [],
       },
     },
     '56f40101d2720b2a4d8b45d6': {
+      '0eedf7dfd9db21b60e216ebccbf52271a06cddf6': {
+        name: 'ex_customs_scav_medgate',
+        rules: [],
+      },
       '1dd5cede4fa747d279b076872c45fc59a4c3b916': {
         name: 'ex_customs_pmc_flare',
+        rules: [],
+      },
+      '1e7baccc265b49195aead2e783779cbca83d73f3': {
+        name: 'Old Road Gate',
         rules: [],
       },
       '3f7e27d7bae8ffb6e3004af071b18bf0e7d896b8': {
@@ -94,12 +93,32 @@
           },
         ],
       },
+      '46979e6dd937e83470b013382282919388a07f8c': {
+        name: 'ex_customs_scav_rail_tarkov',
+        rules: [],
+      },
       '59c2c12e375a1b45a8e5ac1a32c5581b593aa4df': {
         name: 'ex_customs_pmc_zb1011',
         rules: [],
       },
+      '74840d2d5d9c332e466148e94be1ab4ef0fb3ac4': {
+        name: 'ex_customs_scav_rail_milbase',
+        rules: [],
+      },
+      '92e7412193276c1044299b51d930440cdab835e4': {
+        name: 'ex_customs_scav_admin',
+        rules: [],
+      },
+      '973dfce3d353b26fe9b3e9373bd4536d26fffc05': {
+        name: 'ex_customs_scav_milbase_cp',
+        rules: [],
+      },
       ab12c1f902a669fb0c940820e8cc40d7131e3208: {
         name: 'ex_customs_pmc_crossroads',
+        rules: [],
+      },
+      bf421e259c2e851b159401432318bcca326b16d5: {
+        name: 'ex_customs_scav_rail_port',
         rules: [],
       },
       c1e0123c42bbd048096fffbe5c98fa28e866680b: {
@@ -134,12 +153,28 @@
           },
         ],
       },
+      d2cefbb74bd24ffc53a1a3a148069483c5fae6cb: {
+        name: 'ex_customs_scav_gasstation',
+        rules: [],
+      },
       f367bab752ed8474989104613d1151e9434f2bd4: {
         name: 'ex_customs_pmc_rail_milbase',
         rules: [],
       },
+      f3f0171d1c8396a152e319f372c4e9d9df120e73: {
+        name: 'ex_customs_scav_trailerpark',
+        rules: [],
+      },
       f4cdf3dbe54ef647a2a798266a39f1761f871b96: {
         name: 'ex_customs_pmc_trailerpark',
+        rules: [],
+      },
+      f57705238de721e427d8ea262f7226f804e88726: {
+        name: 'ex_customs_scav_zb1011',
+        rules: [],
+      },
+      fc4876c616edf234b1b0b75fb02fce784e54a6c2: {
+        name: 'ex_customs_scav_crossroads',
         rules: [],
       },
       fed921b46204418ef8fa0174468c6886e91325c4: {
@@ -178,6 +213,14 @@
           },
         ],
       },
+      '3e64a0665e093dac84499dc50e2768684e8bd508': {
+        name: 'Scav House',
+        rules: [],
+      },
+      '495bcac9e8a677cef40194ea3c57d65f2c4276d9': {
+        name: 'Dead Man\'s Place',
+        rules: [],
+      },
       '5c838439af24f720bd7b8b6abcb2ded710bcaba0': {
         name: 'woods_secret_minefield',
         rules: [
@@ -191,6 +234,10 @@
       },
       '5e2529edb827c041cb4198afb28b8c1ded6eace9': {
         name: 'Outskirts',
+        rules: [],
+      },
+      '6363090af9e0ab1a3d0f7154ea89e1c1c362e30d': {
+        name: 'West Border',
         rules: [],
       },
       '66f71d2b38d7af05a0fa888343dda2d5df97b314': {
@@ -213,6 +260,10 @@
           },
         ],
       },
+      '7692ab53faec4d1c375212a2bca01796de7c4cdb': {
+        name: 'Mountain Stash',
+        rules: [],
+      },
       ab12f6c1f417aae2de34a55560d4be3ff5f7c309: {
         name: 'Factory Gate',
         rules: [
@@ -221,8 +272,16 @@
           },
         ],
       },
+      b6371d7a90e044c79df5dbc651983ddabbc9b2bf: {
+        name: 'The Boat',
+        rules: [],
+      },
       bd8c86edf705cfb2bd02f8ccc95e64ed3450760c: {
         name: 'UN Roadblock',
+        rules: [],
+      },
+      beefde059ae2d331c8d568066518e0293ff9da59: {
+        name: 'Old Station',
         rules: [],
       },
       c89cb6207811316f70945ed1de3e5e0d9f8cfc96: {
@@ -237,6 +296,10 @@
       },
       d71465c84357271657810c0395fd1e69b7636e4a: {
         name: 'wood_sniper_exit',
+        rules: [],
+      },
+      dc49f6444b7e835b4cfb2589e1df68a21a9bf3c9: {
+        name: 'East Gate',
         rules: [],
       },
       edceeaccf9cb0f6c3fd47c0e5625f4cdd2f49e9e: {
@@ -256,6 +319,10 @@
           },
         ],
       },
+      '29fc02598426cdcb78bf9e07e188680ce0e8730d': {
+        name: 'Shorl_free_scav',
+        rules: [],
+      },
       '2c1d67e0a46f41e0c268dce15848eb3722fae9ad': {
         name: 'tunnel_shared',
         rules: [
@@ -263,6 +330,14 @@
             type: 'coop',
           },
         ],
+      },
+      '3ab7031964d90e541d16b1307d2017f424518b49': {
+        name: 'Scav_Underboat_Hideout',
+        rules: [],
+      },
+      '4d2faa68a953a89cc697348f947ef24d9a626380': {
+        name: 'Scav_Industrial_zone',
+        rules: [],
       },
       '65541e3df26023e91dd4f156e6409ef06eb0027a': {
         name: 'Shorl_free',
@@ -295,6 +370,10 @@
           },
         ],
       },
+      aa9a937fb2c3c2d51fe21ab457ab0613ff5e2539: {
+        name: 'Scav_Coastal_South',
+        rules: [],
+      },
       cc16b27f07697867c3afe8731a5323f8b6db7574: {
         name: 'EXFIL_Train',
         rules: [
@@ -306,6 +385,10 @@
             maxPve: 1420,
           },
         ],
+      },
+      e2d5caeaeb8747a3182be5bfc98cad24892a2d00: {
+        name: 'Scav_Hideout_at_the_grotto',
+        rules: [],
       },
     },
     '5704e554d2720bac5b8b456e': {
@@ -325,6 +408,10 @@
           },
         ],
       },
+      '3475b9df1bf661d3c746ff1a1a8493bae828b939': {
+        name: 'Adm Basement',
+        rules: [],
+      },
       '40f2f8a82926d016855443fba325070fa8b5dafb': {
         name: 'Smugglers_Trail_coop',
         rules: [
@@ -332,6 +419,10 @@
             type: 'coop',
           },
         ],
+      },
+      '566161efb75d27f6347b9d0f610cd423dcdf319f': {
+        name: 'Lighthouse',
+        rules: [],
       },
       '818e7812793c8e47a09c62f670ae189c8bd61901': {
         name: 'CCP Temporary',
@@ -343,8 +434,20 @@
           },
         ],
       },
+      '95406652decb52abdd763626e88024931990da7d': {
+        name: 'Scav Road to Customs',
+        rules: [],
+      },
+      a048afd75fd279f62ee3da4fb0f38c42d8b7a934: {
+        name: 'RWing Gym Entrance',
+        rules: [],
+      },
       a302bfd6b8b040202ce873db7386f930318c3f0b: {
         name: 'Road to Customs',
+        rules: [],
+      },
+      aa2c447aa7f49a1795efd56aad7ef0670888425f: {
+        name: 'Wrecked Road',
         rules: [],
       },
       aef6de6ce5e7c898a2a6a65c4433e683f4e06baa: {
@@ -407,6 +510,10 @@
       },
     },
     '5704e5fad2720bc05b8b4567': {
+      '037fb35378864fe476e2b1bb8b6a613ee8ac7101': {
+        name: 'Exit4',
+        rules: [],
+      },
       '1cef4b3cdf682c528a33c165f1e57fff82f7898e': {
         name: 'reserve_secret_minefield',
         rules: [
@@ -417,6 +524,18 @@
             countPve: 1,
           },
         ],
+      },
+      '3a5be2ffaa91dc56af778ea406023197d32b33c7': {
+        name: 'Exit3',
+        rules: [],
+      },
+      '4603ee6acd4e4873aadc865fc476e0c0e3b4c724': {
+        name: 'Exit1',
+        rules: [],
+      },
+      '493cc117068458f12944b1b83710116395831e21': {
+        name: 'Exit2',
+        rules: [],
       },
       '78919c46c8d06b4ea7790a701b383e1cc0dda28e': {
         name: 'EXFIL_vent',
@@ -513,6 +632,10 @@
           },
         ],
       },
+      '4cf9e8c499daa3f18291b2fce601e6dd0be66882': {
+        name: 'ex_interchange_scav_railway',
+        rules: [],
+      },
       '56bd754c4ce1864b212e908114bd6190940e01c2': {
         name: 'ex_interchange_pmc_emercom',
         rules: [],
@@ -529,8 +652,20 @@
           },
         ],
       },
+      f60ee7a996094e3a9c0cb1155a6e20558a4386db: {
+        name: 'ex_interchange_scav_emercom',
+        rules: [],
+      },
     },
     '5714dc692459777137212e12': {
+      '177bd2a8abcb68ca8d1964d6c5efdfeeb3f6abb8': {
+        name: 'scav_e7',
+        rules: [],
+      },
+      '1adaba531eb66eae1ef23896862a3681ed23a67f': {
+        name: 'scav_e4',
+        rules: [],
+      },
       '321358e7c712157a0692f8212c0ce644a85d8d9a': {
         name: 'E1',
         rules: [],
@@ -565,6 +700,22 @@
             type: 'coop',
           },
         ],
+      },
+      '91ef53b9da2e2c8d3dab3a51536d24d149af44c5': {
+        name: 'scav_e5',
+        rules: [],
+      },
+      '9ab4ef82011a4ebdb53413d61c806c12d731ebd4': {
+        name: 'scav_e8',
+        rules: [],
+      },
+      b89e9f9cc4529c5ba4b2487c6a5331c694d0d22a: {
+        name: 'scav_e2',
+        rules: [],
+      },
+      d40366cc1831e903e3c9ddb3a28063a7baa45a6a: {
+        name: 'scav_e3',
+        rules: [],
       },
       d93214582e40ec0c37a7f55ba8777447f43e9b2f: {
         name: 'E9_sniper',

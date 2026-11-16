@@ -40,6 +40,7 @@ import {
   TARKOV_MAP_NAMES_BY_ID,
 } from '../src/lib/index.js';
 import { getLanJson, lanOrigin } from './eft-remote.js';
+import { CURATED_EXTRACT_BASELINES, type CuratedExtractBaselines } from './eft-extracts-curated.js';
 import { writeFileAtomicSync } from './lib/atomic-write.js';
 import {
   referenceDirectory,
@@ -205,7 +206,11 @@ function extractIds(catalog: Catalog, mapId: string, name: string): string[] {
 type ModeRules = Map<string, { mapId: string; name: string; rules: ExtractRule[] }>;
 
 /** Rules per tarkov.dev extract ID for one capture mode, limited to tarkov.dev maps. */
-export function modeRules(definitions: SavedDefinitions, catalog: Catalog): ModeRules {
+export function modeRules(
+  definitions: SavedDefinitions,
+  catalog: Catalog,
+  curated: CuratedExtractBaselines = {}
+): ModeRules {
   const locations = isRecord(definitions.data.locations) ? definitions.data.locations : {};
   const references = requirementReferences(definitions);
   const result: ModeRules = new Map();
@@ -213,7 +218,50 @@ export function modeRules(definitions: SavedDefinitions, catalog: Catalog): Mode
     if (!TARKOV_MAP_NAMES_BY_ID[mapId] || !isRecord(location)) continue;
     addLocationRules(result, mapId, location, { catalog, references });
   }
+  fillCuratedBaselines(result, locations, catalog, curated);
   return result;
+}
+
+/** Only missing passage fields can be filled: a new unsupported requirement stays unknown. */
+function requirementOmitted(location: unknown, name: string): boolean {
+  if (!isRecord(location)) return false;
+  const named = (value: unknown) =>
+    exitDefinitions(value).filter(
+      (exit) => typeof exit.Name === 'string' && exit.Name.trim() === name
+    );
+  const ordinary = named(location.exits);
+  return (
+    ordinary.length > 0 &&
+    named(location.secretExits).length === 0 &&
+    ordinary.every((exit) => exit.PassageRequirement === undefined)
+  );
+}
+
+/** Public-source baselines fill gaps; all captured chance, timer and other conditions survive. */
+function fillCuratedBaselines(
+  result: ModeRules,
+  locations: JsonRecord,
+  catalog: Catalog,
+  curated: CuratedExtractBaselines
+): void {
+  for (const [mapId, entries] of Object.entries(curated)) {
+    for (const [id, entry] of Object.entries(entries)) {
+      if (!/^https:\/\/[^/]+\//.test(entry.reference)) {
+        throw new Error(`curated extract ${id} requires a public HTTPS reference`);
+      }
+      if (!extractIds(catalog, mapId, entry.name).includes(id)) {
+        throw new Error(`curated extract ${mapId}/${id} does not match the catalog name`);
+      }
+      const current = result.get(id);
+      if (!current) result.set(id, { mapId, name: entry.name, rules: [] });
+      else if (requirementOmitted(locations[mapId], entry.name)) {
+        result.set(id, {
+          ...current,
+          rules: current.rules.filter((rule) => rule.type !== 'unknown'),
+        });
+      }
+    }
+  }
 }
 
 function requirementReferences(definitions: SavedDefinitions): References {
@@ -286,11 +334,14 @@ function entryFor(
 /** Combine both capture modes into the committed file shape, in a stable order. */
 export function buildExtractRequirements(
   definitions: Partial<Record<CaptureMode, SavedDefinitions>>,
-  catalog: Catalog
+  catalog: Catalog,
+  curated: CuratedExtractBaselines = {}
 ): ExtractRequirementsFile {
-  const regular = definitions.regular ? modeRules(definitions.regular, catalog) : new Map();
+  const regular = definitions.regular
+    ? modeRules(definitions.regular, catalog, curated)
+    : new Map();
   const seasonal = definitions['pvp-season']
-    ? modeRules(definitions['pvp-season'], catalog)
+    ? modeRules(definitions['pvp-season'], catalog, curated)
     : new Map();
   const maps: ExtractRequirementsFile['maps'] = {};
   for (const id of [...new Set([...regular.keys(), ...seasonal.keys()])].sort()) {
@@ -331,7 +382,10 @@ const HEADER = [
   '// `rules` applies to every mode; `pvp` / `seasonal` appear only when the two captures',
   "// differ. PvE reads the regular definitions' *Pve values. A chance is the configured",
   '// opening chance, not live raid status. `unknown` marks an exit whose requirement the',
-  '// definitions do not describe. Curated scene cues live in extractCues.json5.',
+  '// definitions and public references do not resolve. Public-source gap baselines are',
+  '// maintained with per-extract citations in scripts/eft-extracts-curated.ts; `sources`',
+  '// identifies only the capture inputs, not those baselines. Curated scene cues live',
+  '// in extractCues.json5. None of these sources establishes live raid availability.',
 ].join('\n');
 
 export function renderExtractRequirements(data: ExtractRequirementsFile): string {
@@ -517,7 +571,7 @@ async function generate(): Promise<ExtractRequirementsFile> {
   const catalogs = await Promise.all(
     CATALOG_MODES.map(async (mode) => catalogMaps(mode, await fetchTarkovEnvelope(`${mode}/maps`)))
   );
-  return buildExtractRequirements(definitions, extractCatalog(catalogs));
+  return buildExtractRequirements(definitions, extractCatalog(catalogs), CURATED_EXTRACT_BASELINES);
 }
 
 /** tarkov.dev's maps for one mode; a response without them must not empty the generated file. */
