@@ -6214,8 +6214,8 @@
         "definitionsSha256": "2ff5fac306b5d9845e52ce65663bceb7de5119db97e726c701bd2fe5d9438119"
       },
       "pvp-season": {
-        "clientBuild": "1.3.0.1.48558",
-        "definitionsSha256": "e66013fc734d0efdd9fee125889ca968ced7018b7d25ff4c894a0bc6aad3ff01"
+        "clientBuild": "1.3.0.2.48779",
+        "definitionsSha256": "cb2fb016952260175607267cd04b6e0f6fcb1bc4f80040aada31768c7097398c"
       }
     },
     "maps": {
@@ -6225,6 +6225,17 @@
           "rules": [
             {
               "type": "unknown"
+            }
+          ]
+        },
+        "51efd2aabf8b603f7a5d54327aa3d8a94e22af6b": {
+          "name": "factory_secret_ark",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaaf674a7619a5304c233",
+              "count": 1,
+              "countPve": 1
             }
           ]
         },
@@ -6290,6 +6301,17 @@
           "name": "ex_customs_pmc_crossroads",
           "rules": []
         },
+        "c1e0123c42bbd048096fffbe5c98fa28e866680b": {
+          "name": "ex_customs_secret_voron_boat",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaab74bca0b001d02f356",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "c936f6e98a38c78963a308892b708474c54f4718": {
           "name": "ex_customs_pmc_gasstation",
           "rules": [
@@ -6297,6 +6319,17 @@
               "type": "chance",
               "percent": 50,
               "percentPve": 50
+            }
+          ]
+        },
+        "cdae9cc1c431a141431e9022a901eaaa70ef67ea": {
+          "name": "ex_customs_secret_voron_bunker",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaab74bca0b001d02f356",
+              "count": 1,
+              "countPve": 1
             }
           ]
         },
@@ -6341,6 +6374,17 @@
               "type": "chance",
               "percent": 50,
               "percentPve": 50
+            }
+          ]
+        },
+        "5c838439af24f720bd7b8b6abcb2ded710bcaba0": {
+          "name": "woods_secret_minefield",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaa9a3107dac100063331",
+              "count": 1,
+              "countPve": 1
             }
           ]
         },
@@ -6400,6 +6444,17 @@
         }
       },
       "5704e4dad2720bb55b8b4567": {
+        "147a3f816c587f8c2b842160c6778185ac49c17d": {
+          "name": "lighthouse_secret_minefield",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaa8f7f3c962069072b27",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "2c1d67e0a46f41e0c268dce15848eb3722fae9ad": {
           "name": "tunnel_shared",
           "rules": [
@@ -6505,6 +6560,17 @@
           "name": "Tunnel",
           "rules": []
         },
+        "e9f00531aa0d2933a41d4a6c8446a952736b304d": {
+          "name": "shoreline_secret_heartbeat",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aab0d6b6addc02a08f097",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "ef41c42e56e8f67e5835245dd4f66c4ed8684db9": {
           "name": "Lighthouse_pass",
           "rules": []
@@ -6540,6 +6606,17 @@
         }
       },
       "5704e5fad2720bc05b8b4567": {
+        "1cef4b3cdf682c528a33c165f1e57fff82f7898e": {
+          "name": "reserve_secret_minefield",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaa003107dac10006332f",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "78919c46c8d06b4ea7790a701b383e1cc0dda28e": {
           "name": "EXFIL_vent",
           "rules": [
@@ -6657,6 +6734,17 @@
           "name": "E1",
           "rules": []
         },
+        "503af4b68570318227939024660b81dceb9f4794": {
+          "name": "streets_secret_onyx",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaae1dcf102478202c537",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "51cfcc623bcf29fa75c44fe4997e4b130ffbba34": {
           "name": "E5",
           "rules": []
@@ -6733,6 +6821,17 @@
           "rules": [
             {
               "type": "unknown"
+            }
+          ]
+        },
+        "26effe8cd7b41a8de17da240e3202e02252090fa": {
+          "name": "factory_secret_ark",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaaf674a7619a5304c233",
+              "count": 1,
+              "countPve": 1
             }
           ]
         },
@@ -6851,6 +6950,17 @@
           "name": "Unity_free_exit",
           "rules": []
         },
+        "c0be13ca1d5b12f54c2f615533bcb137d26a98ff": {
+          "name": "groundzero_secret_adaptation",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaae75a3ab8372d0b02a7",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "d36aaa1e0306978ca39f00edec5b4195bf7a57da": {
           "name": "Scav_coop_exit",
           "rules": [
@@ -6873,6 +6983,17 @@
         }
       },
       "65b8d6f5cdde2479cb2a3125": {
+        "10722e1ceee9636b505a7cb5447e29ba30a5b60e": {
+          "name": "groundzero_secret_adaptation",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "675aaae75a3ab8372d0b02a7",
+              "count": 1,
+              "countPve": 1
+            }
+          ]
+        },
         "1bb328c35dbf9c2127defe6df5a48c630ece92a1": {
           "name": "Nakatani_stairs_free_exit",
           "rules": []
@@ -6916,6 +7037,17 @@
               "max": 905,
               "minPve": 900,
               "maxPve": 905
+            }
+          ]
+        },
+        "8fd7a20a588f2243a186af931a5c0224ae01e972": {
+          "name": "labyrinth_secret_tagilla_key",
+          "rules": [
+            {
+              "type": "transfer",
+              "item": "67e183377c6c2011970f3149",
+              "count": 1,
+              "countPve": 1
             }
           ]
         }
@@ -19593,8 +19725,8 @@
     }
   },
   "$meta": {
-    "version": "1.178",
-    "generated": "2026-11-16T10:48:38.731Z",
-    "sha256": "7b77e71785a43b831c4d68d4bebbaf18bc3dcd428059ed89a50865dea920702f"
+    "version": "1.179",
+    "generated": "2026-11-16T14:49:57.841Z",
+    "sha256": "a72700c1ed297e6b934bf9089f85889e5fff1579b91c6075fc27b61037b765ef"
   }
 }
