@@ -10,6 +10,7 @@ import { join } from 'path';
 import { createHash } from 'crypto';
 import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import { assertTaskIdAliases } from '../src/lib/task-id-aliases.js';
+import { compileNeutralOverlay } from '../src/lib/neutral-overlay.js';
 import {
   getLatestTagVersion,
   getProjectPaths,
@@ -126,7 +127,7 @@ export function resolveBuildVersion(
 
 /** Compare an existing committed overlay with the freshly generated content. */
 function checkGeneratedOutput(
-  output: OverlayOutput,
+  output: Pick<OverlayOutput, '$meta'>,
   outputPath: string,
   checkVersion: boolean
 ): void {
@@ -195,11 +196,18 @@ function build(): void {
   output.$meta.sha256 = generateSha256(jsonContent);
 
   const finalContent = JSON.stringify(output, null, 2);
+  const neutral = compileNeutralOverlay(output);
+  neutral.$meta.sha256 = generateSha256(JSON.stringify(neutral, null, 2));
 
   // Ensure dist directory exists
   const outputPath = join(distDir, 'overlay.json');
+  const neutralPath = join(distDir, 'overlay-neutral.json');
   if (process.argv.includes('--check')) {
     checkGeneratedOutput(output, outputPath, versionIsAuthoritative);
+    // Source identity includes the volatile legacy build timestamp and digest.
+    // Bind the expected sidecar to the already-validated committed legacy output.
+    const expectedNeutral = compileNeutralOverlay(loadJsonFile<OverlayOutput>(outputPath));
+    checkGeneratedOutput(expectedNeutral, neutralPath, versionIsAuthoritative);
     console.log(`Generated overlay is current: ${outputPath}`);
     return;
   }
@@ -207,6 +215,7 @@ function build(): void {
 
   // Write output
   writeFileSync(outputPath, finalContent);
+  writeFileSync(neutralPath, JSON.stringify(neutral, null, 2));
 
   // Summary
   const entityCounts = Object.entries(data)

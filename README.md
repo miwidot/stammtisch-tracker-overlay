@@ -22,6 +22,9 @@ using the overlay in production; the embedded digest detects corruption or stale
 prove the CDN response's authenticity.
 
 Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATION.md) for details.
+Language-neutral consumers use the versioned `dist/overlay-neutral.json` artifact.
+Its string tables, locale bindings, integrity checks, and release order are documented in
+[Language-neutral overlay contract](docs/NEUTRAL_OVERLAY.md).
 For accurate task visibility and unlock-state tracking, see
 [Task availability and unlock tracking](docs/TASK_AVAILABILITY.md).
 Use `evaluateTaskProgression` for verified progress-based counters and explicit

@@ -67,8 +67,10 @@ jobs:
             --dir "$artifact_dir"
 
           test -f "$artifact_dir/overlay.json"
+          test -f "$artifact_dir/overlay-neutral.json"
           mkdir -p dist
           cp -- "$artifact_dir/overlay.json" dist/overlay.json
+          cp -- "$artifact_dir/overlay-neutral.json" dist/overlay-neutral.json
 
       - name: Verify release artifact
         id: artifact
@@ -77,52 +79,55 @@ jobs:
           const fs = require('node:fs');
           const crypto = require('node:crypto');
 
-          const file = 'dist/overlay.json';
-          const maxBytes = 32 * 1024 * 1024;
-          const raw = fs.readFileSync(file);
-          if (raw.length > maxBytes) {
-            throw new Error(`Overlay exceeds ${maxBytes} bytes`);
-          }
+          for (const file of ['dist/overlay.json', 'dist/overlay-neutral.json']) {
+            const maxBytes = 32 * 1024 * 1024;
+            const raw = fs.readFileSync(file);
+            if (raw.length > maxBytes) {
+              throw new Error(`Overlay exceeds ${maxBytes} bytes`);
+            }
 
-          let overlay;
-          try {
-            overlay = JSON.parse(raw.toString('utf8'));
-          } catch (error) {
-            throw new Error(`Overlay is not valid JSON: ${error.message}`);
-          }
+            let overlay;
+            try {
+              overlay = JSON.parse(raw.toString('utf8'));
+            } catch (error) {
+              throw new Error(`Overlay is not valid JSON: ${error.message}`);
+            }
 
-          if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {
-            throw new Error('Overlay must be a JSON object');
-          }
+            if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {
+              throw new Error('Overlay must be a JSON object');
+            }
 
-          const meta = overlay.$meta;
-          if (!meta || typeof meta !== 'object' || Array.isArray(meta)) {
-            throw new Error('Overlay metadata is missing');
-          }
-          if (
-            typeof meta.version !== 'string' ||
-            !/^\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(meta.version)
-          ) {
-            throw new Error(`Overlay version is invalid: ${String(meta.version)}`);
-          }
-          if (typeof meta.generated !== 'string' || !Number.isFinite(Date.parse(meta.generated))) {
-            throw new Error('Overlay generated timestamp is invalid');
-          }
-          if (typeof meta.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(meta.sha256)) {
-            throw new Error('Overlay SHA256 metadata is invalid');
-          }
+            const meta = overlay.$meta;
+            if (!meta || typeof meta !== 'object' || Array.isArray(meta)) {
+              throw new Error('Overlay metadata is missing');
+            }
+            if (
+              typeof meta.version !== 'string' ||
+              !/^\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(meta.version)
+            ) {
+              throw new Error(`Overlay version is invalid: ${String(meta.version)}`);
+            }
+            if (typeof meta.generated !== 'string' || !Number.isFinite(Date.parse(meta.generated))) {
+              throw new Error('Overlay generated timestamp is invalid');
+            }
+            if (typeof meta.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(meta.sha256)) {
+              throw new Error('Overlay SHA256 metadata is invalid');
+            }
 
-          const expectedDigest = meta.sha256;
-          delete meta.sha256;
-          const actualDigest = crypto
-            .createHash('sha256')
-            .update(JSON.stringify(overlay, null, 2))
-            .digest('hex');
-          if (actualDigest !== expectedDigest) {
-            throw new Error('Overlay SHA256 does not match its content');
-          }
+            const expectedDigest = meta.sha256;
+            delete meta.sha256;
+            const actualDigest = crypto
+              .createHash('sha256')
+              .update(JSON.stringify(overlay, null, 2))
+              .digest('hex');
+            if (actualDigest !== expectedDigest) {
+              throw new Error('Overlay SHA256 does not match its content');
+            }
 
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `artifact_tag=v${meta.version}\n`);
+            if (file === 'dist/overlay.json') {
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `artifact_tag=v${meta.version}\n`);
+            }
+          }
           NODE
 
       - name: Verify artifact against trusted source
@@ -162,13 +167,16 @@ jobs:
               echo "main advanced beyond the validated release commit; refusing to release" >&2
               exit 1
             fi
-            if ! git show "$current_sha:dist/overlay.json" | cmp -s - dist/overlay.json; then
-              echo "The already-pushed commit does not contain the validated release artifact" >&2
-              exit 1
-            fi
+            for file in dist/overlay.json dist/overlay-neutral.json; do
+              if ! git show "$current_sha:$file" | cmp -s - "$file"; then
+                echo "The already-pushed commit does not contain the validated release artifact $file" >&2
+                exit 1
+              fi
+            done
             changed_files="$(git diff-tree --no-commit-id --name-only -r "$current_sha")"
-            if [[ "$changed_files" != "dist/overlay.json" ]]; then
-              echo "The already-pushed recovery commit changed files besides dist/overlay.json" >&2
+            expected_files="$(printf '%s\n' dist/overlay-neutral.json dist/overlay.json)"
+            if [[ "$changed_files" != "$expected_files" ]]; then
+              echo "The already-pushed recovery commit changed unexpected files" >&2
               exit 1
             fi
             tag_sha="$(git rev-parse --verify "$ARTIFACT_TAG^{commit}" 2>/dev/null || true)"
@@ -197,7 +205,7 @@ jobs:
 
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add -- dist/overlay.json
+          git add -- dist/overlay.json dist/overlay-neutral.json
           if git diff --staged --quiet; then
             if git rev-parse --verify "$NEXT_TAG^{commit}" >/dev/null 2>&1; then
               if [[ "$(git rev-parse "$NEXT_TAG^{commit}")" != "$(git rev-parse HEAD)" ]]; then
@@ -256,24 +264,23 @@ jobs:
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
         run: |
           if gh release view "$NEXT_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-            artifact_digest="$(sha256sum dist/overlay.json | awk '{print $1}')"
-            existing_digest="$(gh api \
-              "repos/${REPOSITORY}/releases/tags/${NEXT_TAG}/assets" \
-              --paginate \
-              --jq '.[] | select(.name == "overlay.json") | .digest')"
-            if [[ "$existing_digest" == "sha256:$artifact_digest" ]]; then
-              echo "Release $NEXT_TAG already has the validated overlay asset"
-            else
-              echo "Release $NEXT_TAG is missing or has a different overlay asset; syncing it"
-              gh release upload "$NEXT_TAG" \
+            for file in overlay.json overlay-neutral.json; do
+              artifact_digest="$(sha256sum "dist/$file" | awk '{print $1}')"
+              existing_digest="$(gh release view "$NEXT_TAG" \
                 --repo "$REPOSITORY" \
-                --clobber \
-                dist/overlay.json
-            fi
+                --json assets \
+                --jq ".assets[] | select(.name == \"$file\") | .digest")"
+              if [[ "$existing_digest" != "sha256:$artifact_digest" ]]; then
+                gh release upload "$NEXT_TAG" \
+                  --repo "$REPOSITORY" \
+                  --clobber \
+                  "dist/$file"
+              fi
+            done
           else
             gh release create "$NEXT_TAG" \
               --repo "$REPOSITORY" \
               --title "Overlay $NEXT_TAG" \
               --generate-notes \
-              dist/overlay.json
+              dist/overlay.json dist/overlay-neutral.json
           fi

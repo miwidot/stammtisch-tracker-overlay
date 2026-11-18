@@ -62,7 +62,7 @@ jobs:
       - name: Validate overlay
         run: npm run validate
 
-      # dist/overlay.json is rebuilt by the release workflow after merge, so a PR
+      # Generated dist artifacts are rebuilt by the release workflow after merge, so a PR
       # that changes source data never matches the committed copy; build it here.
       - name: Build overlay
         run: npm run build
@@ -106,7 +106,7 @@ jobs:
           # generated commits that arrived after the event payload's base SHA.
           base="$BASE_SHA"
           if ! git diff --quiet "$base" HEAD -- dist/; then
-            echo "::error file=dist/overlay.json::dist/overlay.json is generated and committed by the release workflow after merge. Drop it from this PR by restoring the base copy: git fetch https://github.com/${BASE_REPO}.git ${BASE_REF} && git checkout FETCH_HEAD -- dist/overlay.json"
+            echo "::error file=dist/overlay.json::dist artifacts are generated and committed by the release workflow after merge. Restore dist/ to the PR base before submitting."
             exit 1
           fi
 
@@ -188,7 +188,9 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: overlay-${{ github.sha }}
-          path: dist/overlay.json
+          path: |
+            dist/overlay.json
+            dist/overlay-neutral.json
           if-no-files-found: error
           overwrite: true
           retention-days: 30

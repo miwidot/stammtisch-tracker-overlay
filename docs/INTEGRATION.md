@@ -2,6 +2,10 @@
 
 How to use tarkov-data-overlay in your application.
 
+Consumers that load catalogs independently of language use `dist/overlay-neutral.json`.
+Follow the [language-neutral contract](NEUTRAL_OVERLAY.md) for its keyed fields,
+string tables, locale target bindings, and source identity. The examples below use `overlay.json`.
+
 For the task unlock/availability contract, account-state adapter, and generated
 mode reports, see [Task availability and unlock tracking](TASK_AVAILABILITY.md).
 
@@ -596,8 +600,9 @@ Rules for applying them:
   objective `description`) when rendering that locale.
 - Only apply the section matching your active locale. If you render `de`,
   ignore `locales.en` entirely.
-- Locale overrides are **not** mode-specific — locale bundles are shared
-  across `regular` and `pve`, so apply them in both modes.
+- Locale overrides apply across all supported modes. Upstream translation tables
+  may contain different values for the same key across modes, so consumers must
+  preserve upstream mode scope when building language bundles.
 - Entries are sparse: only fields broken in that locale bundle are present.
 
 ```typescript
