@@ -53,6 +53,51 @@ function loadSuppressions(): Record<string, Record<string, unknown>> {
 describe('task correction data', () => {
   const overrides = loadTaskOverrides();
 
+  it.each(SUPPORTED_GAME_MODES)('places the Ice Cream Cones visit zone at ZB-014 in %s', (mode) => {
+    const id = '59675d6c86f7740a842fc482';
+    const woods = { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' };
+    const visit = {
+      id: '5a3fbe3a86f77414422e0d9b',
+      description: 'Locate the locked bunker on Woods',
+      optional: true,
+      zones: [
+        {
+          id: 'bunker1',
+          map: woods,
+          position: { x: 443.010376, y: -14.9854012, z: 67.66608 },
+          outline: [
+            { x: 879.0928, z: 124.739563 },
+            { x: 893.4613, z: 124.739563 },
+            { x: 893.4613, z: 140.730652 },
+            { x: 879.0928, z: 140.730652 },
+          ],
+        },
+      ],
+    };
+    const overlay = {
+      tasks: overrides,
+      modes: {
+        [mode]: {
+          tasks: loadJson5File<Record<string, TaskOverride>>(
+            join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+          ),
+        },
+      },
+    };
+    const task = { id, name: 'Ice Cream Cones', minPlayerLevel: 6, objectives: [visit] };
+    const effective = applyTaskOverride(task, getTaskOverrideForMode(id, overlay as never, mode));
+    const objective = (effective as TaskData)?.objectives?.[0];
+    expect(objective).toMatchObject({ id: visit.id, optional: true });
+    expect(objective?.zones).toHaveLength(1);
+    const zone = objective?.zones?.[0];
+    expect(zone?.map).toEqual(woods);
+    expect(zone?.outline).toHaveLength(4);
+    const xs = zone?.outline?.map(({ x }) => x) ?? [];
+    const zs = zone?.outline?.map(({ z }) => z) ?? [];
+    expect((Math.min(...xs) + Math.max(...xs)) / 2).toBeCloseTo(443.266663);
+    expect((Math.min(...zs) + Math.max(...zs)) / 2).toBeCloseTo(65.069031);
+  });
+
   it('disables obsolete tasks while retaining the duplicate comparison suppression', () => {
     for (const { id, label } of DISABLED_DUPLICATES) {
       expect(overrides[id], label).toMatchObject({ disabled: true });

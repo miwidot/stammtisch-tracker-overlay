@@ -679,6 +679,35 @@
     experience: 65000, // Was: 55000 (all modes, stale pre-1.1 value)
   },
 
+  // Ice Cream Cones - Optional visit to Woods' ZB-014 bunker.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones
+  // PvP and PvE quest captures target bunker2. The installed Woods scene supplies
+  // the ZB-014 environment volume already in world space. Upstream's bunker1
+  // outline adds the object position again, moving the center to (886.28, 132.74).
+  '59675d6c86f7740a842fc482': {
+    objectives: {
+      '5a3fbe3a86f77414422e0d9b': {
+        // Was: bunker1 at (443.010376, -14.9854012, 67.66608) with an outline
+        // spanning x 879.0928–893.4613 and z 124.739563–140.730652 at y -27.6471424,
+        // top -25.3502045 and bottom -29.9440784.
+        zones: [
+          {
+            map: { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
+            outline: [
+              { x: 436.082397, y: -12.66174, z: 57.073486 },
+              { x: 450.450928, y: -12.66174, z: 57.073486 },
+              { x: 450.450928, y: -12.66174, z: 73.064575 },
+              { x: 436.082397, y: -12.66174, z: 73.064575 },
+            ],
+            position: { x: 443.266663, y: -12.66174, z: 65.069031 },
+            top: -10.364803,
+            bottom: -14.958677,
+          },
+        ],
+      },
+    },
+  },
+
   // Fuel Crisis (old: The Blood of War - Part 1) - Objective zone missing
   // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Crisis
   //
