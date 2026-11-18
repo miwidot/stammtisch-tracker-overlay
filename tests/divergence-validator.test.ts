@@ -6,7 +6,7 @@
  * time so that a single-mode override silently becomes insufficient.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from './test-support.js';
 import {
   validateDivergences,
   categorizeDivergenceResults,

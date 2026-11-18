@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from './test-support.js';
 import { classifyWiki, wikiTitleFor } from '../scripts/eft-wiki-crosscheck.js';
 
 describe('eft-wiki-crosscheck classifyWiki', () => {

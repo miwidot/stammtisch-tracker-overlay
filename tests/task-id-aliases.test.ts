@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { initializeValidators, validateFile } from '../scripts/validate.js';
 import { assertTaskIdAliases } from '../src/lib/task-id-aliases.js';
 import { loadJsonFile } from '../src/lib/file-loader.js';

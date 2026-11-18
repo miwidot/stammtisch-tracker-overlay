@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {

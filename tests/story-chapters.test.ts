@@ -9,7 +9,7 @@
  * disables.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';

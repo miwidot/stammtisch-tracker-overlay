@@ -2,7 +2,7 @@
  * Tests for root overlay schema contract
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from './test-support.js';
 import Ajv from 'ajv';
 import { join } from 'path';
 import {

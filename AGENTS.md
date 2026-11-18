@@ -78,9 +78,9 @@ keyed by BSG perk id. Keep metadata upstream and omit empty or stub effects.
 - `npm run build` generates `dist/overlay.json` from sources.
 - `npm run check-overrides` compares overrides to the live tarkov.dev API.
 - `npm run typecheck` runs `tsc --noEmit` (also run in CI).
-- `npm test` runs the Vitest suite (also run in CI); `npm run test:watch` keeps it running.
+- `npm test` runs the Node.js test suite (also run in CI); `npm run test:watch` keeps it running.
 - `npm run format` / `npm run format:check` run Prettier over the TypeScript, JSON/JSON5, and Markdown sources (`format:check` also runs in CI).
-- Example single test: `npx vitest run tests/file-loader.test.ts`.
+- Example single test: `node --import tsx --experimental-test-module-mocks --test tests/file-loader.test.ts`.
 - `pwsh scripts/ci-local.ps1 -Branch <branch>` runs the `ci.yml` validation steps locally on the PR merge commit of the pushed branch; add `-Local` to test committed but unpushed fixes (see `docs/CONTRIBUTING.md`). Use it as CI evidence when hosted and self-hosted runners are unavailable, and with `-Local` before pushing review fixes.
 
 ### Reference cross-check tooling (local-only)
@@ -244,7 +244,7 @@ TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "
 
 ## Testing Guidelines
 
-Vitest is the only test framework. Tests should be named `*.test.ts` under `tests/`. There is no explicit coverage gate, but add or update tests when you change shared library behavior or validation logic.
+Use the Node.js test runner and the assertions and test helpers in `tests/test-support.ts`. Name tests `*.test.ts` under `tests/`. Add or update tests when changing shared library behavior or validation logic.
 
 ## Static Analysis Findings
 

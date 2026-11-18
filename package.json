@@ -26,12 +26,12 @@
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
     "fallow:security": "fallow security",
-    "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#dist\" \"#data\" \"#eft\"",
+    "lint:markdown": "node scripts/lint-markdown.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,cts,json,json5,md}\"",
     "format:check": "prettier --check \"**/*.{ts,cts,json,json5,md}\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "node --import tsx --experimental-test-module-mocks --test --test-reporter=dot \"tests/**/*.test.ts\"",
+    "test:watch": "node --import tsx --experimental-test-module-mocks --test --watch \"tests/**/*.test.ts\"",
     "status:locale": "tsx scripts/status-locale.ts",
     "maintenance:ci": "tsx scripts/maintenance-ci.ts"
   },
@@ -49,20 +49,22 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
+    "@sinonjs/fake-timers": "15.4.0",
     "@types/node": "24.19.2",
+    "@types/sinonjs__fake-timers": "15.0.1",
+    "@vitest/expect": "5.1.0",
+    "@vitest/spy": "5.1.0",
     "ajv": "^8.20.0",
+    "expect-type": "1.4.0",
     "fallow": "3.40.0",
     "json5": "^2.2.3",
-    "markdownlint-cli2": "^0.24.0",
+    "markdownlint": "0.42.0",
     "prettier": "3.9.10",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2",
-    "vitest": "5.1.0"
+    "typescript": "^7.0.2"
   },
   "overrides": {
     "katex": "0.18.9",
-    "smol-toml": "1.9.0",
-    "markdown-it": "15.0.3",
     "re2js": "2.8.8"
   }
 }

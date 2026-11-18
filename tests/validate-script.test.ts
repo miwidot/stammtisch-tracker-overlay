@@ -2,7 +2,7 @@
  * Tests for scripts/validate.ts helpers
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from './test-support.js';
 import { join, relative, sep } from 'path';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';

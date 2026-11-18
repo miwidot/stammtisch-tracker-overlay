@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from './test-support.js';
 import type { OverlayOutput, TaskAddition } from '../src/lib/index.js';
 import {
   buildReport,

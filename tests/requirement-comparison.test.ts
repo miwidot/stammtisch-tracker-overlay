@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { compareRequirementValues } from '../src/lib/requirement-comparison.js';
 
 const a = { task: { id: 'a', name: 'A' }, provenance: 'first' };

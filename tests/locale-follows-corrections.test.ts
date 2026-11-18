@@ -16,7 +16,7 @@
  */
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { getProjectPaths } from '../src/lib/index.js';
 import { readDataCorrections, readWasComments } from '../scripts/status-locale.js';
 

@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, it } from 'vitest';
+import { expect, it } from './test-support.js';
 import JSON5 from 'json5';
 
 it.each([20000, 8000])('preserves Tour corrections and parents at USD count %i', (usdCount) => {

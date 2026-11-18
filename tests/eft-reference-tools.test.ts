@@ -10,7 +10,7 @@ import {
 } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from './test-support.js';
 
 import {
   diffReferences,

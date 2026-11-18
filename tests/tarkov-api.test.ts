@@ -2,7 +2,7 @@
  * Tests for the json.tarkov.dev adapter (tarkov-api module)
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from './test-support.js';
 import { comparisonTask, registerTaskComparison } from '../src/lib/task-comparison.cjs';
 import { compareOverlayFields } from '../src/lib/overlay-comparison.cjs';
 import {

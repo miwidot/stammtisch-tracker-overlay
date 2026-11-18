@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { compareOverlayFields, comparisonSummary } from '../src/lib/overlay-comparison.cjs';
 
 function row(patch: unknown, upstream: unknown, field: string) {

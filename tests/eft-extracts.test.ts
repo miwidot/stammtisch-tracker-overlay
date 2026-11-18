@@ -2,7 +2,7 @@ import { mkdtempSync, readdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import JSON5 from 'json5';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 
 import {
   buildExtractRequirements,

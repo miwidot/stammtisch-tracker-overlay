@@ -6,7 +6,7 @@ import { aggregateEntityRetirement } from '../src/lib/entity-retirement.js';
  * items, traders, hideout, itemsAdd, story chapters and suppressions.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from './test-support.js';
 import {
   validateEntityOverrides,
   validateEntityAdditions,

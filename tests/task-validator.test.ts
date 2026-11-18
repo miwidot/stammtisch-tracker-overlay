@@ -2,7 +2,7 @@
  * Tests for task-validator module
  */
 
-import { describe, it, expect, expectTypeOf } from 'vitest';
+import { describe, it, expect, expectTypeOf } from './test-support.js';
 import { comparisonTask, registerTaskComparison } from '../src/lib/task-comparison.cjs';
 import { compareOverlayFields } from '../src/lib/overlay-comparison.cjs';
 import {

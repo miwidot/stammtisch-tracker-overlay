@@ -7,7 +7,7 @@
  */
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { findDuplicateKeys, getProjectPaths } from '../src/lib/index.js';
 
 const { srcDir } = getProjectPaths();

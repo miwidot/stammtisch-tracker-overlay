@@ -4,7 +4,7 @@
  * scripts/eft-story-write.ts, scripts/lib/sequence-matcher.ts)
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
@@ -257,7 +257,7 @@ describe('story reference provenance enforcement', { timeout: 30_000 }, () => {
     }
   });
 
-  it('canonicalizes file symlinks and rejects file symlink escapes', ({ skip }) => {
+  it('canonicalizes file symlinks and rejects file symlink escapes', (t) => {
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-file-link-'));
     try {
       mkdirSync(join(dir, 'scripts'));
@@ -270,7 +270,8 @@ describe('story reference provenance enforcement', { timeout: 30_000 }, () => {
         symlinkSync(source, join(dir, 'data', 'reference', 'alias.json'), 'file');
       } catch (error) {
         if (process.platform === 'win32' && (error as NodeJS.ErrnoException).code === 'EPERM') {
-          skip('File symlinks require Windows Developer Mode or elevated privileges');
+          t.skip('File symlinks require Windows Developer Mode or elevated privileges');
+          return;
         }
         throw error;
       }

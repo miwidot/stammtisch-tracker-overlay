@@ -6,7 +6,7 @@
  * (entity/objective gone from the API), and UNVERIFIABLE (storyChapters).
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import {
   validateLocaleOverrides,
   type LocaleBundle,

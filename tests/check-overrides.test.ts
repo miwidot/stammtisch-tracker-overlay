@@ -2,7 +2,7 @@
  * Tests for scripts/check-overrides.ts helpers
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from './test-support.js';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';

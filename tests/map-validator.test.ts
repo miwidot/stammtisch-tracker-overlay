@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { validateMapOverrides, validateModeMapOverrides } from '../src/lib/map-validator.js';
 
 const addition = {

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import Ajv from 'ajv';
 import JSON5 from 'json5';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { objectiveCompletionPolicy } from '../scripts/eft-story-generate.js';
 import type { StoryChapter } from '../src/lib/types.js';
 const escapeId = '6895bc04162304804bdc056e';

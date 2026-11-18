@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { assessAuditRun, evaluateAuditReport, readAuditReport } from '../scripts/audit-policy.cjs';
 
 const TODAY = '2026-10-04';

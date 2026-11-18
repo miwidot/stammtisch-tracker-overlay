@@ -1,5 +1,5 @@
 /** Guards raw seasonal effect supplements without duplicating upstream metadata. */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import Ajv from 'ajv';
 import { join } from 'path';
 import {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { createHash } from 'crypto';
 import { spawnSync } from 'child_process';
 import {

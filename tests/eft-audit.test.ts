@@ -1,12 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
-import { classify, buildRows, effectiveOverrides } from '../scripts/eft-audit.js';
-import { parseEftTasks, type EftTask } from '../scripts/eft-compare.js';
-import { loadJson5File, type TaskData, type TaskOverride } from '../src/lib/index.js';
+import { describe, it, expect, vi } from './test-support.js';
+import { mock } from 'node:test';
+import type { EftTask } from '../scripts/eft-compare.js';
+import * as lib from '../src/lib/index.js';
+import type { TaskData, TaskOverride } from '../src/lib/index.js';
 
-vi.mock('../src/lib/index.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/lib/index.js')>();
-  return { ...actual, loadJson5File: vi.fn(actual.loadJson5File) };
+const loadJson5File = vi.fn(lib.loadJson5File);
+mock.module(import.meta.resolve('../src/lib/index.js'), {
+  namedExports: { ...lib, loadJson5File },
 });
+const { parseEftTasks } = await import('../scripts/eft-compare.js');
+const { classify, buildRows, effectiveOverrides } = await import('../scripts/eft-audit.js');
 
 describe('eft-audit classify (reference -> api -> override)', () => {
   const REFERENCE = 10;
@@ -392,7 +395,7 @@ describe('eft-audit prerequisite condition semantics', () => {
 it('merges shared objective counts with mode descriptions in the effective audit overlay', () => {
   const taskId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
   const objectiveId = 'bbbbbbbbbbbbbbbbbbbbbbbb';
-  vi.mocked(loadJson5File)
+  loadJson5File
     .mockReturnValueOnce({
       [taskId]: {
         objectives: { [objectiveId]: { count: 36 } },

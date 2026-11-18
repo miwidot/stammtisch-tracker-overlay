@@ -1,7 +1,7 @@
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { expect, it } from 'vitest';
+import { expect, it } from './test-support.js';
 import { assertComparisonCoverage } from '../src/lib/comparison-coverage.js';
 
 it.each([
