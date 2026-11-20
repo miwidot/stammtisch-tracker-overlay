@@ -356,6 +356,7 @@
             {
               "id": "placeholder_for_the_good_of_the_chosen_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_for_the_good_of_the_chosen/objectives/placeholder_for_the_good_of_the_chosen_obj01/description",
+              "type": "dialogue",
               "optional": false
             }
           ]
@@ -388,6 +389,7 @@
             {
               "id": "placeholder_break_the_chain_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_break_the_chain/objectives/placeholder_break_the_chain_obj01/description",
+              "type": "shoot",
               "maps": [
                 {
                   "id": "56f40101d2720b2a4d8b45d6",
@@ -399,6 +401,7 @@
             {
               "id": "placeholder_break_the_chain_obj02",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_break_the_chain/objectives/placeholder_break_the_chain_obj02/description",
+              "type": "shoot",
               "maps": [
                 {
                   "id": "56f40101d2720b2a4d8b45d6",
@@ -410,6 +413,7 @@
             {
               "id": "placeholder_break_the_chain_obj03",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_break_the_chain/objectives/placeholder_break_the_chain_obj03/description",
+              "type": "shoot",
               "maps": [
                 {
                   "id": "5704e3c2d2720bac5b8b4567",
@@ -421,6 +425,7 @@
             {
               "id": "placeholder_break_the_chain_obj04",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_break_the_chain/objectives/placeholder_break_the_chain_obj04/description",
+              "type": "shoot",
               "maps": [
                 {
                   "id": "5704e3c2d2720bac5b8b4567",
@@ -610,17 +615,43 @@
             {
               "id": "placeholder_consequences_of_our_decisions_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/description",
+              "type": "craft",
+              "questItem": {
+                "id": "6a5f9becfc12d937d50ae095",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/questItem/name"
+              },
+              "items": [
+                {
+                  "id": "577e1c9d2459773cd707c525",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/items/577e1c9d2459773cd707c525/name"
+                },
+                {
+                  "id": "57347ca924597744596b4e71",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/items/57347ca924597744596b4e71/name"
+                }
+              ],
               "optional": false
             },
             {
               "id": "placeholder_consequences_of_our_decisions_obj02",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj02/description",
+              "type": "useItem",
+              "useAny": [
+                {
+                  "id": "6a55f339fe4be93a04090acc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj02/useAny/6a55f339fe4be93a04090acc/name"
+                }
+              ],
               "optional": false
             },
             {
               "id": "placeholder_consequences_of_our_decisions_obj03",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj03/description",
               "type": "giveQuestItem",
+              "questItem": {
+                "id": "6a5f9becfc12d937d50ae095",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj03/questItem/name"
+              },
               "optional": false,
               "count": 1
             }
@@ -743,6 +774,10 @@
               "id": "placeholder_final_stretch_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj01/description",
               "type": "findQuestItem",
+              "questItem": {
+                "id": "6a5f9becfc12d937d50ae095",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj01/questItem/name"
+              },
               "maps": [
                 {
                   "id": "5714dc692459777137212e12",
@@ -756,6 +791,10 @@
               "id": "placeholder_final_stretch_obj02",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj02/description",
               "type": "giveQuestItem",
+              "questItem": {
+                "id": "6a5f9becfc12d937d50ae095",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj02/questItem/name"
+              },
               "optional": false,
               "count": 1
             }
@@ -855,6 +894,240 @@
               "id": "placeholder_historical_prospects_obj02",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/description",
               "type": "plantItem",
+              "items": [
+                {
+                  "id": "59f32bb586f774757e1e8442",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/59f32bb586f774757e1e8442/name"
+                },
+                {
+                  "id": "59f32c3b86f77472a31742f0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/59f32c3b86f77472a31742f0/name"
+                },
+                {
+                  "id": "6662e9aca7e0b43baa3d5f74",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662e9aca7e0b43baa3d5f74/name"
+                },
+                {
+                  "id": "6662e9cda7e0b43baa3d5f76",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662e9cda7e0b43baa3d5f76/name"
+                },
+                {
+                  "id": "675dc9d37ae1a8792107ca96",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/675dc9d37ae1a8792107ca96/name"
+                },
+                {
+                  "id": "675dcb0545b1a2d108011b2b",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/675dcb0545b1a2d108011b2b/name"
+                },
+                {
+                  "id": "684180bc51bf8645f7067bc8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/684180bc51bf8645f7067bc8/name"
+                },
+                {
+                  "id": "684181208d035f60230f63f9",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/684181208d035f60230f63f9/name"
+                },
+                {
+                  "id": "68df9908972cf1e1ec07256a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df9908972cf1e1ec07256a/name"
+                },
+                {
+                  "id": "68df991142e96f583d042b8a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df991142e96f583d042b8a/name"
+                },
+                {
+                  "id": "68df991dbeba86572e097ceb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df991dbeba86572e097ceb/name"
+                },
+                {
+                  "id": "68df9927a38a5e37d80df6c9",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df9927a38a5e37d80df6c9/name"
+                },
+                {
+                  "id": "68f0f60a121d878a2303eedb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f60a121d878a2303eedb/name"
+                },
+                {
+                  "id": "68f0f63c645c14a02104142a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f63c645c14a02104142a/name"
+                },
+                {
+                  "id": "68f153aa7da590b6df0515da",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f153aa7da590b6df0515da/name"
+                },
+                {
+                  "id": "68f15cf222c8979ee308f495",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15cf222c8979ee308f495/name"
+                },
+                {
+                  "id": "68f15e26f1aa7e100a0ca208",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15e26f1aa7e100a0ca208/name"
+                },
+                {
+                  "id": "68fb41120760c7891606613c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb41120760c7891606613c/name"
+                },
+                {
+                  "id": "68fb412b0760c7891606613e",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb412b0760c7891606613e/name"
+                },
+                {
+                  "id": "6aa2d537cfc9b36b300da067",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d537cfc9b36b300da067/name"
+                },
+                {
+                  "id": "6aa2d55e0b4e81daf20cd212",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d55e0b4e81daf20cd212/name"
+                },
+                {
+                  "id": "6aa2d585cfc9b36b300da06a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d585cfc9b36b300da06a/name"
+                },
+                {
+                  "id": "6aa2d5af0b4e81daf20cd215",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d5af0b4e81daf20cd215/name"
+                },
+                {
+                  "id": "6aa2d5d3667ebebca605d8f6",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d5d3667ebebca605d8f6/name"
+                },
+                {
+                  "id": "6aa2d5ee11d6c6361804dd57",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d5ee11d6c6361804dd57/name"
+                },
+                {
+                  "id": "6662e9f37fa79a6d83730fa0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662e9f37fa79a6d83730fa0/name"
+                },
+                {
+                  "id": "6662ea05f6259762c56f3189",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662ea05f6259762c56f3189/name"
+                },
+                {
+                  "id": "6764202ae307804338014c1a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6764202ae307804338014c1a/name"
+                },
+                {
+                  "id": "6764207f2fa5e32733055c4a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6764207f2fa5e32733055c4a/name"
+                },
+                {
+                  "id": "68418091b5b0c9e4c60f0e7a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68418091b5b0c9e4c60f0e7a/name"
+                },
+                {
+                  "id": "684180ee9b6d80d840042e8a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/684180ee9b6d80d840042e8a/name"
+                },
+                {
+                  "id": "68df99975d4e135b130392ca",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99975d4e135b130392ca/name"
+                },
+                {
+                  "id": "68df99a614ca2428b2017cd8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99a614ca2428b2017cd8/name"
+                },
+                {
+                  "id": "68df99b2f716906506098308",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99b2f716906506098308/name"
+                },
+                {
+                  "id": "68df99c05d4e135b130392cc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99c05d4e135b130392cc/name"
+                },
+                {
+                  "id": "68f0f64f183146ea530330aa",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f64f183146ea530330aa/name"
+                },
+                {
+                  "id": "68f0f662859ebec8d501b76a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f662859ebec8d501b76a/name"
+                },
+                {
+                  "id": "68f15dbab2b53abd200b9378",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15dbab2b53abd200b9378/name"
+                },
+                {
+                  "id": "68f15e53103c5d9d4f022c78",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15e53103c5d9d4f022c78/name"
+                },
+                {
+                  "id": "68fb4143a854bc7ae80fad3e",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb4143a854bc7ae80fad3e/name"
+                },
+                {
+                  "id": "68fb4157b280c103230e3b3c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb4157b280c103230e3b3c/name"
+                },
+                {
+                  "id": "6ab2d6031c7d617b290dd2b0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab2d6031c7d617b290dd2b0/name"
+                },
+                {
+                  "id": "6ab2d68819b981e6870f35d3",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab2d68819b981e6870f35d3/name"
+                },
+                {
+                  "id": "6ab60a252bc101093f05029f",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab60a252bc101093f05029f/name"
+                },
+                {
+                  "id": "6ab60a57615ae75bdd0e39ce",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab60a57615ae75bdd0e39ce/name"
+                },
+                {
+                  "id": "6ab60a62d60e0dec3e04ff2c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab60a62d60e0dec3e04ff2c/name"
+                },
+                {
+                  "id": "6a3549435288a3fe6e085224",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a3549435288a3fe6e085224/name"
+                },
+                {
+                  "id": "6a3548e72a963bcdd8098649",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a3548e72a963bcdd8098649/name"
+                },
+                {
+                  "id": "6a354a30652075cf460944c6",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a30652075cf460944c6/name"
+                },
+                {
+                  "id": "6a354a9a9cd7a91b45027a89",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a9a9cd7a91b45027a89/name"
+                },
+                {
+                  "id": "6a354aa56632508bd10476dc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354aa56632508bd10476dc/name"
+                },
+                {
+                  "id": "6a354abe73339990030ca469",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354abe73339990030ca469/name"
+                },
+                {
+                  "id": "6a354a077e4ccdbe95005266",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a077e4ccdbe95005266/name"
+                },
+                {
+                  "id": "6a354a6240e6797a930312e5",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a6240e6797a930312e5/name"
+                },
+                {
+                  "id": "6a354a6f8d465a55c70065c8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a6f8d465a55c70065c8/name"
+                },
+                {
+                  "id": "6a354a7e6632508bd10476d8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a7e6632508bd10476d8/name"
+                }
+              ],
+              "requiredKeys": [
+                [
+                  {
+                    "id": "5780cf7f2459777de4559322",
+                    "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/requiredKeys/0/5780cf7f2459777de4559322/name"
+                  }
+                ]
+              ],
               "maps": [
                 {
                   "id": "56f40101d2720b2a4d8b45d6",
@@ -882,6 +1155,232 @@
               "id": "placeholder_historical_prospects_obj04",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/description",
               "type": "plantItem",
+              "items": [
+                {
+                  "id": "59f32bb586f774757e1e8442",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/59f32bb586f774757e1e8442/name"
+                },
+                {
+                  "id": "59f32c3b86f77472a31742f0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/59f32c3b86f77472a31742f0/name"
+                },
+                {
+                  "id": "6662e9aca7e0b43baa3d5f74",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662e9aca7e0b43baa3d5f74/name"
+                },
+                {
+                  "id": "6662e9cda7e0b43baa3d5f76",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662e9cda7e0b43baa3d5f76/name"
+                },
+                {
+                  "id": "675dc9d37ae1a8792107ca96",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/675dc9d37ae1a8792107ca96/name"
+                },
+                {
+                  "id": "675dcb0545b1a2d108011b2b",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/675dcb0545b1a2d108011b2b/name"
+                },
+                {
+                  "id": "684180bc51bf8645f7067bc8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/684180bc51bf8645f7067bc8/name"
+                },
+                {
+                  "id": "684181208d035f60230f63f9",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/684181208d035f60230f63f9/name"
+                },
+                {
+                  "id": "68df9908972cf1e1ec07256a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df9908972cf1e1ec07256a/name"
+                },
+                {
+                  "id": "68df991142e96f583d042b8a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df991142e96f583d042b8a/name"
+                },
+                {
+                  "id": "68df991dbeba86572e097ceb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df991dbeba86572e097ceb/name"
+                },
+                {
+                  "id": "68df9927a38a5e37d80df6c9",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df9927a38a5e37d80df6c9/name"
+                },
+                {
+                  "id": "68f0f60a121d878a2303eedb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f60a121d878a2303eedb/name"
+                },
+                {
+                  "id": "68f0f63c645c14a02104142a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f63c645c14a02104142a/name"
+                },
+                {
+                  "id": "68f153aa7da590b6df0515da",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f153aa7da590b6df0515da/name"
+                },
+                {
+                  "id": "68f15cf222c8979ee308f495",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15cf222c8979ee308f495/name"
+                },
+                {
+                  "id": "68f15e26f1aa7e100a0ca208",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15e26f1aa7e100a0ca208/name"
+                },
+                {
+                  "id": "68fb41120760c7891606613c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb41120760c7891606613c/name"
+                },
+                {
+                  "id": "68fb412b0760c7891606613e",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb412b0760c7891606613e/name"
+                },
+                {
+                  "id": "6aa2d537cfc9b36b300da067",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d537cfc9b36b300da067/name"
+                },
+                {
+                  "id": "6aa2d55e0b4e81daf20cd212",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d55e0b4e81daf20cd212/name"
+                },
+                {
+                  "id": "6aa2d585cfc9b36b300da06a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d585cfc9b36b300da06a/name"
+                },
+                {
+                  "id": "6aa2d5af0b4e81daf20cd215",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d5af0b4e81daf20cd215/name"
+                },
+                {
+                  "id": "6aa2d5d3667ebebca605d8f6",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d5d3667ebebca605d8f6/name"
+                },
+                {
+                  "id": "6aa2d5ee11d6c6361804dd57",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d5ee11d6c6361804dd57/name"
+                },
+                {
+                  "id": "6662e9f37fa79a6d83730fa0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662e9f37fa79a6d83730fa0/name"
+                },
+                {
+                  "id": "6662ea05f6259762c56f3189",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662ea05f6259762c56f3189/name"
+                },
+                {
+                  "id": "6764202ae307804338014c1a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6764202ae307804338014c1a/name"
+                },
+                {
+                  "id": "6764207f2fa5e32733055c4a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6764207f2fa5e32733055c4a/name"
+                },
+                {
+                  "id": "68418091b5b0c9e4c60f0e7a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68418091b5b0c9e4c60f0e7a/name"
+                },
+                {
+                  "id": "684180ee9b6d80d840042e8a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/684180ee9b6d80d840042e8a/name"
+                },
+                {
+                  "id": "68df99975d4e135b130392ca",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99975d4e135b130392ca/name"
+                },
+                {
+                  "id": "68df99a614ca2428b2017cd8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99a614ca2428b2017cd8/name"
+                },
+                {
+                  "id": "68df99b2f716906506098308",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99b2f716906506098308/name"
+                },
+                {
+                  "id": "68df99c05d4e135b130392cc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99c05d4e135b130392cc/name"
+                },
+                {
+                  "id": "68f0f64f183146ea530330aa",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f64f183146ea530330aa/name"
+                },
+                {
+                  "id": "68f0f662859ebec8d501b76a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f662859ebec8d501b76a/name"
+                },
+                {
+                  "id": "68f15dbab2b53abd200b9378",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15dbab2b53abd200b9378/name"
+                },
+                {
+                  "id": "68f15e53103c5d9d4f022c78",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15e53103c5d9d4f022c78/name"
+                },
+                {
+                  "id": "68fb4143a854bc7ae80fad3e",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb4143a854bc7ae80fad3e/name"
+                },
+                {
+                  "id": "68fb4157b280c103230e3b3c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb4157b280c103230e3b3c/name"
+                },
+                {
+                  "id": "6ab2d6031c7d617b290dd2b0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab2d6031c7d617b290dd2b0/name"
+                },
+                {
+                  "id": "6ab2d68819b981e6870f35d3",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab2d68819b981e6870f35d3/name"
+                },
+                {
+                  "id": "6ab60a252bc101093f05029f",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab60a252bc101093f05029f/name"
+                },
+                {
+                  "id": "6ab60a57615ae75bdd0e39ce",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab60a57615ae75bdd0e39ce/name"
+                },
+                {
+                  "id": "6ab60a62d60e0dec3e04ff2c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab60a62d60e0dec3e04ff2c/name"
+                },
+                {
+                  "id": "6a3549435288a3fe6e085224",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a3549435288a3fe6e085224/name"
+                },
+                {
+                  "id": "6a3548e72a963bcdd8098649",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a3548e72a963bcdd8098649/name"
+                },
+                {
+                  "id": "6a354a30652075cf460944c6",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a30652075cf460944c6/name"
+                },
+                {
+                  "id": "6a354a9a9cd7a91b45027a89",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a9a9cd7a91b45027a89/name"
+                },
+                {
+                  "id": "6a354aa56632508bd10476dc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354aa56632508bd10476dc/name"
+                },
+                {
+                  "id": "6a354abe73339990030ca469",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354abe73339990030ca469/name"
+                },
+                {
+                  "id": "6a354a077e4ccdbe95005266",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a077e4ccdbe95005266/name"
+                },
+                {
+                  "id": "6a354a6240e6797a930312e5",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a6240e6797a930312e5/name"
+                },
+                {
+                  "id": "6a354a6f8d465a55c70065c8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a6f8d465a55c70065c8/name"
+                },
+                {
+                  "id": "6a354a7e6632508bd10476d8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a7e6632508bd10476d8/name"
+                }
+              ],
               "maps": [
                 {
                   "id": "5704e3c2d2720bac5b8b4567",
@@ -909,6 +1408,232 @@
               "id": "placeholder_historical_prospects_obj06",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/description",
               "type": "plantItem",
+              "items": [
+                {
+                  "id": "59f32bb586f774757e1e8442",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/59f32bb586f774757e1e8442/name"
+                },
+                {
+                  "id": "59f32c3b86f77472a31742f0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/59f32c3b86f77472a31742f0/name"
+                },
+                {
+                  "id": "6662e9aca7e0b43baa3d5f74",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662e9aca7e0b43baa3d5f74/name"
+                },
+                {
+                  "id": "6662e9cda7e0b43baa3d5f76",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662e9cda7e0b43baa3d5f76/name"
+                },
+                {
+                  "id": "675dc9d37ae1a8792107ca96",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/675dc9d37ae1a8792107ca96/name"
+                },
+                {
+                  "id": "675dcb0545b1a2d108011b2b",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/675dcb0545b1a2d108011b2b/name"
+                },
+                {
+                  "id": "684180bc51bf8645f7067bc8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/684180bc51bf8645f7067bc8/name"
+                },
+                {
+                  "id": "684181208d035f60230f63f9",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/684181208d035f60230f63f9/name"
+                },
+                {
+                  "id": "68df9908972cf1e1ec07256a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df9908972cf1e1ec07256a/name"
+                },
+                {
+                  "id": "68df991142e96f583d042b8a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df991142e96f583d042b8a/name"
+                },
+                {
+                  "id": "68df991dbeba86572e097ceb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df991dbeba86572e097ceb/name"
+                },
+                {
+                  "id": "68df9927a38a5e37d80df6c9",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df9927a38a5e37d80df6c9/name"
+                },
+                {
+                  "id": "68f0f60a121d878a2303eedb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f60a121d878a2303eedb/name"
+                },
+                {
+                  "id": "68f0f63c645c14a02104142a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f63c645c14a02104142a/name"
+                },
+                {
+                  "id": "68f153aa7da590b6df0515da",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f153aa7da590b6df0515da/name"
+                },
+                {
+                  "id": "68f15cf222c8979ee308f495",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15cf222c8979ee308f495/name"
+                },
+                {
+                  "id": "68f15e26f1aa7e100a0ca208",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15e26f1aa7e100a0ca208/name"
+                },
+                {
+                  "id": "68fb41120760c7891606613c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb41120760c7891606613c/name"
+                },
+                {
+                  "id": "68fb412b0760c7891606613e",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb412b0760c7891606613e/name"
+                },
+                {
+                  "id": "6aa2d537cfc9b36b300da067",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d537cfc9b36b300da067/name"
+                },
+                {
+                  "id": "6aa2d55e0b4e81daf20cd212",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d55e0b4e81daf20cd212/name"
+                },
+                {
+                  "id": "6aa2d585cfc9b36b300da06a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d585cfc9b36b300da06a/name"
+                },
+                {
+                  "id": "6aa2d5af0b4e81daf20cd215",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d5af0b4e81daf20cd215/name"
+                },
+                {
+                  "id": "6aa2d5d3667ebebca605d8f6",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d5d3667ebebca605d8f6/name"
+                },
+                {
+                  "id": "6aa2d5ee11d6c6361804dd57",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d5ee11d6c6361804dd57/name"
+                },
+                {
+                  "id": "6662e9f37fa79a6d83730fa0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662e9f37fa79a6d83730fa0/name"
+                },
+                {
+                  "id": "6662ea05f6259762c56f3189",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662ea05f6259762c56f3189/name"
+                },
+                {
+                  "id": "6764202ae307804338014c1a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6764202ae307804338014c1a/name"
+                },
+                {
+                  "id": "6764207f2fa5e32733055c4a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6764207f2fa5e32733055c4a/name"
+                },
+                {
+                  "id": "68418091b5b0c9e4c60f0e7a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68418091b5b0c9e4c60f0e7a/name"
+                },
+                {
+                  "id": "684180ee9b6d80d840042e8a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/684180ee9b6d80d840042e8a/name"
+                },
+                {
+                  "id": "68df99975d4e135b130392ca",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99975d4e135b130392ca/name"
+                },
+                {
+                  "id": "68df99a614ca2428b2017cd8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99a614ca2428b2017cd8/name"
+                },
+                {
+                  "id": "68df99b2f716906506098308",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99b2f716906506098308/name"
+                },
+                {
+                  "id": "68df99c05d4e135b130392cc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99c05d4e135b130392cc/name"
+                },
+                {
+                  "id": "68f0f64f183146ea530330aa",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f64f183146ea530330aa/name"
+                },
+                {
+                  "id": "68f0f662859ebec8d501b76a",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f662859ebec8d501b76a/name"
+                },
+                {
+                  "id": "68f15dbab2b53abd200b9378",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15dbab2b53abd200b9378/name"
+                },
+                {
+                  "id": "68f15e53103c5d9d4f022c78",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15e53103c5d9d4f022c78/name"
+                },
+                {
+                  "id": "68fb4143a854bc7ae80fad3e",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb4143a854bc7ae80fad3e/name"
+                },
+                {
+                  "id": "68fb4157b280c103230e3b3c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb4157b280c103230e3b3c/name"
+                },
+                {
+                  "id": "6ab2d6031c7d617b290dd2b0",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab2d6031c7d617b290dd2b0/name"
+                },
+                {
+                  "id": "6ab2d68819b981e6870f35d3",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab2d68819b981e6870f35d3/name"
+                },
+                {
+                  "id": "6ab60a252bc101093f05029f",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab60a252bc101093f05029f/name"
+                },
+                {
+                  "id": "6ab60a57615ae75bdd0e39ce",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab60a57615ae75bdd0e39ce/name"
+                },
+                {
+                  "id": "6ab60a62d60e0dec3e04ff2c",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab60a62d60e0dec3e04ff2c/name"
+                },
+                {
+                  "id": "6a3549435288a3fe6e085224",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a3549435288a3fe6e085224/name"
+                },
+                {
+                  "id": "6a3548e72a963bcdd8098649",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a3548e72a963bcdd8098649/name"
+                },
+                {
+                  "id": "6a354a30652075cf460944c6",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a30652075cf460944c6/name"
+                },
+                {
+                  "id": "6a354a9a9cd7a91b45027a89",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a9a9cd7a91b45027a89/name"
+                },
+                {
+                  "id": "6a354aa56632508bd10476dc",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354aa56632508bd10476dc/name"
+                },
+                {
+                  "id": "6a354abe73339990030ca469",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354abe73339990030ca469/name"
+                },
+                {
+                  "id": "6a354a077e4ccdbe95005266",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a077e4ccdbe95005266/name"
+                },
+                {
+                  "id": "6a354a6240e6797a930312e5",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a6240e6797a930312e5/name"
+                },
+                {
+                  "id": "6a354a6f8d465a55c70065c8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a6f8d465a55c70065c8/name"
+                },
+                {
+                  "id": "6a354a7e6632508bd10476d8",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a7e6632508bd10476d8/name"
+                }
+              ],
               "maps": [
                 {
                   "id": "5714dc692459777137212e12",
@@ -963,6 +1688,14 @@
               "id": "placeholder_in_the_name_of_humanity_obj02",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj02/description",
               "type": "visit",
+              "requiredKeys": [
+                [
+                  {
+                    "id": "5e42c81886f7742a01529f57",
+                    "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj02/requiredKeys/0/5e42c81886f7742a01529f57/name"
+                  }
+                ]
+              ],
               "maps": [
                 {
                   "id": "5714dbc024597771384a510d",
@@ -999,6 +1732,10 @@
               "id": "placeholder_in_the_name_of_humanity_obj05",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj05/description",
               "type": "findQuestItem",
+              "questItem": {
+                "id": "6a6102a39499ae5e110a52c1",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj05/questItem/name"
+              },
               "maps": [
                 {
                   "id": "5714dbc024597771384a510d",
@@ -1042,6 +1779,10 @@
               "id": "placeholder_in_the_name_of_humanity_obj08",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj08/description",
               "type": "plantQuestItem",
+              "questItem": {
+                "id": "6a6102a39499ae5e110a52c1",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj08/questItem/name"
+              },
               "maps": [
                 {
                   "id": "5714dc692459777137212e12",
@@ -1055,6 +1796,22 @@
               "id": "placeholder_in_the_name_of_humanity_obj09",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/description",
               "type": "useItem",
+              "useAny": [
+                {
+                  "id": "624c0b3340357b5f566e8766",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/useAny/624c0b3340357b5f566e8766/name"
+                },
+                {
+                  "id": "62389be94d5d474bf712e709",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/useAny/62389be94d5d474bf712e709/name"
+                }
+              ],
+              "usingWeapon": [
+                {
+                  "id": "620109578d82e67e7911abf2",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/usingWeapon/620109578d82e67e7911abf2/name"
+                }
+              ],
               "maps": [
                 {
                   "id": "5714dc692459777137212e12",
@@ -1153,6 +1910,28 @@
               "id": "placeholder_know_your_enemy_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/description",
               "type": "giveItem",
+              "items": [
+                {
+                  "id": "689479a4a733b1602007e2eb",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/689479a4a733b1602007e2eb/name"
+                },
+                {
+                  "id": "689479eb30cc5ba7be00f5ff",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/689479eb30cc5ba7be00f5ff/name"
+                },
+                {
+                  "id": "689479cb47e5acd1e10be986",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/689479cb47e5acd1e10be986/name"
+                },
+                {
+                  "id": "68947a4be4bf255d1b0ca746",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/68947a4be4bf255d1b0ca746/name"
+                },
+                {
+                  "id": "69e2441a18cb3157560855ec",
+                  "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/69e2441a18cb3157560855ec/name"
+                }
+              ],
               "optional": false,
               "count": 5
             }
@@ -1272,6 +2051,7 @@
               "id": "placeholder_reverse_gear_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj01/description",
               "type": "findQuestItem",
+              "questInventoryOnly": true,
               "maps": [
                 {
                   "id": "5704e554d2720bac5b8b456e",
@@ -1285,6 +2065,7 @@
               "id": "placeholder_reverse_gear_obj02",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj02/description",
               "type": "giveQuestItem",
+              "questInventoryOnly": true,
               "optional": false,
               "count": 1
             },
@@ -1292,6 +2073,7 @@
               "id": "placeholder_reverse_gear_obj03",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj03/description",
               "type": "findQuestItem",
+              "questInventoryOnly": true,
               "maps": [
                 {
                   "id": "5704e554d2720bac5b8b456e",
@@ -1305,6 +2087,7 @@
               "id": "placeholder_reverse_gear_obj04",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj04/description",
               "type": "giveQuestItem",
+              "questInventoryOnly": true,
               "optional": false,
               "count": 1
             },
@@ -1312,6 +2095,7 @@
               "id": "placeholder_reverse_gear_obj05",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj05/description",
               "type": "findQuestItem",
+              "questInventoryOnly": true,
               "maps": [
                 {
                   "id": "5714dc692459777137212e12",
@@ -1325,6 +2109,7 @@
               "id": "placeholder_reverse_gear_obj06",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj06/description",
               "type": "giveQuestItem",
+              "questInventoryOnly": true,
               "optional": false,
               "count": 1
             },
@@ -1332,6 +2117,7 @@
               "id": "placeholder_reverse_gear_obj07",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj07/description",
               "type": "findQuestItem",
+              "questInventoryOnly": true,
               "maps": [
                 {
                   "id": "5714dc692459777137212e12",
@@ -1345,6 +2131,7 @@
               "id": "placeholder_reverse_gear_obj08",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj08/description",
               "type": "giveQuestItem",
+              "questInventoryOnly": true,
               "optional": false,
               "count": 1
             },
@@ -1352,6 +2139,7 @@
               "id": "placeholder_reverse_gear_obj09",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj09/description",
               "type": "findQuestItem",
+              "questInventoryOnly": true,
               "maps": [
                 {
                   "id": "653e6760052c01c1c805532f",
@@ -1365,6 +2153,7 @@
               "id": "placeholder_reverse_gear_obj10",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj10/description",
               "type": "giveQuestItem",
+              "questInventoryOnly": true,
               "optional": false,
               "count": 1
             },
@@ -1372,6 +2161,7 @@
               "id": "placeholder_reverse_gear_obj11",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj11/description",
               "type": "findQuestItem",
+              "questInventoryOnly": true,
               "maps": [
                 {
                   "id": "653e6760052c01c1c805532f",
@@ -1385,6 +2175,7 @@
               "id": "placeholder_reverse_gear_obj12",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_reverse_gear/objectives/placeholder_reverse_gear_obj12/description",
               "type": "giveQuestItem",
+              "questInventoryOnly": true,
               "optional": false,
               "count": 1
             }
@@ -1760,6 +2551,10 @@
               "id": "placeholder_unanswered_calls_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/objectives/placeholder_unanswered_calls_obj01/description",
               "type": "plantQuestItem",
+              "questItem": {
+                "id": "6a6101b09b3e38f37a0dc67e",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/objectives/placeholder_unanswered_calls_obj01/questItem/name"
+              },
               "maps": [
                 {
                   "id": "653e6760052c01c1c805532f",
@@ -1807,6 +2602,10 @@
               "id": "placeholder_uninvited_guests_part_1_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj01/description",
               "type": "findQuestItem",
+              "questItem": {
+                "id": "6a671d87ff6f8a0b080b6bf3",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj01/questItem/name"
+              },
               "optional": false,
               "count": 1
             },
@@ -1924,6 +2723,10 @@
               "id": "placeholder_uninvited_guests_part_2_obj01",
               "description": "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_2/objectives/placeholder_uninvited_guests_part_2_obj01/description",
               "type": "giveQuestItem",
+              "questItem": {
+                "id": "6a671d87ff6f8a0b080b6bf3",
+                "name": "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_2/objectives/placeholder_uninvited_guests_part_2_obj01/questItem/name"
+              },
               "optional": false,
               "count": 1
             }
@@ -16995,6 +17798,7 @@
         {
           "id": "placeholder_honest_review_obj04",
           "description": "@tt:overlay:/tasks/placeholder_honest_review/objectives/placeholder_honest_review_obj04/description",
+          "type": "globalVariable",
           "optional": false
         }
       ]
@@ -17031,6 +17835,44 @@
           "id": "placeholder_i_m_something_of_a_btr_myself_obj01",
           "description": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/description",
           "type": "shoot",
+          "usingWeapon": [
+            {
+              "id": "6410733d5dd49d77bd07847e",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/6410733d5dd49d77bd07847e/name"
+            },
+            {
+              "id": "643ea5b23db6f9f57107d9fd",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/643ea5b23db6f9f57107d9fd/name"
+            },
+            {
+              "id": "64637076203536ad5600c990",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/64637076203536ad5600c990/name"
+            },
+            {
+              "id": "64ca3d3954fc657e230529cc",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/64ca3d3954fc657e230529cc/name"
+            },
+            {
+              "id": "5c46fbd72e2216398b5a8c9c",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/5c46fbd72e2216398b5a8c9c/name"
+            },
+            {
+              "id": "5bfd297f0db834001a669119",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/5bfd297f0db834001a669119/name"
+            },
+            {
+              "id": "5ae08f0a5acfc408fb1398a1",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/5ae08f0a5acfc408fb1398a1/name"
+            },
+            {
+              "id": "55801eed4bdc2d89578b4588",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/55801eed4bdc2d89578b4588/name"
+            },
+            {
+              "id": "61f7c9e189e6fb1a5e3ea78d",
+              "name": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/61f7c9e189e6fb1a5e3ea78d/name"
+            }
+          ],
           "maps": [
             {
               "id": "5704e4dad2720bb55b8b4567",
@@ -17044,6 +17886,7 @@
         {
           "id": "placeholder_i_m_something_of_a_btr_myself_obj02",
           "description": "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj02/description",
+          "type": "dialogue",
           "optional": false
         }
       ]
@@ -17195,6 +18038,233 @@
           "id": "placeholder_to_the_light_a_time_to_gather_stones_obj01",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/description",
           "type": "giveItem",
+          "items": [
+            {
+              "id": "59f32bb586f774757e1e8442",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/59f32bb586f774757e1e8442/name"
+            },
+            {
+              "id": "59f32c3b86f77472a31742f0",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/59f32c3b86f77472a31742f0/name"
+            },
+            {
+              "id": "6662e9aca7e0b43baa3d5f74",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662e9aca7e0b43baa3d5f74/name"
+            },
+            {
+              "id": "6662e9cda7e0b43baa3d5f76",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662e9cda7e0b43baa3d5f76/name"
+            },
+            {
+              "id": "675dc9d37ae1a8792107ca96",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/675dc9d37ae1a8792107ca96/name"
+            },
+            {
+              "id": "675dcb0545b1a2d108011b2b",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/675dcb0545b1a2d108011b2b/name"
+            },
+            {
+              "id": "684180bc51bf8645f7067bc8",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/684180bc51bf8645f7067bc8/name"
+            },
+            {
+              "id": "684181208d035f60230f63f9",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/684181208d035f60230f63f9/name"
+            },
+            {
+              "id": "68df9908972cf1e1ec07256a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df9908972cf1e1ec07256a/name"
+            },
+            {
+              "id": "68df991142e96f583d042b8a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df991142e96f583d042b8a/name"
+            },
+            {
+              "id": "68df991dbeba86572e097ceb",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df991dbeba86572e097ceb/name"
+            },
+            {
+              "id": "68df9927a38a5e37d80df6c9",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df9927a38a5e37d80df6c9/name"
+            },
+            {
+              "id": "68f0f60a121d878a2303eedb",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f60a121d878a2303eedb/name"
+            },
+            {
+              "id": "68f0f63c645c14a02104142a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f63c645c14a02104142a/name"
+            },
+            {
+              "id": "68f153aa7da590b6df0515da",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f153aa7da590b6df0515da/name"
+            },
+            {
+              "id": "68f15cf222c8979ee308f495",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15cf222c8979ee308f495/name"
+            },
+            {
+              "id": "68f15e26f1aa7e100a0ca208",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15e26f1aa7e100a0ca208/name"
+            },
+            {
+              "id": "68fb41120760c7891606613c",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb41120760c7891606613c/name"
+            },
+            {
+              "id": "68fb412b0760c7891606613e",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb412b0760c7891606613e/name"
+            },
+            {
+              "id": "6aa2d537cfc9b36b300da067",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d537cfc9b36b300da067/name"
+            },
+            {
+              "id": "6aa2d55e0b4e81daf20cd212",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d55e0b4e81daf20cd212/name"
+            },
+            {
+              "id": "6aa2d585cfc9b36b300da06a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d585cfc9b36b300da06a/name"
+            },
+            {
+              "id": "6aa2d5af0b4e81daf20cd215",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d5af0b4e81daf20cd215/name"
+            },
+            {
+              "id": "6aa2d5d3667ebebca605d8f6",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d5d3667ebebca605d8f6/name"
+            },
+            {
+              "id": "6aa2d5ee11d6c6361804dd57",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d5ee11d6c6361804dd57/name"
+            },
+            {
+              "id": "6662e9f37fa79a6d83730fa0",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662e9f37fa79a6d83730fa0/name"
+            },
+            {
+              "id": "6662ea05f6259762c56f3189",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662ea05f6259762c56f3189/name"
+            },
+            {
+              "id": "6764202ae307804338014c1a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6764202ae307804338014c1a/name"
+            },
+            {
+              "id": "6764207f2fa5e32733055c4a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6764207f2fa5e32733055c4a/name"
+            },
+            {
+              "id": "68418091b5b0c9e4c60f0e7a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68418091b5b0c9e4c60f0e7a/name"
+            },
+            {
+              "id": "684180ee9b6d80d840042e8a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/684180ee9b6d80d840042e8a/name"
+            },
+            {
+              "id": "68df99975d4e135b130392ca",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99975d4e135b130392ca/name"
+            },
+            {
+              "id": "68df99a614ca2428b2017cd8",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99a614ca2428b2017cd8/name"
+            },
+            {
+              "id": "68df99b2f716906506098308",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99b2f716906506098308/name"
+            },
+            {
+              "id": "68df99c05d4e135b130392cc",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99c05d4e135b130392cc/name"
+            },
+            {
+              "id": "68f0f64f183146ea530330aa",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f64f183146ea530330aa/name"
+            },
+            {
+              "id": "68f0f662859ebec8d501b76a",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f662859ebec8d501b76a/name"
+            },
+            {
+              "id": "68f15dbab2b53abd200b9378",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15dbab2b53abd200b9378/name"
+            },
+            {
+              "id": "68f15e53103c5d9d4f022c78",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15e53103c5d9d4f022c78/name"
+            },
+            {
+              "id": "68fb4143a854bc7ae80fad3e",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb4143a854bc7ae80fad3e/name"
+            },
+            {
+              "id": "68fb4157b280c103230e3b3c",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb4157b280c103230e3b3c/name"
+            },
+            {
+              "id": "6ab2d6031c7d617b290dd2b0",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab2d6031c7d617b290dd2b0/name"
+            },
+            {
+              "id": "6ab2d68819b981e6870f35d3",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab2d68819b981e6870f35d3/name"
+            },
+            {
+              "id": "6ab60a252bc101093f05029f",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab60a252bc101093f05029f/name"
+            },
+            {
+              "id": "6ab60a57615ae75bdd0e39ce",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab60a57615ae75bdd0e39ce/name"
+            },
+            {
+              "id": "6ab60a62d60e0dec3e04ff2c",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab60a62d60e0dec3e04ff2c/name"
+            },
+            {
+              "id": "6a3549435288a3fe6e085224",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a3549435288a3fe6e085224/name"
+            },
+            {
+              "id": "6a3548e72a963bcdd8098649",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a3548e72a963bcdd8098649/name"
+            },
+            {
+              "id": "6a354a30652075cf460944c6",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a30652075cf460944c6/name"
+            },
+            {
+              "id": "6a354a9a9cd7a91b45027a89",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a9a9cd7a91b45027a89/name"
+            },
+            {
+              "id": "6a354aa56632508bd10476dc",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354aa56632508bd10476dc/name"
+            },
+            {
+              "id": "6a354abe73339990030ca469",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354abe73339990030ca469/name"
+            },
+            {
+              "id": "6a354a077e4ccdbe95005266",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a077e4ccdbe95005266/name"
+            },
+            {
+              "id": "6a354a6240e6797a930312e5",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a6240e6797a930312e5/name"
+            },
+            {
+              "id": "6a354a6f8d465a55c70065c8",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a6f8d465a55c70065c8/name"
+            },
+            {
+              "id": "6a354a7e6632508bd10476d8",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a7e6632508bd10476d8/name"
+            }
+          ],
+          "dogTagLevel": 30,
           "optional": false,
           "foundInRaid": true,
           "count": 3
@@ -17274,6 +18344,7 @@
           "id": "placeholder_to_the_light_bite_the_dust_obj01",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_bite_the_dust/objectives/placeholder_to_the_light_bite_the_dust_obj01/description",
           "type": "giveQuestItem",
+          "questInventoryOnly": true,
           "optional": false,
           "count": 1
         }
@@ -17449,6 +18520,7 @@
           "id": "placeholder_to_the_light_dangerous_ambitions_obj01",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_dangerous_ambitions/objectives/placeholder_to_the_light_dangerous_ambitions_obj01/description",
           "type": "giveQuestItem",
+          "questInventoryOnly": true,
           "optional": false,
           "count": 1
         }
@@ -17482,6 +18554,7 @@
         {
           "id": "placeholder_to_the_light_fallen_bird_obj01",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_fallen_bird/objectives/placeholder_to_the_light_fallen_bird_obj01/description",
+          "type": "extract",
           "optional": false
         }
       ]
@@ -17568,6 +18641,22 @@
           "id": "placeholder_to_the_light_false_call_obj04",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/description",
           "type": "useItem",
+          "useAny": [
+            {
+              "id": "624c0b3340357b5f566e8766",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/useAny/624c0b3340357b5f566e8766/name"
+            },
+            {
+              "id": "62389be94d5d474bf712e709",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/useAny/62389be94d5d474bf712e709/name"
+            }
+          ],
+          "usingWeapon": [
+            {
+              "id": "620109578d82e67e7911abf2",
+              "name": "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/usingWeapon/620109578d82e67e7911abf2/name"
+            }
+          ],
           "maps": [
             {
               "id": "56f40101d2720b2a4d8b45d6",
@@ -17610,6 +18699,7 @@
         {
           "id": "placeholder_to_the_light_someone_called_obj01",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_someone_called/objectives/placeholder_to_the_light_someone_called_obj01/description",
+          "type": "extract",
           "optional": false
         }
       ]
@@ -17796,6 +18886,10 @@
           "id": "placeholder_to_the_light_trust_but_verify_obj01",
           "description": "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj01/description",
           "type": "plantQuestItem",
+          "questItem": {
+            "id": "6a8993cab2713c27d90e9bb7",
+            "name": "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj01/questItem/name"
+          },
           "maps": [
             {
               "id": "5b0fc42d86f7744a585f9105",
@@ -19133,8 +20227,13 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/map/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/taskRequirements/0/task/name": "Final Stretch",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/description": "Decrypt the data from the secret facility laptop",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/questItem/name": "Laptop from an unknown facility",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/items/577e1c9d2459773cd707c525/name": "Printer paper",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj01/items/57347ca924597744596b4e71/name": "Graphics card",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj02/description": "Read the data recovered from Fence's laptop",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj02/useAny/6a55f339fe4be93a04090acc/name": "Data from Fence's laptop",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj03/description": "Hand over the laptop",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_consequences_of_our_decisions/objectives/placeholder_consequences_of_our_decisions_obj03/questItem/name": "Laptop from an unknown facility",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_desperate_assault/name": "Desperate Assault",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_desperate_assault/wikiLink": "https://escapefromtarkov.fandom.com/wiki/Desperate_Assault",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_desperate_assault/trader/name": "Mechanic",
@@ -19155,8 +20254,10 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/map/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/taskRequirements/0/task/name": "Sheep in Wolf's Clothing",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj01/description": "Locate and obtain the laptop from Fence's stash on Streets of Tarkov",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj01/questItem/name": "Laptop from an unknown facility",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj01/maps/5714dc692459777137212e12/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj02/description": "Hand over the found item",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_final_stretch/objectives/placeholder_final_stretch_obj02/questItem/name": "Laptop from an unknown facility",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_forbidden_knowledge/name": "Forbidden Knowledge",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_forbidden_knowledge/wikiLink": "https://escapefromtarkov.fandom.com/wiki/Forbidden_Knowledge",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_forbidden_knowledge/trader/name": "Fence",
@@ -19174,14 +20275,183 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj01/description": "Eliminate 3 PMC operatives during 22:00-08:00 on Customs",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj01/maps/56f40101d2720b2a4d8b45d6/name": "Customs",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/description": "Stash 3 PMC dogtags in the marked room on Customs",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/59f32bb586f774757e1e8442/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/59f32c3b86f77472a31742f0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662e9aca7e0b43baa3d5f74/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662e9cda7e0b43baa3d5f76/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/675dc9d37ae1a8792107ca96/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/675dcb0545b1a2d108011b2b/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/684180bc51bf8645f7067bc8/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/684181208d035f60230f63f9/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df9908972cf1e1ec07256a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df991142e96f583d042b8a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df991dbeba86572e097ceb/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df9927a38a5e37d80df6c9/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f60a121d878a2303eedb/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f63c645c14a02104142a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f153aa7da590b6df0515da/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15cf222c8979ee308f495/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15e26f1aa7e100a0ca208/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb41120760c7891606613c/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb412b0760c7891606613e/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d537cfc9b36b300da067/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d55e0b4e81daf20cd212/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d585cfc9b36b300da06a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d5af0b4e81daf20cd215/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d5d3667ebebca605d8f6/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6aa2d5ee11d6c6361804dd57/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662e9f37fa79a6d83730fa0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6662ea05f6259762c56f3189/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6764202ae307804338014c1a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6764207f2fa5e32733055c4a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68418091b5b0c9e4c60f0e7a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/684180ee9b6d80d840042e8a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99975d4e135b130392ca/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99a614ca2428b2017cd8/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99b2f716906506098308/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68df99c05d4e135b130392cc/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f64f183146ea530330aa/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f0f662859ebec8d501b76a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15dbab2b53abd200b9378/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68f15e53103c5d9d4f022c78/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb4143a854bc7ae80fad3e/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/68fb4157b280c103230e3b3c/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab2d6031c7d617b290dd2b0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab2d68819b981e6870f35d3/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab60a252bc101093f05029f/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab60a57615ae75bdd0e39ce/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6ab60a62d60e0dec3e04ff2c/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a3549435288a3fe6e085224/name": "Double dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a3548e72a963bcdd8098649/name": "Double dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a30652075cf460944c6/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a9a9cd7a91b45027a89/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354aa56632508bd10476dc/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354abe73339990030ca469/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a077e4ccdbe95005266/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a6240e6797a930312e5/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a6f8d465a55c70065c8/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/items/6a354a7e6632508bd10476d8/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/requiredKeys/0/5780cf7f2459777de4559322/name": "Dorm room 314 marked key",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj02/maps/56f40101d2720b2a4d8b45d6/name": "Customs",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj03/description": "Eliminate 3 PMC operatives during 22:00-08:00 on Woods",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj03/maps/5704e3c2d2720bac5b8b4567/name": "Woods",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/description": "Stash 3 PMC dogtags at the abandoned village marked circle on Woods",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/59f32bb586f774757e1e8442/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/59f32c3b86f77472a31742f0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662e9aca7e0b43baa3d5f74/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662e9cda7e0b43baa3d5f76/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/675dc9d37ae1a8792107ca96/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/675dcb0545b1a2d108011b2b/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/684180bc51bf8645f7067bc8/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/684181208d035f60230f63f9/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df9908972cf1e1ec07256a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df991142e96f583d042b8a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df991dbeba86572e097ceb/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df9927a38a5e37d80df6c9/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f60a121d878a2303eedb/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f63c645c14a02104142a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f153aa7da590b6df0515da/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15cf222c8979ee308f495/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15e26f1aa7e100a0ca208/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb41120760c7891606613c/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb412b0760c7891606613e/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d537cfc9b36b300da067/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d55e0b4e81daf20cd212/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d585cfc9b36b300da06a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d5af0b4e81daf20cd215/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d5d3667ebebca605d8f6/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6aa2d5ee11d6c6361804dd57/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662e9f37fa79a6d83730fa0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6662ea05f6259762c56f3189/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6764202ae307804338014c1a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6764207f2fa5e32733055c4a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68418091b5b0c9e4c60f0e7a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/684180ee9b6d80d840042e8a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99975d4e135b130392ca/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99a614ca2428b2017cd8/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99b2f716906506098308/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68df99c05d4e135b130392cc/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f64f183146ea530330aa/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f0f662859ebec8d501b76a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15dbab2b53abd200b9378/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68f15e53103c5d9d4f022c78/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb4143a854bc7ae80fad3e/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/68fb4157b280c103230e3b3c/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab2d6031c7d617b290dd2b0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab2d68819b981e6870f35d3/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab60a252bc101093f05029f/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab60a57615ae75bdd0e39ce/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6ab60a62d60e0dec3e04ff2c/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a3549435288a3fe6e085224/name": "Double dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a3548e72a963bcdd8098649/name": "Double dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a30652075cf460944c6/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a9a9cd7a91b45027a89/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354aa56632508bd10476dc/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354abe73339990030ca469/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a077e4ccdbe95005266/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a6240e6797a930312e5/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a6f8d465a55c70065c8/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/items/6a354a7e6632508bd10476d8/name": "Marked dogtag USEC",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj04/maps/5704e3c2d2720bac5b8b4567/name": "Woods",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj05/description": "Eliminate 3 PMC operatives during 22:00-08:00 on Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj05/maps/5714dc692459777137212e12/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/description": "Stash 3 PMC dogtags in the marked circle in Nikitskaya St. 8 second floor apartment on Streets of Tarkov",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/59f32bb586f774757e1e8442/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/59f32c3b86f77472a31742f0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662e9aca7e0b43baa3d5f74/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662e9cda7e0b43baa3d5f76/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/675dc9d37ae1a8792107ca96/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/675dcb0545b1a2d108011b2b/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/684180bc51bf8645f7067bc8/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/684181208d035f60230f63f9/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df9908972cf1e1ec07256a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df991142e96f583d042b8a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df991dbeba86572e097ceb/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df9927a38a5e37d80df6c9/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f60a121d878a2303eedb/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f63c645c14a02104142a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f153aa7da590b6df0515da/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15cf222c8979ee308f495/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15e26f1aa7e100a0ca208/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb41120760c7891606613c/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb412b0760c7891606613e/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d537cfc9b36b300da067/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d55e0b4e81daf20cd212/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d585cfc9b36b300da06a/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d5af0b4e81daf20cd215/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d5d3667ebebca605d8f6/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6aa2d5ee11d6c6361804dd57/name": "Dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662e9f37fa79a6d83730fa0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6662ea05f6259762c56f3189/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6764202ae307804338014c1a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6764207f2fa5e32733055c4a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68418091b5b0c9e4c60f0e7a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/684180ee9b6d80d840042e8a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99975d4e135b130392ca/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99a614ca2428b2017cd8/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99b2f716906506098308/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68df99c05d4e135b130392cc/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f64f183146ea530330aa/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f0f662859ebec8d501b76a/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15dbab2b53abd200b9378/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68f15e53103c5d9d4f022c78/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb4143a854bc7ae80fad3e/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/68fb4157b280c103230e3b3c/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab2d6031c7d617b290dd2b0/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab2d68819b981e6870f35d3/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab60a252bc101093f05029f/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab60a57615ae75bdd0e39ce/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6ab60a62d60e0dec3e04ff2c/name": "Dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a3549435288a3fe6e085224/name": "Double dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a3548e72a963bcdd8098649/name": "Double dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a30652075cf460944c6/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a9a9cd7a91b45027a89/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354aa56632508bd10476dc/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354abe73339990030ca469/name": "Marked dogtag BEAR",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a077e4ccdbe95005266/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a6240e6797a930312e5/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a6f8d465a55c70065c8/name": "Marked dogtag USEC",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/items/6a354a7e6632508bd10476d8/name": "Marked dogtag USEC",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_historical_prospects/objectives/placeholder_historical_prospects_obj06/maps/5714dc692459777137212e12/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/name": "In the Name of Humanity...",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/wikiLink": "https://escapefromtarkov.fandom.com/wiki/In_the_Name_of_Humanity...",
@@ -19190,12 +20460,14 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj01/description": "Eliminate any 3 targets during 20:00-08:00 on Interchange (In one raid)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj01/maps/5714dbc024597771384a510d/name": "Interchange",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj02/description": "Locate the hidden keycard panel in the Burger Spot bathroom on Interchange (In one raid)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj02/requiredKeys/0/5e42c81886f7742a01529f57/name": "Object #11SR keycard",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj02/maps/5714dbc024597771384a510d/name": "Interchange",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj03/description": "Locate the hidden TerraGroup saferoom on Interchange (In one raid)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj03/maps/5714dbc024597771384a510d/name": "Interchange",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj04/description": "Locate and access Container 14 on Interchange (In one raid)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj04/maps/5714dbc024597771384a510d/name": "Interchange",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj05/description": "Obtain the carbon fiber case from Container 14 on Interchange (In one raid)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj05/questItem/name": "Carbon fiber case",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj05/maps/5714dbc024597771384a510d/name": "Interchange",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj06/description": "Use the transit from Interchange to Streets of Tarkov (In one raid)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj06/maps/5714dbc024597771384a510d/name": "Interchange",
@@ -19203,8 +20475,12 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj07/description": "Eliminate any 3 targets during 20:00-08:00 on Streets of Tarkov (In one raid)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj07/maps/5714dc692459777137212e12/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj08/description": "Stash the carbon fiber case on the 3rd floor balcony of the Pinewood Hotel restaurant on Streets of Tarkov (In one raid)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj08/questItem/name": "Carbon fiber case",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj08/maps/5714dc692459777137212e12/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/description": "Launch a yellow signal flare at the tram that collapsed into the sewers on Streets of Tarkov (In one raid)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/useAny/624c0b3340357b5f566e8766/name": "RSP-30 reactive signal cartridge (Yellow)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/useAny/62389be94d5d474bf712e709/name": "26x75mm flare cartridge (Yellow)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/usingWeapon/620109578d82e67e7911abf2/name": "ZiD SP-81 26x75 signal pistol",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_in_the_name_of_humanity/objectives/placeholder_in_the_name_of_humanity_obj09/maps/5714dc692459777137212e12/name": "Streets of Tarkov",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_key_to_understanding/name": "Key to Understanding",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_key_to_understanding/wikiLink": "https://escapefromtarkov.fandom.com/wiki/Key_to_Understanding",
@@ -19221,6 +20497,11 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/trader/name": "Prapor",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/taskRequirements/0/task/name": "Cast the Net",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/description": "Hand over 5 any Black Division plate carriers",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/689479a4a733b1602007e2eb/name": "Spiritus Systems LV-119 Plate Carrier (Black Division V1)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/689479eb30cc5ba7be00f5ff/name": "Spiritus Systems LV-119 Plate Carrier (Black Division V2)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/689479cb47e5acd1e10be986/name": "Ferro Concepts FCPC V5 Plate Carrier (Black Division)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/68947a4be4bf255d1b0ca746/name": "First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_know_your_enemy/objectives/placeholder_know_your_enemy_obj01/items/69e2441a18cb3157560855ec/name": "Spiritus Systems LV-119 Plate Carrier (MultiCam Black)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_price_for_information/name": "Price for Information",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_price_for_information/wikiLink": "https://escapefromtarkov.fandom.com/wiki/Price_for_Information",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_price_for_information/trader/name": "Lightkeeper",
@@ -19324,6 +20605,7 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/map/name": "Ground Zero",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/taskRequirements/0/task/name": "Uninvited Guests - Part 1",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/objectives/placeholder_unanswered_calls_obj01/description": "Stash Therapist's letter at the reception desk on the second floor of the TerraGroup office on Ground Zero (in one raid)",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/objectives/placeholder_unanswered_calls_obj01/questItem/name": "Therapist's message",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/objectives/placeholder_unanswered_calls_obj01/maps/653e6760052c01c1c805532f/name": "Ground Zero",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_unanswered_calls/objectives/placeholder_unanswered_calls_obj02/description": "Extract from the location through the Nakatani Basement Stairs or Emercom Checkpoint exfil (in one raid)",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/name": "Uninvited Guests - Part 1",
@@ -19331,6 +20613,7 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/trader/name": "Prapor",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/traderRequirements/overlay.placeholder_uninvited_guests_part_1.54cb50c76803fa8b248b4571.level.>=.2/trader/name": "Prapor",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj01/description": "Locate and obtain the case with military equipment",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj01/questItem/name": "Case with military equipment",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj02/description": "Investigate the shack next to the sordi tower on Shoreline",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj02/maps/5704e554d2720bac5b8b456e/name": "Shoreline",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_1/objectives/placeholder_uninvited_guests_part_1_obj03/description": "Investigate the second floor of the weather station building on Shoreline",
@@ -19351,6 +20634,7 @@
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_2/trader/name": "BTR Driver",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_2/taskRequirements/0/task/name": "Uninvited Guests - Part 1",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_2/objectives/placeholder_uninvited_guests_part_2_obj01/description": "Obtain and hand over the case with military equipment",
+      "@tt:overlay:/modes/pvp-season/tasks/placeholder_uninvited_guests_part_2/objectives/placeholder_uninvited_guests_part_2_obj01/questItem/name": "Case with military equipment",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_what_s_in_the_bag/name": "What's in the Bag?",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_what_s_in_the_bag/wikiLink": "https://escapefromtarkov.fandom.com/wiki/What's_in_the_Bag%3F",
       "@tt:overlay:/modes/pvp-season/tasks/placeholder_what_s_in_the_bag/trader/name": "Fence",
@@ -20631,6 +21915,15 @@
       "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/map/name": "Lighthouse",
       "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/taskRequirements/0/task/name": "Honest Review",
       "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/description": "Eliminate 15 Scavs with any 7.62x54R caliber weapon on Lighthouse",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/6410733d5dd49d77bd07847e/name": "Tokarev AVT-40 7.62x54R automatic rifle",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/643ea5b23db6f9f57107d9fd/name": "Tokarev SVT-40 7.62x54R rifle",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/64637076203536ad5600c990/name": "Kalashnikov PKM 7.62x54R machine gun",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/64ca3d3954fc657e230529cc/name": "Kalashnikov PKP 7.62x54R infantry machine gun",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/5c46fbd72e2216398b5a8c9c/name": "SVDS 7.62x54R sniper rifle",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/5bfd297f0db834001a669119/name": "Mosin 7.62x54R bolt-action rifle (Infantry)",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/5ae08f0a5acfc408fb1398a1/name": "Mosin 7.62x54R bolt-action rifle (Sniper)",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/55801eed4bdc2d89578b4588/name": "SV-98 7.62x54R bolt-action sniper rifle",
+      "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/usingWeapon/61f7c9e189e6fb1a5e3ea78d/name": "MP-18 7.62x54R single-shot rifle",
       "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj01/maps/5704e4dad2720bb55b8b4567/name": "Lighthouse",
       "@tt:overlay:/tasks/placeholder_i_m_something_of_a_btr_myself/objectives/placeholder_i_m_something_of_a_btr_myself_obj02/description": "Report back to the BTR Driver",
       "@tt:overlay:/tasks/placeholder_pay_the_fare/name": "Pay the Fare!",
@@ -20660,6 +21953,62 @@
       "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/trader/name": "Mechanic",
       "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/taskRequirements/0/task/name": "To the Light - A Time to Throw Stones",
       "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/description": "Hand over 3 found in raid PMC dogtags (Level 30 or higher)",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/59f32bb586f774757e1e8442/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/59f32c3b86f77472a31742f0/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662e9aca7e0b43baa3d5f74/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662e9cda7e0b43baa3d5f76/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/675dc9d37ae1a8792107ca96/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/675dcb0545b1a2d108011b2b/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/684180bc51bf8645f7067bc8/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/684181208d035f60230f63f9/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df9908972cf1e1ec07256a/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df991142e96f583d042b8a/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df991dbeba86572e097ceb/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df9927a38a5e37d80df6c9/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f60a121d878a2303eedb/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f63c645c14a02104142a/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f153aa7da590b6df0515da/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15cf222c8979ee308f495/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15e26f1aa7e100a0ca208/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb41120760c7891606613c/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb412b0760c7891606613e/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d537cfc9b36b300da067/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d55e0b4e81daf20cd212/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d585cfc9b36b300da06a/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d5af0b4e81daf20cd215/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d5d3667ebebca605d8f6/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6aa2d5ee11d6c6361804dd57/name": "Dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662e9f37fa79a6d83730fa0/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6662ea05f6259762c56f3189/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6764202ae307804338014c1a/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6764207f2fa5e32733055c4a/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68418091b5b0c9e4c60f0e7a/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/684180ee9b6d80d840042e8a/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99975d4e135b130392ca/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99a614ca2428b2017cd8/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99b2f716906506098308/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68df99c05d4e135b130392cc/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f64f183146ea530330aa/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f0f662859ebec8d501b76a/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15dbab2b53abd200b9378/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68f15e53103c5d9d4f022c78/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb4143a854bc7ae80fad3e/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/68fb4157b280c103230e3b3c/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab2d6031c7d617b290dd2b0/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab2d68819b981e6870f35d3/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab60a252bc101093f05029f/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab60a57615ae75bdd0e39ce/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6ab60a62d60e0dec3e04ff2c/name": "Dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a3549435288a3fe6e085224/name": "Double dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a3548e72a963bcdd8098649/name": "Double dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a30652075cf460944c6/name": "Marked dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a9a9cd7a91b45027a89/name": "Marked dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354aa56632508bd10476dc/name": "Marked dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354abe73339990030ca469/name": "Marked dogtag BEAR",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a077e4ccdbe95005266/name": "Marked dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a6240e6797a930312e5/name": "Marked dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a6f8d465a55c70065c8/name": "Marked dogtag USEC",
+      "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_gather_stones/objectives/placeholder_to_the_light_a_time_to_gather_stones_obj01/items/6a354a7e6632508bd10476d8/name": "Marked dogtag USEC",
       "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_throw_stones/name": "To the Light - A Time to Throw Stones",
       "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_throw_stones/wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Throw_Stones",
       "@tt:overlay:/tasks/placeholder_to_the_light_a_time_to_throw_stones/trader/name": "Mechanic",
@@ -20722,6 +22071,9 @@
       "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj03/items/5b4391a586f7745321235ab2/name": "WI-FI Camera",
       "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj03/items/5b4391a586f7745321235ab2/shortName": "Camera",
       "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/description": "Launch a yellow signal flare at the Shoreline transit on Customs (In one raid)",
+      "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/useAny/624c0b3340357b5f566e8766/name": "RSP-30 reactive signal cartridge (Yellow)",
+      "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/useAny/62389be94d5d474bf712e709/name": "26x75mm flare cartridge (Yellow)",
+      "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/usingWeapon/620109578d82e67e7911abf2/name": "ZiD SP-81 26x75 signal pistol",
       "@tt:overlay:/tasks/placeholder_to_the_light_false_call/objectives/placeholder_to_the_light_false_call_obj04/maps/56f40101d2720b2a4d8b45d6/name": "Customs",
       "@tt:overlay:/tasks/placeholder_to_the_light_someone_called/name": "To the Light - Someone Called?",
       "@tt:overlay:/tasks/placeholder_to_the_light_someone_called/wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Someone_Called%3F",
@@ -20757,6 +22109,7 @@
       "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/traderRequirements/overlay.placeholder_to_the_light_trust_but_verify.5c0647fdd443bc2504c2d371.level.>=.3/trader/name": "Jaeger",
       "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/otherRequirements/placeholder_to_the_light_trust_but_verify_req_dialogue/traders/5a7c2eca46aef81a7ca2145d/name": "Mechanic",
       "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj01/description": "Stash the Hard drive with false data in the server room near the weapon testing area in The Lab (In one raid)",
+      "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj01/questItem/name": "Hard drive with false data",
       "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj01/maps/5b0fc42d86f7744a585f9105/name": "The Lab",
       "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj02/description": "Extract from The Lab through the Ventilation Shaft (In one raid)",
       "@tt:overlay:/tasks/placeholder_to_the_light_trust_but_verify/objectives/placeholder_to_the_light_trust_but_verify_obj02/maps/5b0fc42d86f7744a585f9105/name": "The Lab"
@@ -22389,13 +23742,13 @@
     ]
   },
   "$source": {
-    "version": "1.183",
-    "generated": "2026-11-18T21:19:09.938Z",
-    "sha256": "a1ae5057fa18b7513c77a1676ab7a79686a4d5596e290fd33c682a89c9d50e77"
+    "version": "1.184",
+    "generated": "2026-11-20T17:17:24.078Z",
+    "sha256": "39c6b16303ced6fa019c80b0d9472130a5ae1fa09fae41f0c4bb0ca15a716293"
   },
   "$meta": {
-    "version": "1.183",
-    "generated": "2026-11-18T21:19:09.938Z",
-    "sha256": "0a1f1d6caef9554466e8087dd4c6f78fc54944f6b385eb42cefab1d9324e52c1"
+    "version": "1.184",
+    "generated": "2026-11-20T17:17:24.078Z",
+    "sha256": "8fb675a4b5d0056666b601de7acc232ade730c7dc0cf85145db56f5c7e2adc3d"
   }
 }
