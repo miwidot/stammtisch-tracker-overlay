@@ -3265,6 +3265,8 @@
       {
         id: 'placeholder_honest_review_obj04',
         description: 'Share your feedback with the BTR Driver',
+        // Was: untyped objective. A client quest capture identifies this as a GlobalVariableValue. https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/507
+        type: 'globalVariable',
         optional: false,
       },
     ],
@@ -3302,6 +3304,18 @@
         id: 'placeholder_i_m_something_of_a_btr_myself_obj01',
         description: 'Eliminate 15 Scavs with any 7.62x54R caliber weapon on Lighthouse',
         type: 'shoot',
+        // Was: requirement fields missing. Same unrestricted 7.62x54R weapon class as Stimulating Demand in the three upstream task feeds. https://raidsignal.com/tasks/im-something-of-a-btr-myself
+        usingWeapon: [
+          { id: '6410733d5dd49d77bd07847e', name: 'Tokarev AVT-40 7.62x54R automatic rifle' },
+          { id: '643ea5b23db6f9f57107d9fd', name: 'Tokarev SVT-40 7.62x54R rifle' },
+          { id: '64637076203536ad5600c990', name: 'Kalashnikov PKM 7.62x54R machine gun' },
+          { id: '64ca3d3954fc657e230529cc', name: 'Kalashnikov PKP 7.62x54R infantry machine gun' },
+          { id: '5c46fbd72e2216398b5a8c9c', name: 'SVDS 7.62x54R sniper rifle' },
+          { id: '5bfd297f0db834001a669119', name: 'Mosin 7.62x54R bolt-action rifle (Infantry)' },
+          { id: '5ae08f0a5acfc408fb1398a1', name: 'Mosin 7.62x54R bolt-action rifle (Sniper)' },
+          { id: '55801eed4bdc2d89578b4588', name: 'SV-98 7.62x54R bolt-action sniper rifle' },
+          { id: '61f7c9e189e6fb1a5e3ea78d', name: 'MP-18 7.62x54R single-shot rifle' },
+        ],
         maps: [
           {
             id: '5704e4dad2720bb55b8b4567',
@@ -3315,6 +3329,8 @@
       {
         id: 'placeholder_i_m_something_of_a_btr_myself_obj02',
         description: 'Report back to the BTR Driver',
+        // Was: untyped objective. Report to the BTR Driver. https://raidsignal.com/tasks/im-something-of-a-btr-myself
+        type: 'dialogue',
         optional: false,
       },
     ],
@@ -3470,6 +3486,66 @@
         id: 'placeholder_to_the_light_a_time_to_gather_stones_obj01',
         description: 'Hand over 3 found in raid PMC dogtags (Level 30 or higher)',
         type: 'giveItem',
+        // Was: requirement fields missing. Both PMC factions use the same catalog pool as The Punisher - Part 6. https://www.tarkovhead.com/en/quest/regular/to-the-light-a-time-to-gather-stones
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
+        dogTagLevel: 30,
         optional: false,
         foundInRaid: true,
         count: 3,
@@ -3551,6 +3627,8 @@
         id: 'placeholder_to_the_light_bite_the_dust_obj01',
         description: 'Hand over the evidence implicating the person behind the disruptions',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. Client item templates confirm both Amulet from Lightkeeper templates are quest inventory items. https://raidsignal.com/tasks/to-the-light-bite-the-dust
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -3728,6 +3806,8 @@
         id: 'placeholder_to_the_light_dangerous_ambitions_obj01',
         description: 'Hand over the Amulet from Lightkeeper to Peacekeeper',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. Client item templates confirm both Amulet from Lightkeeper templates are quest inventory items. https://www.tarkovhead.com/en/quest/regular/to-the-light-dangerous-ambitions
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -3762,6 +3842,8 @@
       {
         id: 'placeholder_to_the_light_fallen_bird_obj01',
         description: 'Return to the Hideout',
+        // Was: untyped objective. Return to the Hideout, as for the captured Honest Review exit objective. https://raidsignal.com/tasks/to-the-light-fallen-bird
+        type: 'extract',
         optional: false,
       },
     ],
@@ -3849,6 +3931,12 @@
         id: 'placeholder_to_the_light_false_call_obj04',
         description: 'Launch a yellow signal flare at the Shoreline transit on Customs (In one raid)',
         type: 'useItem',
+        // Was: requirement fields missing. Both yellow flare forms and the launcher for the cartridge. https://www.tarkovhead.com/en/quest/regular/to-the-light-false-call
+        useAny: [
+          { id: '624c0b3340357b5f566e8766', name: 'RSP-30 reactive signal cartridge (Yellow)' },
+          { id: '62389be94d5d474bf712e709', name: '26x75mm flare cartridge (Yellow)' },
+        ],
+        usingWeapon: [{ id: '620109578d82e67e7911abf2', name: 'ZiD SP-81 26x75 signal pistol' }],
         maps: [
           {
             id: '56f40101d2720b2a4d8b45d6',
@@ -3892,6 +3980,8 @@
       {
         id: 'placeholder_to_the_light_someone_called_obj01',
         description: 'Return to the Hideout',
+        // Was: untyped objective. Return to the Hideout, as for the captured Honest Review exit objective. https://raidsignal.com/tasks/to-the-light-someone-called
+        type: 'extract',
         optional: false,
       },
     ],
@@ -4082,6 +4172,8 @@
         id: 'placeholder_to_the_light_trust_but_verify_obj01',
         description: 'Stash the Hard drive with false data in the server room near the weapon testing area in The Lab (In one raid)',
         type: 'plantQuestItem',
+        // Was: requirement fields missing. Client localization and item template for the hard drive. https://tarkov.help/en/quest/to-the-light-trust-but-verify
+        questItem: { id: '6a8993cab2713c27d90e9bb7', name: 'Hard drive with false data' },
         maps: [
           {
             id: '5b0fc42d86f7744a585f9105',

@@ -53,6 +53,8 @@
       {
         id: 'placeholder_for_the_good_of_the_chosen_obj01',
         description: 'Report back to Lightkeeper',
+        // Was: untyped objective. Report back to Lightkeeper. https://ka-chanblog.com/for-the-good-of-the-chosen/
+        type: 'dialogue',
         optional: false,
       },
     ],
@@ -86,6 +88,8 @@
       {
         id: 'placeholder_break_the_chain_obj01',
         description: 'Destroy the transmitter on the factory chimney near the unfinished construction site on Customs',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
         maps: [
           {
             id: '56f40101d2720b2a4d8b45d6',
@@ -97,6 +101,8 @@
       {
         id: 'placeholder_break_the_chain_obj02',
         description: 'Destroy the transmitter on the power line tower on Customs',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
         maps: [
           {
             id: '56f40101d2720b2a4d8b45d6',
@@ -108,6 +114,8 @@
       {
         id: 'placeholder_break_the_chain_obj03',
         description: 'Destroy the transmitter on top of the mountain on Woods',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
         maps: [
           {
             id: '5704e3c2d2720bac5b8b4567',
@@ -119,6 +127,8 @@
       {
         id: 'placeholder_break_the_chain_obj04',
         description: 'Destroy the transmitter on the cell tower on Woods',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
         maps: [
           {
             id: '5704e3c2d2720bac5b8b4567',
@@ -309,17 +319,29 @@
       {
         id: 'placeholder_consequences_of_our_decisions_obj01',
         description: 'Decrypt the data from the secret facility laptop',
+        // Was: untyped objective. Client hideout recipe 6a614e9593f5bcb59a0af69c requires the laptop, printer paper and a graphics card. https://www.tarkovhead.com/en/quest/regular/consequences-of-our-decisions
+        type: 'craft',
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
+        items: [
+          { id: '577e1c9d2459773cd707c525', name: 'Printer paper' },
+          { id: '57347ca924597744596b4e71', name: 'Graphics card' },
+        ],
         optional: false,
       },
       {
         id: 'placeholder_consequences_of_our_decisions_obj02',
         description: "Read the data recovered from Fence's laptop",
+        // Was: untyped objective. Client item template identifies the readable craft output. https://www.tarkovhead.com/en/quest/regular/consequences-of-our-decisions
+        type: 'useItem',
+        useAny: [{ id: '6a55f339fe4be93a04090acc', name: "Data from Fence's laptop" }],
         optional: false,
       },
       {
         id: 'placeholder_consequences_of_our_decisions_obj03',
         description: 'Hand over the laptop',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. Client item template shared with Final Stretch. https://www.tarkovhead.com/en/quest/regular/consequences-of-our-decisions
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
         optional: false,
         count: 1,
       },
@@ -445,6 +467,8 @@
         id: 'placeholder_final_stretch_obj01',
         description: "Locate and obtain the laptop from Fence's stash on Streets of Tarkov",
         type: 'findQuestItem',
+        // Was: requirement fields missing. Client item template for the quest laptop. https://www.tarkovhead.com/en/quest/regular/final-stretch
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
         maps: [
           {
             id: '5714dc692459777137212e12',
@@ -458,6 +482,8 @@
         id: 'placeholder_final_stretch_obj02',
         description: 'Hand over the found item',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. Client item template for the quest laptop. https://www.tarkovhead.com/en/quest/regular/final-stretch
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
         optional: false,
         count: 1,
       },
@@ -559,6 +585,66 @@
         id: 'placeholder_historical_prospects_obj02',
         description: 'Stash 3 PMC dogtags in the marked room on Customs',
         type: 'plantItem',
+        // Was: requirement fields missing. The PMC dogtag pool is the same as the upstream Punisher - Part 6 pool. https://www.tarkovhead.com/en/quest/regular/historical-prospects
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
+        requiredKeys: [[{ id: '5780cf7f2459777de4559322', name: 'Dorm room 314 marked key' }]],
         maps: [
           {
             id: '56f40101d2720b2a4d8b45d6',
@@ -586,6 +672,65 @@
         id: 'placeholder_historical_prospects_obj04',
         description: 'Stash 3 PMC dogtags at the abandoned village marked circle on Woods',
         type: 'plantItem',
+        // Was: requirement fields missing. The PMC dogtag pool is the same as the upstream Punisher - Part 6 pool. https://www.tarkovhead.com/en/quest/regular/historical-prospects
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
         maps: [
           {
             id: '5704e3c2d2720bac5b8b4567',
@@ -613,6 +758,65 @@
         id: 'placeholder_historical_prospects_obj06',
         description: 'Stash 3 PMC dogtags in the marked circle in Nikitskaya St. 8 second floor apartment on Streets of Tarkov',
         type: 'plantItem',
+        // Was: requirement fields missing. The PMC dogtag pool is the same as the upstream Punisher - Part 6 pool. https://www.tarkovhead.com/en/quest/regular/historical-prospects
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
         maps: [
           {
             id: '5714dc692459777137212e12',
@@ -668,6 +872,8 @@
         id: 'placeholder_in_the_name_of_humanity_obj02',
         description: 'Locate the hidden keycard panel in the Burger Spot bathroom on Interchange (In one raid)',
         type: 'visit',
+        // Was: requirement fields missing. The #11SR keycard opens the saferoom. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        requiredKeys: [[{ id: '5e42c81886f7742a01529f57', name: 'Object #11SR keycard' }]],
         maps: [
           {
             id: '5714dbc024597771384a510d',
@@ -704,6 +910,8 @@
         id: 'placeholder_in_the_name_of_humanity_obj05',
         description: 'Obtain the carbon fiber case from Container 14 on Interchange (In one raid)',
         type: 'findQuestItem',
+        // Was: requirement fields missing. Client item template for the carbon fiber case. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        questItem: { id: '6a6102a39499ae5e110a52c1', name: 'Carbon fiber case' },
         maps: [
           {
             id: '5714dbc024597771384a510d',
@@ -747,6 +955,8 @@
         id: 'placeholder_in_the_name_of_humanity_obj08',
         description: 'Stash the carbon fiber case on the 3rd floor balcony of the Pinewood Hotel restaurant on Streets of Tarkov (In one raid)',
         type: 'plantQuestItem',
+        // Was: requirement fields missing. Client item template for the carbon fiber case. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        questItem: { id: '6a6102a39499ae5e110a52c1', name: 'Carbon fiber case' },
         maps: [
           {
             id: '5714dc692459777137212e12',
@@ -760,6 +970,12 @@
         id: 'placeholder_in_the_name_of_humanity_obj09',
         description: 'Launch a yellow signal flare at the tram that collapsed into the sewers on Streets of Tarkov (In one raid)',
         type: 'useItem',
+        // Was: requirement fields missing. Both yellow flare forms and the launcher for the cartridge. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        useAny: [
+          { id: '624c0b3340357b5f566e8766', name: 'RSP-30 reactive signal cartridge (Yellow)' },
+          { id: '62389be94d5d474bf712e709', name: '26x75mm flare cartridge (Yellow)' },
+        ],
+        usingWeapon: [{ id: '620109578d82e67e7911abf2', name: 'ZiD SP-81 26x75 signal pistol' }],
         maps: [
           {
             id: '5714dc692459777137212e12',
@@ -860,6 +1076,29 @@
         id: 'placeholder_know_your_enemy_obj01',
         description: 'Hand over 5 any Black Division plate carriers',
         type: 'giveItem',
+        // Was: requirement fields missing. Five verified carrier variants, including MultiCam Black. https://www.tarkovhead.com/en/quest/regular/know-your-enemy
+        items: [
+          {
+            id: '689479a4a733b1602007e2eb',
+            name: 'Spiritus Systems LV-119 Plate Carrier (Black Division V1)',
+          },
+          {
+            id: '689479eb30cc5ba7be00f5ff',
+            name: 'Spiritus Systems LV-119 Plate Carrier (Black Division V2)',
+          },
+          {
+            id: '689479cb47e5acd1e10be986',
+            name: 'Ferro Concepts FCPC V5 Plate Carrier (Black Division)',
+          },
+          {
+            id: '68947a4be4bf255d1b0ca746',
+            name: 'First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)',
+          },
+          {
+            id: '69e2441a18cb3157560855ec',
+            name: 'Spiritus Systems LV-119 Plate Carrier (MultiCam Black)',
+          },
+        ],
         optional: false,
         count: 5,
       },
@@ -981,6 +1220,8 @@
         id: 'placeholder_reverse_gear_obj01',
         description: 'Locate and obtain the Wi-Fi Camera from the Ural truck near the hydroelectric power station on Shoreline',
         type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         maps: [
           {
             id: '5704e554d2720bac5b8b456e',
@@ -994,6 +1235,8 @@
         id: 'placeholder_reverse_gear_obj02',
         description: 'Hand over the camera',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -1001,6 +1244,8 @@
         id: 'placeholder_reverse_gear_obj03',
         description: "Locate and obtain the Wi-Fi Camera from the excavator at the stream near the smugglers' base on Shoreline",
         type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         maps: [
           {
             id: '5704e554d2720bac5b8b456e',
@@ -1014,6 +1259,8 @@
         id: 'placeholder_reverse_gear_obj04',
         description: 'Hand over the camera',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -1021,6 +1268,8 @@
         id: 'placeholder_reverse_gear_obj05',
         description: 'Locate and obtain the Wi-Fi Camera from the concrete mixer truck at the collapsed crane on Streets of Tarkov',
         type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         maps: [
           {
             id: '5714dc692459777137212e12',
@@ -1034,6 +1283,8 @@
         id: 'placeholder_reverse_gear_obj06',
         description: 'Hand over the camera',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -1041,6 +1292,8 @@
         id: 'placeholder_reverse_gear_obj07',
         description: 'Locate and obtain the Wi-Fi Camera from the bio toilet near the Rodina cinema on Streets of Tarkov',
         type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         maps: [
           {
             id: '5714dc692459777137212e12',
@@ -1054,6 +1307,8 @@
         id: 'placeholder_reverse_gear_obj08',
         description: 'Hand over the camera',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -1061,6 +1316,8 @@
         id: 'placeholder_reverse_gear_obj09',
         description: 'Locate and obtain the Wi-Fi Camera from the cargo truck cabin near Mira Ave on Ground Zero',
         type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         maps: [
           {
             id: '653e6760052c01c1c805532f',
@@ -1074,6 +1331,8 @@
         id: 'placeholder_reverse_gear_obj10',
         description: 'Hand over the camera',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -1081,6 +1340,8 @@
         id: 'placeholder_reverse_gear_obj11',
         description: 'Locate and obtain the Wi-Fi Camera from yellow bus in the underground tunnel on Ground Zero',
         type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         maps: [
           {
             id: '653e6760052c01c1c805532f',
@@ -1094,6 +1355,8 @@
         id: 'placeholder_reverse_gear_obj12',
         description: 'Hand over the camera',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
         optional: false,
         count: 1,
       },
@@ -1471,6 +1734,8 @@
         id: 'placeholder_unanswered_calls_obj01',
         description: "Stash Therapist's letter at the reception desk on the second floor of the TerraGroup office on Ground Zero (in one raid)",
         type: 'plantQuestItem',
+        // Was: requirement fields missing. Client item template identifies Therapist’s quest-only message. https://www.tarkovhead.com/en/quest/regular/unanswered-calls
+        questItem: { id: '6a6101b09b3e38f37a0dc67e', name: "Therapist's message" },
         maps: [
           {
             id: '653e6760052c01c1c805532f',
@@ -1527,6 +1792,8 @@
         id: 'placeholder_uninvited_guests_part_1_obj01',
         description: 'Locate and obtain the case with military equipment',
         type: 'findQuestItem',
+        // Was: requirement fields missing. Client task condition and item template. https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/507
+        questItem: { id: '6a671d87ff6f8a0b080b6bf3', name: 'Case with military equipment' },
         optional: false,
         count: 1,
       },
@@ -1642,6 +1909,8 @@
         id: 'placeholder_uninvited_guests_part_2_obj01',
         description: 'Obtain and hand over the case with military equipment',
         type: 'giveQuestItem',
+        // Was: requirement fields missing. Same quest-inventory case as Part 1. https://www.tarkovhead.com/en/quest/regular/uninvited-guests-part-2
+        questItem: { id: '6a671d87ff6f8a0b080b6bf3', name: 'Case with military equipment' },
         optional: false,
         count: 1,
       },
