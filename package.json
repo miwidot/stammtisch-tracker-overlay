@@ -11,25 +11,29 @@
     "check-overrides": "tsx scripts/check-overrides.ts",
     "eft:compare": "tsx scripts/eft-compare.ts",
     "eft:audit": "tsx scripts/eft-audit.ts",
+    "eft:coverage": "tsx scripts/eft-coverage.ts",
+    "eft:diff": "tsx scripts/eft-diff.ts",
+    "eft:import": "tsx scripts/eft-import.ts",
+    "eft:remote": "tsx scripts/eft-remote.ts",
+    "eft:extracts": "tsx scripts/eft-extracts.ts",
     "eft:wiki": "tsx scripts/eft-wiki-crosscheck.ts",
     "eft:normalize": "tsx scripts/eft-normalize.ts",
     "eft:story": "mkdir -p data/eft && tsx scripts/eft-story-wiki.ts && tsx scripts/eft-story-generate.ts > data/eft/story-final.json && tsx scripts/eft-story-write.ts",
     "tasks:availability": "tsx scripts/task-availability.ts",
     "wiki:compare": "tsx scripts/wiki-compare.ts",
-    "monitor": "node monitor/server.js",
-    "check:monitor": "node --check monitor/server.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
     "audit:dependencies": "node scripts/audit-dependencies.cjs",
     "fallow:check": "fallow dead-code",
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
     "fallow:security": "fallow security",
-    "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#dist\" \"#data\" \"#eft\"",
+    "lint:markdown": "node scripts/lint-markdown.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,cts,json,json5,md}\"",
     "format:check": "prettier --check \"**/*.{ts,cts,json,json5,md}\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "status:locale": "tsx scripts/status-locale.ts"
+    "test": "node --import tsx --experimental-test-module-mocks --test --test-reporter=dot \"tests/**/*.test.ts\"",
+    "test:watch": "node --import tsx --experimental-test-module-mocks --test --watch \"tests/**/*.test.ts\"",
+    "status:locale": "tsx scripts/status-locale.ts",
+    "maintenance:ci": "tsx scripts/maintenance-ci.ts"
   },
   "keywords": [
     "tarkov",
@@ -40,22 +44,27 @@
     "data"
   ],
   "author": "Lab",
-  "license": "MIT",
+  "license": "(MIT AND CC-BY-NC-4.0)",
   "engines": {
     "node": ">=24.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.5",
+    "@sinonjs/fake-timers": "15.4.0",
+    "@types/node": "24.19.2",
+    "@types/sinonjs__fake-timers": "15.0.1",
+    "@vitest/expect": "5.1.0",
+    "@vitest/spy": "5.1.0",
     "ajv": "^8.20.0",
-    "fallow": "^3.26.0",
+    "expect-type": "1.4.0",
+    "fallow": "3.40.0",
     "json5": "^2.2.3",
-    "markdownlint-cli2": "^0.23.2",
-    "prettier": "^3.9.6",
-    "tsx": "^4.23.13",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.1"
+    "markdownlint": "0.42.0",
+    "prettier": "3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   },
   "overrides": {
-    "smol-toml": "^1.7.2"
+    "katex": "0.18.9",
+    "re2js": "2.8.8"
   }
 }

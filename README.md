@@ -22,61 +22,95 @@ using the overlay in production; the embedded digest detects corruption or stale
 prove the CDN response's authenticity.
 
 Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATION.md) for details.
+Language-neutral consumers use the versioned `dist/overlay-neutral.json` artifact.
+Its string tables, locale bindings, integrity checks, and release order are documented in
+[Language-neutral overlay contract](docs/NEUTRAL_OVERLAY.md).
 For accurate task visibility and unlock-state tracking, see
 [Task availability and unlock tracking](docs/TASK_AVAILABILITY.md).
 Use `evaluateTaskProgression` for verified progress-based counters and explicit
 unknown results; see the [counter data contract](docs/GLOBAL_VARIABLES.md).
 
-## Monitor
-
-Browse the hosted monitor at [monitor.nivmizz7.fr](https://monitor.nivmizz7.fr), or run it locally with:
-
-```bash
-npm run monitor
-```
-
-The monitor is read-only by default. To enable its local “Update overlay” action,
-explicitly opt in with a rebuild token when starting it:
-
-```bash
-ALLOW_REBUILD=true REBUILD_TOKEN='choose-a-local-secret' npm run monitor
-```
-
-The server binds to `127.0.0.1` by default. Set `HOST` only when a trusted
-reverse proxy or network boundary is configured; a non-empty token is always
-required for rebuilds, and callers must pass it in an `Authorization: Bearer …`
-header. When `HOST` is not loopback, set `TRUSTED_HTTPS_PROXY=true` only when
-HTTPS is terminated by a trusted reverse proxy; otherwise rebuilds remain
-disabled. In that mode the monitor also uses the first valid `X-Forwarded-For`
-address for per-client SSE quotas, so the proxy must overwrite that header.
-Without the trusted-proxy setting, quotas use the direct socket address.
-Rebuilds target the default `dist/overlay.json` output; custom local and HTTP(S)
-overlay targets remain read-only.
-
 ## Maintenance
 
-The overlay is regularly validated against the tarkov.dev API to ensure corrections are still needed:
+The overlay is compared against current `json.tarkov.dev` data in each supported mode:
 
 ```bash
 npm run check-overrides
 ```
 
-This command compares all overrides against current API data and reports:
+Mode-specific values that match upstream but cancel a different shared patch are
+preserved as guards. Shared task corrections are removable only after checking
+their effective behavior in every supported mode, including corrections masked
+by mode-specific patches.
 
-- ✅ Overrides that are still needed
+This command reports upstream comparison results and the limits of each check:
+
+- ⚠️ Values that differ from upstream and require supporting correction evidence
 - 🔄 Corrections that have been fixed upstream (can be removed)
 - 🗑️ Tasks that have been removed from the API (can be deleted)
 - ⚠️ Upstream data-quality regressions (reported for escalation, not actionable here)
 
+Every supplied field is reported, including nested objects, array members,
+unknown extensions and unavailable upstream values. Items and crafts retain the
+upstream field format; task additions retain the existing adapted overlay
+contract for consumer compatibility. Format and reference checks validate item,
+task, trader, map, station and perk references against the applicable mode and
+its additions. Additions are reference targets, never evidence for their own
+format or values. Unknown raw seasonal filter IDs remain unverified because the
+upstream item catalog does not establish all game template identities.
+
+Task additions match canonical IDs before wiki links or names. An adopted ID
+flags a duplicate addition independently of its values. Full retirement requires
+all supplied values to match; differing or unavailable values require review and
+only proven corrections should become overrides. Array comparisons preserve
+membership and cardinality, align unique IDs, and reject ambiguous identity
+matches. Maps include
+extract additions and effective shared/mode patches. Seasonal supplements check
+perk IDs and raw effects when upstream exposes them; progression counters check
+task references and exposed variable references. Counter pool membership,
+unexposed raw effects, editions and story data are explicitly reported as not
+comparable, rather than verified. Endpoint discovery flags potential new upstream
+edition/story sources for review without gating unrelated PRs.
+
+Item adoption checks include the mode's items, quest items and usable item-name
+entries in both English translation dictionaries. Dictionary-only identities must
+be item IDs, excluding generic labels and known task IDs. Incomplete item sources or
+malformed translations fail validation; unresolved translation placeholders do
+not establish field values. Empty task snapshots also fail validation. Missing
+objective lists and unexposed disabled flags remain unverified, and disabling a
+task does not skip its other field comparisons.
+Comparison snapshots preserve raw evidence separately from display fallbacks:
+filtered malformed collections and unresolved or blank translations cannot prove
+an empty list or matching text. Task status aliases and equivalent trader merge
+identities retain their existing semantics while checking all supplied nested
+names and extension fields. Shared corrections retire only when every mode is
+covered by upstream data or a task mode correction that remains independently needed;
+identical shared/mode values cannot be retired together. Stale counts include
+matching nested leaves within corrections that still differ elsewhere. Shared
+map/entity fields and additions require evidence in every applicable mode, and
+stale counts identify physical source units instead of counting each mode again. Supplied
+typed task requirements enforce their conditional contract fields.
+
+Counter checks reuse the main audit's task snapshots; standalone checks fetch
+independent modes concurrently.
+
+A difference alone does not establish that the overlay is correct. Missing local
+reference evidence is reported as `UNVERIFIED`; numeric objective contradictions
+with an applicable reference count toward `--strict`. API failures, malformed
+responses, unhandled source files and unhandled task fields fail validation, so
+new published data cannot silently bypass comparison. Internal `NEEDED` statuses
+mean "not redundant", not "independently proven correct".
+
 Run this periodically to keep the overlay lean and accurate.
 
-By default the command only reports. Each gate is opt-in:
+By default the command only reports. CI enables `--strict --fail-on-stale`;
+upstream data-quality regressions remain separately opt-in. Each gate is opt-in:
 
-| Flag                 | Fails on                                                            | Exit code |
-| -------------------- | ------------------------------------------------------------------- | --------- |
-| `--strict`           | Overlay inconsistency, or data served incorrectly                   | 2         |
-| `--fail-on-stale`    | Overlay carries data tarkov.dev now supplies (this is what CI runs) | 3         |
-| `--fail-on-upstream` | Upstream data-quality regression                                    | 4         |
+| Flag                 | Fails on                                          | Exit code |
+| -------------------- | ------------------------------------------------- | --------- |
+| `--strict`           | Overlay inconsistency, or data served incorrectly | 2         |
+| `--fail-on-stale`    | Overlay carries data tarkov.dev now supplies      | 3         |
+| `--fail-on-upstream` | Upstream data-quality regression                  | 4         |
 
 Exit `0` means no enabled gate found a problem; exit `1` is a script or network
 error. `--fail-on-upstream` is intentionally excluded from CI: those problems
@@ -93,6 +127,12 @@ npm run typecheck
 npm test
 ```
 
+Validation rejects source files without a registered schema, including empty
+files. Item, trader and hideout corrections validate the documented ID-to-object
+envelope while keeping API-specific fields extensible. Wiki-incorrect suppressions
+validate ID-to-field-name arrays and are checked alongside task suppressions;
+unknown files, including nested JSON5 files anywhere under `src/`, fail validation too.
+
 ## Contributing
 
 Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).
@@ -107,4 +147,18 @@ For issue requirements and maintainer triage, see the [Issue Triage Guide](docs/
 
 ## License
 
-See [LICENSE](LICENSE).
+This repository is dual-licensed:
+
+- **Code** (`scripts/`, `src/lib/`, `src/schemas/`, `examples/`, `tests/`, and
+  tooling): [MIT](LICENSE).
+- **Data** (`src/overrides/`, `src/additions/`, `src/divergences/`, `src/suppressions/`, and the
+  built `dist/overlay.json`): [CC BY-NC 4.0](LICENSE-DATA).
+
+Using the data requires visible attribution, for example:
+
+> Data corrections from [tarkov-data-overlay](https://github.com/tarkovtracker-org/tarkov-data-overlay)
+> by TarkovTracker.org, licensed under CC BY-NC 4.0.
+
+Commercial use of the data needs written permission from TarkovTracker.org. Open an issue to ask.
+
+Data published before this change remains available under the MIT terms it was released with.

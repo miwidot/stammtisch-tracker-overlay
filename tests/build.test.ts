@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from './test-support.js';
 import { getProjectPaths } from '../src/lib/index.js';
 import { resolveBuildVersion } from '../scripts/build.js';
 

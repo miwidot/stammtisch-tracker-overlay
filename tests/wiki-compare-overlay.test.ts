@@ -6,8 +6,9 @@
  * new. That noise is why the regular-mode experience regression stayed hidden.
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import * as fs from 'node:fs';
+import { describe, it, expect, vi } from './test-support.js';
+import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 import { join } from 'path';
 import {
   taskOverlayFiles,
@@ -18,11 +19,6 @@ import {
   nextTaskKey,
 } from '../scripts/wiki-compare/overlay.js';
 import { compareSubset, valuesEqual, formatValue } from '../src/lib/index.js';
-
-vi.mock('node:fs', async (importOriginal) => {
-  const original = await importOriginal<typeof import('node:fs')>();
-  return { ...original, readFileSync: vi.fn(original.readFileSync) };
-});
 
 const base = join('src', 'overrides', 'tasks.json5');
 const regularFile = join('src', 'overrides', 'modes', 'regular', 'tasks.json5');
@@ -106,8 +102,8 @@ describe('loadSuppressedFields', () => {
     expect(suppressed.has('67af4c17f4f1fb58a907f8f6:factionName')).toBe(true);
   });
 
-  it('does not suppress a task-wide report for ID-keyed trader patches', async () => {
-    const original = (await vi.importActual<typeof import('node:fs')>('node:fs')).readFileSync;
+  it('does not suppress a task-wide report for ID-keyed trader patches', () => {
+    const original = fs.readFileSync;
     const spy = vi.spyOn(fs, 'readFileSync').mockImplementation(((
       file: unknown,
       ...args: unknown[]
@@ -116,10 +112,13 @@ describe('loadSuppressedFields', () => {
         return JSON.stringify({ fixture: { traderRequirements: { requirementId: { value: 3 } } } });
       return (original as (...values: unknown[]) => unknown)(file, ...args);
     }) as typeof fs.readFileSync);
+    syncBuiltinESMExports();
     try {
       expect(loadSuppressedFields().suppressed.has('fixture:traderRequirements')).toBe(false);
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining(base), 'utf-8');
     } finally {
       spy.mockRestore();
+      syncBuiltinESMExports();
     }
   });
 

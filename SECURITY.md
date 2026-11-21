@@ -26,11 +26,6 @@ tooling that maintainers run locally or in CI.
 - **Build and validation pipeline** (`scripts/build.ts`, `scripts/validate.ts`, `src/lib/`):
   anything that lets untrusted input corrupt the published overlay, bypass schema
   validation, or forge the `$meta.sha256` digest.
-- **Local monitor** (`monitor/`): it binds `127.0.0.1` by default and its rebuild action
-  requires an explicit `REBUILD_TOKEN` bearer token. Auth bypass, a rebuild triggered
-  without a valid token, or a path that escapes the intended output file are in scope.
-  See the Monitor section of [README.md](README.md) for the intended model, including the
-  `TRUSTED_HTTPS_PROXY` requirement when `HOST` is not loopback.
 - **Supply chain**: a dependency advisory that `npm run audit:dependencies` does not
   catch, or a way to influence what CI installs.
 - **Overlay data integrity**: a route by which unreviewed third-party content reaches a
@@ -65,7 +60,9 @@ latest for corrections.
 
 The `Validate & Build` workflow runs on pull requests targeting `main` and on pushes to
 `main` — that is the trigger in `ci.yml`, so a pull request between two topic branches is not
-covered — and checks `npm run audit:dependencies` (fails at high severity) and
+covered — and checks `npm run audit:dependencies` (fails at high severity across all
+dependencies, except advisories reviewed and accepted with an expiry date in
+`scripts/audit-dependencies.cjs`) and
 `fallow security --gate new` for newly introduced findings. CodeQL runs for
 `javascript-typescript` and `actions` through GitHub's default code-scanning setup, which is
 configured on the repository rather than by a workflow in this tree. `main` is not

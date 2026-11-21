@@ -4,9 +4,27 @@
 
 Community-maintained data overlay for tarkov.dev API corrections and additions. Provides a JSON overlay file that consumers merge with tarkov.dev API responses to fix incorrect data or add missing data types (like game editions).
 
+## Evidence Standard
+
+The overlay is **best effort**, not a proof system. Ship a correction or addition
+when the best available evidence supports it and nothing known contradicts it.
+Record the evidence and its scope (which modes, captures or sources it covers) in
+comments, docs or PR text so the next contributor can judge it. When a capture,
+public data or a user report contradicts a shipped value, correct it or flip it
+back; that is the normal feedback loop, not a failure.
+
+- Hold data back only when concrete evidence contradicts it, not because the
+  underlying game mechanism is unproven.
+- The field-authority rules below (`taskRequirements`, `minPlayerLevel`,
+  `traderRequirements`) stay binding: each one exists because getting it wrong
+  shipped a regression.
+- Reviewers, human or bot: report contradictions, unsourced values, rule
+  violations and overstated evidence scope. Do not block a change solely because
+  a best-effort value lacks mechanism-level proof.
+
 ## Project Structure & Module Organization
 
-`src/overrides/` holds JSON5 corrections keyed by tarkov.dev IDs, while `src/additions/` contains new data types (for example game editions). `src/schemas/` stores JSON Schemas, and `src/lib/` houses shared TypeScript utilities used by scripts in `scripts/`. Built output lands in `dist/overlay.json`. Tests live in `tests/`, with docs in `docs/`. The `data/` directory is used for local cache/results from validation tooling.
+`src/overrides/` holds JSON5 corrections keyed by tarkov.dev IDs, while `src/additions/` contains new data types (for example game editions). `src/schemas/` stores JSON Schemas, and `src/lib/` houses shared TypeScript utilities used by scripts in `scripts/`. Built output lands in `dist/overlay.json`. Tests live in `tests/`, with docs in `docs/`. The gitignored `data/` directory holds local references, historical evidence, caches, and validation results; see `docs/LOCAL_DATA.md`.
 
 ## Architecture
 
@@ -27,6 +45,7 @@ The wiki comparison tool is modular: `scripts/wiki-compare.ts` is a thin entry p
 
 1. `scripts/validate.ts` - Validates JSON5 source files against schemas using AJV
 2. `scripts/build.ts` - Compiles JSON5 sources into single `dist/overlay.json` with metadata
+3. `.github/workflows/release.yml` - After CI passes on `main`, verifies the CI-built overlay against sources (`build:check`) and commits it as `chore: build overlay [skip ci]`. It is the only writer of `dist/overlay.json`; PR CI rejects changes to that file so merges never conflict on generated output.
 
 ### Output Structure
 
@@ -47,11 +66,10 @@ Two mode lists live in `src/lib/types.ts`:
   mode until its true value is independently verified; omission must not be
   interpreted as equality with another mode.
 
-Seasonal-only data types tarkov.dev does not model at all live in dedicated
-additions, e.g. `src/additions/seasonalPerks.json5` (schema
-`seasonal-perk.schema.json`): tarkov.dev serves the `pvp-season` mode but has no
-seasonal-perks endpoint, so the perks ship as an addition, following the same
-pattern as `editions.json5`.
+Seasonal perk metadata is served at `pvp-season/season`, with translations at
+`pvp-season/season_en`. `src/additions/seasonalPerks.json5` (schema
+`seasonal-perk.schema.json`) supplements only raw effects missing upstream,
+keyed by BSG perk id. Keep metadata upstream and omit empty or stub effects.
 
 ## Build, Test, and Development Commands
 
@@ -60,30 +78,35 @@ pattern as `editions.json5`.
 - `npm run build` generates `dist/overlay.json` from sources.
 - `npm run check-overrides` compares overrides to the live tarkov.dev API.
 - `npm run typecheck` runs `tsc --noEmit` (also run in CI).
-- `npm test` runs the Vitest suite (also run in CI); `npm run test:watch` keeps it running.
+- `npm test` runs the Node.js test suite (also run in CI); `npm run test:watch` keeps it running.
 - `npm run format` / `npm run format:check` run Prettier over the TypeScript, JSON/JSON5, and Markdown sources (`format:check` also runs in CI).
-- Example single test: `npx vitest run tests/file-loader.test.ts`.
+- Example single test: `node --import tsx --experimental-test-module-mocks --test tests/file-loader.test.ts`.
+- `pwsh scripts/ci-local.ps1 -Branch <branch>` runs the `ci.yml` validation steps locally on the PR merge commit of the pushed branch; add `-Local` to test committed but unpushed fixes (see `docs/CONTRIBUTING.md`). Use it as CI evidence when hosted and self-hosted runners are unavailable, and with `-Local` before pushing review fixes.
 
 ### Reference cross-check tooling (local-only)
 
 The `eft:*` scripts cross-check the overlay against a local quest reference -
 values verified in-game and kept out of the repo - which is the authority for
 numeric quest fields (experience, minPlayerLevel, objective counts). The
-reference lives in `eft/` and all derived output in `data/` — both gitignored.
-Versioned captures go in subdirectories (`eft/eft-1.1-pve/`); `findReferenceFile`
+reference lives only in `data/reference/` and all derived output in `data/` — gitignored. Top-level `eft/` is retired; there is no fallback to it. The nested `data/eft/` directory remains the output location for the `eft:*` tools.
+Versioned captures go in subdirectories (`data/reference/<capture>/`); `findReferenceFile`
 scans recursively and auto-detects the most recently captured `quest_list`
 reference, so a fresh dump supersedes an older one without touching the tooling
 call sites (pass an explicit `eftDir` to pin a specific capture).
-Never commit the reference or anything derived from it; PRs carry only the
-resulting JSON5 corrections plus proof links. That prohibition covers the raw
-capture and the field-by-field diffs these tools emit — not every artifact
-informed by the reference. Deliberate, documented exceptions exist and are called
-out where they apply: `src/additions/storyChapters.json5` and its provenance lock
-`scripts/story-reference.lock.json` (both below) and
-`docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates plus a few per-task
-observations, using only publicly published identifiers and no reference field
-values. Anything new in that category needs the same explicit rationale and must
-name what it does and does not reproduce.
+Keep the raw reference (captures, dumps) and the tools' field-by-field diff
+output out of the repo; they stay in the gitignored `data/`. Captures
+and dumps are provided anonymously and privately to update the data — naming
+that a value comes from an in-game capture or dump is fine. Beyond that,
+capture evidence may be referenced openly: comments, PR and issue text, and
+docs can say a value was verified against an in-game capture and describe the
+game data it shows (conditions, rewards, quest/item/recipe ids, client version,
+game mode). Keep public proof links alongside it where they exist.
+
+Protect the provider, not the game data. Never expose specifics of a capture
+itself or of the person who made it: no local filesystem paths, exact capture
+dates or timestamps, session or file names, account/profile/character
+identifiers, server hosts, or other PII or sensitive details. Refer to a
+capture generically instead (for example "a 1.1 PvE capture").
 
 - `npm run eft:normalize` distills the local reference into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
@@ -105,8 +128,8 @@ name what it does and does not reproduce.
   `TraderLoyalty` conditions, and tarkov.dev serves those as
   `otherRequirements` `globalVariable` entries. A `GlobalVariableValue` is a
   numeric state gate, though — not automatically a loyalty condition or a task
-  prerequisite list. See `docs/GLOBAL_VARIABLES.md` for counter evidence
-  requirements. That distinction drives all three rules below:
+  prerequisite list. See `docs/GLOBAL_VARIABLES.md` for the counter evidence
+  standard. That distinction drives all three rules below:
   - `taskRequirements` — preserve explicit `Quest` start conditions and their
     accepted statuses. The wiki's infobox `previous` field is narrative order,
     **not** proof of an unlock edge. Distinguish a present template carrying no
@@ -129,6 +152,49 @@ name what it does and does not reproduce.
     corroborated wiki Requirements section. A candidate cohort tier must not
     automatically become an extra runtime gate.
 
+- `npm run eft:coverage` is the full check of what consumers see against the
+  reference. It covers every reference quest, not only those tarkov.dev serves:
+  each is classified as upstream (compared after applying effective overrides),
+  addition, placeholder (matched by name and trader, printing the placeholder ->
+  real id and objective mapping for issue #507), story, hidden helper, or
+  missing. Per quest it compares name, trader, map, experience, explicit Level,
+  Quest prerequisites and statuses, availability delay, explicit TraderLoyalty
+  and GlobalVariableValue gates, objective presence/counts/text, and finish
+  rewards (weapon presets compared by base item). The field-authority rules
+  above still apply: absent Level/TraderLoyalty conditions are never flagged,
+  and prerequisite targets tarkov.dev cannot represent are info, not edges to
+  add. A quest absent from the reference proves nothing (quest lists are
+  account-scoped). Check the reference's client version before acting on rows
+  from an older capture.
+- `npm run eft:diff -- --mode <mode>` compares the quest definitions of the two
+  newest references for a mode (or two given files), ignoring per-account
+  progress: added/removed quests and changed fields, localization summarized
+  unless `--text`. Quest lists are account-scoped, so an added or removed quest
+  may only mean the two accounts could see different quests; compare captures
+  from the same account before treating it as a game change.
+- `npm run eft:import -- <decoded-session-dir>` files a decoded capture's
+  `pve`/`pvp`/`pvp-season` folders under `data/reference/decoded/<session>/`
+  without overwriting different files.
+- `npm run eft:remote -- --mode regular|pvp-season` saves the remote session's
+  live quest list (RemoteSession LAN API, `REMOTE_SESSION_URL` or `--url`) to
+  `data/reference/remote/<mode>/` as a reference the other tools read. It makes
+  one paced game request, skips writing when definitions are unchanged, and
+  stores no host, session or account identifiers. Never commit the URL.
+
+- `npm run eft:extracts` saves the remote session's archived `locations` and
+  `globals` definitions for Regular and Seasonal beside those quest lists, then
+  regenerates `src/additions/extractRequirements.json5`: one rule list per
+  tarkov.dev extract, joined on map ID and raw exit name (trimmed when
+  tarkov.dev trims it), with `RequirementReferences` expanded. Rules equal in
+  both captures are shared; otherwise `pvp` / `seasonal` keep their own. PvE
+  has no session, so its values come from the regular definitions' `*PVE`
+  fields. The file records only client builds and a definitions hash. Pass
+  `--offline` to regenerate from saved definitions, or `--allow-stale` to accept
+  an archived copy the worker could not refresh (for a mode whose session is not
+  active). Hand-curated flare, smoke and key cues stay in
+  `src/additions/extractCues.json5`; a test requires every cue to name a
+  generated extract with the same raw exit name.
+
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the
   numeric `eft:*` tools this one produces committed additions, not a gitignored
@@ -145,17 +211,19 @@ name what it does and does not reproduce.
 
   Generation is local-only and cannot run in CI or for a contributor without the
   capture. What keeps the committed output auditable is
-  `scripts/story-reference.lock.json`, a committed provenance lock — the second
-  deliberate exception to "never commit anything derived from the reference".
-  It records only which capture was used: path, SHA-256, byte size, client
-  version, game mode, capture timestamp, and how much of the storyline that
-  capture resolved (quest count, chapter quests, objective texts). It reproduces
+  `scripts/story-reference.lock.json`, a committed provenance lock. It is the one
+  committed place that records capture provenance: relative filename, SHA-256,
+  byte size, client version, game mode, capture timestamp, and how much of the
+  storyline that capture resolved (quest count, chapter quests, objective
+  texts). Keep the filename relative (never absolute or user-specific local
+  paths) and never include account/profile/character identifiers, server hosts,
+  or other provider PII. It reproduces
   no field values — no experience, no level gates, no objective text, no ids.
   The generator refuses to guess: it uses the locked capture and fails if the
   hash no longer matches, and `STORY_REFERENCE_UPDATE_LOCK=1` is the only way to
   re-pin, so switching source captures always lands as a reviewable lock diff
   next to the regenerated data. `STORY_REFERENCE=<file>` only relaxes the _path_
-  (a moved or renamed copy of the pinned capture); its hash must still match, so
+  (a moved or renamed copy within `data/reference/`); its hash must still match, so
   it cannot swap in a different capture. The generator stages a sidecar binding
   the capture to the exact payload it emits, and `eft-story-write.ts` refuses to
   replace the artifact without one - so an edited or unrelated
@@ -172,11 +240,11 @@ name what it does and does not reproduce.
 
 ## Coding Style & Naming Conventions
 
-TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "module"`). Data files are JSON5 and may include comments. Use tarkov.dev entity IDs as keys and field names that match the tarkov.dev API exactly (camelCase). Every correction must include: entity name comment, proof link, and inline “Was:” value. For nested patches (like task objectives), use ID-keyed objects rather than arrays. Empty override files are valid and skipped during build. When adding a new entity type, add its schema to `SCHEMA_CONFIGS` in `src/lib/types.ts`.
+TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "module"`). Data files are JSON5 and may include comments. Use tarkov.dev entity IDs as keys and field names that match the tarkov.dev API exactly (camelCase). Every correction must include: entity name comment, proof link, and inline “Was:” value. For nested patches (like task objectives), use ID-keyed objects rather than arrays. To drop an objective tarkov.dev serves but the game lacks, list its upstream ID in `objectivesRemove` (shared and mode removals union); back it with proof that the objective is absent (an in-game capture or other proof, as for any correction) and a `Was:` comment. Empty override files are valid and skipped during build. When adding a new entity type, add its schema to `SCHEMA_CONFIGS` in `src/lib/types.ts`.
 
 ## Testing Guidelines
 
-Vitest is the only test framework. Tests should be named `*.test.ts` under `tests/`. There is no explicit coverage gate, but add or update tests when you change shared library behavior or validation logic.
+Use the Node.js test runner and the assertions and test helpers in `tests/test-support.ts`. Name tests `*.test.ts` under `tests/`. Add or update tests when changing shared library behavior or validation logic.
 
 ## Static Analysis Findings
 
@@ -184,14 +252,14 @@ Fix fallow findings at their root whenever the code can be safely consolidated, 
 
 `npm run fallow:security` reports candidates rather than confirmed vulnerabilities and
 exits 0; CI checks only newly introduced ones (`--gate new --changed-since <base>`), and
-because `main` is not branch-protected a red result reports rather than blocks. The 30
-candidates standing on `main` were triaged and are all tool false positives. Re-check a
+because `main` is not branch-protected a red result reports rather than blocks. The remaining
+candidates were triaged and are all tool false positives. Re-check a
 category only if the guard named below stops holding, and prefer fixing a guard over
 suppressing an item:
 
-- **Path traversal, 16 items** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Every path
-  is `path.join(process.cwd(), …)` over literal segments except the mode segment in
-  `taskOverlayFiles`, which is either a member of the module-local `WIKI_COMPARE_MODES`
+- **Path traversal** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Fixed paths
+  use `path.resolve` with literal segments, relative to the working directory. The variable mode
+  segment in `taskOverlayFiles` is either a member of the module-local `WIKI_COMPARE_MODES`
   constant or a `SuppressionScope` argument threaded down from a caller. That type is a
   compile-time bound only, so the guard that matters is at the input boundary: the sole
   external source is the `--gameMode`/`-g` flag, and `cli.ts` accepts it only when it equals
@@ -204,12 +272,23 @@ suppressing an item:
   interpolation is wrapped in `escapeRegExp`, so wiki text cannot inject metacharacters.
   The two that are not (`normalize.ts` around the count-word replacements) interpolate
   module-local word lists, not input.
-- **SSRF, 3 items** (`monitor/server.js`, `src/lib/tarkov-api.ts`,
-  `monitor/public/app.js`). Both server-side calls append to a hardcoded
-  `https://json.tarkov.dev` base, so the host cannot be redirected, and the request-derived
-  mode segment passes `normalizeMode` (allowlist with fallback) plus `isSafeModeName`
-  (`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`, no separators). The third is a same-origin `fetch` in
-  browser code.
+- **SSRF** (`src/lib/tarkov-api.ts`). Server-side calls append to a hardcoded
+  `https://json.tarkov.dev` base, so callers cannot select the requested host.
+  Native fetch redirects retain the upstream service's existing behavior.
+- **SSRF** (`scripts/eft-remote.ts`). The remote-session URL is the operator's
+  own `--url`/`REMOTE_SESSION_URL`, which is intended local CLI behaviour. The
+  guard is `lanOrigin`: an IP literal must be loopback, private or link-local; a
+  hostname must look local and every address it resolves to must be a LAN
+  address. The paths are fixed: `/api/<mode>/tasks`, plus `/api/<mode>/locations`
+  and `/api/<mode>/globals` for `scripts/eft-extracts.ts`, which reuses the exported
+  `getLanJson` only after `lanOrigin` approves the operator's URL and adds no sink of
+  its own. The request is made with
+  `node:http(s)` through `lanOnlyLookup`, which pins the socket to an address
+  that passed `isLanAddress` (a changed DNS answer cannot redirect it), and no
+  redirects are followed. Fallow supports only a file-level suppression for this
+  sink type, so the file carries a reviewer-approved
+  `fallow-ignore-file security-sink`; re-review any new outbound request added to
+  that file by hand.
 
 CodeQL alerts dismissed as false positives should state the reason that actually holds. For
 wiki-derived text the operative reason is that `eft-story-generate.ts` consumes the scraped
@@ -223,43 +302,34 @@ overlay would not.
 
 ## Commit & Pull Request Guidelines
 
-Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). If you updated generated output, call that out explicitly.
+Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. PRs should include proof links for data changes and the commands you ran (at least `npm run validate`), plus the checked commit, worktree state, checks, and any missing review evidence. Never commit `dist/overlay.json` in a PR: the release workflow is its only writer and commits it after each merge, and CI rejects PRs that change it.
 
 ### PR review bots
 
-Three bots review pull requests here. cubic re-reviews automatically on every
-push. Codex reviews on open, on ready-for-review, and on a `@codex review`
-comment, but only because the Codex GitHub integration is enabled for this
-repository; that comment does nothing where it is not. CodeRabbit reviews on push
-and on `@coderabbitai review`, subject to the allowance below.
+Automatic Codex reviews are intended to be off, but the checked-in repository
+files do not establish the current dashboard or integration settings. Push-triggered
+reviews depend on those settings; do not assume a push will or will not trigger a
+review.
 
-Never idle waiting for CodeRabbit's GitHub review allowance to reopen. That
-allowance is metered from recent usage (CodeRabbit has reported it as one review
-per hour here), and when it is exhausted the bot answers a review request with
-`Review rate limited` while still reporting its own check as **passing**. It also
-"does not re-review already reviewed commits", so a green CodeRabbit check is not
-evidence that the head commit was reviewed. Get the coverage another way:
+Repo overrides to the global review rules:
 
-- Run a supplemental local CodeRabbit review. It is not the same artifact as a PR
-  review — different context, and no PR threads come out of it — but it surfaces
-  findings while the PR allowance is closed: `coderabbit review --base main --agent`
-  for structured findings, with `--committed` / `--uncommitted` to scope which
-  changes are considered, `coderabbit review findings` to re-read the last local
-  run, and `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit
-  already posted on a PR. Subcommands and their flags vary by CLI version, so
-  confirm against `coderabbit review --help` and `coderabbit pullrequest --help`
-  before relying on one; the top-level `coderabbit --help` lists subcommands and
-  global options only. A local run has completed a full
-  review while the GitHub PR allowance was exhausted, so the two are metered
-  separately in practice — but CLI runs are still review events counted against the
-  account's limits and can draw on usage-based billing, so treat them as costed
-  rather than free. The CLI has its own small included pool and reports
-  `errorType: rate_limit` with a wait time when it is spent; when that happens fall
-  through to the bots below rather than waiting for it either.
-- Comment `@codex review` for a fresh pass on the current head commit.
-
-Reply to each review thread naming the commit that fixed it and what changed, then
-resolve the thread; the reply is what makes the trail auditable later.
+- A substantial follow-up needs a manual `@coderabbitai review` before merge
+  unless recorded local or independent review evidence covers the final changes.
+- Use `@codex review` only as an exceptional fallback when both CodeRabbit review
+  channels (CLI and PR) are limited, or for a final review of a risky change. Do
+  not run Codex reviews locally.
+- Auth, billing, migrations and concurrency changes require an independent review
+  before merge; use CodeRabbit or another independent reviewer and record the
+  evidence.
+- Merge class: dependency bumps that keep `npm run validate` and CI green, docs,
+  tests, and proof-backed data corrections are low risk and may merge once checks
+  pass. Confirm before merging changes to workflows or release automation, the
+  overlay output schema or `dist/` contract consumers rely on, secrets, or any
+  weakened security control.
+- Dependencies: Dependabot npm version updates wait out a cooldown (major 30
+  days, minor 7, patch 3) and GitHub Actions updates wait 7 days; security
+  updates open immediately. Socket's pull request
+  alerts and `npm run audit:dependencies` findings must be resolved or reviewed before merge.
 
 A `CHANGES_REQUESTED` review stays attached to the commit it was written against,
 so it survives the push that fixes it and leaves `reviewDecision` misleading. It
@@ -280,7 +350,7 @@ satisfy that rule and a fresh approving review will be needed.
   entry. Consumers resolve these by `id`, so a correct `name` beside the wrong
   `id` silently points at another map or trader;
   `tests/entity-references.test.ts` enforces the pairing.
-- Run `npm run validate` and `npm run build` before submitting.
+- Run `npm run validate` and `npm run build` before submitting; leave `dist/overlay.json` out of the PR.
 
 ## Issue Triage
 
@@ -303,4 +373,4 @@ Use the MediaWiki API instead — it is not challenged and returns full content 
 - Rendered HTML fragment: `...&prop=text`
 - Plain-text extract: `action=query&prop=extracts&...`
 
-The wiki-compare tool (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API` in `scripts/wiki-compare/types.ts`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
+The wiki-compare tool (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API_URL` in `scripts/wiki-compare/wiki.ts`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).

@@ -7,7 +7,7 @@
  * storyRequirements list and synthetic New Beginning task conditions.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import Ajv from 'ajv';
 import { join } from 'path';
 import {

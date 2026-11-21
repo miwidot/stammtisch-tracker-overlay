@@ -100,3 +100,56 @@ export function buildTaskContext<TEnvelope extends { data: unknown }, TMode exte
     toLookup: (value: unknown) => Map<string, JsonRecord>;
   }
 ): Promise<TaskContext>;
+
+/** Runtime-specific serialization stays explicit; entity normalization is shared. */
+export function createTaskNormalizers(helpers: {
+  isRecord: (value: unknown) => value is JsonRecord;
+  compact: (value: JsonRecord) => JsonRecord;
+  stringId: (value: unknown) => string | undefined;
+  translate: (map: Record<string, string>, key: unknown) => string | undefined;
+}): {
+  resolveItemRef: (
+    value: unknown,
+    ctx: TaskContext
+  ) => { id: string; name: string; shortName?: string } | undefined;
+  resolveItemRefs: (
+    value: unknown,
+    ctx: TaskContext
+  ) => Array<{ id: string; name: string; shortName?: string }> | undefined;
+  resolveItemRefMatrix: (
+    value: unknown,
+    ctx: TaskContext
+  ) => Array<Array<{ id: string; name: string; shortName?: string }>> | undefined;
+  resolveMapRef: (value: unknown, ctx: TaskContext) => { id: string; name: string } | undefined;
+  resolveMapRefs: (
+    value: unknown,
+    ctx: TaskContext
+  ) => Array<{ id: string; name: string }> | undefined;
+  resolveTraderRef: (value: unknown, ctx: TaskContext) => { id: string; name: string } | undefined;
+  resolveTaskRef: (value: unknown, ctx: TaskContext) => { id: string; name: string } | undefined;
+  resolveRequiredPrestige: (
+    value: unknown,
+    ctx: TaskContext
+  ) => { id?: string; name: string; prestigeLevel: number } | undefined;
+  adaptObjective: (raw: JsonRecord, ctx: TaskContext) => JsonRecord;
+  adaptReward: <T>(raw: unknown, ctx: TaskContext) => T | undefined;
+};
+
+export function validateTranslationMap(value: unknown, label: string): Record<string, string>;
+export function comparisonRecords(
+  value: unknown,
+  label: string,
+  allowEmpty?: boolean
+): JsonRecord[];
+export function translateComparisonValues(
+  value: unknown,
+  translations: Record<string, string>
+): unknown;
+export function buildItemComparisonIndex(
+  itemsData: unknown,
+  tasksData: unknown,
+  itemsEn: unknown,
+  tasksEn: unknown
+): Map<string, JsonRecord>;
+
+export function validObjectiveCollection(value: unknown): value is JsonRecord[];

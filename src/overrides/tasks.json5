@@ -133,8 +133,20 @@
 
   // Escort - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/360
   // Verified: the 1.1-pve data; wiki agrees.
+  //
+  // minPlayerLevel 36, the Prapor LL4 tier floor: upstream's 46 is neither an
+  // explicit client `Level` condition (neither the 1.1 PvE nor the 1.1 regular
+  // capture has one; the only start condition is the Prapor LL4 tier variable)
+  // nor the LL4 floor (Prapor LL4 requires level 36), so it is a stale pre-1.1
+  // leftover. Per AGENTS.md the missing `Level` condition means "no explicit
+  // gate", not "no gate", so the loyalty-derived floor is kept rather than
+  // zeroed. The wiki's 2026-09-19 update replaced "Must be level 46" with "Must
+  // reach Loyalty Level 4 with Prapor", and two reporters (#360 PvE, #390 PvP)
+  // received the task at level 42.
   '60e71b62a0beca400d69efc4': {
+    minPlayerLevel: 36, // Was: 46 (stale pre-1.1 gate; 36 = Prapor LL4 floor)
     traderRequirements: [
       {
         id: 'overlay.60e71b62a0beca400d69efc4.54cb50c76803fa8b248b4571.level.>=.4',
@@ -249,6 +261,148 @@
     experience: 10000, // Was: 6600 (all modes, stale pre-1.1 value)
   },
 
+  // Tier-2 tasks with no start condition at all (loyalty implied by tier)
+  //
+  // The 1.1 PvE and PvP captures hold exactly eight tier-2 tasks whose
+  // AvailableForStart is empty: tierAccessory 2 is their only loyalty gate, so
+  // neither the client conditions nor tarkov.dev expose it and the tasks read
+  // as available at LL1. Each sits in its trader's Tier 2 pool in
+  // src/additions/progressionCounters.json5, so leaving one ungated also lets
+  // that pool's counter advance below LL2. Every other tier-2/3/4 task carries
+  // either an explicit TraderLoyalty condition or a tier-counter gate.
+  // District Patrol (above) and Crooked Cop (below) are two of the eight and
+  // were already gated; the remaining six are here.
+  //
+  // Prapor
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Capturing_Outposts
+  //        https://escapefromtarkov.fandom.com/wiki/You've_Got_Mail
+  //        https://escapefromtarkov.fandom.com/wiki/Possessor
+  //        (each infobox: LL requirement = 2)
+  // Capturing Outposts
+  '60e71b9bbd90872cb85440f3': {
+    traderRequirements: [
+      {
+        id: 'overlay.60e71b9bbd90872cb85440f3.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // You've Got Mail
+  '6391359b9444fb141f4e6ee6': {
+    traderRequirements: [
+      {
+        id: 'overlay.6391359b9444fb141f4e6ee6.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // Possessor
+  '669fa399033a3ce9870338a8': {
+    traderRequirements: [
+      {
+        id: 'overlay.669fa399033a3ce9870338a8.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // Jaeger
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Crooked_Cop
+  //        (the one page in this Jaeger cohort that states a loyalty gate: LL2)
+  // These three pages predate 1.1 and state no loyalty requirement either
+  // way (Sellout still lists a player-level 32 gate that neither the capture
+  // nor tarkov.dev carries). The capture's tierAccessory 2 is the evidence,
+  // backed by the five wiki-checkable members of the cohort all reading LL2.
+  // The Huntsman Path - Big Game
+  '64e7b971f9d6fa49d6769b44': {
+    traderRequirements: [
+      {
+        id: 'overlay.64e7b971f9d6fa49d6769b44.5c0647fdd443bc2504c2d371.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // The Huntsman Path - Sellout
+  '5d25e2e286f77444001e2e48': {
+    traderRequirements: [
+      {
+        id: 'overlay.5d25e2e286f77444001e2e48.5c0647fdd443bc2504c2d371.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // The Huntsman Path - Factory Chief
+  '60c0c018f7afb4354815096a': {
+    traderRequirements: [
+      {
+        id: 'overlay.60c0c018f7afb4354815096a.5c0647fdd443bc2504c2d371.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+
+  // Tour "Talk to <trader>" gates (served upstream as `dialogue`)
+  //
+  // Upstream serves twelve tasks with a single `dialogue` otherRequirement. In
+  // the 1.1 PvE and PvP captures each one is a GlobalVariableValue >= 1 start
+  // condition on one per-trader flag, and the only writer of each flag is a
+  // "Talk to <trader>" objective of the Tour story chapter (its finish condition
+  // checks the same variable). The trader dialogues only read the flags. The
+  // gate is therefore that Tour objective, expressed as a storyObjective so the
+  // story tracker drives it:
+  //   Therapist 68c81cf8d242d0b184959530 <- Talk to Therapist 68c81d6e82b7593afaa638e0
+  //   Mechanic  68c41b22c5e8a18a3692d395 <- Talk to Mechanic  68c41dde2ddd4581cfc7531c
+  //   Skier     68c2bf4f8c7b5c191d5ec0df <- Talk to Skier     68c2c0907a45d1fc06b150a2
+  //   Ragman    68c15c231582be58295e06b6 <- Talk to Ragman    68c15e129c0090b717977bd4
+  // Tour is added automatically at game start and its talk steps unlock the
+  // early traders and maps; nothing in the captures sets these flags another
+  // way. Proof: https://escapefromtarkov.fandom.com/wiki/Tour
+  // The other ten tasks carry the same gate in their existing entries: First in
+  // Line, Operation Aquarius, Supply Plans, Saving the Mole, Gunsmith - MP-133,
+  // Passion for Ergonomics, Burning Rubber, Supplier, Make ULTRA Great Again,
+  // Fuel Crisis.
+  // Introduction
+  '5d2495a886f77425cd51e403': {
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a3d2b4f3e1b25e87035d40a' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.5d2495a886f77425cd51e403.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
+    ],
+  },
+  // Pathfinder
+  '5ae449c386f7744bde357697': {
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a4b3757c4724593f07e762d' }] (Tour "Talk to Ragman" flag)
+      {
+        id: 'overlay.5ae449c386f7744bde357697.tour.talk-to-ragman',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c15e129c0090b717977bd4', name: 'Talk to Ragman' },
+      },
+    ],
+  },
+
   // Unique Experience - quest XP reworked in 1.1.0.0 (wiki lags)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
   // Verified: the 1.1-pve data; wiki still shows the old value.
@@ -343,11 +497,11 @@
       // The kill location moved to Streets of Tarkov, Shoreline and Ground Zero
       // (both variants). tarkov.dev still serves the pre-1.1 Lighthouse,
       // Customs, Reserve set in every mode, and its English objective text still
-      // says "Eliminate 20 PMCs" even though the count is 10. Both the
-      // 2026-08-11 PvE and 2026-08-27 regular captures carry the counter's
-      // Location condition TarkovStreets, Shoreline, Sandbox_high, Sandbox. The
-      // wiki's last content edit (2026-08-07) predates both captures and is
-      // stale for the maps here.
+      // says "Eliminate 20 PMCs" even though the count is 10. Both a
+      // 1.1 PvE and a 1.1 regular capture carry the counter's Location
+      // condition TarkovStreets, Shoreline, Sandbox_high, Sandbox. The wiki's
+      // last content edit (2026-08-07) predates both captures and is stale for
+      // the maps here.
       // Proof: https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
       //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/389
       '64f5deac39e45b527a7c4235': {
@@ -466,10 +620,9 @@
   // Debtor - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
   // Verified: the 1.1-pve data; wiki agrees.
-  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
-  // BEAR PMCs." (issues #288, #291)
+  // BEAR-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves BEAR in all three modes.
   '639dbaf17c898a131e1cffff': {
-    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2',
@@ -526,6 +679,35 @@
     experience: 65000, // Was: 55000 (all modes, stale pre-1.1 value)
   },
 
+  // Ice Cream Cones - Optional visit to Woods' ZB-014 bunker.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones
+  // PvP and PvE quest captures target bunker2. The installed Woods scene supplies
+  // the ZB-014 environment volume already in world space. Upstream's bunker1
+  // outline adds the object position again, moving the center to (886.28, 132.74).
+  '59675d6c86f7740a842fc482': {
+    objectives: {
+      '5a3fbe3a86f77414422e0d9b': {
+        // Was: bunker1 at (443.010376, -14.9854012, 67.66608) with an outline
+        // spanning x 879.0928–893.4613 and z 124.739563–140.730652 at y -27.6471424,
+        // top -25.3502045 and bottom -29.9440784.
+        zones: [
+          {
+            map: { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
+            outline: [
+              { x: 436.082397, y: -12.66174, z: 57.073486 },
+              { x: 450.450928, y: -12.66174, z: 57.073486 },
+              { x: 450.450928, y: -12.66174, z: 73.064575 },
+              { x: 436.082397, y: -12.66174, z: 73.064575 },
+            ],
+            position: { x: 443.266663, y: -12.66174, z: 65.069031 },
+            top: -10.364803,
+            bottom: -14.958677,
+          },
+        ],
+      },
+    },
+  },
+
   // Fuel Crisis (old: The Blood of War - Part 1) - Objective zone missing
   // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Crisis
   //
@@ -540,6 +722,15 @@
         trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a4b390edce9a13bbb6c6be6' }] (Tour "Talk to Ragman" flag)
+      {
+        id: 'overlay.5ae448f286f77448d73c0131.tour.talk-to-ragman',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c15e129c0090b717977bd4', name: 'Talk to Ragman' },
+      },
     ],
     objectives: {
       '5ae452de86f77450595c4333': {
@@ -728,8 +919,12 @@
 
   // Master Key (old: Spa Tour - Part 5) - Change rewards
   // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
-  // S1: exp 3000, +0.1, 673 Dollars (Intelligence Center L2), 3 CPU fans;
-  // RB-AO key reward removed. Base dollars derived from IC2 (673 / 1.15 = 585).
+  // S1: exp 3000, +0.1, 550 Dollars, 3 CPU fans; RB-AO key reward removed.
+  // 2026-10-31: finishRewards override removed. Was: 585 Dollars, +0.1, 3 CPU fans.
+  // Upstream now serves +0.1 and the
+  // reduced items; the 585 Dollars derived from the wiki's IC2 figure
+  // (673 / 1.15) is contradicted by every capture (1.1.0.1 PvP and PvE templates
+  // give 550, as upstream does). The override also dropped upstream's offer unlock.
   '5a0449d586f77474e66227b7': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
     // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
@@ -744,36 +939,16 @@
         value: 1,
       }, // Was: []
     ],
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.02 (upstream now serves 0.1)
-      ],
-      items: [
-        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 550 Dollars
-        {
-          count: 3,
-          item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' },
-        },
-      ],
-    },
   },
 
-  // One-Way Ticket (old: Spa Tour - Part 1) - Change rewards + Change objective
+  // One-Way Ticket (old: Spa Tour - Part 1) - Change objective
   // Proof: https://escapefromtarkov.fandom.com/wiki/One-Way_Ticket
   // S1: kill 15 targets with headshots using an AUG on Factory; exp 10000, +0.25,
-  // 1347 Dollars (IC2, base = 1347 / 1.15 = 1171); MPX/RIP/room key rewards removed.
+  // 1100 Dollars; MPX/RIP/room key rewards removed.
+  // 2026-10-31: finishRewards override removed. Was: 1171 Dollars, +0.25.
+  // Upstream now serves +0.25 and 1100 Dollars, which the 1.1.0.1 PvP and PvE captures confirm; the 1171
+  // derived from the wiki's IC2 figure (1347 / 1.15) is contradicted.
   '5a03153686f77442d90e2171': {
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03 (upstream now serves 0.25)
-      ],
-      items: [
-        {
-          count: 1171,
-          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
-        }, // Was: 1100 Dollars
-      ],
-    },
     objectives: {
       '5c9a17c686f7747dbe2da3c1': {
         description: 'Eliminate 15 targets with headshots while using an AUG on Factory', // Was: Eliminate any target with headshots using a Steyr AUG on Factory
@@ -789,35 +964,30 @@
     },
   },
 
-  // Fuel Shortage (old: Spa Tour - Part 3) - Change rewards
+  // Fuel Shortage (old: Spa Tour - Part 3) - no override needed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Shortage
-  // S1: hand over 5 Household goods + 5 Flammable materials (upstream now
-  // serves the S1 category objectives); exp 3000, +0.1,
-  // 673 Dollars (IC2, base = 673 / 1.15 = 585); Vector/mags/M67/Toolset rewards removed.
-  '5a0327ba86f77456b9154236': {
-    // No loyalty gate. The wiki Requirements line reads "Must be Loyalty Level 1
-    // to start this quest" (naming no trader, so it would be attributed to the
-    // quest giver by inference), but both 1.1 captures serve this task with an
-    // empty `AvailableForStart` - no `TraderLoyalty`, no `GlobalVariableValue`, no
-    // condition of any kind - and the API serves `traderRequirements: []`. The
-    // "wiki is the source because the gate hides in a global variable" argument
-    // does not apply where the client carries no start condition at all, so the
-    // gate stays out until something corroborates it.
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.03 (upstream now serves 0.1)
-      ],
-      items: [
-        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 550 Dollars
-      ],
-    },
-  },
+  // S1: hand over 5 Household goods + 5 Flammable materials; exp 3000, +0.1,
+  // 550 Dollars; Vector/mags/M67/Toolset rewards removed. Upstream serves all of
+  // this. 2026-10-31: the finishRewards override was removed. Was: 585 Dollars,
+  // +0.1. Its 585 Dollars,
+  // derived from the wiki's IC2 figure (673 / 1.15), is contradicted by every
+  // capture (1.1.0.1 through 1.3.0.0, PvP, PvE and pvp-season templates give 550).
+  // No loyalty gate: the wiki Requirements line reads "Must be Loyalty Level 1
+  // to start this quest" (naming no trader), but the 1.1 captures serve this
+  // task with an empty `AvailableForStart` - no `TraderLoyalty`, no
+  // `GlobalVariableValue`, no condition of any kind - and the API serves
+  // `traderRequirements: []`. The "wiki is the source because the gate hides in
+  // a global variable" argument does not apply where the client carries no
+  // start condition at all, so the gate stays out until something corroborates it.
 
-  // I Need More Power (old: Spa Tour - Part 4) - Change rewards
+  // I Need More Power (old: Spa Tour - Part 4) - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
-  // S1: hand over 3 Metal/Expeditionary fuel tanks (upstream now serves the S1
-  // objective); exp 10000, +0.25, 1347 Dollars (IC2, base = 1347 / 1.15 = 1171),
-  // 2 Military flash drives.
+  // S1: hand over 3 Metal/Expeditionary fuel tanks; exp 10000, +0.25,
+  // 1100 Dollars, 2 Military flash drives. 2026-10-31: finishRewards override
+  // removed. Was: 1171 Dollars, 2 MFD, +0.25. Upstream now serves +0.25 and
+  // these items; the 1171 Dollars derived from the wiki's IC2 figure
+  // (1347 / 1.15) is contradicted by the 1.1.0.1 PvP and PvE captures (1100),
+  // and the override dropped upstream's offer unlock.
   '5a03296886f774569778596a': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
     // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
@@ -831,42 +1001,20 @@
         value: 2,
       }, // Was: []
     ],
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03 (upstream now serves 0.25)
-      ],
-      items: [
-        {
-          count: 1171,
-          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
-        }, // Was: 1100 Dollars
-        {
-          count: 2,
-          item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' },
-        },
-      ],
-    },
   },
 
-  // Chemical Experiments (old: Spa Tour - Part 7) - Change rewards
+  // Chemical Experiments (old: Spa Tour - Part 7) - no override needed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_Experiments
-  // S1: stash a Corrugated hose in the med lab on Customs (upstream now serves
-  // the restructured objective); exp 3000, +0.1, 570 Dollars (655 with IC2);
-  // RB-ST key and Jaeger -0.01 removed.
-  '5a27bafb86f7741c73584017': {
-    // No loyalty gate. The wiki Requirements line reads "Obtain level 1 loyalty
-    // with Peacekeeper", but both 1.1 captures serve this task with an empty
-    // `AvailableForStart` (no condition of any kind) and the API serves
-    // `traderRequirements: []`. See Fuel Shortage above for the same call.
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.04 (+ -0.01 Jaeger) (upstream now serves 0.1)
-      ],
-      items: [
-        { count: 570, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 550 Dollars
-      ],
-    },
-  },
+  // S1: stash a Corrugated hose in the med lab on Customs; exp 3000, +0.1,
+  // 550 Dollars; RB-ST key and Jaeger -0.01 removed. Upstream serves all of this.
+  // 2026-10-31: the finishRewards override was removed. Was: 570 Dollars, +0.1.
+  // Its 570 Dollars is
+  // contradicted by every capture (1.1.0.1 through 1.3.0.0, PvP, PvE and
+  // pvp-season templates give 550).
+  // No loyalty gate. The wiki Requirements line reads "Obtain level 1 loyalty
+  // with Peacekeeper", but the 1.1 captures serve this task with an empty
+  // `AvailableForStart` (no condition of any kind) and the API serves
+  // `traderRequirements: []`. See Fuel Shortage above for the same call.
 
   // Special Order (old: No Questions Asked) - Change rewards
   // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Order
@@ -1205,10 +1353,9 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Shaking_Up_the_Teller
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level (was LL2)
-  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
-  // USEC PMCs." (issues #288, #291)
+  // USEC-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves USEC in all three modes.
   '5967725e86f774601a446662': {
-    factionName: 'USEC', // Was: Any
     traderRequirements: [
       // Was: [{ id: "59a9280b86f77477925e27cb", requirementType: "level", compareMethod: ">=", value: 2, trader: Prapor }]
       {
@@ -1263,6 +1410,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 6)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a541aee0f558b660e06709d' }] (Tour "Talk to Therapist" flag)
+      {
+        id: 'overlay.59689fbd86f7740d137ebfc4.tour.talk-to-therapist',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c81d6e82b7593afaa638e0', name: 'Talk to Therapist' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Blood_in_the_Water
   //
@@ -1306,6 +1462,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 13)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a541bbff43cda8994db38b7' }] (Tour "Talk to Therapist" flag)
+      {
+        id: 'overlay.596a0e1686f7741ddf17dbee.tour.talk-to-therapist',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c81d6e82b7593afaa638e0', name: 'Talk to Therapist' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/General_Wares
   //
@@ -1347,6 +1512,15 @@
         trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a5a8e2360cf004801084b67' }] (Tour "Talk to Skier" flag)
+      {
+        id: 'overlay.596b36c586f77450d6045ad2.tour.talk-to-skier',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c2c0907a45d1fc06b150a2', name: 'Talk to Skier' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Extortionist
@@ -1428,10 +1602,9 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
-  // BEAR-only quest (issue #291): wiki Requirements - "This quest is only
-  // obtainable by BEAR PMCs."
+  // BEAR-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves BEAR in all three modes.
   '59c124d686f774189b3c843f': {
-    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1',
@@ -1561,6 +1734,15 @@
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a3bda9a408ef52190ac78ca' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.5ac23c6186f7741247042bad.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74U
@@ -1754,6 +1936,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 15)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a4b3845723a4707a0ad4420' }] (Tour "Talk to Ragman" flag)
+      {
+        id: 'overlay.5ae448bf86f7744d733e55ee.tour.talk-to-ragman',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c15e129c0090b717977bd4', name: 'Talk to Ragman' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Big_Sale
   //
@@ -1913,14 +2104,43 @@
       }, // Was: [] (player level requirement, minPlayerLevel 24)
     ],
   },
+  // Vitamins - the chemical container is now in the Factory laboratory.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Vitamins
+  // Issue #433: upstream still includes obsolete Shoreline maps/locations in
+  // regular, pve and pvp-season. The wiki confirms Factory; Factory and Night
+  // Factory coordinates below are retained from all three upstream records,
+  // rather than independently re-measured.
+  // Issue #433 keys: upstream still lists the Health Resort west wing office
+  // room 112 key in all three modes, but current map lock data places that
+  // lock only on Shoreline, and the reworked wiki guide (rev 353224) removed
+  // the old key rows. The key's own wiki page keeps an unchanged pre-rework
+  // claim. No replacement key is known.
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
-  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
-  // BEAR PMCs." (issues #288, #291)
+  // BEAR-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves BEAR in all three modes.
   '5b478eca86f7744642012254': {
-    factionName: 'BEAR', // Was: Any
+    neededKeys: [], // Was: [W112 key 5a0dc95c86f77452440fc675 on Factory]
+    objectives: {
+      '5b478f6886f774464201225a': {
+        requiredKeys: [], // Was: [[5a0dc95c86f77452440fc675]] (W112 key)
+        maps: [
+          { id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' },
+          { id: '59fc81d786f774390775787e', name: 'Night Factory' },
+        ], // Was: Factory, Night Factory, Shoreline
+        possibleLocations: [
+          {
+            map: { id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' },
+            positions: [{ x: 29.285004, y: 4.4782, z: -21.469002 }],
+          },
+          {
+            map: { id: '59fc81d786f774390775787e', name: 'Night Factory' },
+            positions: [{ x: 29.285004, y: 4.4782, z: -21.469002 }],
+          },
+        ], // Was: also Shoreline at { x: -186.06189, y: -2.7302, z: -86.1152039 }
+      },
+    },
     traderRequirements: [
       {
         id: 'overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2',
@@ -1933,8 +2153,11 @@
   },
   // Supplements - renamed in S1 (2026-08-10), which also replaced the
   // player-level gate with Skier LL2. USEC-only per wiki Requirements ("This
-  // quest is only obtainable by USEC PMCs.") (issues #288, #291). The chemical
-  // vial objective is on Customs, matching the objective text (issue #321).
+  // quest is only obtainable by USEC PMCs.") (issues #288, #291); the
+  // factionName patch (Was: Any) was retired 2026-10-19 once upstream served
+  // USEC in all three modes.
+  // The chemical vial objective is on Customs, matching the objective text
+  // (issue #321).
   // 2026-09-23: the maps fix (Was: Interchange) is now served identically
   // upstream in all three modes, so the patch was retired as a stale no-op.
   // Only the possibleLocations suppression remains: the original Interchange
@@ -1943,7 +2166,6 @@
   // suppression stands until a capture or screenshot confirms them.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
   '5b478ff486f7744d184ecbbf': {
-    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2',
@@ -2162,10 +2384,13 @@
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
     objectives: {
-      // 2026-08-25: objective text reworded (any map, not the listed four)
+      // 1.1 PvE and PvP captures keep a Location condition (Reserve, Streets of
+      // Tarkov, Shoreline, Lighthouse) with count 50, and upstream serves those
+      // four maps in every mode, so only the count is added to the text.
+      // "All over the Tarkov territory" with no Location condition is the 1.0
+      // template (count 30). The wiki objective was corrected to the four maps.
       '5d2701b586f77469f1599fe2': {
-        description: 'Eliminate 50 Scavs all over the Tarkov territory', // Was: Eliminate Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline
-        maps: [], // Was: Streets of Tarkov, Reserve, Lighthouse, Shoreline (now any map)
+        description: 'Eliminate 50 Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline', // Was: Eliminate Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline
       },
     },
   },
@@ -2729,10 +2954,9 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
-  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
-  // USEC PMCs." (issues #288, #291)
+  // USEC-only quest (issues #288, #291). The factionName patch (Was: Any) was
+  // retired 2026-10-19: upstream now serves USEC in all three modes.
   '639135c3744e452011470807': {
-    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2',
@@ -2929,6 +3153,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 1)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '68dfd6d220b777b168d7ef72' }] (Tour "Talk to Therapist" flag)
+      {
+        id: 'overlay.657315ddab5a49b71f098853.tour.talk-to-therapist',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c81d6e82b7593afaa638e0', name: 'Talk to Therapist' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Luxurious_Life
   //
@@ -2957,6 +3190,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 1)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6917b4c8e0ec62f3d7a46246' }] (Tour "Talk to Skier" flag)
+      {
+        id: 'overlay.657315e270bb0b8dba00cc48.tour.talk-to-skier',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c2c0907a45d1fc06b150a2', name: 'Talk to Skier' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Saving_the_Mole
   //
@@ -2970,6 +3212,15 @@
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '68dfd865aaf6f3c722200252' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.657315e4a6af4ab4b50f3459.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Secret_to_Productivity
@@ -3082,10 +3333,14 @@
       }, // Was: [] (player level requirement, minPlayerLevel 32)
     ],
   },
+  // New Paths - S1 rename, Peacekeeper LL1 gate, and the two objectives tarkov.dev omits
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Paths
   //
   // 2026-08-10: renamed in S1
   // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  // 2026-10-31: tarkov.dev omits the last two objectives. Added from the
+  // captures (1.1.0.1 PvE, 1.2.5.0 and 1.3.0.0 pvp-season); the wiki agrees and
+  // marks the cinema objective (a sub-condition of the extract) optional.
   '66aa58245ab22944110db6e9': {
     traderRequirements: [
       {
@@ -3095,6 +3350,25 @@
         trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+    objectivesAdd: [
+      // Was: absent
+      {
+        id: '66aa5c8ba8c36eaef492ef92',
+        description: 'Survive and extract from Streets of Tarkov (or transit to another location)',
+        type: 'extract',
+        maps: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }],
+        exitStatus: ['Survived', 'Runner', 'Transit'],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: '66b0e57eddc25d8d17e3e3c0',
+        description: 'Scout the area round the Rodina cinema on Streets of Tarkov (In one raid)',
+        type: 'visit',
+        maps: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }],
+        optional: true,
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Secrets_of_Polikhim
@@ -3166,6 +3440,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 12)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a3bee21f93d55d68c9bd900' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.675c1570526ff496850895d9.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Work_Smarter
   //
@@ -3232,17 +3515,6 @@
   // the links even though the corresponding quest pages document them.
   // ---------------------------------------------------------------------------
 
-  // The Good Times - Part 1 - requires level 27. Issue #343 reports its successor
-  // Quality Standard (666314b696a9349baa021bac) appearing at level 21; the
-  // successor's own gate is right, so the fix belongs on this predecessor whose
-  // level 27 gate upstream understates as 12. No `taskRequirements`: the client
-  // gates this task with five TraderLoyalty LL2 conditions that upstream already
-  // serves, not with a Quest condition on Shooting Cans.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
-  '666314b4d7f171c4c20226c3': {
-    minPlayerLevel: 27, // Was: 12
-  },
-
   // The Hermit - the client has no Quest AvailableForStart condition, while
   // the API incorrectly adds Tough Guy in all three modes. Keep the explicit
   // empty array so the upstream edge is cleared.
@@ -3251,12 +3523,8 @@
     taskRequirements: [], // Was: The Survivalist Path - Tough Guy
   },
 
-  // Offensive Reconnaissance - the client has no Quest AvailableForStart
-  // condition, while the API incorrectly adds Hidden Layer in all three modes.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
-  '67a0970744893b9f3f0d9b68': {
-    taskRequirements: [], // Was: Hidden Layer
-  },
+  // Offensive Reconnaissance - the empty `taskRequirements` correction is
+  // PvE-only; see src/overrides/modes/pve/tasks.json5 (issue #378).
 
   // Hot Wheels - the client roots this task at A Helping Hand; the API instead
   // points at Shipping Delay - Part 1 in all three modes.
@@ -3270,17 +3538,8 @@
     ], // Was: Shipping Delay - Part 1
   },
 
-  // The Higher They Fly - the client roots this task at A Helping Hand; the
-  // API instead points at Building Foundations in all three modes.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
-  '6745fae369a58fceba10343d': {
-    taskRequirements: [
-      {
-        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
-        status: ['complete'],
-      },
-    ], // Was: Building Foundations
-  },
+  // The Higher They Fly - the A Helping Hand edge is PvE-only; see
+  // src/overrides/modes/pve/tasks.json5 (issue #356).
 
   // ---------------------------------------------------------------------------
   // FACTION-LOCKED QUESTS (issues #288, #291)
@@ -3296,35 +3555,20 @@
   //
   // The entries below correct quests tarkov.dev serves as factionName "Any"
   // even though they are faction-locked in-game. Faction-locked quests that
-  // already had an entry in this file (Oil Run, Shaking Up the Teller,
-  // Vitamins, Supplements, Debtor, House Arrest) carry their factionName there
+  // already have an entry elsewhere in this file carry their factionName there
   // instead - duplicate keys are rejected by the duplicate-key test
   // (tests/duplicate-keys.test.ts). Quests whose
   // factionName upstream already serves correctly (Textile - Part 1/2,
   // Drip-Out - Part 1/2, Our Own Land / Counteraction, Green Corridor /
-  // Road Closed) need no override. Each lock is proven by the wiki
+  // Road Closed) need no override. On 2026-10-19 upstream began serving the
+  // correct faction in regular, pve and pvp-season for The Huntsman Path -
+  // Administrator (both variants), Gunsmith - M4A1, Gunsmith - AKM, Oil Run,
+  // Shaking Up the Teller, Vitamins, Supplements, Debtor and House Arrest, so
+  // those patches were retired as stale. Each lock is proven by the wiki
   // Requirements section ("This quest is only obtainable by BEAR/USEC PMCs")
   // or, for The Huntsman Path - Administrator, the wiki's BEAR/USEC Exclusive
   // objective lists.
   // ---------------------------------------------------------------------------
-
-  // The Huntsman Path - Administrator (BEAR variant) - faction-locked pair
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
-  // Issue #288: this quest is two faction variants sharing one name. The wiki
-  // lists the Reserve objectives (this ID) as BEAR Exclusive and the
-  // Lighthouse objectives (6a45208043b8d7604d00b8d5, below) as USEC Exclusive.
-  '639136df4b15ca31f76bc31f': {
-    factionName: 'BEAR', // Was: Any
-  },
-
-  // The Huntsman Path - Administrator (USEC variant) - faction-locked pair
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
-  // Issue #288: Lighthouse objectives ("Launch a yellow signal flare at the
-  // train station on Lighthouse", "Eliminate any 6 targets at the train
-  // station territory on Lighthouse") are USEC Exclusive.
-  '6a45208043b8d7604d00b8d5': {
-    factionName: 'USEC', // Was: Any
-  },
 
   // A Life Lesson - BEAR-only quest
   // Proof: https://escapefromtarkov.fandom.com/wiki/A_Life_Lesson
@@ -3496,112 +3740,7 @@
     ],
   },
 
-  // ---------------------------------------------------------------------------
-  // Retired Lightkeeper access chain (2026-09-10).
-  //
-  // The whole pre-1.1 route to Lightkeeper was replaced by the "To the Light -
-  // ..." series. The wiki marked all seven of these pages
-  // `{{Historical content}}` in one coordinated sweep on 2026-09-08
-  // (20:21-20:48 UTC) and rewrote each opening line to the past tense
-  // ("'''X''' was a Quest in Escape from Tarkov"), which is the same standard
-  // already used for the 33 other disabled tasks in this file. The Lightkeeper
-  // trader page no longer documents THIS chain: it now routes access through the
-  // replacement series ("The questline to obtain one starts with [[To the Light
-  // - Trust but Verify]]").
-  //
-  // tarkov.dev still serves all seven in regular, pve and pvp-season.
-  //
-  // Evidence limit worth recording: the newest local client capture is
-  // 2026-08-11 (PvE) and still contains the chain wired together, i.e. it
-  // predates the change; the 2026-08-27 regular capture does not contain them,
-  // but that capture covers only ~63% of upstream tasks so its silence is not
-  // proof. The wiki is therefore the freshest source here, and the
-  // `{{Historical content}}` marker is what these entries rest on.
-  //
-  // Replacement data is NOT added here: none of the ten "To the Light - ..."
-  // quests exists in tarkov.dev, and none appears in any local capture locale,
-  // so their IDs are unknown. Adding them needs a post-2026-09-08 capture.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Lightkeeper
-  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365
-  // ---------------------------------------------------------------------------
-
-  // Network Provider - Part 1 ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1
-  '625d6ff5ddc94657c21a1625': {
-    disabled: true, // Was: active
-  },
-
-  // Network Provider - Part 2 ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_2
-  '625d6ffaf7308432be1d44c5': {
-    disabled: true, // Was: active
-  },
-
-  // Assessment - Part 1 ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_1
-  '625d6ffcaa168e51321d69d7': {
-    disabled: true, // Was: active
-  },
-
-  // Assessment - Part 2 ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_2
-  '625d6fff4149f1149b5b12c9': {
-    disabled: true, // Was: active
-  },
-
-  // Assessment - Part 3 ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_3
-  '625d7001c4874104f230c0c5': {
-    disabled: true, // Was: active
-  },
-
-  // Key to the Tower ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Key_to_the_Tower
-  '625d70031ed3bb5bcc5bd9e5': {
-    disabled: true, // Was: active
-  },
-
-  // Knock-Knock ({{Historical content}})
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Knock-Knock
-  '625d7005a4eb80027c4f2e09': {
-    disabled: true, // Was: active
-  },
-
-  // Getting Acquainted -> To the Light - Getting Acquainted (renamed, NOT retired)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted
-  //
-  // This is the one member of the old chain that survived the rework, so it is
-  // renamed rather than disabled. The old page is now literally
-  // `#REDIRECT [[To the Light - Getting Acquainted]]`, and the identity is
-  // confirmed field-by-field: same trader (Mechanic), and all four of upstream's
-  // objective IDs carry text matching the new page's objective list one-for-one
-  // (6391e2f9e705511c8a4a1b85 obtain the V3
-  // flash drive, 6391e31bfa894f0a866afdec reflash the transmitter,
-  // 6391e329c115f907b14700b1 hand over the flash drive, 63ab727b1287ef0b827d0c95
-  // visit the Lighthouse building).
-  //
-  // Only the name and wiki link are corrected here. `taskRequirements` is
-  // deliberately left alone even though its sole upstream edge (Knock-Knock) is
-  // disabled above:
-  //   - Asserting a replacement edge would mean trusting the wiki's `previous`
-  //     field, which AGENTS.md rules out as proof of an unlock edge.
-  //   - Asserting `taskRequirements: []` is not licensed either: the 2026-08-11
-  //     capture carries a real `Quest` start condition for this task, so an empty
-  //     list would contradict the reference rather than record an absence.
-  // Explicit active-successor exception, covered for both IDs and all modes in
-  // tests/task-corrections.test.ts: task-unlocks returns `unknown`, never
-  // `available`, when the filtered prerequisite has no recorded status. Consumers
-  // must preserve that third state rather than treating missing tasks as complete.
-  // These quests are active; disabling them would assert an unsupported removal.
-  // Consequence to be aware of: consumers that filter disabled tasks will see
-  // this task and Information Source (63966faeea19ac7ed845db2c) gated behind a
-  // filtered prerequisite until a post-2026-09-08 capture establishes the real
-  // wiring. The wiki's own reading is that this task now follows "To the Light -
-  // The Other Side" and still leads to Information Source; neither edge is
-  // expressible today, because the "To the Light - ..." quests are absent from
-  // tarkov.dev entirely.
-  '625d700cc48e6c62a440fab5': {
-    name: 'To the Light - Getting Acquainted', // Was: Getting Acquainted
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted', // Was: .../Getting_Acquainted (now a redirect)
-  },
+  // The legacy Lightkeeper access-chain patches were retired after all eight
+  // IDs disappeared from regular, pve and pvp-season upstream task data.
+  // Proof: https://json.tarkov.dev/regular/tasks (also /pve/tasks, /pvp-season/tasks)
 }

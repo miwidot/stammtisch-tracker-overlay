@@ -72,7 +72,7 @@
             "$comment": "Omitted objective text means the list is a projection, so `partial` cannot be false. Without this a consumer could read `missingObjectiveTexts: 2, partial: false` and treat an incomplete chapter as complete. The resolved-vs-referenced half of the invariant compares two properties, which JSON Schema cannot express, and is enforced in tests/story-chapters.test.ts instead.",
             "if": {
               "required": ["missingObjectiveTexts"],
-              "properties": { "missingObjectiveTexts": { "minimum": 1 } }
+              "properties": { "missingObjectiveTexts": { "type": "integer", "minimum": 1 } }
             },
             "then": { "properties": { "partial": { "const": true } } }
           }
@@ -226,6 +226,11 @@
           "type": "object",
           "required": ["id", "type", "description", "sourceQuestId"],
           "properties": {
+            "completionPolicy": {
+              "description": "Guaranteed effective completion baseline for every character in regular, pve and pvp-season, including prestige and older characters. tutorial means completed during the mandatory tutorial; consumers render read-only without creating or deleting saved marks. Absence means ordinary tracked completion. Never implies subquest, dialogue or chapter completion.",
+              "type": "string",
+              "enum": ["tutorial"]
+            },
             "id": {
               "description": "Objective ID: the stable source objective id from the client (24-hex). Every chapter is generated from the quest reference, so fabricated positional ids are not accepted.",
               "type": "string",
@@ -233,6 +238,11 @@
             },
             "sourceQuestId": {
               "description": "EFT sub-quest id backing this objective (traceability to source game data)",
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
+            },
+            "parentObjectiveId": {
+              "description": "Presentation parent derived from the raw condition parentId. Only optional objectives may carry this field; the parent must be a main objective in the same chapter and sourceQuestId. Multiple optionals can share a parent. This does not imply a completion prerequisite or shared progress.",
               "type": "string",
               "pattern": "^[0-9a-f]{24}$"
             },
@@ -448,6 +458,12 @@
               }
             }
           },
+          "allOf": [
+            {
+              "if": { "required": ["parentObjectiveId"] },
+              "then": { "properties": { "type": { "const": "optional" } } }
+            }
+          ],
           "additionalProperties": false
         }
       },

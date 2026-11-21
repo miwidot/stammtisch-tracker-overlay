@@ -34,7 +34,9 @@ coverage/
 # Generated data (wiki cache, API cache, comparison results)
 data/
 
-eft/
+# Retired capture location: ignored to prevent accidental private-data commits.
+# Tools never read this directory; active inputs and outputs live under data/.
+/eft/
 
 # Local lookup notes (kept out of the repo on purpose)
 /DELETE.txt

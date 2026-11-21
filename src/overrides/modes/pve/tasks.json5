@@ -4,6 +4,42 @@
   // Anything true of every mode belongs in src/overrides/tasks.json5, even when
   // the supporting capture came from PvE.
 
+  // Hell on Earth - Part 2 - the 1.1 PvE template accepts Part 1 while active
+  // as well as complete. No regular/Seasonal template verifies this status change.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2
+  '666314b2a9290f9e0806cca3': {
+    taskRequirements: [
+      {
+        task: { id: '666314b0acf8442f8b0531a1', name: 'Hell on Earth - Part 1' },
+        status: ['active', 'complete'], // Was: ['complete']
+      },
+    ],
+  },
+
+  // The Tarkov Shooter - Part 4 - explicit Quest start statuses in the 1.1 PvE
+  // template include active; do not infer this edge from narrative wiki order.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_4
+  '5bc480a686f7741af0342e29': {
+    taskRequirements: [
+      {
+        task: { id: '5bc47dbf86f7741ee74e93b9', name: 'The Tarkov Shooter - Part 3' },
+        status: ['active', 'complete'], // Was: ['complete']
+      },
+    ],
+  },
+
+  // Chemical - Part 3 - the 1.1 PvE template accepts Part 2 while active or
+  // complete. This capture does not establish the same statuses in other modes.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_-_Part_3
+  '597a0e5786f77426d66c0636': {
+    taskRequirements: [
+      {
+        task: { id: '597a0b2986f77426d66c0633', name: 'Chemical - Part 2' },
+        status: ['active', 'complete'], // Was: ['complete']
+      },
+    ],
+  },
+
   // Building Foundations - the PvE client roots this task at A Helping Hand,
   // while regular and pvp-season upstream require Swift Retribution (complete
   // or failed). The shared override had been forcing the PvE edge into every
@@ -21,6 +57,34 @@
         status: ['complete'],
       }, // Was (shared/API): Swift Retribution, complete or failed
     ],
+  },
+
+  // The Higher They Fly - the 1.1 PvE capture roots this task at A Helping
+  // Hand, while upstream points at Building Foundations (active or complete) in
+  // every mode. The 1.1 regular capture does not include the task, so there is
+  // no evidence for the PvE edge outside PvE; it was previously shared and has
+  // been scoped here like Building Foundations, its upstream predecessor.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '6745fae369a58fceba10343d': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      }, // Was (shared/API): Building Foundations, active or complete
+    ],
+  },
+
+  // Offensive Reconnaissance - the 1.1 PvE capture's only start condition is
+  // TraderLoyalty Mechanic >= 3, with no Quest condition, while upstream adds
+  // Hidden Layer in every mode. This was previously a shared override, but the
+  // 1.1 regular capture points the other way: it includes Hidden Layer and
+  // several other Mechanic LL3-gated quests yet not Offensive Reconnaissance,
+  // so the regular client did not offer it on Mechanic LL3 alone. Regular and
+  // pvp-season therefore keep upstream's Hidden Layer edge.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/378
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '67a0970744893b9f3f0d9b68': {
+    taskRequirements: [], // Was: Hidden Layer, complete
   },
 
   // Pathfinder's old PvE-only objective text is gone: the 1.1 client has no
@@ -53,7 +117,7 @@
   //
   // The 1.1-pve capture's Quest start condition targets Chemical - Part 4
   // (597a0f5686f774273b74f676) and accepts status [4, 5] = complete or failed.
-  // The 2026-08-27 regular capture instead targets Chemical - Part 3 accepting
+  // A 1.1 regular capture instead targets Chemical - Part 3 accepting
   // complete only, and the wiki Requirements section agrees with regular - so
   // Chemical - Part 3 is the shared value in src/overrides/tasks.json5 and this
   // PvE-only entry restores the PvE edge. The other three edges are identical in
@@ -77,30 +141,5 @@
         status: ['complete'],
       },
     ],
-  },
-
-  // New Beginning - prestige track, and PvE has no prestige.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/362
-  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/319
-  //        https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-  //
-  // This task is not an ordinary trader quest: it is the Quest start condition
-  // on prestige element 672df12f97f0469cea52f55e (Prestige 1), returned by
-  // `client/prestige/list`. Upstream itself agrees PvE has no prestige -
-  // `json.tarkov.dev/pve/tasks` serves `prestige: []` while
-  // `json.tarkov.dev/regular/tasks` serves all six prestige elements - yet it
-  // still lists the quest whose only purpose is to gate Prestige 1. The local
-  // captures agree: no PvE session is served `client/prestige/list`, and this
-  // repository already scopes every prestige correction to
-  // src/overrides/modes/regular/prestige.json5.
-  //
-  // Two independent reporters at levels 35 and 36 (both above the wiki's level-25
-  // requirement) confirm the quest never appears in PvE.
-  //
-  // Note the PvE capture is build 1.1.0.1.46699 rather than the 46911 used for
-  // the other modes, so the endpoint evidence alone would carry a version
-  // caveat; the empty upstream `prestige` array for PvE is what removes it.
-  '6761f28a022f60bb320f3e95': {
-    disabled: true, // Was: active (pve has no prestige track)
   },
 }

@@ -4,6 +4,7 @@
   "additionalProperties": false,
   "description": "Root schema for compiled overlay output",
   "properties": {
+    "taskIdAliases": { "$ref": "task-id-aliases.schema.json" },
     "$meta": {
       "description": "Build metadata",
       "properties": {
@@ -41,11 +42,20 @@
     "progressionCounters": {
       "$ref": "progression-counter.schema.json"
     },
+    "traderTaskGroups": {
+      "$ref": "trader-task-group.schema.json"
+    },
     "seasonalPerks": {
       "$ref": "seasonal-perk.schema.json"
     },
     "craftsAdd": {
       "$ref": "craft-additions.schema.json"
+    },
+    "extractRequirements": {
+      "$ref": "extract-requirements.schema.json"
+    },
+    "extractCues": {
+      "$ref": "extract-cues.schema.json"
     },
     "tasks": {
       "$ref": "task-override.schema.json"
@@ -56,6 +66,9 @@
     "traders": {
       "description": "Trader corrections",
       "type": "object"
+    },
+    "maps": {
+      "$ref": "map-override.schema.json"
     },
     "locales": {
       "additionalProperties": {
@@ -76,7 +89,8 @@
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
             "tasksAdd": { "$ref": "task-additions.schema.json" },
-            "prestige": { "$ref": "prestige-override.schema.json" }
+            "prestige": { "$ref": "prestige-override.schema.json" },
+            "maps": { "$ref": "map-override.schema.json" }
           },
           "additionalProperties": false
         },
@@ -84,7 +98,8 @@
           "type": "object",
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
-            "tasksAdd": { "$ref": "task-additions.schema.json" }
+            "tasksAdd": { "$ref": "task-additions.schema.json" },
+            "maps": { "$ref": "map-override.schema.json" }
           },
           "additionalProperties": false
         },
@@ -92,7 +107,8 @@
           "type": "object",
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
-            "tasksAdd": { "$ref": "task-additions.schema.json" }
+            "tasksAdd": { "$ref": "task-additions.schema.json" },
+            "maps": { "$ref": "map-override.schema.json" }
           },
           "additionalProperties": false
         }

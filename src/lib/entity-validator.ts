@@ -17,11 +17,12 @@
  *   and flagged for retirement once upstream ships them.
  */
 
+import { compareOverlayFields, type OverlayComparisonDetail } from './overlay-comparison.cjs';
 import type { TaskData } from './types.js';
-import { compareSubset, formatValue } from './value-compare.js';
+import { formatValue } from './value-compare.js';
 import { categorizeResults } from './task-validator.js';
 
-export type EntityDetailStatus = 'needed' | 'fixed' | 'synthetic' | 'error' | 'info';
+export type EntityDetailStatus = 'needed' | 'fixed' | 'synthetic' | 'error' | 'info' | 'check';
 
 export interface EntityValidationDetail {
   field: string;
@@ -35,6 +36,8 @@ export interface EntityValidationResult {
   id: string;
   status: EntityStatus;
   stillNeeded: boolean;
+  /** Identity exists upstream, independently of whether values agree. */
+  adopted?: boolean;
   details: EntityValidationDetail[];
 }
 
@@ -46,6 +49,19 @@ export interface EntityValidatorConfig {
   /** ID-keyed sub-objects where overlay-only keys are synthetic additions. */
   keyedFields?: string[];
 }
+
+interface OverrideFieldPolicies {
+  identity: Set<string>;
+  additive: Set<string>;
+  keyed: Set<string>;
+}
+
+interface KeyedCollectionIndex {
+  entries: Map<string, unknown>;
+  problem?: string;
+}
+
+type FieldPolicy = 'identity' | 'keyed' | 'generic';
 
 /**
  * Validate ID-keyed entity overrides against raw API records.
@@ -59,165 +75,197 @@ export function validateEntityOverrides(
   apiEntities: Map<string, Record<string, unknown>>,
   config: EntityValidatorConfig = {}
 ): EntityValidationResult[] {
-  const identity = new Set(config.identityFields ?? []);
-  const additive = new Set(config.additiveFields ?? []);
-  const keyed = new Set(config.keyedFields ?? []);
-
-  const results: EntityValidationResult[] = [];
-
-  for (const [entityId, rawOverride] of Object.entries(overrides)) {
-    if (!rawOverride || typeof rawOverride !== 'object' || Array.isArray(rawOverride)) {
-      continue;
-    }
-    const override = rawOverride as Record<string, unknown>;
-    const apiEntity = apiEntities.get(entityId);
-
-    if (!apiEntity) {
-      results.push({
-        id: entityId,
-        status: 'REMOVED_FROM_API',
-        stillNeeded: false,
-        details: [
-          {
-            field: 'entity',
-            status: 'error',
-            message: 'Not found in API - removed upstream, or the ID is wrong',
-          },
-        ],
-      });
-      continue;
-    }
-
-    const details: EntityValidationDetail[] = [];
-
-    for (const [field, overrideValue] of Object.entries(override)) {
-      if (overrideValue === undefined) continue;
-      const apiValue = apiEntity[field];
-
-      // Identity fields must agree with upstream but are not corrections.
-      if (identity.has(field)) {
-        if (apiValue === undefined) {
-          details.push({
-            field,
-            status: 'error',
-            message: `${field}: identity field absent from API - entity shape changed or the ID is wrong`,
-          });
-        } else if (!compareSubset(overrideValue, apiValue)) {
-          details.push({
-            field,
-            status: 'error',
-            message: `${field}: identity field disagrees with API (API=${formatValue(
-              apiValue
-            )}, overlay=${formatValue(overrideValue)}) - wrong entity or upstream renumbered`,
-          });
-        }
-        continue;
-      }
-
-      // Fields tarkov.dev does not expose: needed while absent.
-      if (additive.has(field)) {
-        if (apiValue === undefined) {
-          details.push({
-            field,
-            status: 'needed',
-            message: `${field}: absent from API (not exposed upstream) - STILL NEEDED`,
-          });
-        } else {
-          details.push({
-            field,
-            status: 'fixed',
-            message: `${field}: NOW PRESENT IN API (${formatValue(
-              apiValue
-            )}) - review and retire the addition`,
-          });
-        }
-        continue;
-      }
-
-      // ID-keyed sub-objects: overlay-only keys are deliberate additions.
-      if (keyed.has(field) && overrideValue && typeof overrideValue === 'object') {
-        const apiKeyed = (apiValue && typeof apiValue === 'object' ? apiValue : {}) as Record<
-          string,
-          unknown
-        >;
-        const apiKeyedIds = new Set(collectKeyedIds(apiValue));
-
-        for (const [subKey, subValue] of Object.entries(overrideValue as Record<string, unknown>)) {
-          if (!apiKeyedIds.has(subKey)) {
-            details.push({
-              field: `${field}:${subKey}`,
-              status: 'synthetic',
-              message: `${field} '${subKey}': not in API - synthetic overlay entry, STILL NEEDED`,
-            });
-            continue;
-          }
-          const apiSub = findKeyedEntry(apiValue, subKey) ?? apiKeyed[subKey];
-          const isMatch = compareSubset(subValue, apiSub);
-          details.push({
-            field: `${field}:${subKey}`,
-            status: isMatch ? 'fixed' : 'needed',
-            message: isMatch
-              ? `${field} '${subKey}': FIXED IN API`
-              : `${field} '${subKey}': API=${formatValue(apiSub)}, overlay=${formatValue(
-                  subValue
-                )} - STILL NEEDED`,
-          });
-        }
-        continue;
-      }
-
-      const isMatch = compareSubset(overrideValue, apiValue);
-      details.push({
-        field,
-        status: isMatch ? 'fixed' : 'needed',
-        message: isMatch
-          ? `${field}: ${formatValue(apiValue)} - FIXED IN API`
-          : `${field}: API=${formatValue(apiValue)}, overlay=${formatValue(
-              overrideValue
-            )} - STILL NEEDED`,
-      });
-    }
-
-    const stillNeeded = details.some(
-      (d) => d.status === 'needed' || d.status === 'synthetic' || d.status === 'error'
-    );
-
-    results.push({
-      id: entityId,
-      status: stillNeeded ? 'NEEDED' : 'FIXED',
-      stillNeeded,
-      details,
-    });
-  }
-
-  return results;
+  const policies = overrideFieldPolicies(config);
+  return Object.entries(overrides).map(([id, override]) =>
+    entityOverrideResult(id, override, apiEntities.get(id), policies)
+  );
 }
 
-/** API keyed collections may arrive as arrays of {id} or as id-keyed objects. */
-function collectKeyedIds(apiValue: unknown): string[] {
-  if (Array.isArray(apiValue)) {
-    return apiValue
-      .filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === 'object')
-      .map((entry) => entry.id)
-      .filter((id): id is string => typeof id === 'string');
-  }
-  if (apiValue && typeof apiValue === 'object') {
-    return Object.keys(apiValue as Record<string, unknown>);
-  }
-  return [];
+function overrideFieldPolicies(config: EntityValidatorConfig): OverrideFieldPolicies {
+  return {
+    identity: new Set(config.identityFields ?? []),
+    additive: new Set(config.additiveFields ?? []),
+    keyed: new Set(config.keyedFields ?? []),
+  };
 }
 
-function findKeyedEntry(apiValue: unknown, key: string): unknown {
-  if (Array.isArray(apiValue)) {
-    return apiValue.find(
-      (entry) =>
-        !!entry && typeof entry === 'object' && (entry as Record<string, unknown>).id === key
-    );
+function isEntityRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function entityOverrideResult(
+  id: string,
+  override: unknown,
+  upstream: Record<string, unknown> | undefined,
+  policies: OverrideFieldPolicies
+): EntityValidationResult {
+  if (!isEntityRecord(override))
+    throw new Error(`Invalid entity override ${id}: expected an object`);
+  if (!upstream) return missingEntityResult(id);
+  const details = Object.entries(override).flatMap(([field, value]) =>
+    suppliedFieldDetails(field, value, upstream, policies)
+  );
+  return comparedEntityResult(id, details);
+}
+
+function missingEntityResult(id: string): EntityValidationResult {
+  return {
+    id,
+    status: 'REMOVED_FROM_API',
+    stillNeeded: false,
+    details: [
+      {
+        field: 'entity',
+        status: 'error',
+        message: 'Not found in API - removed upstream, or the ID is wrong',
+      },
+    ],
+  };
+}
+
+function comparedEntityResult(
+  id: string,
+  details: EntityValidationDetail[]
+): EntityValidationResult {
+  const stillNeeded = details.some((detail) => correctionStatuses.has(detail.status));
+  return { id, status: stillNeeded ? 'NEEDED' : 'FIXED', stillNeeded, details };
+}
+
+const correctionStatuses = new Set<EntityDetailStatus>(['needed', 'synthetic', 'error', 'check']);
+
+function fieldPolicy(field: string, policies: OverrideFieldPolicies): FieldPolicy {
+  if (policies.identity.has(field)) return 'identity';
+  if (policies.additive.has(field)) return 'generic';
+  if (policies.keyed.has(field)) return 'keyed';
+  return 'generic';
+}
+
+const fieldComparisons = {
+  identity: identityFieldDetails,
+  keyed: keyedFieldDetails,
+  generic: genericFieldDetails,
+};
+
+function suppliedFieldDetails(
+  field: string,
+  value: unknown,
+  upstream: Record<string, unknown>,
+  policies: OverrideFieldPolicies
+): EntityValidationDetail[] {
+  if (value === undefined) return [];
+  return fieldComparisons[fieldPolicy(field, policies)](field, value, upstream);
+}
+
+function genericFieldDetails(
+  field: string,
+  value: unknown,
+  upstream: Record<string, unknown>
+): EntityValidationDetail[] {
+  return entityFieldDetails({ [field]: value }, upstream);
+}
+
+function identityFieldDetails(
+  field: string,
+  value: unknown,
+  upstream: Record<string, unknown>
+): EntityValidationDetail[] {
+  return genericFieldDetails(field, value, upstream).map(identityFieldDetail);
+}
+
+/** Identity checks cover every supplied value without classifying identities as corrections. */
+function identityFieldDetail(detail: EntityValidationDetail): EntityValidationDetail {
+  const messages: Partial<Record<EntityDetailStatus, string>> = {
+    fixed: `${detail.field}: identity field agrees with API`,
+    check: `${detail.field}: identity field absent from API - entity shape changed or the ID is wrong; ${detail.message}`,
+    needed: `${detail.field}: identity field disagrees with API - wrong entity or upstream renumbered; ${detail.message}`,
+  };
+  return {
+    ...detail,
+    status: detail.status === 'fixed' ? 'info' : 'error',
+    message: messages[detail.status] ?? detail.message,
+  };
+}
+
+function fieldValue(upstream: Record<string, unknown>, field: string): unknown {
+  return Object.hasOwn(upstream, field) ? upstream[field] : undefined;
+}
+
+function keyedFieldDetails(
+  field: string,
+  value: unknown,
+  upstream: Record<string, unknown>
+): EntityValidationDetail[] {
+  if (!isEntityRecord(value)) return invalidKeyedPatch(field);
+  const index = indexKeyedCollection(fieldValue(upstream, field));
+  return Object.entries(value).flatMap(([key, entry]) =>
+    keyedEntryDetails(field, key, entry, index)
+  );
+}
+
+function invalidKeyedPatch(field: string): EntityValidationDetail[] {
+  return [{ field, status: 'error', message: `${field}: expected an ID-keyed overlay object` }];
+}
+
+function indexKeyedCollection(value: unknown): KeyedCollectionIndex {
+  if (value === undefined) return unavailableKeyedIndex('Field is absent upstream');
+  if (Array.isArray(value)) return indexKeyedArray(value);
+  if (isEntityRecord(value)) return { entries: new Map(Object.entries(value)) };
+  return unavailableKeyedIndex('Upstream value is not a keyed collection');
+}
+
+function unavailableKeyedIndex(problem: string): KeyedCollectionIndex {
+  return { entries: new Map(), problem };
+}
+
+/** An incomplete or duplicate ID list cannot justify choosing an arbitrary array entry. */
+function indexKeyedArray(values: unknown[]): KeyedCollectionIndex {
+  const entries = new Map<string, unknown>();
+  for (const value of values) {
+    const id = keyedEntryId(value);
+    if (id === undefined) return unavailableKeyedIndex('Malformed upstream keyed array entry');
+    if (entries.has(id)) return unavailableKeyedIndex(`Duplicate upstream keyed array ID '${id}'`);
+    entries.set(id, value);
   }
-  if (apiValue && typeof apiValue === 'object') {
-    return (apiValue as Record<string, unknown>)[key];
-  }
-  return undefined;
+  return { entries };
+}
+
+function keyedEntryId(value: unknown): string | undefined {
+  if (!isEntityRecord(value)) return undefined;
+  if (typeof value.id !== 'string') return undefined;
+  return value.id.trim() ? value.id : undefined;
+}
+
+function keyedEntryDetails(
+  field: string,
+  key: string,
+  value: unknown,
+  index: KeyedCollectionIndex
+): EntityValidationDetail[] {
+  const path = `${field}:${key}`;
+  if (index.problem) return unavailableKeyedDetails(path, value, index.problem);
+  if (!index.entries.has(key)) return syntheticKeyedDetails(field, key);
+  return genericFieldDetails(path, value, { [path]: index.entries.get(key) });
+}
+
+function unavailableKeyedDetails(
+  path: string,
+  value: unknown,
+  reason: string
+): EntityValidationDetail[] {
+  return genericFieldDetails(path, value, {}).map((detail) => ({
+    ...detail,
+    message: `${detail.message}; ${reason}`,
+  }));
+}
+
+function syntheticKeyedDetails(field: string, key: string): EntityValidationDetail[] {
+  return [
+    {
+      field: `${field}:${key}`,
+      status: 'synthetic',
+      message: `${field} '${key}': not in API - synthetic overlay entry, NOT REDUNDANT - VERIFY CORRECTION EVIDENCE`,
+    },
+  ];
 }
 
 /**
@@ -230,34 +278,81 @@ export function validateEntityAdditions(
   additions: Record<string, unknown>,
   apiEntities: Map<string, Record<string, unknown>>
 ): EntityValidationResult[] {
-  const results: EntityValidationResult[] = [];
+  return Object.entries(additions).map(([key, addition]) =>
+    entityAdditionResult(key, addition, apiEntities)
+  );
+}
 
-  for (const [key, rawAddition] of Object.entries(additions)) {
-    const addition =
-      rawAddition && typeof rawAddition === 'object' && !Array.isArray(rawAddition)
-        ? (rawAddition as Record<string, unknown>)
-        : {};
-    const explicitId = typeof addition.id === 'string' ? addition.id : undefined;
+function entityAdditionResult(
+  key: string,
+  addition: unknown,
+  apiEntities: Map<string, Record<string, unknown>>
+): EntityValidationResult {
+  if (!isEntityRecord(addition))
+    throw new Error(`Invalid entity addition ${key}: expected an object`);
+  const upstream = additionUpstream(key, addition, apiEntities);
+  const details = entityFieldDetails(addition, upstream);
+  const identical = additionValuesMatch(upstream, details);
+  details.unshift(additionAdoptionDetail(upstream));
+  return {
+    id: key,
+    adopted: Boolean(upstream),
+    status: identical ? 'FIXED' : 'NEEDED',
+    stillNeeded: !identical,
+    details,
+  };
+}
 
-    const present = apiEntities.has(key) || (explicitId ? apiEntities.has(explicitId) : false);
+function additionUpstream(
+  key: string,
+  addition: Record<string, unknown>,
+  apiEntities: Map<string, Record<string, unknown>>
+): Record<string, unknown> | undefined {
+  const keyed = apiEntities.get(key);
+  if (keyed) return keyed;
+  return typeof addition.id === 'string' ? apiEntities.get(addition.id) : undefined;
+}
 
-    results.push({
-      id: key,
-      status: present ? 'FIXED' : 'NEEDED',
-      stillNeeded: !present,
-      details: [
-        {
-          field: 'addition',
-          status: present ? 'fixed' : 'needed',
-          message: present
-            ? 'NOW IN API - remove the addition and switch to an override if still wrong'
-            : 'Still missing from API - STILL NEEDED',
-        },
-      ],
-    });
-  }
+function additionValuesMatch(
+  upstream: Record<string, unknown> | undefined,
+  details: EntityValidationDetail[]
+): boolean {
+  return (
+    Boolean(upstream) &&
+    details.some((detail) => detail.field !== '(root)') &&
+    details.every((detail) => detail.status === 'fixed')
+  );
+}
 
-  return results;
+function additionAdoptionDetail(
+  upstream: Record<string, unknown> | undefined
+): EntityValidationDetail {
+  return {
+    field: 'addition',
+    status: 'info',
+    message: upstream
+      ? 'ID exists upstream: replace the duplicate addition with only proven corrections; retire it fully only when all values match'
+      : 'ID absent upstream: supplied values cannot be verified; format and references require separate validation',
+  };
+}
+
+/** Preserve unavailable values as explicit checks, rather than inferred corrections. */
+function entityFieldDetail(detail: OverlayComparisonDetail): EntityValidationDetail {
+  const statuses = {
+    same: 'fixed',
+    different: 'needed',
+    unverified: 'check',
+    invalid: 'error',
+  } as const;
+  return {
+    field: detail.field,
+    status: statuses[detail.status],
+    message: `${detail.field}: ${detail.status.toUpperCase()} - ${detail.reason} (API=${formatValue(detail.upstreamValue)}, overlay=${formatValue(detail.overlayValue)})`,
+  };
+}
+
+function entityFieldDetails(patch: unknown, upstream: unknown): EntityValidationDetail[] {
+  return compareOverlayFields(patch, upstream).map(entityFieldDetail);
 }
 
 // ---------------------------------------------------------------------------
@@ -457,7 +552,7 @@ export function checkTaskSuppressionStaleness(
         objectiveId,
         stale: !exists,
         message: exists
-          ? 'suppressed objective still present upstream - STILL NEEDED'
+          ? 'suppressed objective still present upstream - NOT REDUNDANT - VERIFY CORRECTION EVIDENCE'
           : 'suppressed objective no longer present upstream - suppression is stale',
       });
     }

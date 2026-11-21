@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { verifyOverlaySha256 } from '../src/lib/index.js';
 
 function withDigest(value: Record<string, unknown>): Record<string, unknown> {

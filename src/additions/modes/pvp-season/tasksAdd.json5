@@ -1,0 +1,1973 @@
+{
+  // Seasonal-mode-only task additions (pvp-season), merged after the shared
+  // src/additions files.
+
+  // Placeholder tasks (pvp-season, "Seasonal mode" on the wiki): quests the wiki
+  // documents but no source exposes BSG task/objective IDs for yet. IDs are
+  // synthetic and identity-based: task 'placeholder_<wiki title slug>',
+  // objectives '<taskId>_objNN' in wiki order, so they never collide with 24-hex
+  // BSG IDs. Every placeholder is tracked in
+  // https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/507; when a
+  // real ID is known, replace the entry, record the placeholder -> real mapping
+  // there and migrate stored progress (plan in the issue). Definitions come from
+  // each linked wiki page. Map, item and trader references use real IDs.
+  //
+  // Gates are best-effort and placeholder-only: besides explicit "Unlocks N-M
+  // after completion of X" Requirements lines, each placeholder is gated on its
+  // wiki infobox `previous` quest (status ['active', 'complete'] when the wiki
+  // says "Accept X", so finishing X keeps the gate met; else 'complete').
+  // AGENTS.md treats `previous` as narrative order, not proof; it is used here
+  // only because these entries are synthetic anyway and leaving them ungated
+  // shows the whole line as available. Chain roots keep
+  // the wiki loyalty-level gates as traderRequirements with synthetic ids
+  // 'overlay.<placeholder id>.<traderId>.level.>=.N'. Replace both with
+  // upstream data when the real IDs land; the issue lists each gate.
+
+  // ...for the Good of the Chosen
+  // Proof: https://escapefromtarkov.fandom.com/wiki/...for_the_Good_of_the_Chosen
+  placeholder_for_the_good_of_the_chosen: {
+    id: 'placeholder_for_the_good_of_the_chosen',
+    name: '...for the Good of the Chosen',
+    normalizedName: 'for-the-good-of-the-chosen',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/...for_the_Good_of_the_Chosen',
+    trader: {
+      id: '638f541a29ffd1183d187f57',
+      name: 'Lightkeeper',
+    },
+    map: {
+      id: '5704e4dad2720bb55b8b4567',
+      name: 'Lighthouse',
+    },
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_in_the_name_of_humanity',
+          name: 'In the Name of Humanity...',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_for_the_good_of_the_chosen_obj01',
+        description: 'Report back to Lightkeeper',
+        // Was: untyped objective. Report back to Lightkeeper. https://ka-chanblog.com/for-the-good-of-the-chosen/
+        type: 'dialogue',
+        optional: false,
+      },
+    ],
+  },
+
+  // Break the Chain
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Break_the_Chain
+  placeholder_break_the_chain: {
+    id: 'placeholder_break_the_chain',
+    name: 'Break the Chain',
+    normalizedName: 'break-the-chain',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Break_the_Chain',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_desperate_assault',
+          name: 'Desperate Assault',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_break_the_chain_obj01',
+        description: 'Destroy the transmitter on the factory chimney near the unfinished construction site on Customs',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_break_the_chain_obj02',
+        description: 'Destroy the transmitter on the power line tower on Customs',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_break_the_chain_obj03',
+        description: 'Destroy the transmitter on top of the mountain on Woods',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_break_the_chain_obj04',
+        description: 'Destroy the transmitter on the cell tower on Woods',
+        // Was: untyped objective. Shoot the installed transmitter with any weapon. https://www.tarkovhead.com/en/quest/regular/break-the-chain
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        optional: false,
+      },
+    ],
+  },
+
+  // Cast the Net
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Cast_the_Net
+  placeholder_cast_the_net: {
+    id: 'placeholder_cast_the_net',
+    name: 'Cast the Net',
+    normalizedName: 'cast-the-net',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Cast_the_Net',
+    trader: {
+      id: '54cb50c76803fa8b248b4571',
+      name: 'Prapor',
+    },
+    map: null,
+    experience: 11000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_uninvited_guests_part_2',
+          name: 'Uninvited Guests - Part 2',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_cast_the_net_obj01',
+        description: 'Plant a WI-FI Camera in the Ural truck near the hydroelectric power station on Shoreline',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_cast_the_net_obj02',
+        description: "Plant a WI-FI Camera in the excavator at the stream near the smugglers' base on Shoreline",
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_cast_the_net_obj03',
+        description: 'Plant a WI-FI Camera on the concrete mixer truck at the collapsed crane on Streets of Tarkov',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_cast_the_net_obj04',
+        description: 'Plant a WI-FI Camera on the bio toilet near the Rodina cinema on Streets of Tarkov',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_cast_the_net_obj05',
+        description: 'Plant a WI-FI Camera in the cargo truck cabin near Mira Ave on Ground Zero',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_cast_the_net_obj06',
+        description: 'Plant a WI-FI Camera inside the yellow bus in the underground tunnel on Ground Zero',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        items: [
+          {
+            id: '5b4391a586f7745321235ab2',
+            name: 'WI-FI Camera',
+            shortName: 'Camera',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Consequences of Our Decisions
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Consequences_of_Our_Decisions
+  placeholder_consequences_of_our_decisions: {
+    id: 'placeholder_consequences_of_our_decisions',
+    name: 'Consequences of Our Decisions',
+    normalizedName: 'consequences-of-our-decisions',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Consequences_of_Our_Decisions',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5714dc692459777137212e12',
+      name: 'Streets of Tarkov',
+    },
+    experience: 35000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_final_stretch',
+          name: 'Final Stretch',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_consequences_of_our_decisions_obj01',
+        description: 'Decrypt the data from the secret facility laptop',
+        // Was: untyped objective. Client hideout recipe 6a614e9593f5bcb59a0af69c requires the laptop, printer paper and a graphics card. https://www.tarkovhead.com/en/quest/regular/consequences-of-our-decisions
+        type: 'craft',
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
+        items: [
+          { id: '577e1c9d2459773cd707c525', name: 'Printer paper' },
+          { id: '57347ca924597744596b4e71', name: 'Graphics card' },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_consequences_of_our_decisions_obj02',
+        description: "Read the data recovered from Fence's laptop",
+        // Was: untyped objective. Client item template identifies the readable craft output. https://www.tarkovhead.com/en/quest/regular/consequences-of-our-decisions
+        type: 'useItem',
+        useAny: [{ id: '6a55f339fe4be93a04090acc', name: "Data from Fence's laptop" }],
+        optional: false,
+      },
+      {
+        id: 'placeholder_consequences_of_our_decisions_obj03',
+        description: 'Hand over the laptop',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. Client item template shared with Final Stretch. https://www.tarkovhead.com/en/quest/regular/consequences-of-our-decisions
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Desperate Assault
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Desperate_Assault
+  placeholder_desperate_assault: {
+    id: 'placeholder_desperate_assault',
+    name: 'Desperate Assault',
+    normalizedName: 'desperate-assault',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Desperate_Assault',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: {
+      id: '5b0fc42d86f7744a585f9105',
+      name: 'The Lab',
+    },
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_final_stretch',
+          name: 'Final Stretch',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_desperate_assault_obj01',
+        description: 'Eliminate 15 Black Division operatives in The Lab',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 15,
+      },
+    ],
+  },
+
+  // Digital Puzzle
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Digital_Puzzle
+  placeholder_digital_puzzle: {
+    id: 'placeholder_digital_puzzle',
+    name: 'Digital Puzzle',
+    normalizedName: 'digital-puzzle',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Digital_Puzzle',
+    trader: {
+      id: '5a7c2eca46aef81a7ca2145d',
+      name: 'Mechanic',
+    },
+    map: null,
+    experience: 35000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_break_the_chain',
+          name: 'Break the Chain',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_digital_puzzle_obj01',
+        description: 'Hand over the data from the Black Division rugged laptop',
+        type: 'giveItem',
+        items: [
+          {
+            id: '6a6692d4beccfa243d0bb575',
+            name: 'Data from Black Division laptop',
+            shortName: 'BD data',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Final Stretch
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Final_Stretch
+  placeholder_final_stretch: {
+    id: 'placeholder_final_stretch',
+    name: 'Final Stretch',
+    normalizedName: 'final-stretch',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Final_Stretch',
+    trader: {
+      id: '579dc571d53a0658a154fbec',
+      name: 'Fence',
+    },
+    map: {
+      id: '5714dc692459777137212e12',
+      name: 'Streets of Tarkov',
+    },
+    experience: 35000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_sheep_in_wolf_s_clothing',
+          name: "Sheep in Wolf's Clothing",
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_final_stretch_obj01',
+        description: "Locate and obtain the laptop from Fence's stash on Streets of Tarkov",
+        type: 'findQuestItem',
+        // Was: requirement fields missing. Client item template for the quest laptop. https://www.tarkovhead.com/en/quest/regular/final-stretch
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_final_stretch_obj02',
+        description: 'Hand over the found item',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. Client item template for the quest laptop. https://www.tarkovhead.com/en/quest/regular/final-stretch
+        questItem: { id: '6a5f9becfc12d937d50ae095', name: 'Laptop from an unknown facility' },
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Forbidden Knowledge
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Forbidden_Knowledge
+  placeholder_forbidden_knowledge: {
+    id: 'placeholder_forbidden_knowledge',
+    name: 'Forbidden Knowledge',
+    normalizedName: 'forbidden-knowledge',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Forbidden_Knowledge',
+    trader: {
+      id: '579dc571d53a0658a154fbec',
+      name: 'Fence',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_what_s_in_the_bag',
+          name: "What's in the Bag?",
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_forbidden_knowledge_obj01',
+        description: 'Locate and obtain 3 14-4 KORD SSDs',
+        type: 'findQuestItem',
+        questItem: {
+          id: '6a5f9c49b8281c31a1062aea',
+          name: '14-4 KORD SSD',
+          shortName: 'BD SSD',
+        },
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_forbidden_knowledge_obj02',
+        description: 'Hand over the found intel',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6a5f9c49b8281c31a1062aea',
+          name: '14-4 KORD SSD',
+          shortName: 'BD SSD',
+        },
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Historical Prospects
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Historical_Prospects
+  placeholder_historical_prospects: {
+    id: 'placeholder_historical_prospects',
+    name: 'Historical Prospects',
+    normalizedName: 'historical-prospects',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Historical_Prospects',
+    trader: {
+      id: '638f541a29ffd1183d187f57',
+      name: 'Lightkeeper',
+    },
+    map: null,
+    experience: 100000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_for_the_good_of_the_chosen',
+          name: '...for the Good of the Chosen',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_historical_prospects_obj01',
+        description: 'Eliminate 3 PMC operatives during 22:00-08:00 on Customs',
+        type: 'shoot',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_historical_prospects_obj02',
+        description: 'Stash 3 PMC dogtags in the marked room on Customs',
+        type: 'plantItem',
+        // Was: requirement fields missing. The PMC dogtag pool is the same as the upstream Punisher - Part 6 pool. https://www.tarkovhead.com/en/quest/regular/historical-prospects
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
+        requiredKeys: [[{ id: '5780cf7f2459777de4559322', name: 'Dorm room 314 marked key' }]],
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_historical_prospects_obj03',
+        description: 'Eliminate 3 PMC operatives during 22:00-08:00 on Woods',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_historical_prospects_obj04',
+        description: 'Stash 3 PMC dogtags at the abandoned village marked circle on Woods',
+        type: 'plantItem',
+        // Was: requirement fields missing. The PMC dogtag pool is the same as the upstream Punisher - Part 6 pool. https://www.tarkovhead.com/en/quest/regular/historical-prospects
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
+        maps: [
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_historical_prospects_obj05',
+        description: 'Eliminate 3 PMC operatives during 22:00-08:00 on Streets of Tarkov',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_historical_prospects_obj06',
+        description: 'Stash 3 PMC dogtags in the marked circle in Nikitskaya St. 8 second floor apartment on Streets of Tarkov',
+        type: 'plantItem',
+        // Was: requirement fields missing. The PMC dogtag pool is the same as the upstream Punisher - Part 6 pool. https://www.tarkovhead.com/en/quest/regular/historical-prospects
+        items: [
+          { id: '59f32bb586f774757e1e8442', name: 'Dogtag BEAR' },
+          { id: '59f32c3b86f77472a31742f0', name: 'Dogtag USEC' },
+          { id: '6662e9aca7e0b43baa3d5f74', name: 'Dogtag BEAR' },
+          { id: '6662e9cda7e0b43baa3d5f76', name: 'Dogtag BEAR' },
+          { id: '675dc9d37ae1a8792107ca96', name: 'Dogtag BEAR' },
+          { id: '675dcb0545b1a2d108011b2b', name: 'Dogtag BEAR' },
+          { id: '684180bc51bf8645f7067bc8', name: 'Dogtag BEAR' },
+          { id: '684181208d035f60230f63f9', name: 'Dogtag BEAR' },
+          { id: '68df9908972cf1e1ec07256a', name: 'Dogtag BEAR' },
+          { id: '68df991142e96f583d042b8a', name: 'Dogtag BEAR' },
+          { id: '68df991dbeba86572e097ceb', name: 'Dogtag BEAR' },
+          { id: '68df9927a38a5e37d80df6c9', name: 'Dogtag BEAR' },
+          { id: '68f0f60a121d878a2303eedb', name: 'Dogtag BEAR' },
+          { id: '68f0f63c645c14a02104142a', name: 'Dogtag BEAR' },
+          { id: '68f153aa7da590b6df0515da', name: 'Dogtag BEAR' },
+          { id: '68f15cf222c8979ee308f495', name: 'Dogtag BEAR' },
+          { id: '68f15e26f1aa7e100a0ca208', name: 'Dogtag BEAR' },
+          { id: '68fb41120760c7891606613c', name: 'Dogtag BEAR' },
+          { id: '68fb412b0760c7891606613e', name: 'Dogtag BEAR' },
+          { id: '6aa2d537cfc9b36b300da067', name: 'Dogtag BEAR' },
+          { id: '6aa2d55e0b4e81daf20cd212', name: 'Dogtag BEAR' },
+          { id: '6aa2d585cfc9b36b300da06a', name: 'Dogtag BEAR' },
+          { id: '6aa2d5af0b4e81daf20cd215', name: 'Dogtag BEAR' },
+          { id: '6aa2d5d3667ebebca605d8f6', name: 'Dogtag BEAR' },
+          { id: '6aa2d5ee11d6c6361804dd57', name: 'Dogtag BEAR' },
+          { id: '6662e9f37fa79a6d83730fa0', name: 'Dogtag USEC' },
+          { id: '6662ea05f6259762c56f3189', name: 'Dogtag USEC' },
+          { id: '6764202ae307804338014c1a', name: 'Dogtag USEC' },
+          { id: '6764207f2fa5e32733055c4a', name: 'Dogtag USEC' },
+          { id: '68418091b5b0c9e4c60f0e7a', name: 'Dogtag USEC' },
+          { id: '684180ee9b6d80d840042e8a', name: 'Dogtag USEC' },
+          { id: '68df99975d4e135b130392ca', name: 'Dogtag USEC' },
+          { id: '68df99a614ca2428b2017cd8', name: 'Dogtag USEC' },
+          { id: '68df99b2f716906506098308', name: 'Dogtag USEC' },
+          { id: '68df99c05d4e135b130392cc', name: 'Dogtag USEC' },
+          { id: '68f0f64f183146ea530330aa', name: 'Dogtag USEC' },
+          { id: '68f0f662859ebec8d501b76a', name: 'Dogtag USEC' },
+          { id: '68f15dbab2b53abd200b9378', name: 'Dogtag USEC' },
+          { id: '68f15e53103c5d9d4f022c78', name: 'Dogtag USEC' },
+          { id: '68fb4143a854bc7ae80fad3e', name: 'Dogtag USEC' },
+          { id: '68fb4157b280c103230e3b3c', name: 'Dogtag USEC' },
+          { id: '6ab2d6031c7d617b290dd2b0', name: 'Dogtag USEC' },
+          { id: '6ab2d68819b981e6870f35d3', name: 'Dogtag USEC' },
+          { id: '6ab60a252bc101093f05029f', name: 'Dogtag USEC' },
+          { id: '6ab60a57615ae75bdd0e39ce', name: 'Dogtag USEC' },
+          { id: '6ab60a62d60e0dec3e04ff2c', name: 'Dogtag USEC' },
+          { id: '6a3549435288a3fe6e085224', name: 'Double dogtag BEAR' },
+          { id: '6a3548e72a963bcdd8098649', name: 'Double dogtag USEC' },
+          { id: '6a354a30652075cf460944c6', name: 'Marked dogtag BEAR' },
+          { id: '6a354a9a9cd7a91b45027a89', name: 'Marked dogtag BEAR' },
+          { id: '6a354aa56632508bd10476dc', name: 'Marked dogtag BEAR' },
+          { id: '6a354abe73339990030ca469', name: 'Marked dogtag BEAR' },
+          { id: '6a354a077e4ccdbe95005266', name: 'Marked dogtag USEC' },
+          { id: '6a354a6240e6797a930312e5', name: 'Marked dogtag USEC' },
+          { id: '6a354a6f8d465a55c70065c8', name: 'Marked dogtag USEC' },
+          { id: '6a354a7e6632508bd10476d8', name: 'Marked dogtag USEC' },
+        ],
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        count: 3,
+      },
+    ],
+  },
+
+  // In the Name of Humanity...
+  // Proof: https://escapefromtarkov.fandom.com/wiki/In_the_Name_of_Humanity...
+  placeholder_in_the_name_of_humanity: {
+    id: 'placeholder_in_the_name_of_humanity',
+    name: 'In the Name of Humanity...',
+    normalizedName: 'in-the-name-of-humanity',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/In_the_Name_of_Humanity...',
+    trader: {
+      id: '638f541a29ffd1183d187f57',
+      name: 'Lightkeeper',
+    },
+    map: null,
+    experience: 70000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_price_for_information',
+          name: 'Price for Information',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj01',
+        description: 'Eliminate any 3 targets during 20:00-08:00 on Interchange (In one raid)',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj02',
+        description: 'Locate the hidden keycard panel in the Burger Spot bathroom on Interchange (In one raid)',
+        type: 'visit',
+        // Was: requirement fields missing. The #11SR keycard opens the saferoom. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        requiredKeys: [[{ id: '5e42c81886f7742a01529f57', name: 'Object #11SR keycard' }]],
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj03',
+        description: 'Locate the hidden TerraGroup saferoom on Interchange (In one raid)',
+        type: 'visit',
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj04',
+        description: 'Locate and access Container 14 on Interchange (In one raid)',
+        type: 'visit',
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj05',
+        description: 'Obtain the carbon fiber case from Container 14 on Interchange (In one raid)',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. Client item template for the carbon fiber case. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        questItem: { id: '6a6102a39499ae5e110a52c1', name: 'Carbon fiber case' },
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj06',
+        description: 'Use the transit from Interchange to Streets of Tarkov (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj07',
+        description: 'Eliminate any 3 targets during 20:00-08:00 on Streets of Tarkov (In one raid)',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 3,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj08',
+        description: 'Stash the carbon fiber case on the 3rd floor balcony of the Pinewood Hotel restaurant on Streets of Tarkov (In one raid)',
+        type: 'plantQuestItem',
+        // Was: requirement fields missing. Client item template for the carbon fiber case. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        questItem: { id: '6a6102a39499ae5e110a52c1', name: 'Carbon fiber case' },
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_in_the_name_of_humanity_obj09',
+        description: 'Launch a yellow signal flare at the tram that collapsed into the sewers on Streets of Tarkov (In one raid)',
+        type: 'useItem',
+        // Was: requirement fields missing. Both yellow flare forms and the launcher for the cartridge. https://www.tarkovhead.com/en/quest/regular/in-the-name-of-humanity
+        useAny: [
+          { id: '624c0b3340357b5f566e8766', name: 'RSP-30 reactive signal cartridge (Yellow)' },
+          { id: '62389be94d5d474bf712e709', name: '26x75mm flare cartridge (Yellow)' },
+        ],
+        usingWeapon: [{ id: '620109578d82e67e7911abf2', name: 'ZiD SP-81 26x75 signal pistol' }],
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Key to Understanding
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Key_to_Understanding
+  placeholder_key_to_understanding: {
+    id: 'placeholder_key_to_understanding',
+    name: 'Key to Understanding',
+    normalizedName: 'key-to-understanding',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Key_to_Understanding',
+    trader: {
+      id: '579dc571d53a0658a154fbec',
+      name: 'Fence',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    minPlayerLevel: 20,
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_reverse_gear',
+          name: 'Reverse Gear',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_key_to_understanding_obj01',
+        description: 'Locate and obtain the Black Division encryption keys',
+        type: 'findItem',
+        items: [
+          {
+            id: '6a5f9cfcc409750b6e065592',
+            name: 'Black Division encryption keys',
+            shortName: 'BD keys',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_key_to_understanding_obj02',
+        description: 'Hand over the found item',
+        type: 'giveItem',
+        items: [
+          {
+            id: '6a5f9cfcc409750b6e065592',
+            name: 'Black Division encryption keys',
+            shortName: 'BD keys',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+    ],
+  },
+
+  // Know Your Enemy
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Know_Your_Enemy
+  placeholder_know_your_enemy: {
+    id: 'placeholder_know_your_enemy',
+    name: 'Know Your Enemy',
+    normalizedName: 'know-your-enemy',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Know_Your_Enemy',
+    trader: {
+      id: '54cb50c76803fa8b248b4571',
+      name: 'Prapor',
+    },
+    map: null,
+    experience: 11000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_cast_the_net',
+          name: 'Cast the Net',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_know_your_enemy_obj01',
+        description: 'Hand over 5 any Black Division plate carriers',
+        type: 'giveItem',
+        // Was: requirement fields missing. Five verified carrier variants, including MultiCam Black. https://www.tarkovhead.com/en/quest/regular/know-your-enemy
+        items: [
+          {
+            id: '689479a4a733b1602007e2eb',
+            name: 'Spiritus Systems LV-119 Plate Carrier (Black Division V1)',
+          },
+          {
+            id: '689479eb30cc5ba7be00f5ff',
+            name: 'Spiritus Systems LV-119 Plate Carrier (Black Division V2)',
+          },
+          {
+            id: '689479cb47e5acd1e10be986',
+            name: 'Ferro Concepts FCPC V5 Plate Carrier (Black Division)',
+          },
+          {
+            id: '68947a4be4bf255d1b0ca746',
+            name: 'First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)',
+          },
+          {
+            id: '69e2441a18cb3157560855ec',
+            name: 'Spiritus Systems LV-119 Plate Carrier (MultiCam Black)',
+          },
+        ],
+        optional: false,
+        count: 5,
+      },
+    ],
+  },
+
+  // Price for Information
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Price_for_Information
+  placeholder_price_for_information: {
+    id: 'placeholder_price_for_information',
+    name: 'Price for Information',
+    normalizedName: 'price-for-information',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Price_for_Information',
+    trader: {
+      id: '638f541a29ffd1183d187f57',
+      name: 'Lightkeeper',
+    },
+    map: null,
+    experience: 65000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_digital_puzzle',
+          name: 'Digital Puzzle',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_price_for_information_obj01',
+        description: 'Use the transit from Shoreline to Lighthouse (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_price_for_information_obj02',
+        description: 'Use the transit from Lighthouse to Reserve (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_price_for_information_obj03',
+        description: 'Use the transit from Reserve to Woods (In one raid)',
+        type: 'extract',
+        maps: [
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+          {
+            id: '5704e3c2d2720bac5b8b4567',
+            name: 'Woods',
+          },
+        ],
+        optional: false,
+      },
+      {
+        id: 'placeholder_price_for_information_obj04',
+        description: 'Eliminate any 10 targets except Black Division while completing the other objectives',
+        type: 'shoot',
+        shotType: 'kill',
+        optional: false,
+        count: 10,
+      },
+    ],
+  },
+
+  // Reverse Gear
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reverse_Gear
+  placeholder_reverse_gear: {
+    id: 'placeholder_reverse_gear',
+    name: 'Reverse Gear',
+    normalizedName: 'reverse-gear',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Reverse_Gear',
+    trader: {
+      id: '54cb50c76803fa8b248b4571',
+      name: 'Prapor',
+    },
+    map: null,
+    experience: 11000,
+    kappaRequired: false,
+    factionName: 'Any',
+    availableDelaySecondsMin: 0,
+    availableDelaySecondsMax: 7200,
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_know_your_enemy',
+          name: 'Know Your Enemy',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_reverse_gear_obj01',
+        description: 'Locate and obtain the Wi-Fi Camera from the Ural truck near the hydroelectric power station on Shoreline',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj02',
+        description: 'Hand over the camera',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj03',
+        description: "Locate and obtain the Wi-Fi Camera from the excavator at the stream near the smugglers' base on Shoreline",
+        type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj04',
+        description: 'Hand over the camera',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj05',
+        description: 'Locate and obtain the Wi-Fi Camera from the concrete mixer truck at the collapsed crane on Streets of Tarkov',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj06',
+        description: 'Hand over the camera',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj07',
+        description: 'Locate and obtain the Wi-Fi Camera from the bio toilet near the Rodina cinema on Streets of Tarkov',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj08',
+        description: 'Hand over the camera',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj09',
+        description: 'Locate and obtain the Wi-Fi Camera from the cargo truck cabin near Mira Ave on Ground Zero',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj10',
+        description: 'Hand over the camera',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj11',
+        description: 'Locate and obtain the Wi-Fi Camera from yellow bus in the underground tunnel on Ground Zero',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_reverse_gear_obj12',
+        description: 'Hand over the camera',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. The six client q_camera templates are quest inventory only. The capture does not link individual templates to locations. https://raidsignal.com/tasks/reverse-gear
+        questInventoryOnly: true,
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Riding the Wave
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Riding_the_Wave
+  placeholder_riding_the_wave: {
+    id: 'placeholder_riding_the_wave',
+    name: 'Riding the Wave',
+    normalizedName: 'riding-the-wave',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Riding_the_Wave',
+    trader: {
+      id: '5ac3b934156ae10c4430e83c',
+      name: 'Ragman',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_reverse_gear',
+          name: 'Reverse Gear',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_riding_the_wave_obj01',
+        description: 'Hand over the found in raid item: First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)',
+        type: 'giveItem',
+        items: [
+          {
+            id: '68947a4be4bf255d1b0ca746',
+            name: 'First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)',
+            shortName: 'Siege-R',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj02',
+        description: 'Hand over the found in raid item: Spiritus Systems LV-119 Plate Carrier (Black Division V2)',
+        type: 'giveItem',
+        items: [
+          {
+            id: '689479eb30cc5ba7be00f5ff',
+            name: 'Spiritus Systems LV-119 Plate Carrier (Black Division V2)',
+            shortName: 'LV-119',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj03',
+        description: 'Hand over the found in raid item: Ferro Concepts FCPC V5 Plate Carrier (Black Division)',
+        type: 'giveItem',
+        items: [
+          {
+            id: '689479cb47e5acd1e10be986',
+            name: 'Ferro Concepts FCPC V5 Plate Carrier (Black Division)',
+            shortName: 'FCPC V5',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj04',
+        description: 'Hand over the found in raid item: Spiritus Systems LV-119 Plate Carrier (Black Division V1)',
+        type: 'giveItem',
+        items: [
+          {
+            id: '689479a4a733b1602007e2eb',
+            name: 'Spiritus Systems LV-119 Plate Carrier (Black Division V1)',
+            shortName: 'LV-119',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj05',
+        description: 'Hand over the found in raid item: Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black)',
+        type: 'giveItem',
+        items: [
+          {
+            id: '68947a8ce4bf255d1b0ca759',
+            name: 'Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black)',
+            shortName: 'Modular Pack 45',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj06',
+        description: 'Hand over the found in raid item: Mystery Ranch 2 Day Assault Pack (Black)',
+        type: 'giveItem',
+        items: [
+          {
+            id: '68947ab5a733b1602007e2fe',
+            name: 'Mystery Ranch 2 Day Assault Pack (Black)',
+            shortName: '2 Day Assault',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj07',
+        description: 'Hand over the found in raid item: Mystery Ranch NICE Frame Load Sling',
+        type: 'giveItem',
+        items: [
+          {
+            id: '68947ad3e4bf255d1b0ca75c',
+            name: 'Mystery Ranch NICE Frame Load Sling',
+            shortName: 'NICE Load Sling',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj08',
+        description: 'Hand over the found in raid item: Avon M53A1 gas mask',
+        type: 'giveItem',
+        items: [
+          {
+            id: '689b880fff8b4adc420f5b56',
+            name: 'Avon M53A1 gas mask',
+            shortName: 'M53A1',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj09',
+        description: 'Hand over the found in raid item: Gentex Ops-Core SOTR respirator',
+        type: 'giveItem',
+        items: [
+          {
+            id: '689b404db49f27df1c0873f6',
+            name: 'Gentex Ops-Core SOTR respirator',
+            shortName: 'SOTR',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'placeholder_riding_the_wave_obj10',
+        description: 'Hand over the found in raid item: Gatorz Specter MILSPEC ballistic glasses',
+        type: 'giveItem',
+        items: [
+          {
+            id: '689b3fffa1295e322207a677',
+            name: 'Gatorz Specter MILSPEC ballistic glasses',
+            shortName: 'Specter',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+    ],
+  },
+
+  // Sheep in Wolf's Clothing
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sheep_in_Wolf's_Clothing
+  placeholder_sheep_in_wolf_s_clothing: {
+    id: 'placeholder_sheep_in_wolf_s_clothing',
+    name: "Sheep in Wolf's Clothing",
+    normalizedName: 'sheep-in-wolf-s-clothing',
+    wikiLink: "https://escapefromtarkov.fandom.com/wiki/Sheep_in_Wolf's_Clothing",
+    trader: {
+      id: '579dc571d53a0658a154fbec',
+      name: 'Fence',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_forbidden_knowledge',
+          name: 'Forbidden Knowledge',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_sheep_in_wolf_s_clothing_obj01',
+        description: 'Eliminate 4 Black Division operatives while wearing a Black Division plate carrier on Shoreline',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 4,
+      },
+      {
+        id: 'placeholder_sheep_in_wolf_s_clothing_obj02',
+        description: 'Eliminate 4 Black Division operatives while wearing a Black Division plate carrier on Streets of Tarkov',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 4,
+      },
+      {
+        id: 'placeholder_sheep_in_wolf_s_clothing_obj03',
+        description: 'Eliminate 4 Black Division operatives while wearing a Black Division plate carrier on Ground Zero',
+        type: 'shoot',
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        shotType: 'kill',
+        optional: false,
+        count: 4,
+      },
+    ],
+  },
+
+  // Stay Clear of Blast Zone
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stay_Clear_of_Blast_Zone
+  placeholder_stay_clear_of_blast_zone: {
+    id: 'placeholder_stay_clear_of_blast_zone',
+    name: 'Stay Clear of Blast Zone',
+    normalizedName: 'stay-clear-of-blast-zone',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Stay_Clear_of_Blast_Zone',
+    trader: {
+      id: '5c0647fdd443bc2504c2d371',
+      name: 'Jaeger',
+    },
+    map: {
+      id: '5704e554d2720bac5b8b456e',
+      name: 'Shoreline',
+    },
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_desperate_assault',
+          name: 'Desperate Assault',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_stay_clear_of_blast_zone_obj01',
+        description: 'Plant a TP-200 TNT brick at the Health Resort west side fence breach on Shoreline',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        items: [
+          {
+            id: '60391b0fb847c71012789415',
+            name: 'TP-200 TNT brick',
+            shortName: 'TP-200',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_stay_clear_of_blast_zone_obj02',
+        description: 'Plant a TP-200 TNT brick at the Health Resort north side fence breach on Shoreline',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        items: [
+          {
+            id: '60391b0fb847c71012789415',
+            name: 'TP-200 TNT brick',
+            shortName: 'TP-200',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_stay_clear_of_blast_zone_obj03',
+        description: 'Plant a TP-200 TNT brick at the Health Resort east side fence breach on Shoreline',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        items: [
+          {
+            id: '60391b0fb847c71012789415',
+            name: 'TP-200 TNT brick',
+            shortName: 'TP-200',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // Unanswered Calls
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Unanswered_Calls
+  placeholder_unanswered_calls: {
+    id: 'placeholder_unanswered_calls',
+    name: 'Unanswered Calls',
+    normalizedName: 'unanswered-calls',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Unanswered_Calls',
+    trader: {
+      id: '54cb57776803fa99248b456e',
+      name: 'Therapist',
+    },
+    map: {
+      id: '653e6760052c01c1c805532f',
+      name: 'Ground Zero',
+    },
+    experience: 11000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_uninvited_guests_part_1',
+          name: 'Uninvited Guests - Part 1',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_unanswered_calls_obj01',
+        description: "Stash Therapist's letter at the reception desk on the second floor of the TerraGroup office on Ground Zero (in one raid)",
+        type: 'plantQuestItem',
+        // Was: requirement fields missing. Client item template identifies Therapist’s quest-only message. https://www.tarkovhead.com/en/quest/regular/unanswered-calls
+        questItem: { id: '6a6101b09b3e38f37a0dc67e', name: "Therapist's message" },
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_unanswered_calls_obj02',
+        description: 'Extract from the location through the Nakatani Basement Stairs or Emercom Checkpoint exfil (in one raid)',
+        type: 'extract',
+        optional: false,
+      },
+    ],
+  },
+
+  // Uninvited Guests - Part 1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_1
+  // Real BSG id 6a4f528221e50974ab006f6f, in-game name "[KORD BREACH] Uninvited
+  // Guests - Part 1" (1.3.0.0 pvp-season capture; objective mapping in #507).
+  // Kept as a placeholder until the #507 alias migration lands. The capture
+  // confirms the Prapor LL2 gate (an explicit TraderLoyalty condition); its
+  // other start condition is the Escape Ground Zero tutorial quest (story, not
+  // a task). The investigate objectives are sub-conditions of the case objective.
+  placeholder_uninvited_guests_part_1: {
+    id: 'placeholder_uninvited_guests_part_1',
+    name: 'Uninvited Guests - Part 1',
+    normalizedName: 'uninvited-guests-part-1',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_1',
+    trader: {
+      id: '54cb50c76803fa8b248b4571',
+      name: 'Prapor',
+    },
+    map: null, // Was: Shoreline (capture location: any)
+    experience: 6000,
+    kappaRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      {
+        id: 'overlay.placeholder_uninvited_guests_part_1.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        value: 2,
+        trader: {
+          id: '54cb50c76803fa8b248b4571',
+          name: 'Prapor',
+        },
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_uninvited_guests_part_1_obj01',
+        description: 'Locate and obtain the case with military equipment',
+        type: 'findQuestItem',
+        // Was: requirement fields missing. Client task condition and item template. https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/507
+        questItem: { id: '6a671d87ff6f8a0b080b6bf3', name: 'Case with military equipment' },
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_uninvited_guests_part_1_obj02',
+        description: 'Investigate the shack next to the sordi tower on Shoreline',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        optional: true,
+      },
+      {
+        id: 'placeholder_uninvited_guests_part_1_obj03',
+        description: 'Investigate the second floor of the weather station building on Shoreline',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        optional: true,
+      },
+      {
+        id: 'placeholder_uninvited_guests_part_1_obj04',
+        description: 'Investigate the hydroelectric power station on Shoreline',
+        type: 'visit',
+        maps: [
+          {
+            id: '5704e554d2720bac5b8b456e',
+            name: 'Shoreline',
+          },
+        ],
+        optional: true,
+      },
+      {
+        // Added from the capture (6a4f54cffbc043d36ba11ae2): a Quest condition
+        // completed when the hand-over quest (6a4f53f6be2cd3a87c0b708d, not in
+        // the capture; by its objective text, Part 2) is complete.
+        id: 'placeholder_uninvited_guests_part_1_obj05',
+        description: 'Bring the case with military equipment to the BTR driver',
+        type: 'taskStatus',
+        task: 'placeholder_uninvited_guests_part_2', // Uninvited Guests - Part 2
+        status: ['complete'],
+        optional: false,
+      },
+    ],
+    finishRewards: {
+      // Was: unset (capture rewards; the wiki agrees)
+      items: [
+        {
+          count: 18000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        },
+        {
+          count: 1,
+          item: {
+            id: '5beed0f50db834001c062b12',
+            name: 'RPK-16 5.45x39 light machine gun',
+            shortName: 'RPK-16',
+          },
+        },
+        {
+          count: 3,
+          item: {
+            id: '55d480c04bdc2d1d4e8b456a',
+            name: 'AK-74 5.45x39 6L23 30-round magazine',
+            shortName: '6L23',
+          },
+        },
+        {
+          count: 1,
+          item: {
+            id: '57372d1b2459776862260581',
+            name: '5.45x39mm PP gs ammo pack (120 pcs)',
+            shortName: 'PP',
+          },
+        },
+      ],
+    },
+  },
+
+  // Uninvited Guests - Part 2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_2
+  placeholder_uninvited_guests_part_2: {
+    id: 'placeholder_uninvited_guests_part_2',
+    name: 'Uninvited Guests - Part 2',
+    normalizedName: 'uninvited-guests-part-2',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_2',
+    trader: {
+      id: '656f0f98d80a697f855d34b1',
+      name: 'BTR Driver',
+    },
+    map: null,
+    experience: 5000,
+    kappaRequired: false,
+    factionName: 'Any',
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_uninvited_guests_part_1',
+          name: 'Uninvited Guests - Part 1',
+        },
+        status: ['active', 'complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_uninvited_guests_part_2_obj01',
+        description: 'Obtain and hand over the case with military equipment',
+        type: 'giveQuestItem',
+        // Was: requirement fields missing. Same quest-inventory case as Part 1. https://www.tarkovhead.com/en/quest/regular/uninvited-guests-part-2
+        questItem: { id: '6a671d87ff6f8a0b080b6bf3', name: 'Case with military equipment' },
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+
+  // What's in the Bag?
+  // Proof: https://escapefromtarkov.fandom.com/wiki/What's_in_the_Bag%3F
+  placeholder_what_s_in_the_bag: {
+    id: 'placeholder_what_s_in_the_bag',
+    name: "What's in the Bag?",
+    normalizedName: 'what-s-in-the-bag',
+    wikiLink: "https://escapefromtarkov.fandom.com/wiki/What's_in_the_Bag%3F",
+    trader: {
+      id: '579dc571d53a0658a154fbec',
+      name: 'Fence',
+    },
+    map: null,
+    experience: 30000,
+    kappaRequired: false,
+    factionName: 'Any',
+    availableDelaySecondsMin: 3600,
+    availableDelaySecondsMax: 7200,
+    taskRequirements: [
+      {
+        task: {
+          id: 'placeholder_key_to_understanding',
+          name: 'Key to Understanding',
+        },
+        status: ['complete'],
+      },
+    ],
+    objectives: [
+      {
+        id: 'placeholder_what_s_in_the_bag_obj01',
+        description: 'Locate and obtain the Briefcase with documents',
+        type: 'findQuestItem',
+        questItem: {
+          id: '6a3563dacdaebb512e0a009c',
+          name: 'Briefcase with documents',
+          shortName: 'Briefcase',
+        },
+        optional: false,
+        count: 1,
+      },
+      {
+        id: 'placeholder_what_s_in_the_bag_obj02',
+        description: 'Hand over the found item',
+        type: 'giveQuestItem',
+        questItem: {
+          id: '6a3563dacdaebb512e0a009c',
+          name: 'Briefcase with documents',
+          shortName: 'Briefcase',
+        },
+        optional: false,
+        count: 1,
+      },
+    ],
+  },
+}

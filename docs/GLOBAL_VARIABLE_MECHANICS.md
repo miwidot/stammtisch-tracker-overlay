@@ -11,7 +11,7 @@ questions that repeatedly cause confusion:
   satisfied.
 
 This is the mechanism-and-evidence side. For what the overlay actually ships —
-the `progressionCounters` registry contract, its evidence bar, and the
+the `progressionCounters` registry contract, its evidence standard, and the
 evaluation rules `evaluateTaskProgression` follows — see
 [global variables and progression counters](GLOBAL_VARIABLES.md).
 
@@ -37,11 +37,11 @@ counter interpretation below apply.
 Treat that as an observed interpretation, not an established rule. It reproduces
 the profile's value for 23 of the 27 groups and matches the pool size for 20 of
 27; the groups it fails on are listed in [Caveats](#caveats) and are not
-explained. Reconciling is necessary but **not sufficient** — an aggregate match in
-one profile cannot show which tasks contribute or by how much — so no group here
-is established well enough to drive a progression mapping. See
-[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the bar a
-mapping must clear before it can produce a value.
+explained. An aggregate match cannot show which tasks contribute or by how much,
+so the mapping is best effort rather than proven: the registry publishes the 23
+consistent pools plus the Mechanic tier-3 and Ragman tier-1 faction-pair
+derivations, and keeps the other 2 groups unresolved. See
+[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the standard.
 
 Under that reading the group's child variables would be individual per-task
 completion markers for the pool — but that is the hypothesis, not a finding: 351 of
@@ -100,14 +100,18 @@ Treating an absent value as `0` is therefore only ever valid against a complete
 raw payload: an unwritten group child in step 1, or the second bullet above. It
 must not be carried into `TaskUnlockState.globalVariables`, which holds
 already-resolved effective values: a key missing from that map means **unknown**,
-not zero. The distinction is load-bearing because `==` comparisons exist: all 164
+not zero. The distinction is load-bearing because `==` comparisons exist: all 168
 conditions tarkov.dev currently publishes use `>=`, but 60 of the 300 in the
-capture compare with `==`, so an invented `0` would satisfy an `== 0` gate and
-report a task available with no account evidence. Anyone reading client data, or
-consuming a future publication that includes them, is exposed.
-`evaluateTaskProgression` already behaves correctly here — a missing entry reaches
-`evaluateNumericCondition` as `undefined` and yields `unknown` ("… is not
-present"), never `0`.
+capture compare with `==`. Only **2** of those equality conditions compare with
+zero; the other 58 compare with non-zero values. An invented `0` would satisfy
+an `== 0` gate and report a task available with no account evidence. This matters
+when reading client data or a future API publication that includes equality gates.
+`evaluateTaskProgression` leaves the value unknown when neither an explicit
+resolved account value nor an eligible verified registry derivation supplies it.
+The numeric evaluator receives `undefined`, never an invented `0`. Missing raw
+`profile.Variables` does not prevent the 25 verified mappings (23 distinct-task
+pools and the Mechanic tier-3 and Ragman tier-1 faction-pair groupings) from deriving values when the
+consumer supplies enough contributor history to settle every group.
 
 In the 1.1 PVE reference, 109 distinct targets appear across 300
 `GlobalVariableValue` conditions: **36 are group IDs and 73 are plain
@@ -119,9 +123,10 @@ Also worth noting, because it changes evaluation semantics:
 - Condition placement: 179 `AvailableForStart`, 92 `AvailableForFinish`,
   29 `Fail`. Only the first is an unlock gate; `Fail` conditions _fail_ a task
   when the counter reaches a value.
-- `compareMethod` is not always `>=`: 236 `>=`, 60 `==`, 4 `>`. An `== 0`
-  condition means "this must not have happened yet", which an unconditional
-  `>=` reading inverts.
+- `compareMethod` is not always `>=`: 236 `>=`, 60 `==`, 4 `>`; only 2 are `== 0`.
+  Equality with zero tests current state, not whether an event ever happened.
+  Reset behavior is unresolved. Replacing `== 0` with `>= 0` would make every
+  non-negative value pass.
 
 ## Why the counter exists: trader tier pools
 
@@ -130,15 +135,17 @@ Every one of the 27 IDs tarkov.dev publishes corresponds to exactly one
 sets: some are open as soon as the tier is reached, and the rest are staggered
 behind counter thresholds.
 
-Mechanic tier 2 is representative — 12 tasks in the pool, 11 of them gated, so
-one is open on arrival and the rest unlock in waves at `>=1`, `>=3` and `>=5`.
-The thresholds and task names below are from the published data and can be
-re-derived with the snippet under [Reproducing](#reproducing); only "children"
-and the pool size come from the capture:
+Mechanic tier 2 illustrates the consumer/contributor distinction: its registry
+pool contains 12 tasks, 9 group-gated and 3 counter-free in the capture. The live
+API lists 11 tasks gated by this group, including Corporate Perks and Shady
+Contractor, which are not in that pool. A gate identifies a consumer, not a writer.
+The thresholds and gated task names below are from the published data and can be
+re-derived with the snippet under [Reproducing](#reproducing); children, pool size,
+and counter-free pool membership come from the capture:
 
 ```text
 group 6a3c0fefbea2d2ad581c090b  (Mechanic, trader level 2, 12 children)
-  free                     1 task
+  counter-free             3 registry-pool tasks (not listed by the API query)
   GlobalVariableValue >=1  5 tasks   (Ill-Wisher, Chemistry Closet,
                                       Corporate Perks, The Secret to
                                       Productivity, Shady Contractor)
@@ -149,8 +156,28 @@ group 6a3c0fefbea2d2ad581c090b  (Mechanic, trader level 2, 12 children)
 
 Tier access itself is a separate, ordinary condition. In the reference the
 per-task `tierAccessory` field and the `TraderLoyalty` condition never
-disagree: `tierAccessory` 2/3/4 pairs only with `TraderLoyalty` value 2/3/4,
-and `tierAccessory` 1 carries no loyalty condition. So the shape of the unlock is:
+disagree: where a tier-pool task carries `TraderLoyalty`, its value equals the
+task's `tierAccessory` 2/3/4, and `tierAccessory` 1 carries no loyalty condition.
+Tier 2–4 tasks do not always carry one, though. Counter-gated tasks usually
+don't, and eight tier-2 tasks (four Prapor, four Jaeger) have an empty
+`AvailableForStart`, so `tierAccessory` is their only loyalty gate and
+tarkov.dev serves them with none. `src/overrides/tasks.json5` supplies that
+gate as a `traderRequirements` level entry.
+
+`tierAccessory` is also the trader task-list grouping in the client UI. Locale
+keys `UI/Quests/TraderAccessoryGroup/Tier1`–`Tier4` render as "Loyalty Level
+1"–"Loyalty Level 4", and `UI/Quests/TraderAccessoryGroup/Chain` renders as
+"Essential Tasks" for `tierAccessory: 0`. Those tasks sit outside the tier
+pools and are gated by ordinary conditions. Example: Wet Job - Part 1
+(`5a27bb8386f7741c770d2d0a`) has `tierAccessory: 0` and a lone Peacekeeper
+`TraderLoyalty` 2 start condition. A 1.2.5 PvP Seasonal client lists it under
+"Essential Tasks" as locked, with "Loyalty level with Peacekeeper: 2" as its
+only unlock requirement. A `TraderLoyalty` condition on a `tierAccessory: 0`
+task does not place it in that trader's tier pool or counter group. The overlay
+publishes each task's group as `traderTaskGroups` (see
+[INTEGRATION.md](INTEGRATION.md#trader-task-groups)).
+
+For counter-gated tier-pool tasks, the shape of the unlock is:
 
 ```text
 (explicit TraderLoyalty condition, if the task has one)
@@ -162,9 +189,11 @@ Both conjuncts are narrower than they look, and the exact form is given in
 `TraderLoyalty` condition, so the first conjunct must not be applied to them.
 And `contributors` is not interchangeable with the tier pool: for four groups the
 counter reads below the completed pool count, so counting every completed pool
-task would overshoot and report a task available too early. No group's contributor
-set is established here, so this is the model's shape rather than an evaluable
-predicate.
+task would overshoot and report a task available too early. For the other 23 the
+registry treats the pool as the contributor set on a best-effort basis.
+Mechanic tier 3 instead counts four faction pairs once each plus eight singletons,
+and Ragman tier 1 one pair plus seven singletons; the other two shortfall groups
+remain unresolved.
 
 ### Evidence
 
@@ -193,6 +222,8 @@ Trader, tier, group ID and thresholds are derived from public data
 (`json.tarkov.dev/pve/tasks` + `dist/overlay.json`). "Children" and "Pool" are
 aggregate counts observed in the 1.1 PVE client capture, included because they
 are the point of the question; no child variable IDs are reproduced here.
+Threshold counts were refreshed from all three live modes on 2026-10-14 and
+include consumers outside the registry pools. They are not contributor counts.
 
 | Trader      | Tier | Group (`variableId`)       | Children | Pool | Thresholds (tasks gated) |
 | ----------- | ---- | -------------------------- | -------- | ---- | ------------------------ |
@@ -214,14 +245,14 @@ are the point of the question; no child variable IDs are reproduced here.
 | Prapor      | 4    | `6a326525789ae12ecb0b2807` | 8        | 8    | ≥1 (3), ≥2 (2)           |
 | Ragman      | 1    | `6a4b339f18db62e03b4f7ded` | 8        | 9    | ≥1 (3), ≥2 (3)           |
 | Ragman      | 2    | `6a4b4e6a30dac4b01af220aa` | 10       | 10   | ≥1 (1), ≥2 (3), ≥4 (3)   |
-| Ragman      | 3    | `6a4b9c9a60b56d421cceea18` | 10       | 7    | ≥1 (1), ≥2 (2)           |
+| Ragman      | 3    | `6a4b9c9a60b56d421cceea18` | 10       | 7    | ≥1 (1), ≥2 (2), ≥4 (2)   |
 | Skier       | 1    | `6a59f3ba06c8949abad30871` | 9        | 9    | ≥1 (2), ≥2 (2), ≥3 (4)   |
 | Skier       | 2    | `6a5a111de1f417ac80a163e5` | 12       | 12   | ≥1 (4), ≥3 (3), ≥4 (2)   |
-| Skier       | 3    | `6a5a115181116e807b55f258` | 8        | 8    | ≥1 (3), ≥3 (3)           |
+| Skier       | 3    | `6a5a115181116e807b55f258` | 8        | 8    | ≥1 (3), ≥3 (4)           |
 | Skier       | 4    | `6a5a1192efde11cc7105b18f` | 5        | 4    | ≥1 (2)                   |
 | Therapist   | 1    | `6a4e4ab3ecd1145894d00990` | 9        | 9    | ≥1 (2), ≥2 (2), ≥4 (2)   |
 | Therapist   | 2    | `6a4e4aed3ded7a18126603f6` | 9        | 9    | ≥1 (2), ≥2 (2), ≥4 (2)   |
-| Therapist   | 3    | `6a4e4b28629dc64c4001967c` | 8        | 8    | ≥1 (3), ≥3 (2)           |
+| Therapist   | 3    | `6a4e4b28629dc64c4001967c` | 8        | 8    | ≥1 (3), ≥3 (3)           |
 | Therapist   | 4    | `6a56925b1c30ba5a77c7c518` | 3        | 3    | ≥1 (1)                   |
 
 Only these seven traders use tier counters. Fence, Lightkeeper, BTR, Ref and
@@ -229,7 +260,14 @@ the 1.1 story traders gate through plain variables instead (next section).
 Ragman has no tier-4 group; that tier holds a single task. Whether the one implies
 the other is not established.
 
-Rows where Children ≠ Pool are unresolved; see Caveats.
+Children ≠ Pool is not by itself a contradiction. Surplus children (Prapor tier 2
+and 3, Ragman tier 3, Skier tier 4) do not stop the counter from equalling the
+completed pool count, and in every retained profile it does for these four, so
+the registry publishes them on a best-effort basis. Four full-pool counts are
+contradicted: Mechanic tier 3 and Ragman tier 1 (fewer children than tasks), and
+Mechanic tier 4 and Prapor tier 4 (not fewer). Mechanic tier 3 and Ragman tier 1
+now use faction-pair derivations that fit the retained aggregates; the other two
+remain unresolved. See [Unreconciled groups](#unreconciled-groups).
 
 ## The second family: plain variables
 
@@ -278,12 +316,14 @@ reference counter for only **7 of 27** groups, because tasks that are free
 within their tier carry no trader-level requirement upstream and are therefore
 missed, while some gated tasks carry a level that differs from their pool.
 
-The missing input is small and fully covered upstream. The 27 counter pools hold
-**248 tasks** (66 at tier 1, 79 at tier 2, 68 at tier 3, 35 at tier 4), of which
-**164 are gated** by a counter threshold and 84 are free within their tier. The
-gated figure is publicly checkable: it equals the 164 `globalVariable` conditions
-`json.tarkov.dev/pve/tasks` serves over these 27 `variableId`s. All 248 tasks
-already exist in that endpoint — they just lack the pool annotation. Supplying
+The 27 registry pools hold **248 tasks** (66 at tier 1, 79 at tier 2, 68 at tier 3,
+35 at tier 4). In the retained PVE templates, **158 are group-gated** and 90 have
+no tier-group gate; 11 of those 90 instead have a plain-scalar start gate.
+The live API check on 2026-10-14 finds 168 group gates: 158 on registry-pool tasks
+and 10 on tasks outside those pools, over the same 27 targets in every mode.
+The former 164 figure described a public API snapshot, not the gated subset of
+the 248-task pool. Consumer counts do not establish contributor membership.
+All 248 tasks already exist in that endpoint — they just lack the pool annotation. Supplying
 `(trader, tier)` membership per task makes a counter computable as:
 
 ```text
@@ -291,30 +331,31 @@ globalVariables[groupId] = |completed ∩ contributors(groupId)|
 ```
 
 Throughout this document, **`contributors(groupId)`** means the set of tasks that
-actually increment that counter. Nothing here establishes that set for **any**
-group, so distinguish three states and do not conflate the first two:
+actually increment that counter. The captures cannot identify that set directly,
+so the registry uses the pool as a best-effort stand-in where the evidence is
+consistent:
 
-- **Aggregate-reconciling (23 groups).** The counter's observed value equals the
-  number of completed pool tasks in one profile. That is consistent with the pool
-  being the contributor set, but it does not prove it: an aggregate can match
-  while one task contributes nothing and another contributes twice, and one
-  profile says nothing about contribution amounts, alternate producers, initial
-  values or resets. See
-  [the registry's evidence bar](GLOBAL_VARIABLES.md#registry-contract), which
-  states outright that a matching sum in one profile does not prove these
-  properties.
-- **Not reconciling (4 groups).** The counter reads below the completed pool
-  count, so the pool and the counter are **inconsistent under the simple model**.
-  This is not proof that those tasks are outside the contributor set: since reset
-  and initial-value behaviour is unresolved, a reset could produce the same
-  shortfall after every pool task had contributed. Either way the identities stay
-  unknown and the counter is not computable. See [Caveats](#caveats).
-- **Verified.** Contributor identities established by evidence of the derivation
-  itself. No group in this document reaches this state.
+- **Consistent (23 groups), published `verified`/`complete`.** The counter equals
+  the number of completed pool tasks in every retained PMC profile. That is not
+  proof: an aggregate can match while one task contributes nothing and another
+  contributes twice, and the profiles say nothing about alternate producers,
+  initial values or resets. It is the best available evidence, and nothing
+  contradicts it.
+- **Faction alternatives (Mechanic tier 3, Ragman tier 1), published
+  `verified`/`complete` with `taskGroupCompletions`.** Counting each of four
+  BEAR/USEC Gunsmith pairs once, plus the other eight tasks individually, fits the
+  informative Mechanic tier-3 PvE and PvP aggregates. Counting Inventory Files and
+  A Big Loss once, plus the other seven, fits Ragman tier 1. Current faction
+  requirements support `anyOf` for all five pairs; shared writers and backfill
+  behavior remain hypotheses. See
+  [paired-count hypotheses](#mechanic-tier-3-and-ragman-tier-1-paired-count-hypotheses).
+- **Contradicted (2 groups), kept `unresolved`/`partial`.** The counter reads below
+  the completed pool count, so counting the pool can clear a threshold too early. The
+  cause is unknown: some tasks may not contribute, or a reset may have lowered the
+  counter after every pool task had contributed. See [Caveats](#caveats).
 
-Every formula below is scoped to `contributors`, never to the raw pool, and each
-is usable only once a group is verified — by evidence beyond this document. On the
-strength of what is recorded here, all 27 are candidates.
+If a capture or user report contradicts a published mapping, move it to the
+contradicted category and set it to `unresolved`/`partial`.
 
 Ragman's single tier-4 task is **not** in these totals: it has no counter group,
 which is why the table above has no Ragman tier-4 row. Do not add it as a
@@ -324,19 +365,11 @@ The overlay already has the vehicle for that annotation: the
 `progressionCounters` registry in `src/additions/progressionCounters.json5`,
 published as `overlay.progressionCounters` and consumed by
 `evaluateTaskProgression`. A `distinctTaskCompletions` derivation over a pool's
-task IDs is exactly the shape above.
-
-What is _not_ settled is whether the mapping in this document clears that
-registry's evidence bar. It does not, and not merely because of the four
-unreconciled counters and seven child-count mismatches below. The bar requires
-`verification: 'verified'` and `coverage: 'complete'` with public proof of the
-derivation, and the aggregate profile match behind this model does not supply that
-for **any** of the 27 — it cannot distinguish which tasks contribute, how much
-each contributes, whether another producer writes the value, or how it initialises
-and resets. So all 27 belong in the registry as `unresolved` candidates at most,
-which never produce an inferred value. See
+task IDs is exactly the shape above, and the registry now carries it for the 23
+consistent groups. Mechanic tier 3 and Ragman tier 1 instead use
+`taskGroupCompletions`, with `anyOf` faction pairs and singletons. See
 [the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the fields and
-the bar.
+the best-effort standard.
 
 ## Building a progression model
 
@@ -351,14 +384,13 @@ only two types — `TraderLoyalty` and `GlobalVariableValue` — with **no `Ques
 condition among them**. So there is no intra-pool "task X, Y, Z" prerequisite list
 to recover from these gates.
 
-Two populations of `GlobalVariableValue` live in here and must not be added
-together or confused with the public figure. 164 target one of the 27 tier groups,
-which is the count `json.tarkov.dev/pve/tasks` also serves. A further 11 tier-1
-tasks target a plain variable instead, and those are **not** published — the public
-endpoint carries no `globalVariable` requirement outside the 27 groups. So the
-captured total is at least 175, and the match between 164 and the public count is a
-property of the group population alone, not evidence that the capture and the
-endpoint agree overall.
+Two populations of `GlobalVariableValue` live in these 248 pool templates:
+158 target a tier group and 11 tier-1 tasks target a plain variable, giving
+169 captured start conditions. The latter are **not** published — the live API
+check carries no `globalVariable` requirement outside the 27 group targets.
+Across the full captured quest list, including non-pool consumers, 162 start
+conditions target those 27 groups. These are different populations from the
+168 live public gates; neither total proves agreement or pool membership.
 
 Read that as the scope it is: no recoverable `Quest` edge in the captured start
 conditions of these pools. It is **not** a licence to strip `taskRequirements`.
@@ -366,7 +398,7 @@ Upstream asserts one for one of the 248 (see below), and `AGENTS.md` requires
 preserving explicit `Quest` start conditions and their accepted statuses; an
 absence here is not evidence against an edge established elsewhere.
 
-The 164 counter-gated tasks take the predicate below. It does **not** apply to
+The 158 group-gated pool tasks take the predicate below. It does **not** apply to
 every tier-pool task: 11 tier-1 tasks are gated on a plain variable rather than
 their tier counter, distributed across four traders (Mechanic and Ragman and
 Therapist with 3 each, Skier with 2 — these are task counts per trader, all at
@@ -394,8 +426,8 @@ consumer that supplied no trader-level value would flip a valid tier-1 unlock to
 
 `counter(...)` is `|completed ∩ contributors(groupId)|`, which is **not**
 interchangeable with `|completed ∩ pool|`. For the 23 aggregate-reconciling groups
-substituting the pool happens to reproduce the observed value in the one profile
-checked, which is why the model is plausible — but as noted above that match does
+substituting the pool reproduces the observed value in the retained profiles,
+which is why the model is plausible — but as noted above that match does
 not establish the contributor set, so the substitution stays a hypothesis rather
 than a licence. For the four groups in [Caveats](#caveats) the substitution is
 contradicted: in each the counter read **below** the number of completed pool
@@ -404,8 +436,9 @@ threshold and report a task available too early. The reason is undetermined. A
 shortfall in child count fits two of the four (Mechanic tier 3 and Ragman tier 1),
 but for the other two the children are not fewer than the pool at all, and in any
 of the four an unresolved reset could equally explain a low reading after every
-member had contributed. Treat all four as `unknown` rather than substituting a
-full-pool count.
+member had contributed. Mechanic tier 3 and Ragman tier 1 now use best-effort
+faction-pair derivations instead of the full-pool count. Treat Mechanic tier 4 and
+Prapor tier 4 as `unknown` without an explicit account value.
 
 Each pool has 1–7 tasks carrying no counter gate, and the staggered waves are
 reachable from those tasks in all 27 pools — but only once those tasks are
@@ -426,15 +459,12 @@ Knowing a player has a task at threshold `N` over a group tells you
 intra-pool task edges**, no individual member is ever forced, so no specific task
 can be inferred as required. Where a contributor set is verified, the number of
 minimal explanations is `C(|contributors|, N)` — large enough that enumerating them
-is pointless. Since no group here is verified, that figure cannot currently be
-computed for any of them: substituting the pool would enumerate subsets containing
-members that may not contribute. Raw-pool arithmetic gives a feel for the scale
-only — taking `C(Pool, N)` for each of the 164 gated tasks in the table, using its
+is pointless. Taking `C(Pool, N)` for each group-gated task in the table, using its
 own threshold `N` and its pool size, the median is 56 and the maximum is
 `C(16,5) = 4368` at Mechanic tier 3. Both are reproducible from the table, but
 treat them as illustrations of magnitude rather than counts of valid histories:
-Mechanic tier 3 is one of the four unreconciled groups, so its `16` is only a pool
-size.
+Mechanic tier 3 has 16 pool tasks but only 12 contributor groups under its
+published faction-pair derivation.
 
 This does **not** license picking an `N`-subset and recording it as completed
 history. The gate supplies no identity evidence, so any such subset is invented:
@@ -449,7 +479,11 @@ no member fails another member and the only `Fail` conditions on pool tasks are
 route planner may choose freely by cost; a history reconstructor may not choose at
 all.
 
-That guarantee does **not** extend to the four unreconciled groups. There an
+For Mechanic tier 3 and Ragman tier 1, plan by contributor group: completing either
+eligible faction variant earns the pair's point, and completing both must not add
+another point.
+
+That guarantee does **not** extend to the two unresolved groups. There an
 available pool task may not advance the counter at all, so completing `N` of them
 can leave the threshold unmet and a planner would report false progress. Restrict
 route planning to verified contributors.
@@ -465,7 +499,8 @@ route planning to verified contributors.
   set**: schedule `max(0, N - have)` further contributors, not `N` — counting from
   the threshold rather than the shortfall schedules work the player has already
   done. Any available contributors will do, so pick by cost; greedy selection is
-  sufficient given the seed/wave structure. For the four unreconciled groups an
+  sufficient given the seed/wave structure. Count Mechanic tier-3 and Ragman tier-1
+  faction pairs once each. For the two unresolved groups an
   available task may not advance the counter, so do not plan routes or report
   progress across them.
 - A missing account value must evaluate to `unknown`, never `available`.
@@ -477,16 +512,15 @@ route planning to verified contributors.
   tasks — not children versus pool size: Mechanic tier 3 (12 vs 16), Mechanic
   tier 4 (3 vs 4), Prapor tier 4 (6 vs 7), Ragman tier 1 (8 vs 9). In every case
   the counter reads lower, which is inconsistent with the pool being counted
-  one-per-task. The cause is undetermined and at least two explanations survive:
-  some task does not contribute (a shortfall in child count fits Mechanic tier 3
-  at 12 children for 16 tasks and Ragman tier 1 at 8 for 9, but Mechanic tier 4
-  has _more_ children than pool tasks and Prapor tier 4 has exactly as many), or
-  the counter reset at some point after contributions landed. Nothing here
-  distinguishes them, so no contributor identity is established for these groups.
+  one-per-task. What the retained captures narrow down per group is in
+  [Unreconciled groups](#unreconciled-groups). The published Mechanic tier-3 and
+  Ragman tier-1 faction-pair derivations reconcile their aggregates; no individual writer is
+  established for any of the four.
 - **Seven groups where children ≠ pool size**, including Prapor tier 2
-  (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). Extra children are
-  never set in the observed profile, so they are plausibly retired or
-  mode-specific markers, but that is unverified.
+  (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). The surplus children are
+  plausibly retired or mode-specific markers, which is unverified. For the four
+  surplus groups whose counter matches the completed pool count in every retained
+  profile, the mismatch does not contradict the count, so they are published.
 - **351 of 374 child variables have no writer anywhere in the client payloads.**
   That makes their producer **unknown**, not confirmed: the write happens
   server-side, but nothing here shows it happens on task completion rather than at
@@ -500,12 +534,179 @@ route planning to verified contributors.
   a live tarkov.dev read. Group membership and thresholds are BSG data and can
   change between patches; re-verify after a task rework.
 
+## Unreconciled groups
+
+Evidence scope: the level-55 PVE profile, a level-42 PVP profile captured after
+1.1, and two seasonal profiles, read against their own `quest_list`. The captures
+are local and untracked; per the policy above, child variables are described by
+count, never by ID. Every captured member has `side: Pmc`, but that field alone
+does not establish faction eligibility: the current wiki describes eight Mechanic
+tier-3 Gunsmith tasks as faction-exclusive (see below). Fail/restart flags do not
+isolate the shortfalls: the only restartable members (Escort in Prapor tier 4, Psycho Sniper
+in Mechanic tier 4) are not distinguished from restartable tasks that counted in
+consistent groups (The Guide, Bullshit), and failed pool tasks elsewhere correctly
+do not count.
+
+**Common pattern.** The retained completion history is consistent with one point
+per post-1.1 completion and shortfalls in how pre-1.1 history was credited.
+These are profile snapshots, not isolated before/after observations of each
+completion. They support a backfill explanation but do not establish the write
+rule or show that fresh completions will reproduce the same shortfall.
+
+### Mechanic tier 3 and Ragman tier 1: paired-count hypotheses
+
+- **Mechanic tier 3.** 16 tasks, 12 children. PVE reads 12 for 16 completed; PVP
+  reads 7 for 11 completed. Both are short by exactly 4. The 8 Gunsmith tasks in
+  the pool unlock in pairs at the same threshold (free: AKM, M4A1; ≥1: AKS-74N,
+  P226R; ≥3: AK-105, Vector 9x19; ≥5: MPX, AS VAL). If each pair is one point,
+  the 8 other tasks plus 4 pairs give 12, matching the child count. The PVP
+  profile has all 8 Gunsmith tasks plus 3 others completed (7 = 4 + 3). The 5
+  extra tasks complete in PVE coincide with exactly 5 additional set children.
+- **Ragman tier 1.** 9 tasks, 8 children. PVE reads 8 for 9; PVP reads 2 for 3.
+  A seasonal profile has Make ULTRA Great Again and Fuel Crisis complete, with
+  2 set children. The PVP profile's Make ULTRA Great Again, Inventory Files and
+  A Big Loss coincide with only 2 set children. Inventory Files and A Big Loss
+  (both ≥1) sharing a child, one not counting, or a backfill omission all fit.
+
+Neither observed aggregate fits `distinctTaskCompletions` over the full pool.
+A paired-count derivation fits both informative profiles, but is not the only
+explanation. Mechanic tier 3 is published as a best-effort mapping: its four pairs
+have independent faction-eligibility evidence, and each pair uses `anyOf`, so a
+current player's single eligible variant can earn its point. The PvE aggregate is
+8 singletons + 4 pairs = 12; the PvP aggregate is 3 singletons + 4 pairs = 7.
+Those profiles completed both variants, so they do not isolate the current
+single-variant write rule or prove that each pair shares a child. Seasonal
+membership is extrapolated from the matching catalogue, as documented in
+[the registry scope](GLOBAL_VARIABLES.md#what-ships-today). No retained aggregate
+contradicts this mapping; re-check it with current-faction before/after captures.
+
+Ragman tier 1 is published the same way. The [SPT quest config](https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json) lists Inventory Files as
+BEAR-only and A Big Loss as USEC-only. That gives the pair the faction-eligibility evidence it previously lacked,
+so it uses `anyOf`: either variant earns the pair's point, and a legacy profile
+that completed both earns one. The PvE aggregate is 7 singletons + 1 pair = 8;
+the PvP aggregate is Make ULTRA Great Again + 1 pair = 2. A partly completed pair
+has not been isolated, so a fresh single-variant completion is extrapolated, as
+for Mechanic tier 3.
+
+Other BEAR/USEC pairs in the same SPT list sit in pools with one child per task:
+Justice/Trophy (Jaeger tier 1), the two Huntsman Path - Administrator variants
+(Jaeger tier 3), Oil Run/Shaking Up the Teller (Prapor tier 1), and
+Vitamins/Supplements and Debtor/House Arrest (Skier tier 2). Their counters
+matched the full completed pool count in every retained profile, so they keep
+`distinctTaskCompletions`.
+
+### Prapor tier 4: one-point shortfall, cause unidentified
+
+8 tasks, 8 children. PVE reads 6 for 7 completed (Escort is not completed), with 2
+children unset. The PVP profile reads 4 for 4 completed (Regulated Materials,
+Intimidator, Getting Some Air, Unique Experience), consistent with all four
+counting, including two completed after 1.1. Under a stable one-point contributor
+model, the missing contributor would be **Best Job in the World**, **The Art of
+Explosion** or **Special Order**. A profile-specific backfill omission could also
+affect one of the four that counted in PvP; the snapshots do not exclude that.
+
+The Art of Explosion starts on Prapor LL4 alone, but so do Regulated Materials
+and Getting Some Air, which fit the reconciling PvP total. Its captured tier,
+side and start-condition shape do not isolate it as the missing contributor.
+Neither completion order nor a counter-free start proves exclusion from the
+counter. The retained evidence does not identify which completion was omitted.
+
+### Mechanic tier 4: one-point shortfall, cause unidentified
+
+5 tasks, 6 children. PVE reads 3 for 4 completed (Shooter Born in Heaven, Goals
+and Means, Calibration, Psycho Sniper; Setting Priorities is not completed). No
+profile isolates which of the four did not count.
+
+### Cross-check against current wiki and API data
+
+Checked on 2026-10-14 against the retained 1.1 captures, current source registry,
+all three [live task endpoints](https://json.tarkov.dev/pve/tasks), and the wiki
+pages' wikitext through `api.php`. Wiki requirements and rewards are useful
+best-effort evidence, but a reward signature does not identify a counter writer.
+
+- **Mechanic tier 3:** the wiki Requirements sections identify BEAR-only
+  [AKM](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKM),
+  [AKS-74N](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74N),
+  [AK-105](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AK-105), and
+  [AS VAL](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AS_VAL), paired by
+  captured threshold with USEC-only
+  [M4A1](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_M4A1),
+  [P226R](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_P226R),
+  [Vector 9x19](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Vector_9x19), and
+  [MPX](https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_MPX).
+  Counting each pair once fits 12/16 in PVE and 7/11 in PvP. It does not distinguish
+  a shared child from crediting only the player's faction variant during backfill.
+  All eight were `factionName: "Any"` upstream at that check. On 2026-10-19,
+  upstream serves BEAR for AKM and USEC for M4A1 in all three modes, so their
+  faction overrides were retired in #506. The other six had no faction override.
+  Current wiki eligibility is
+  not proof of how older completed IDs were credited. The suggested lower-tier
+  MP-133/Model 870 and AKS-74U/HK MP5 pairings are not supported by faction
+  restrictions on their current wiki pages; MP-133 and Model 870 also occupy
+  different tiers.
+- **Ragman tier 1:** both Inventory Files and A Big Loss have independent
+  `group >= 1` start gates, with no `Quest` prerequisite between them, in the
+  capture and live API. Both have 3,000 EXP and +0.1 reputation there.
+  [Inventory Files](https://escapefromtarkov.fandom.com/wiki/Inventory_Files)
+  still lists 8,400 EXP and +0.03 reputation on the wiki, so that reward comparison
+  is a source disagreement, not evidence of a non-contributing setup step.
+  Counting the two tasks as one fits the observed totals. The [SPT quest config](https://github.com/SP-Tushonka/server-csharp/blob/794b0d5c6b/Libraries/SPTushonka.Server.Assets/SPT_Data/configs/quest.json) lists
+  Inventory Files as BEAR-only and A Big Loss as USEC-only, so the registry counts
+  them as an `anyOf` faction pair rather than a "payoff task only" rule.
+- **Hot Delivery:** the [wiki](https://escapefromtarkov.fandom.com/wiki/Hot_Delivery)
+  corroborates LL2 and the tier-2 reward signature. The capture and live API gate
+  it on Ragman's **tier-2** group `6a4b4e6a30dac4b01af220aa >= 2`, not the
+  tier-1 group at `>= 5`. It is already in the tier-2 registry pool, not tier 1.
+  The proposed tier-2 ID `6a3cf76a51a600d97d1d6b05` is absent from both the
+  retained group catalogue and live gates.
+- **Mechanic tier 4:** the [Calibration wiki page](https://escapefromtarkov.fandom.com/wiki/Calibration)
+  omits Mechanic reputation, but the capture and all live modes give +1.5.
+  Calibration and Setting Priorities start on Mechanic LL4 alone, not on group
+  thresholds `>= 1` and `>= 2`. The 3/4 aggregate therefore does not identify
+  Calibration as the non-contributor or establish the proposed early-unlock
+  scenario. [Hobby Club](https://escapefromtarkov.fandom.com/wiki/Hobby_Club)
+  is LL4-gated but has captured `tierAccessory: 0`; loyalty alone does not place
+  it in this pool.
+- **Prapor tier 4:** the correct published group is
+  `6a326525789ae12ecb0b2807`, with 8 children and 8 pool tasks, including
+  [Unique Experience](https://escapefromtarkov.fandom.com/wiki/Unique_Experience).
+  The proposed `6a3cfa44732fbff76561e307` appears in neither the retained group
+  catalogue nor current public gates. PvP reads **4/4**, not 0/0. Escort is not
+  completed in the informative PVE profile, and Intimidator is complete in the
+  reconciling PvP profile; neither is supported as its missing contributor.
+  Escort and Special Order require `>= 2`; Intimidator requires `>= 1`, not `>= 5`.
+
+The shipped registry is `src/additions/progressionCounters.json5`, using
+`derivation.taskIds` or `derivation.groups`; it has no `countPoolTasks` field. Counter resolution is
+`resolveCounter` in `src/lib/task-progression.ts`, not `deriveCounterValue` in
+`src/lib/globalVariables.ts`. There is no `npm run triage` command. A future pool
+audit should distinguish consumers from producers and flag tier/reward
+disagreements for investigation, rather than make them automatic inclusion or
+exclusion rules. The grouped derivation has matching schema, types, runtime
+validation, and unknown-history semantics; a simple `.some(completed)` alone
+would turn missing history into an invented zero.
+
+### Decisive tests
+
+- Prapor tier 4: a 1.1 profile that completes The Art of Explosion (or Best Job in
+  the World, or Special Order) as the only change between two captures.
+- Mechanic tier 4: the same for each of its four completed tasks.
+- Mechanic tier 3: isolate a current-faction Gunsmith completion between captures
+  and check that it advances the counter by one. Repeat for both factions and all
+  four pairs, across fresh and migrated histories. A current player cannot
+  complete both faction variants to test the second completion in the same run.
+- Ragman tier 1: isolate a current-faction Inventory Files (BEAR) or A Big Loss
+  (USEC) completion between captures and check that it advances the counter by
+  one. Repeat for both factions and fresh/migrated histories.
+
 ## Reproducing
 
 All reference-side figures come from the gitignored local capture under
-`eft/data/combined/<mode>/`, using `variable_group.json`, `quests.json`,
-`dialogue.json` and `profile_list.json`. Public-side figures come from
-`json.tarkov.dev/pve/tasks`, `json.tarkov.dev/pve/traders` and
+`data/reference/decoded/`, using the variable-group, quest-list, dialogue and
+profile-list responses. `data/catalog.json` maps the former combined filenames
+(`variable_group.json`, `quests.json`, `dialogue.json`, `profile_list.json`) to
+the equivalent decoded response and its independently matched mode. Public-side
+figures come from `json.tarkov.dev/pve/tasks`, `json.tarkov.dev/pve/traders` and
 `dist/overlay.json`.
 
 The published condition can be listed without any local capture:
@@ -513,7 +714,7 @@ The published condition can be listed without any local capture:
 ```bash
 curl -s https://json.tarkov.dev/pve/tasks \
   | jq '[.data.tasks[].otherRequirements[]? | select(.type=="globalVariable")] | length'
-# 164 conditions over 27 distinct variableIds
+# 168 conditions on 2026-10-14 (27 distinct variableIds, checked separately)
 ```
 
 Every threshold in the table, and the gated task names for any one group, come
@@ -543,41 +744,7 @@ translation lookup, so a script can call it instead of resolving keys by hand.
 
 ### Why this document is tracked
 
-`AGENTS.md` says of the numeric `eft:*` cross-check tooling: "Never commit the
-reference or anything derived from it; PRs carry only the resulting JSON5
-corrections plus proof links." That prohibition is about republishing the
-reference's contents — the raw capture and the field-by-field diffs the `eft:*`
-tools emit, which is why their output goes to gitignored `data/`.
-
-It is not a blanket ban on reference-informed output, and the repository already
-commits such output deliberately: `src/additions/storyChapters.json5` is tracked,
-declares "Source: local quest reference (structure/ordering)", and carries 344
-per-objective `sourceQuestId` references, because those story quests exist nowhere
-else. `AGENTS.md` sanctions that explicitly — "unlike the numeric `eft:*` tools
-this one produces committed additions, not a gitignored diff. The reference itself
-stays gitignored; only the generated JSON5 is committed."
-
-This document sits well inside that boundary, and the boundary is checkable rather
-than asserted:
-
-- Every one of the 27 identifiers it names is published by
-  `json.tarkov.dev/pve/tasks`. No capture-only identifier appears — two were
-  removed for that reason while this document was in review.
-- Every threshold and gated task name is re-derivable from public endpoints with
-  the command above.
-- Capture-informed content is mostly aggregate: the `Children` and `Pool` integers,
-  the reconciliation counts, condition-type and `compareMethod` distributions, and
-  the caveats. A few observations are per-task rather than aggregate — which tier-1
-  tasks are gated on a plain variable, and that two named Prapor tier-2 tasks
-  declare an explicit `GlobalVariable` success reward. Those name tasks only by
-  their public identifiers and report the presence of a condition, never a
-  reference field value.
-- No reference field values appear at all — no experience, no `minPlayerLevel`, no
-  objective counts — and no quest, objective or child-variable identifier that
-  tarkov.dev does not already publish.
-
-That is less reference detail than the committed `storyChapters.json5` already
-carries. If a maintainer prefers a stricter line, the affected material is the
-aggregate columns and counts plus those per-task observations; the resolution rule
-and the guidance would go with them, since `variable_group` is a client endpoint
-and cannot be described from public data at all.
+It references capture evidence as `AGENTS.md` allows (reference cross-check
+tooling): it describes what the capture shows, names tasks only by identifiers
+tarkov.dev already publishes, and reproduces no raw capture contents or reference
+field values.

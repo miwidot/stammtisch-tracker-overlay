@@ -2,8 +2,9 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import {
+  buildItemComparisonIndex,
   fetchCached,
   adaptReward,
   getNextTagVersion,
@@ -170,5 +171,219 @@ describe('readResponseJson', () => {
     await expect(readResponseJson(new Response('12345'), 'regular/tasks', 4)).rejects.toThrow(
       'exceeds the 4-byte limit'
     );
+  });
+});
+
+describe('buildItemComparisonIndex', () => {
+  const items = { items: [{ id: 'x', name: 'x Name', weight: 1 }] };
+  const itemsEn = { 'x Name': 'Item' };
+  it.each([
+    { questItems: [{ id: 'q', name: 'q Name' }] },
+    {
+      questItems: { q: { id: 'q', name: 'q Name' } },
+    },
+  ])('indexes quest items from arrays and objects', ({ questItems }) => {
+    expect(
+      buildItemComparisonIndex(items, { questItems }, itemsEn, {
+        'q Name': 'Quest',
+      }).get('q')
+    ).toEqual({ id: 'q', name: 'Quest' });
+  });
+  it('gives item records precedence over quest records and dictionary names', () => {
+    const result = buildItemComparisonIndex(
+      items,
+      { questItems: [{ id: 'x', name: 'quest Name' }] },
+      itemsEn,
+      { 'quest Name': 'Quest', 'x Name': 'Dictionary' }
+    );
+    expect(result.get('x')).toEqual({ id: 'x', name: 'Item', weight: 1 });
+  });
+  it('omits unresolved record names for unverified comparisons', () => {
+    expect(buildItemComparisonIndex(items, { questItems: [] }, {}, {}).get('x')).toEqual({
+      id: 'x',
+      weight: 1,
+    });
+  });
+  it.each(
+    [null, 7, [{ id: 'q' }, { id: 'q' }], [{ name: 'broken' }]].map((questItems) => ({
+      questItems,
+    }))
+  )('rejects invalid quest sources %j', ({ questItems }) => {
+    expect(() => buildItemComparisonIndex(items, { questItems }, itemsEn, {})).toThrow(
+      'questItems'
+    );
+  });
+  it.each(
+    [{}, [], [{ id: 'x' }, { id: 'x' }], [{ id: ' ' }]].map((collection) => ({ collection }))
+  )('rejects invalid item sources %j', ({ collection }) => {
+    expect(() =>
+      buildItemComparisonIndex({ items: collection }, { questItems: [] }, {}, {})
+    ).toThrow('items');
+  });
+  it('accepts an explicitly empty supplemental quest collection', () => {
+    expect(buildItemComparisonIndex(items, { questItems: [] }, itemsEn, {}).size).toBe(1);
+  });
+  it.each([null, [], { key: 7 }].map((translations) => ({ translations })))(
+    'rejects malformed translation maps %j',
+    ({ translations }) => {
+      expect(() => buildItemComparisonIndex(items, { questItems: [] }, translations, {})).toThrow(
+        'translations'
+      );
+    }
+  );
+});
+
+describe('complete item comparison snapshots', () => {
+  it('rejects an absent quest collection rather than establish absence', () => {
+    expect(() => buildItemComparisonIndex({ items: [{ id: 'x' }] }, {}, {}, {})).toThrow(
+      'questItems'
+    );
+  });
+  it('resolves record fields from either dictionary', () => {
+    const result = buildItemComparisonIndex(
+      { items: [{ id: 'x', name: 'x Name' }] },
+      { questItems: [{ id: 'q', name: 'q Name' }] },
+      { 'q Name': 'Quest' },
+      { 'x Name': 'Item' }
+    );
+    expect(result.get('x')).toEqual({ id: 'x', name: 'Item' });
+    expect(result.get('q')).toEqual({
+      id: 'q',
+      name: 'Quest',
+    });
+  });
+  it('does not fabricate dictionary identities from unresolved or blank names', () => {
+    const result = buildItemComparisonIndex(
+      { items: [{ id: 'x' }] },
+      { questItems: [] },
+      {
+        '0123456789abcdef01234567 Name': '0123456789abcdef01234567 Name',
+        '3123456789abcdef01234567 Name': ' ',
+        '4123456789abcdef01234567 ShortName': 'Only short name',
+      },
+      {}
+    );
+    expect([...result.keys()]).toEqual(['x']);
+  });
+});
+
+it('enriches dictionary-only items with all usable dictionary fields', () => {
+  const result = buildItemComparisonIndex(
+    { items: [{ id: 'x' }] },
+    { questItems: [] },
+    {
+      '0123456789abcdef01234567 Name': 'Quest',
+      '0123456789abcdef01234567 ShortName': 'Q',
+      '0123456789abcdef01234567 Description': 'Description',
+    },
+    {}
+  );
+  expect(result.get('0123456789abcdef01234567')).toEqual({
+    id: '0123456789abcdef01234567',
+    name: 'Quest',
+    shortName: 'Q',
+    description: 'Description',
+  });
+});
+it('fills missing fields with source dictionary precedence while preserving record values', () => {
+  const result = buildItemComparisonIndex(
+    { items: [{ id: 'x', description: 'Actual description', shortName: 'x ShortName' }] },
+    { questItems: [{ id: 'q' }] },
+    {
+      'x Name': 'Item',
+      'x ShortName': 'I',
+      'x Description': 'Wrong description',
+      'q Name': 'Wrong quest',
+    },
+    {
+      'x Name': 'Wrong item',
+      'q Name': 'Quest',
+      'q ShortName': 'Q',
+      'q Description': 'Quest description',
+    }
+  );
+  expect(result.get('x')).toEqual({
+    id: 'x',
+    name: 'Item',
+    shortName: 'I',
+    description: 'Actual description',
+  });
+  expect(result.get('q')).toEqual({
+    id: 'q',
+    name: 'Quest',
+    shortName: 'Q',
+    description: 'Quest description',
+  });
+});
+
+it('preserves literal text ending in dictionary field words', () => {
+  const result = buildItemComparisonIndex(
+    {
+      items: [
+        { id: '0123456789abcdef01234567', name: 'Display Name', description: 'Full Description' },
+      ],
+    },
+    { questItems: [] },
+    {},
+    {}
+  );
+  expect(result.get('0123456789abcdef01234567')).toEqual({
+    id: '0123456789abcdef01234567',
+    name: 'Display Name',
+    description: 'Full Description',
+  });
+});
+
+it('omits unresolved values tied to a known dictionary key', () => {
+  const result = buildItemComparisonIndex(
+    { items: [{ id: 'x', name: 'other Name' }] },
+    { questItems: [] },
+    { 'other Name': 'other Name' },
+    {}
+  );
+  expect(result.get('x')).toEqual({ id: 'x' });
+  expect(result.has('other')).toBe(false);
+});
+
+it('excludes task names from dictionary-only item identities while preserving real items', () => {
+  const result = buildItemComparisonIndex(
+    { items: [{ id: 'real' }] },
+    {
+      tasks: {
+        task: { id: '2123456789abcdef01234567' },
+        real: { id: 'real' },
+        quest: { id: 'quest' },
+      },
+      questItems: [{ id: 'quest' }],
+    },
+    { 'real Name': 'Real item' },
+    {
+      '2123456789abcdef01234567 Name': 'Task title',
+      'marathon Name': 'Transition',
+      'quest Name': 'Quest item',
+      '1123456789abcdef01234567 Name': 'Dictionary item',
+    }
+  );
+  expect(result.has('2123456789abcdef01234567')).toBe(false);
+  expect(result.has('marathon')).toBe(false);
+  expect(result.get('1123456789abcdef01234567')).toEqual({
+    id: '1123456789abcdef01234567',
+    name: 'Dictionary item',
+  });
+  expect(result.get('real')).toEqual({ id: 'real', name: 'Real item' });
+  expect(result.get('quest')).toEqual({ id: 'quest', name: 'Quest item' });
+});
+
+it('rejects generic dictionary labels while preserving actual nonhex item records', () => {
+  const result = buildItemComparisonIndex(
+    { items: [{ id: 'customdogtags12345678910', name: 'Dogtag' }] },
+    { questItems: [] },
+    {},
+    { 'marathon Name': 'Transition' }
+  );
+  expect(result.has('marathon')).toBe(false);
+  expect(result.get('customdogtags12345678910')).toEqual({
+    id: 'customdogtags12345678910',
+    name: 'Dogtag',
   });
 });

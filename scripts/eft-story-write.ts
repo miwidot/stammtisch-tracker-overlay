@@ -17,6 +17,7 @@
 import { createHash } from 'crypto';
 import {
   closeSync,
+  linkSync,
   mkdirSync,
   mkdtempSync,
   openSync,
@@ -30,6 +31,7 @@ import { basename, dirname, join } from 'path';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
 import { isDirectExecution } from '../src/lib/index.js';
+import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
 import { writeFileAtomicSync } from './lib/atomic-write.js';
 import {
   inspectStagedReferenceLock,
@@ -41,22 +43,25 @@ import {
 const HEADER =
   '  // Story chapters (Edge of Darkness storyline) - not present in the tarkov.dev API.\n' +
   '  //\n' +
-  '  // Source: local quest reference (structure/ordering) cross-referenced with the\n' +
+  '  // Source: local quest reference (structure and stable ids) cross-referenced with the\n' +
   '  // EFT wiki (objective text + optional/required flags). Chapters are the storyline\n' +
   '  // narrator-trader quests; objectives are the ordered sub-quest references. Optional\n' +
-  '  // flags come from the wiki. Chapter ordering, wikiLink, activation, and requirements\n' +
-  '  // are curated (scripts/story-chapter-meta.json). Each generated objective id is\n' +
-  '  // the stable source objective id, with sourceQuestId linking to its sub-quest.\n' +
+  '  // flags come from the wiki or evidence-backed optionality corrections keyed by stable\n' +
+  '  // objective id. Narrative ordering,\n' +
+  '  // stage unlocks and chapter metadata are curated (scripts/story-chapter-meta.json).\n' +
+  '  // Each objective uses its stable source id, with sourceQuestId linking to its sub-quest.\n' +
+  '  // Optional parentObjectiveId links come from raw parentId, for layout only;\n' +
+  '  // multiple optionals may share a main step and keep independent completion.\n' +
   '  // Every chapter is derived from the reference, so no objective carries a\n' +
   '  // fabricated id; endingId and the chapter-level `endings` list use the real\n' +
   '  // client/ending_list ids.\n' +
   '  //\n' +
-  '  // `referenceCoverage` reports how much of each chapter the capture resolved. The\n' +
+  '  // `referenceCoverage` reports how much of each chapter the locked references resolve. The\n' +
   '  // client only returns a story sub-quest template once the player has reached it,\n' +
   '  // so `partial: true` means these objectives are what the capture could see, not a\n' +
   '  // complete chapter - a missing objective is not evidence that none exists. For the\n' +
   '  // same reason an ending can appear in `endings` with objectiveCount 0: the branch\n' +
-  '  // is real (the chapter quest references its gate sub-quest) but this capture holds\n' +
+  '  // is real (the chapter quest references its gate sub-quest) but the references hold\n' +
   '  // no objective-level evidence for it.\n' +
   '  //\n' +
   '  // `mutuallyExclusiveQuestPairs` contains unordered pairs of resolved chapter\n' +
@@ -65,7 +70,7 @@ const HEADER =
   '  // progress on both quests is allowed: these are NOT objective exclusions. Cascade\n' +
   '  // failure and counterparts outside the resolved chapter sub-quests are excluded.\n' +
   '  //\n' +
-  '  // Regenerate with `npm run eft:story`; the exact source capture is pinned by\n' +
+  '  // Regenerate with `npm run eft:story`; the primary and supplemental captures are pinned by\n' +
   '  // scripts/story-reference.lock.json.\n' +
   '  // The storyline is shared between PVP and PVE.\n' +
   '  //\n' +
@@ -106,6 +111,38 @@ const WRITE_LOCK = join('data', 'eft', 'story-write.lock');
  */
 class PublicationRefused extends Error {}
 
+/** Publication happened, but neither promotion nor rollback was confirmed. */
+class RecoveryRequired extends AggregateError {
+  constructor(promotion: unknown, rollback: unknown, snapshot: string | null) {
+    super(
+      [promotion, rollback],
+      `error: story publication requires verified recovery; promotion failed: ${promotion}; ` +
+        `rollback was not confirmed: ${rollback}. Retaining ${WRITE_LOCK}` +
+        (snapshot ? ` and ${snapshot}` : ' (no previous artifact)') +
+        '. Follow docs/STORY_PUBLICATION_RECOVERY.md before another run.'
+    );
+    this.name = 'RecoveryRequired';
+  }
+}
+
+interface WriteLock {
+  fd: number;
+  reconciled: boolean;
+}
+
+function sha256(data: string | Buffer): string {
+  return createHash('sha256').update(data).digest('hex');
+}
+
+function fileSha256(file: string): string | null {
+  try {
+    return sha256(readFileSync(file));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
 /**
  * Serialize artifact publication across runs.
  *
@@ -115,7 +152,7 @@ class PublicationRefused extends Error {}
  * lock file makes publication one at a time. A crashed run leaves the file
  * behind, so the refusal names the remedy rather than waiting or guessing.
  */
-function acquireWriteLock(): () => void {
+function acquireWriteLock(): WriteLock {
   mkdirSync(dirname(WRITE_LOCK), { recursive: true });
   let fd: number;
   try {
@@ -124,24 +161,26 @@ function acquireWriteLock(): () => void {
     if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
       throw new PublicationRefused(
         `error: ${WRITE_LOCK} exists, so another story run appears to be publishing. ` +
-          'If no run is active (a crashed run leaves it behind), delete that file and retry.'
+          'A stopped run may require recovery. Follow docs/STORY_PUBLICATION_RECOVERY.md; ' +
+          'do not delete the lock until the artifact and provenance pin are verified.'
       );
     }
     throw error;
   }
   try {
-    // Diagnostic only: tells a human which process left a stale lock behind.
+    // Keep the numeric PID on the first line for existing diagnostics. Recovery
+    // metadata is appended to this same fd before replacement, never allocated
+    // after a failure (in particular, after ENOSPC).
     writeFileSync(fd, `${process.pid}\n`);
-  } catch {
-    // Never fail publication over the diagnostic payload.
-  }
-  return () => {
+  } catch (error) {
     closeSync(fd);
     rmSync(WRITE_LOCK, { force: true });
-  };
+    throw error;
+  }
+  return { fd, reconciled: true };
 }
 
-function publishStory(): void {
+function publishStory(writeLock: WriteLock): void {
   const input = process.argv[2] || 'data/eft/story-final.json';
   const raw = readFileSync(input, 'utf8');
   const data: StoryChapterMap = JSON.parse(raw);
@@ -159,9 +198,14 @@ function publishStory(): void {
     throw new PublicationRefused(`story-chapter schema validation failed:\n${details}`);
   }
 
+  try {
+    assertStoryObjectiveParents(data);
+  } catch (error) {
+    throw new PublicationRefused((error as Error).message);
+  }
   const out = renderStoryChaptersJson5(data);
   const dest = join('src', 'additions', 'storyChapters.json5');
-  const inputSha256 = createHash('sha256').update(raw).digest('hex');
+  const inputSha256 = sha256(raw);
 
   // A staged provenance binding is required for every artifact write, and it is
   // validated *before* the artifact is replaced. The writer cannot show on its
@@ -186,27 +230,67 @@ function publishStory(): void {
     );
   }
 
-  // Preserve the committed artifact as a renameable backup instead of keeping its
-  // bytes only in memory. Rollback must not allocate a full write: the failures
-  // that trigger it (ENOSPC) tend to make every later write fail too, and a
-  // failed rollback would pair the newly published artifact with the old lock. A
-  // sibling directory keeps the rename on the destination filesystem.
-  const backupDir = mkdtempSync(join(dirname(dest), `.${basename(dest)}-backup-`));
-  const backupFile = join(backupDir, 'previous');
-  let hasBackup = false;
+  // A same-filesystem hard link preserves rollback without removing the
+  // destination: an interruption before atomic replacement leaves the committed
+  // artifact readable. Rollback must not allocate a full write because ENOSPC
+  // can make every later write fail too. Abort if the snapshot cannot be made.
+  const rollbackDir = mkdtempSync(join(dirname(dest), `.${basename(dest)}-rollback-`));
+  const snapshot = join(rollbackDir, 'previous');
+  const discardSnapshot = (): void => {
+    try {
+      rmSync(rollbackDir, { recursive: true, force: true });
+    } catch (error) {
+      console.error(
+        `warning: could not remove rollback snapshot directory ${rollbackDir}: ${error}`
+      );
+    }
+  };
+  let hasSnapshot = false;
   try {
     if (statSync(dest).isFile()) {
-      renameSync(dest, backupFile);
-      hasBackup = true;
+      hasSnapshot = true;
     } else {
       throw new Error(`${dest} exists but is not a regular file`);
     }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      rmSync(backupDir, { recursive: true, force: true });
+      discardSnapshot();
       throw error;
     }
     // ENOENT: nothing committed yet, so there is nothing to back up.
+  }
+  if (hasSnapshot) {
+    try {
+      linkSync(dest, snapshot);
+    } catch (error) {
+      // In particular, ENOENT here is a failed snapshot, not permission to
+      // publish without rollback: the existing artifact disappeared mid-run.
+      discardSnapshot();
+      throw error;
+    }
+  }
+
+  let previousPinSha256: string | null;
+  let previousArtifactSha256: string | null;
+  try {
+    previousPinSha256 = fileSha256(LOCK);
+    previousArtifactSha256 = hasSnapshot ? sha256(readFileSync(snapshot)) : null;
+    // Fixed project-relative paths and hashes only: no capture details. Failure
+    // to record this metadata aborts while the previous artifact is still intact.
+    writeFileSync(
+      writeLock.fd,
+      `${JSON.stringify({
+        version: 1,
+        artifact: dest,
+        snapshot: hasSnapshot ? snapshot : null,
+        artifactSha256: sha256(out),
+        previousArtifactSha256,
+        previousPinSha256,
+      })}\n`
+    );
+  } catch (error) {
+    discardSnapshot();
+    throw error;
   }
 
   // Roll back only this run's publication. If another run has already replaced
@@ -220,23 +304,42 @@ function publishStory(): void {
       throw error;
     }
   };
-  const restore = (): void => {
-    if (!stillOurs()) {
-      console.error(`note: ${dest} was replaced by another run; leaving it in place.`);
-      return;
+  const restore = (): boolean => {
+    if (fileSha256(LOCK) !== previousPinSha256) {
+      throw new Error(`${LOCK} no longer matches the previous pin; leaving the artifact in place`);
     }
-    if (hasBackup) renameSync(backupFile, dest);
-    else rmSync(dest, { force: true });
+    if (!stillOurs()) {
+      return false;
+    }
+    if (hasSnapshot) {
+      if (fileSha256(snapshot) !== previousArtifactSha256) {
+        throw new Error(`${snapshot} no longer matches the previous artifact; leaving it in place`);
+      }
+      renameSync(snapshot, dest);
+    } else rmSync(dest, { force: true });
+    return true;
   };
-  const discardBackup = (): void => rmSync(backupDir, { recursive: true, force: true });
 
+  const rollback = (promotion: unknown): void => {
+    try {
+      if (!restore()) {
+        throw new Error(`${dest} contains foreign bytes; leaving it in place`);
+      }
+      writeLock.reconciled = true;
+    } catch (error) {
+      throw new RecoveryRequired(promotion, error, hasSnapshot ? snapshot : null);
+    }
+    discardSnapshot();
+  };
+
+  writeLock.reconciled = false;
   try {
     writeFileAtomicSync(dest, out);
   } catch (error) {
-    // The previous artifact is still in the backup (or there was none), so the
-    // committed state is restored by a metadata-only rename.
-    restore();
-    discardBackup();
+    // The atomic writer leaves the destination intact on write/rename failure;
+    // there is no publication to roll back yet.
+    writeLock.reconciled = true;
+    discardSnapshot();
     throw error;
   }
   console.log(`wrote ${dest} (${out.length} bytes, ${Object.keys(data).length} chapters)`);
@@ -254,8 +357,7 @@ function publishStory(): void {
   try {
     promoted = promoteStoryReferenceLock(inputSha256);
   } catch (error) {
-    restore();
-    discardBackup();
+    rollback(error);
     console.error(
       `error: the source-capture lock could not be updated after ${dest} was written, so the ` +
         'artifact has been rolled back and the pin left unchanged.'
@@ -264,8 +366,7 @@ function publishStory(): void {
   }
 
   if (!promoted) {
-    restore();
-    discardBackup();
+    rollback(new Error('the staged provenance binding changed or was refused after publication'));
     throw new PublicationRefused(
       `error: the staged binding at ${pendingLockSidecar(inputSha256)} was refused after ${dest} was ` +
         'written, so it changed mid-run. The artifact has been rolled back and the ' +
@@ -273,25 +374,32 @@ function publishStory(): void {
     );
   }
 
-  discardBackup();
+  writeLock.reconciled = true;
+  discardSnapshot();
 }
 
 function main(): void {
-  let release: (() => void) | null = null;
+  let writeLock: WriteLock | null = null;
   try {
-    release = acquireWriteLock();
-    publishStory();
+    writeLock = acquireWriteLock();
+    publishStory(writeLock);
   } catch (error) {
-    if (error instanceof PublicationRefused) {
+    if (error instanceof PublicationRefused || error instanceof RecoveryRequired) {
       console.error(error.message);
-      // Exit code rather than process.exit(): the finally below must run so a
-      // refusal cannot leave the write lock behind.
+      // Exit code rather than process.exit(): always close the fd, releasing
+      // the lock pathname only when publication was reconciled.
       process.exitCode = 1;
       return;
     }
     throw error;
   } finally {
-    release?.();
+    if (writeLock) {
+      try {
+        closeSync(writeLock.fd);
+      } finally {
+        if (writeLock.reconciled) rmSync(WRITE_LOCK, { force: true });
+      }
+    }
   }
 }
 

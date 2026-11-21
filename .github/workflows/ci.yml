@@ -9,10 +9,70 @@ on:
 permissions:
   contents: read
 
+# Each new push to a pull request cancels that PR's previous run; pushes to main
+# get their own group so every main commit is validated and released.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Jobs use GitHub-hosted runners unless the repository variables CI_WINDOWS_RUNNER /
+# CI_LINUX_RUNNER name a self-hosted runner label (see docs/CI_RUNNERS.md). Pull
+# requests from forks or Dependabot always use hosted runners, so third-party
+# code never runs on the owner's machine.
 jobs:
+  windows-validation:
+    name: Windows validation (LF checkout)
+    runs-on: ${{ (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) && vars.CI_WINDOWS_RUNNER || 'windows-latest' }}
+    # Job-scoped git config, so a self-hosted runner's global config is untouched.
+    env:
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'true'
+    steps:
+      - name: Exercise Windows automatic line endings
+        run: if ((git config --get core.autocrlf) -ne 'true') { throw 'Expected core.autocrlf=true for this job' }
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify LF checkout policy
+        run: node -e "const text = require('node:fs').readFileSync('docs/MASTER_SAMPLES.md', 'utf8'); if (!text.includes('\n') || text.includes('\r')) throw new Error('Expected an LF checkout despite core.autocrlf=true')"
+
+      - name: Check formatting on Windows
+        run: npm run format:check
+
+      - name: Audit dependencies
+        run: npm run audit:dependencies
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Validate overlay
+        run: npm run validate
+
+      # Generated dist artifacts are rebuilt by the release workflow after merge, so a PR
+      # that changes source data never matches the committed copy; build it here.
+      - name: Build overlay
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
   validate:
     name: Validate & Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) && vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout
@@ -22,7 +82,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: 'npm'
@@ -30,11 +90,48 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve maintenance comparison base
+        id: maintenance-base
+        run: npm run maintenance:ci -- base
+
+      - name: Reject changes to the generated overlay
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ steps.maintenance-base.outputs.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # The resolver uses the verified PR merge parent to exclude release-only
+          # generated commits that arrived after the event payload's base SHA.
+          base="$BASE_SHA"
+          if ! git diff --quiet "$base" HEAD -- dist/; then
+            echo "::error file=dist/overlay.json::dist artifacts are generated and committed by the release workflow after merge. Restore dist/ to the PR base before submitting."
+            exit 1
+          fi
+
       - name: Audit dependencies
         run: npm run audit:dependencies
 
+      - name: Check dead code
+        run: npm run fallow:check -- --fail-on-issues
+
+      - name: Audit maintenance regressions
+        env:
+          MAINTENANCE_BASE: ${{ steps.maintenance-base.outputs.sha }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/fallow-audit.json"
+          status=0
+          npm run fallow:audit -- --base "$MAINTENANCE_BASE" --gate new-only --format json --output-file "$report" || status=$?
+          # Report inherited findings and LOC even when Fallow's verdict fails.
+          npm run maintenance:ci -- report "$MAINTENANCE_BASE" "$report" || status=$?
+          exit "$status"
+
       - name: Run Fallow security analysis
-        run: npm run fallow:security -- --gate new --changed-since "${{ github.event.pull_request.base.sha || github.event.before }}"
+        env:
+          MAINTENANCE_BASE: ${{ steps.maintenance-base.outputs.sha }}
+        run: npm run fallow:security -- --gate new --changed-since "$MAINTENANCE_BASE"
 
       - name: Lint Markdown
         run: npm run lint:markdown
@@ -45,34 +142,27 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Check monitor JavaScript
-        run: npm run check:monitor
-
-      - name: Run tests
-        run: npm test
+      - name: Check shared data JavaScript
+        run: node --check src/lib/tarkov-api-shared.cjs
 
       - name: Validate source files
         run: npm run validate
 
-      - name: Check overlay for data now supplied by tarkov.dev
-        timeout-minutes: 15
-        run: npm run check-overrides -- --fail-on-stale
-
       - name: Compute next overlay version
         id: version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git fetch --tags --force
+          git_auth=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)")
+          git "${git_auth[@]}" fetch --tags --force
           next_tag="$(npm run --silent next-overlay-tag)"
           if [[ ! "$next_tag" =~ ^v[0-9]+\.[0-9]+$ ]]; then
             echo "Unexpected next overlay tag: '$next_tag'" >&2
             exit 1
           fi
           echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
-
-      - name: Check generated overlay
-        run: npm run build:check
 
       - name: Build overlay for release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -86,12 +176,21 @@ jobs:
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
         run: npm run build
 
+      - name: Run tests
+        run: npm test
+
+      - name: Check overlay for data now supplied by tarkov.dev
+        timeout-minutes: 15
+        run: npm run check-overrides -- --strict --fail-on-stale
+
       - name: Upload validated release overlay
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: overlay-${{ github.sha }}
-          path: dist/overlay.json
+          path: |
+            dist/overlay.json
+            dist/overlay-neutral.json
           if-no-files-found: error
           overwrite: true
           retention-days: 30

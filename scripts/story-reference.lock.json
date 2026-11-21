@@ -1,5 +1,5 @@
 {
-  "file": "eft/quest_list.rollinglatest.modified.json",
+  "file": "data/reference/quest_list.rollinglatest.modified.json",
   "sha256": "c8357e137b6fcfd25ff255e889286a8de5e0fd248001e207b87a5b17b14403f1",
   "bytes": 46940789,
   "clientVersion": "EFT Client 1.0.5.0.45581",
@@ -7,5 +7,34 @@
   "capturedAt": "2026-06-30T00:02:34.289061",
   "quests": 688,
   "chapterQuests": 10,
-  "objectiveTexts": 430
+  "objectiveTexts": 430,
+  "supplementalReferences": [
+    {
+      "file": "data/reference/story-supplements/pve.quest_list.json",
+      "sha256": "d7f5a535274f2fadfd00bf8ca85a635788530df918b5acc338548cbfd5d4afb3",
+      "bytes": 67372374,
+      "clientVersion": "EFT Client 1.1.0.1.46699",
+      "gameMode": "pve",
+      "capturedAt": "2026-08-11T07:37:37.290724",
+      "quests": 644,
+      "chapterQuests": 10,
+      "objectiveTexts": 384
+    },
+    {
+      "file": "data/reference/story-supplements/regular.quest_list.json",
+      "sha256": "21488a38243771815ec9df4663ee84d01c09efb3f89b6a9d5dc9f9845ca6a30a",
+      "bytes": 16319099,
+      "clientVersion": "EFT Client 1.1.0.1.46911",
+      "gameMode": "regular",
+      "capturedAt": "2026-08-25T20:22:57.599200",
+      "quests": 164,
+      "chapterQuests": 5,
+      "objectiveTexts": 62
+    }
+  ],
+  "combinedCoverage": {
+    "quests": 734,
+    "chapterQuests": 10,
+    "objectiveTexts": 437
+  }
 }

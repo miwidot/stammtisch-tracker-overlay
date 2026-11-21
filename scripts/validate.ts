@@ -6,21 +6,27 @@
  */
 
 import Ajv from 'ajv';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
+import { assertTaskIdAliases } from '../src/lib/task-id-aliases.js';
+import type { TaskIdAliases } from '../src/lib/types.js';
 import {
+  assertDisjointCounterGroups,
   isDirectExecution,
   getProjectPaths,
   loadJson5File,
   loadJsonFile,
-  listJson5Files,
   fetchTarkovEnvelope,
   SCHEMA_CONFIGS,
+  SHARED_SCHEMA_FILES,
   SUPPORTED_GAME_MODES,
   SYNTHETIC_REQUIREMENT_ID_PREFIX,
   icons,
   type LocaleOverlay,
+  type ProgressionCounterRegistry,
   type SchemaValidationResult,
+  type StoryChapter,
 } from '../src/lib/index.js';
 
 const { srcDir, schemasDir } = getProjectPaths();
@@ -85,13 +91,9 @@ export function initializeValidators(): ValidatorCache {
   const cache: ValidatorCache = new Map();
   const schemaCache = new Map<string, ReturnType<Ajv['compile']>>();
 
-  // Task source schemas share this contract. Register it once so both resolve
-  // the same constraints and cannot drift independently.
-  const traderRequirementSchemaFile = 'trader-requirement.schema.json';
-  ajv.addSchema(
-    loadJsonFile(join(schemasDir, traderRequirementSchemaFile)) as object,
-    traderRequirementSchemaFile
-  );
+  for (const schemaFile of SHARED_SCHEMA_FILES) {
+    ajv.addSchema(loadJsonFile(join(schemasDir, schemaFile)) as object, schemaFile);
+  }
 
   for (const config of SCHEMA_CONFIGS) {
     let validator = schemaCache.get(config.schemaFile);
@@ -138,16 +140,19 @@ export function validateFile(
   try {
     const data = loadJson5File(filePath);
 
-    // Skip empty plain objects - they're valid by convention.
-    // Arrays/primitives/null should still be validated against schema.
-    if (isRecord(data) && Object.keys(data).length === 0) {
-      return { file: displayPath, valid: true };
+    const validator = getValidator(displayPath, validators);
+    // Unknown source data must not receive the same success result as checked data.
+    if (!validator) {
+      return { file: displayPath, valid: false, errors: ['No schema registered for source file'] };
     }
 
-    const validator = getValidator(displayPath, validators);
-
-    // No schema for this file type - consider valid
-    if (!validator) {
+    // Skip empty plain objects - they're valid by convention.
+    // Arrays/primitives/null should still be validated against schema.
+    if (
+      displayPath !== 'additions/taskIdAliases.json5' &&
+      isRecord(data) &&
+      Object.keys(data).length === 0
+    ) {
       return { file: displayPath, valid: true };
     }
 
@@ -155,6 +160,16 @@ export function validateFile(
     const errors = valid
       ? undefined
       : validator.errors?.map((e) => `${e.instancePath}: ${e.message}`);
+
+    if (valid && displayPath === 'additions/storyChapters.json5') {
+      assertStoryObjectiveParents(data as Record<string, StoryChapter>);
+    }
+    if (valid && displayPath === 'additions/progressionCounters.json5') {
+      assertDisjointCounterGroups(data as ProgressionCounterRegistry);
+    }
+    if (valid && displayPath === 'additions/taskIdAliases.json5') {
+      assertTaskIdAliases(data as unknown as TaskIdAliases);
+    }
 
     return { file: displayPath, valid, errors };
   } catch (error) {
@@ -271,8 +286,8 @@ export function validateTaskSourceFile(
   return idResult.valid ? result : idResult;
 }
 
-function addJson5Keys(index: Set<string>, relPath: string): void {
-  const filePath = join(srcDir, relPath);
+function addJson5Keys(index: Set<string>, relPath: string, root = srcDir): void {
+  const filePath = join(root, relPath);
   if (!existsSync(filePath)) return;
   const data = loadJson5File(filePath);
   if (isRecord(data)) {
@@ -281,20 +296,22 @@ function addJson5Keys(index: Set<string>, relPath: string): void {
 }
 
 /** Build the local entity ID set locale overrides are allowed to patch. */
-export function buildLocalLocaleEntityIdIndex(): LocaleEntityIdIndex {
+export function buildLocalLocaleEntityIdIndex(root = srcDir): LocaleEntityIdIndex {
   const index = createLocaleEntityIdIndex();
 
-  addJson5Keys(index.tasks, 'overrides/tasks.json5');
-  addJson5Keys(index.tasks, 'additions/tasksAdd.json5');
-  addJson5Keys(index.items, 'overrides/items.json5');
-  addJson5Keys(index.items, 'additions/itemsAdd.json5');
-  addJson5Keys(index.traders, 'overrides/traders.json5');
-  addJson5Keys(index.prestige, 'overrides/modes/regular/prestige.json5');
-  addJson5Keys(index.storyChapters, 'additions/storyChapters.json5');
+  addJson5Keys(index.tasks, 'overrides/tasks.json5', root);
+  addJson5Keys(index.tasks, 'additions/tasksAdd.json5', root);
+  addJson5Keys(index.items, 'overrides/items.json5', root);
+  addJson5Keys(index.items, 'additions/itemsAdd.json5', root);
+  addJson5Keys(index.traders, 'overrides/traders.json5', root);
+  addJson5Keys(index.maps, 'overrides/maps.json5', root);
+  addJson5Keys(index.prestige, 'overrides/modes/regular/prestige.json5', root);
+  addJson5Keys(index.storyChapters, 'additions/storyChapters.json5', root);
 
   for (const mode of SUPPORTED_GAME_MODES) {
-    addJson5Keys(index.tasks, `overrides/modes/${mode}/tasks.json5`);
-    addJson5Keys(index.tasks, `additions/modes/${mode}/tasksAdd.json5`);
+    addJson5Keys(index.tasks, `overrides/modes/${mode}/tasks.json5`, root);
+    addJson5Keys(index.tasks, `additions/modes/${mode}/tasksAdd.json5`, root);
+    addJson5Keys(index.maps, `overrides/modes/${mode}/maps.json5`, root);
   }
 
   return index;
@@ -401,67 +418,32 @@ export function validateLocaleEntityIds(
   }
 }
 
+function* listSourceJson5Files(directory: string, prefix = ''): Generator<string> {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const relativePath = `${prefix}${entry.name}`;
+    if (entry.isDirectory()) {
+      yield* listSourceJson5Files(join(directory, entry.name), `${relativePath}/`);
+    } else if (entry.name.endsWith('.json5')) {
+      yield relativePath;
+    }
+  }
+}
+
 /**
  * Validate all source files
  */
 export async function validateSourceFiles(): Promise<SchemaValidationResult[]> {
   const validators = initializeValidators();
-  const results: SchemaValidationResult[] = [];
-
-  // Validate overrides directory
-  const overridesDir = join(srcDir, 'overrides');
-  for (const file of listJson5Files(overridesDir)) {
-    const filePath = join(overridesDir, file);
-    results.push(validateTaskSourceFile(filePath, `overrides/${file}`, validators));
-  }
-
-  // Validate additions directory
-  const additionsDir = join(srcDir, 'additions');
-  for (const file of listJson5Files(additionsDir)) {
-    const filePath = join(additionsDir, file);
-    results.push(validateTaskSourceFile(filePath, `additions/${file}`, validators));
-  }
-
-  // Validate per-locale overrides (one file per locale, filename = locale code)
   const localeIdIndex = await buildLocaleEntityIdIndex();
-  const localesDir = join(srcDir, 'overrides', 'locales');
-  for (const file of listJson5Files(localesDir)) {
-    const filePath = join(localesDir, file);
-    const displayPath = `overrides/locales/${file}`;
-    const result = validateFile(filePath, displayPath, validators);
-    if (result.valid) {
-      const idResult = validateLocaleEntityIds(filePath, displayPath, localeIdIndex);
-      result.valid = idResult.valid;
-      result.errors = idResult.errors;
-    }
-    results.push(result);
-  }
-
-  const suppressionsFile = join(srcDir, 'suppressions', 'tasks.json5');
-  results.push(validateFile(suppressionsFile, 'suppressions/tasks.json5', validators));
-
-  // Validate the mode-divergence registry (tooling-only; never built into dist)
-  const divergencesFile = join(srcDir, 'divergences', 'tasks.json5');
-  if (existsSync(divergencesFile)) {
-    results.push(validateFile(divergencesFile, 'divergences/tasks.json5', validators));
-  }
-
-  // Validate mode-specific overrides
-  for (const mode of SUPPORTED_GAME_MODES) {
-    const modeOverridesDir = join(srcDir, 'overrides', 'modes', mode);
-    for (const file of listJson5Files(modeOverridesDir)) {
-      const filePath = join(modeOverridesDir, file);
-      results.push(validateTaskSourceFile(filePath, `overrides/modes/${mode}/${file}`, validators));
-    }
-
-    const modeAdditionsDir = join(srcDir, 'additions', 'modes', mode);
-    for (const file of listJson5Files(modeAdditionsDir)) {
-      const filePath = join(modeAdditionsDir, file);
-      results.push(validateTaskSourceFile(filePath, `additions/modes/${mode}/${file}`, validators));
-    }
-  }
-
-  return results;
+  // Keep the required-file check even when the recursive walk cannot discover it.
+  const files = new Set(['suppressions/tasks.json5', ...listSourceJson5Files(srcDir)]);
+  return [...files].map((relativePath) => {
+    const filePath = join(srcDir, relativePath);
+    const result = validateTaskSourceFile(filePath, relativePath, validators);
+    return result.valid && relativePath.startsWith('overrides/locales/')
+      ? validateLocaleEntityIds(filePath, relativePath, localeIdIndex)
+      : result;
+  });
 }
 
 /**

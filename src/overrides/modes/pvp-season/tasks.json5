@@ -13,8 +13,7 @@
   // fetching the pvp-season mode. Every correction must carry an entity-name
   // comment, a proof link, and an inline "Was:" note.
   //
-  // Seasonal-only mechanics tarkov.dev does not model at all (e.g. seasonal
-  // perks - there is no pvp-season/seasonal-perks endpoint) are NOT task
+  // Seasonal raw effects absent from upstream pvp-season/season are NOT task
   // overrides; they live in dedicated additions such as
   // src/additions/seasonalPerks.json5.
 
@@ -41,5 +40,76 @@
   // which is what the reporter observed at level 49 with Kappa.
   '6761f28a022f60bb320f3e95': {
     disabled: true, // Was: active (pvp-season has no prestige track)
+  },
+
+  // Health Care Privacy - Part 2 - extract objective the Seasonal client lacks
+  // Proof: local in-game captures (1.2.0.0, 1.2.5.0 and 1.3.0.0 pvp-season):
+  //        the quest template carries only the find and hand-over objectives
+  //        (5a68760f86f7743cc55d8709, 5a68763786f77474c33a40a1). The 1.1.0.1
+  //        PvP and PvE captures still carry the extract, so the removal is
+  //        Seasonal-only. Finding recorded in
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/pull/523.
+  '5a68663e86f774501078f78a': {
+    objectivesRemove: [
+      '5a68764c86f77474c4269f3c', // Was: Survive and extract from the location
+    ],
+  },
+
+  // Sew it Good - Part 1 - Seasonal completion unlocks only the Takedown backpack.
+  // Proof: in-game pvp-season capture, client 1.3.0.1.48558, complete Success rewards.
+  // Evidence: https://github.com/tarkovtracker-org/tarkov-data-overlay/pull/533#issuecomment-6721470043
+  // Upstream comparison: https://json.tarkov.dev/pvp-season/tasks
+  // Was: backpack plus 6B13 Flora armor preset (65765f39526e320fbe0357b1).
+  // Preserve all other finish rewards: this object replaces the upstream reward block.
+  // Evidence covers Seasonal only; regular and PvE are intentionally unchanged.
+  '5ae4495086f77443c122bc40': {
+    finishRewards: {
+      traderStanding: [],
+      items: [
+        {
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+          count: 165000,
+          attributes: {},
+        },
+        {
+          item: {
+            id: '6038d614d10cbf667352dd44',
+            name: 'Hazard 4 Takedown sling backpack (MultiCam)',
+            shortName: 'Takedown',
+          },
+          count: 1,
+          attributes: {},
+        },
+      ],
+      offerUnlock: [
+        {
+          id: '6a703395bcdb93e2a6c16d26',
+          level: 2,
+          item: {
+            id: '6038d614d10cbf667352dd44',
+            name: 'Hazard 4 Takedown sling backpack (MultiCam)',
+            shortName: 'Takedown',
+          },
+          count: 1,
+          contains: [],
+          attributes: [],
+          trader: {
+            id: '5ac3b934156ae10c4430e83c',
+            name: 'Ragman',
+          },
+        },
+      ],
+      skillLevelReward: [],
+      traderUnlock: [],
+      craftUnlock: [],
+      achievement: [],
+      customization: [],
+      traderDialogueUnlock: [],
+      locationUnlock: [],
+    },
   },
 }

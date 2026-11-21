@@ -4,9 +4,9 @@ const { createHash } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 
 /**
- * Helpers shared by the TypeScript API client and the standalone CommonJS
- * monitor. Keep the module limited to built-in/runtime APIs so both runtimes
- * can consume it without a build step.
+ * Helpers shared by the TypeScript data tooling and CommonJS release scripts.
+ * Keep the module limited to built-in/runtime APIs so callers can consume it
+ * without a build step.
  */
 
 const DEFAULT_MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
@@ -200,42 +200,64 @@ function requireCollection(value, path, isRecord) {
   return value;
 }
 
+/** Read one layer's value for `field`, failing when it has the wrong container type. */
+function layerValue(layer, field, isValid, kind) {
+  const value = layer[field];
+  if (value !== undefined && !isValid(value)) {
+    throw new Error(`Task override ${field} must be ${kind}`);
+  }
+  return value;
+}
+
+/** Objective patches merge per objective ID; each patch merges shallowly. */
+function mergeObjectivePatches(shared, modeSpecific) {
+  const merged = new Map(Object.entries(shared || {}));
+  for (const [objectiveId, objectivePatch] of Object.entries(modeSpecific || {})) {
+    const existingPatch = merged.get(objectiveId);
+    merged.set(
+      objectiveId,
+      isRecord(existingPatch) && isRecord(objectivePatch)
+        ? { ...existingPatch, ...objectivePatch }
+        : objectivePatch
+    );
+  }
+  return Object.fromEntries(merged);
+}
+
+/**
+ * How each structured field combines across the shared and mode layers. Other
+ * fields are replaced by the mode layer. Additions concatenate; removals union,
+ * so a mode can remove more upstream objectives than the shared layer but
+ * cannot restore one the shared layer removes.
+ */
+const LAYERED_TASK_FIELDS = [
+  { field: 'objectives', isValid: isRecord, kind: 'objects', combine: mergeObjectivePatches },
+  {
+    field: 'objectivesAdd',
+    isValid: Array.isArray,
+    kind: 'arrays',
+    combine: (shared, mode) => [...(shared || []), ...(mode || [])],
+  },
+  {
+    field: 'objectivesRemove',
+    isValid: Array.isArray,
+    kind: 'arrays',
+    combine: (shared, mode) => [...new Set([...(shared || []), ...(mode || [])])],
+  },
+];
+
 /** Merge shared and mode-specific task patches without losing nested fields. */
 function mergeTaskOverride(base, next) {
   const shared = isRecord(base) ? base : {};
   const modeSpecific = isRecord(next) ? next : {};
   const merged = { ...shared, ...modeSpecific };
-
-  if (shared.objectives !== undefined || modeSpecific.objectives !== undefined) {
-    if (
-      (shared.objectives !== undefined && !isRecord(shared.objectives)) ||
-      (modeSpecific.objectives !== undefined && !isRecord(modeSpecific.objectives))
-    ) {
-      throw new Error('Task override objectives must be objects');
+  for (const { field, isValid, kind, combine } of LAYERED_TASK_FIELDS) {
+    const sharedValue = layerValue(shared, field, isValid, kind);
+    const modeValue = layerValue(modeSpecific, field, isValid, kind);
+    if (sharedValue !== undefined || modeValue !== undefined) {
+      merged[field] = combine(sharedValue, modeValue);
     }
-    const mergedObjectives = new Map(Object.entries(shared.objectives || {}));
-    for (const [objectiveId, objectivePatch] of Object.entries(modeSpecific.objectives || {})) {
-      const existingPatch = mergedObjectives.get(objectiveId);
-      mergedObjectives.set(
-        objectiveId,
-        isRecord(existingPatch) && isRecord(objectivePatch)
-          ? { ...existingPatch, ...objectivePatch }
-          : objectivePatch
-      );
-    }
-    merged.objectives = Object.fromEntries(mergedObjectives);
   }
-
-  if (shared.objectivesAdd !== undefined || modeSpecific.objectivesAdd !== undefined) {
-    if (
-      (shared.objectivesAdd !== undefined && !Array.isArray(shared.objectivesAdd)) ||
-      (modeSpecific.objectivesAdd !== undefined && !Array.isArray(modeSpecific.objectivesAdd))
-    ) {
-      throw new Error('Task override objectivesAdd must be arrays');
-    }
-    merged.objectivesAdd = [...(shared.objectivesAdd || []), ...(modeSpecific.objectivesAdd || [])];
-  }
-
   return merged;
 }
 
@@ -499,7 +521,274 @@ async function buildTaskContext(cache, mode, tasksData, helpers) {
   };
 }
 
+/** Shared reference, objective and reward normalization; transports keep their own policies. */
+function createTaskNormalizers(helpers) {
+  const { isRecord, compact, stringId, translate } = helpers;
+  function resolveItemRecord(id, inline, ctx) {
+    return (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
+  }
+  function resolveItemField(field, raw, inline, ctx) {
+    return (
+      translate(ctx.itemsEn, raw && raw[field]) ??
+      (inline && typeof inline[field] === 'string' ? inline[field] : undefined)
+    );
+  }
+  function resolveItemRef(value, ctx) {
+    const id = stringId(value);
+    const inline = isRecord(value) ? value : undefined;
+    const raw = resolveItemRecord(id, inline, ctx);
+    if (!id && !raw) return undefined;
+    const name = resolveItemField('name', raw, inline, ctx);
+    const shortName = resolveItemField('shortName', raw, inline, ctx);
+    return compact({ id: id ?? '', name, shortName });
+  }
+
+  function resolveItemRefs(value, ctx) {
+    if (!Array.isArray(value)) return undefined;
+    return value.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
+  }
+
+  function resolveItemRefMatrix(value, ctx) {
+    return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
+  }
+
+  function resolveMapRef(value, ctx) {
+    const id = stringId(value);
+    if (!id) return undefined;
+    const raw = ctx.mapsById.get(id);
+    return compact({ id, name: translate(ctx.mapsEn, raw && raw.name) });
+  }
+
+  function resolveMapRefs(value, ctx) {
+    if (!Array.isArray(value)) return undefined;
+    return value.map((entry) => resolveMapRef(entry, ctx)).filter(Boolean);
+  }
+
+  function resolveTraderRef(value, ctx) {
+    const id = stringId(value);
+    if (!id) return undefined;
+    const raw = ctx.tradersById.get(id);
+    return compact({ id, name: translate(ctx.tradersEn, raw && raw.name) });
+  }
+
+  function resolveTaskRef(value, ctx) {
+    const id = stringId(value);
+    if (!id) return undefined;
+    const raw = ctx.tasksById.get(id);
+    return compact({ id, name: translate(ctx.tasksEn, raw && raw.name) });
+  }
+
+  function resolveRequiredPrestige(value, ctx) {
+    if (value === undefined) return undefined;
+    const id = stringId(value);
+    const inline = isRecord(value) ? value : undefined;
+    const raw = (id ? ctx.prestigeById.get(id) : undefined) ?? inline;
+    return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw && raw.name), raw);
+  }
+
+  function resolveZone(value, ctx) {
+    if (!isRecord(value)) return value;
+    return compact({ ...value, map: resolveMapRef(value.map, ctx) });
+  }
+
+  function adaptObjective(raw, ctx) {
+    return compact({
+      ...raw,
+      id: stringId(raw) ?? '',
+      description: translate(ctx.tasksEn, raw.description),
+      maps: resolveMapRefs(raw.maps, ctx),
+      items: resolveItemRefs(raw.items, ctx),
+      item: raw.item !== undefined ? resolveItemRef(raw.item, ctx) : undefined,
+      markerItem: raw.markerItem !== undefined ? resolveItemRef(raw.markerItem, ctx) : undefined,
+      questItem: raw.questItem !== undefined ? resolveItemRef(raw.questItem, ctx) : undefined,
+      useAny: resolveItemRefs(raw.useAny, ctx),
+      containsAll: resolveItemRefs(raw.containsAll, ctx),
+      usingWeapon: resolveItemRefs(raw.usingWeapon, ctx),
+      usingWeaponMods: resolveItemRefMatrix(raw.usingWeaponMods, ctx),
+      requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
+      wearing: resolveItemRefMatrix(raw.wearing, ctx),
+      notWearing: resolveItemRefs(raw.notWearing, ctx),
+      zones: Array.isArray(raw.zones) ? raw.zones.map((zone) => resolveZone(zone, ctx)) : undefined,
+      possibleLocations: Array.isArray(raw.possibleLocations)
+        ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
+        : undefined,
+    });
+  }
+
+  function normalizeReward(raw, ctx) {
+    return adaptReward(raw, ctx, {
+      isRecord,
+      compact,
+      resolveItemRef,
+      resolveTraderRef,
+      resolveMapRef,
+    });
+  }
+
+  return {
+    resolveItemRef,
+    resolveItemRefs,
+    resolveItemRefMatrix,
+    resolveMapRef,
+    resolveMapRefs,
+    resolveTraderRef,
+    resolveTaskRef,
+    resolveRequiredPrestige,
+    adaptObjective,
+    adaptReward: normalizeReward,
+  };
+}
+
+function validationRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function validateTranslationMap(value, label) {
+  if (!validationRecord(value) || Object.values(value).some((entry) => typeof entry !== 'string')) {
+    throw new Error(`Invalid ${label} translations: expected string translations`);
+  }
+  return value;
+}
+
+function comparisonRecordId(record, label) {
+  if (!validationRecord(record) || typeof record.id !== 'string' || !record.id.trim()) {
+    throw new Error(`Invalid ${label} entity IDs`);
+  }
+  return record.id;
+}
+
+function validIdentityRecord(value) {
+  return validationRecord(value) && typeof value.id === 'string' && Boolean(value.id.trim());
+}
+
+function validObjectiveCollection(value) {
+  if (!Array.isArray(value)) return false;
+  // `every` skips holes, so a sparse list would otherwise pass while missing
+  // entries, and could not establish that an objective is absent.
+  for (let index = 0; index < value.length; index += 1) {
+    if (!(index in value)) return false;
+  }
+  if (!value.every(validIdentityRecord)) return false;
+  const ids = value.map((record) => record.id);
+  return new Set(ids).size === ids.length;
+}
+
+function validateComparisonIds(records, label) {
+  const seen = new Set();
+  for (const record of records) {
+    const id = comparisonRecordId(record, label);
+    if (seen.has(id)) throw new Error(`Invalid ${label} entity IDs: duplicate '${id}'`);
+    seen.add(id);
+  }
+}
+
+function comparisonRecords(collection, label, allowEmpty = false) {
+  if (!validationRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(`Invalid ${label} entity collection`);
+  }
+  const records = Object.values(collection);
+  if (!allowEmpty && records.length === 0)
+    throw new Error(`Invalid ${label} entity IDs: empty collection`);
+  validateComparisonIds(records, label);
+  return records;
+}
+
+function translateComparisonRecord(value, translations, identity) {
+  const recordId = value.id ?? identity;
+  const result = Object.create(null);
+  for (const [key, entry] of Object.entries(value)) {
+    if (['__proto__', 'constructor', 'prototype'].includes(key)) continue;
+    const translated = translateComparisonValues(entry, translations, recordId);
+    if (translated !== undefined) result[key] = translated;
+  }
+  return result;
+}
+
+function translateComparisonValues(value, translations, identity) {
+  if (Array.isArray(value))
+    return value.map((entry) => translateComparisonValues(entry, translations, identity));
+  if (validationRecord(value)) return translateComparisonRecord(value, translations, identity);
+  if (typeof value !== 'string') return value;
+  return translateComparisonString(value, translations, identity);
+}
+
+function isUnresolvedComparisonKey(value, translations, identity) {
+  const match = /^([^\s]+) (?:Name|ShortName|Description)$/.exec(value.trim());
+  if (!match) return false;
+  return match[1] === identity || Object.hasOwn(translations, value.trim());
+}
+
+function translateComparisonString(value, translations, identity) {
+  const translated = Object.hasOwn(translations, value) ? translations[value] : value;
+  return isUnresolvedComparisonKey(translated, translations, identity) ? undefined : translated;
+}
+
+function usableDictionaryId(key, name, translations) {
+  const match = /^([a-f0-9]{24}) Name$/.exec(key);
+  if (!match || !name.trim()) return undefined;
+  return isUnresolvedComparisonKey(name, translations, match[1]) ? undefined : match[1];
+}
+
+function usableItemText(value) {
+  return typeof value === 'string' && Boolean(value.trim());
+}
+
+function fillItemText(result, id, field, suffix, translations) {
+  if (usableItemText(result[field])) return;
+  const key = `${id} ${suffix}`;
+  if (!Object.hasOwn(translations, key)) return;
+  const text = translateComparisonString(key, translations, id);
+  if (usableItemText(text)) result[field] = text;
+}
+
+function enrichItemRecord(record, translations) {
+  const result = translateComparisonValues(record, translations);
+  for (const [field, suffix] of [
+    ['name', 'Name'],
+    ['shortName', 'ShortName'],
+    ['description', 'Description'],
+  ]) {
+    fillItemText(result, record.id, field, suffix, translations);
+  }
+  return result;
+}
+
+function dictionaryItemId(key, name, translations, taskIds) {
+  const id = usableDictionaryId(key, name, translations);
+  return taskIds.has(id) ? undefined : id;
+}
+
+function addDictionaryItems(index, translations, taskIds) {
+  for (const [key, name] of Object.entries(translations)) {
+    const id = dictionaryItemId(key, name, translations, taskIds);
+    if (id && !index.has(id)) index.set(id, enrichItemRecord({ id, name }, translations));
+  }
+}
+
+function buildItemComparisonIndex(itemsData, tasksData, itemsEn, tasksEn) {
+  validateTranslationMap(itemsEn, 'items_en');
+  validateTranslationMap(tasksEn, 'tasks_en');
+  const items = comparisonRecords(itemsData?.items, 'items');
+  const quests = comparisonRecords(tasksData?.questItems, 'tasks questItems', true);
+  const taskIds = new Set(
+    comparisonRecords(tasksData?.tasks ?? {}, 'tasks', true).map((record) => record.id)
+  );
+  const questTranslations = { ...itemsEn, ...tasksEn };
+  const itemTranslations = { ...tasksEn, ...itemsEn };
+  const index = new Map();
+  for (const record of quests) index.set(record.id, enrichItemRecord(record, questTranslations));
+  for (const record of items) index.set(record.id, enrichItemRecord(record, itemTranslations));
+  addDictionaryItems(index, itemTranslations, taskIds);
+  return index;
+}
+
 module.exports = {
+  validObjectiveCollection,
+  buildItemComparisonIndex,
+  comparisonRecords,
+  translateComparisonValues,
+  validateTranslationMap,
+  createTaskNormalizers,
   MAX_RESPONSE_BYTES: DEFAULT_MAX_RESPONSE_BYTES,
   adaptReward,
   buildTaskContext,

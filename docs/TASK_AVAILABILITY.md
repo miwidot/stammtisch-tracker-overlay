@@ -63,9 +63,20 @@ Existing player-level, trader, dialogue, map, story, and timing gates still appl
 Task completion alone cannot resolve all of them.
 
 For verified mappings, `result.counters` explains each value and its contributor
-progress. The registry starts empty: this release supplies the model, not speculative
-game mappings. See [global variables and progression counters](GLOBAL_VARIABLES.md)
+progress. The shipped mappings are best effort (see
+[what ships today](GLOBAL_VARIABLES.md#what-ships-today)): 25 trader-tier groups
+derive values and 2 stay unresolved. Mechanic tier 3 counts each of four faction
+pairs once when either variant is complete, plus eight singletons; Ragman tier 1
+counts Inventory Files/A Big Loss once, plus seven singletons. See [global variables and progression counters](GLOBAL_VARIABLES.md)
 for the data contract, evidence requirements, and safe backward-inference boundary.
+
+A task consuming a group gate is not automatically a contributor. Matching
+aggregate totals or tier reward signatures alone cannot distinguish shared slots,
+faction-specific credit, and migration omissions. The
+[current-source cross-check](GLOBAL_VARIABLE_MECHANICS.md#cross-check-against-current-wiki-and-api-data)
+records which proposed explanations are supported or contradicted. The two
+unresolved mappings (Mechanic tier 4 and Prapor tier 4) still need
+explicit resolved account values.
 
 The helpers are source-level exports, not a published npm runtime package. Consumers
 must update their vendored/workspace source to use this entry point. Existing callers
@@ -147,6 +158,9 @@ The `otherRequirements` field currently contains two important types:
   the trader interaction. Track the condition ID in `completedConditionIds` or
   provide it in `dialogues`. Do not infer dialogue completion from the task
   name or from merely having the trader unlocked.
+  Where the captures show that a Tour "Talk to <trader>" objective is the only
+  writer of the gated flag, the overlay replaces the `dialogue` entry with a
+  `storyObjective` gate on that objective (see `src/overrides/tasks.json5`).
 
 Unknown future `otherRequirements` types are retained by the adapter and
 evaluate as `unknown` until TarkovTracker adds a state adapter. This is safer
@@ -284,18 +298,28 @@ overlays that do not contain a valid build digest.
 **Retired.** This task was part of the pre-1.1 Lightkeeper access chain, which
 the wiki marked `{{Historical content}}` and which the
 ["To the Light - ..."](https://escapefromtarkov.fandom.com/wiki/Lightkeeper)
-series replaced. The overlay now ships it as `disabled: true`, so an integrator
-that honours `disabled` filters it out and no unlock evaluation applies to it.
-tarkov.dev still serves the task, which is why the override exists. See
+series replaced. tarkov.dev has since removed all seven legacy access-chain
+quests and the old Getting Acquainted ID from regular, PvE and seasonal PvP
+[task data](https://json.tarkov.dev/regular/tasks). Their eight overlay patches
+have been removed because they no longer match upstream tasks. See
 [issue #365](https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365).
 
-The whole chain is disabled together, not just this task: Network Provider -
-Part 1 and Part 2, Assessment - Part 1 through Part 3, Key to the Tower, and
-Knock-Knock. An integrator that honours `disabled` therefore loses seven tasks at
-once. Knock-Knock stays an upstream prerequisite of the active "To the Light -
-Getting Acquainted" and Information Source, so a consumer that resolves
-prerequisites strictly will see those gated behind a task it filters out; that
-edge needs a newer client capture to rewire and is not invented here.
+Current upstream tasks no longer reference those IDs as prerequisites. Consumers
+with older cached task data should still treat a prerequisite with no recorded
+status as unknown rather than inventing a replacement edge or treating it as
+complete.
+
+Exception: Getting Acquainted is not retired. It survived the rework as "To the
+Light - Getting Acquainted", and it and the Make Amends re-entry chain are
+restored in `src/additions/tasksAdd.json5` from tarkov.dev's last archived
+definitions (see
+[tarkov-data-manager#886](https://github.com/the-hideout/tarkov-data-manager/issues/886)).
+The restored entry keeps upstream's Knock-Knock
+(`625d7005a4eb80027c4f2e09`) prerequisite. To keep that reference resolvable,
+the seven retired tasks of the old chain (Network Provider - Part 1 through
+Knock-Knock) are re-added there with `disabled: true`; consumers that filter
+disabled tasks see Getting Acquainted as unknown until the real "To the Light"
+predecessor IDs are known.
 
 The chapter-level `questUnlocks` entries that previously pointed at this task
 were removed from `src/additions/storyChapters.json5` along with it, so the

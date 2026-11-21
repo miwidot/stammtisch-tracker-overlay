@@ -53,7 +53,7 @@ export function stripWikiMarkup(value: string): string {
     .trim();
 }
 
-export function removeHtmlTags(value: string): string {
+function removeHtmlTags(value: string): string {
   let result = '';
   let inTag = false;
 
@@ -76,7 +76,7 @@ export function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
 }
 
-export function normalizeCyrillic(value: string): string {
+function normalizeCyrillic(value: string): string {
   // Replace Cyrillic characters commonly mistaken for Latin ones (e.g., PMСs).
   return value.replace(/[\u0421\u0441]/g, 'c');
 }
@@ -208,7 +208,7 @@ export function stripCountPhrases(value: string): string {
     .trim();
 }
 
-export function singularizeCountWords(value: string): string {
+function singularizeCountWords(value: string): string {
   return value
     .replace(/\btimes\b/g, 'time')
     .replace(/\bkills\b/g, 'kill')
@@ -257,7 +257,7 @@ export function uniqueList(values: string[]): string[] {
   return Array.from(new Set(values.filter((v) => v.trim().length > 0)));
 }
 
-export const WIKI_ITEM_EXCLUSIONS = new Set([
+const WIKI_ITEM_EXCLUSIONS = new Set([
   'found in raid',
   'in raid',
   'fi r',
@@ -356,7 +356,7 @@ export const WIKI_ITEM_EXCLUSIONS = new Set([
   'arena',
 ]);
 
-export function isExcludedWikiItem(value: string): boolean {
+function isExcludedWikiItem(value: string): boolean {
   return WIKI_ITEM_EXCLUSIONS.has(normalizeItemName(value));
 }
 
@@ -418,7 +418,7 @@ export function getObjectiveVerbKey(text: string): string | undefined {
 
 export type ObjectiveItemRef = { name: string; shortName?: string; id?: string };
 
-export function normalizeItemAliases(item: ObjectiveItemRef): string[] {
+function normalizeItemAliases(item: ObjectiveItemRef): string[] {
   const aliases: string[] = [];
   if (item.name) aliases.push(normalizeItemName(item.name));
   if (item.shortName) aliases.push(normalizeItemName(item.shortName));
@@ -427,10 +427,7 @@ export function normalizeItemAliases(item: ObjectiveItemRef): string[] {
   return uniqueList(aliases);
 }
 
-export function normalizeItemAliasesWithContext(
-  item: ObjectiveItemRef,
-  context?: string
-): string[] {
+function normalizeItemAliasesWithContext(item: ObjectiveItemRef, context?: string): string[] {
   const aliases = normalizeItemAliases(item);
   if (!context || !item.name) return aliases;
 
@@ -641,7 +638,7 @@ export function stripMapAliases(value: string, aliasMap: Map<string, string>): s
   return normalizeWhitespace(result);
 }
 
-export function extractItemTokens(value: string): string[] {
+function extractItemTokens(value: string): string[] {
   const cleaned = normalizeItemName(value)
     .replace(/\b\d+(?:\.\d+)?(?:x\d+(?:\.\d+)?)?\b/g, ' ')
     .replace(/[^a-z0-9]+/g, ' ')
@@ -678,7 +675,7 @@ export function extractItemTokens(value: string): string[] {
   return uniqueList(filtered);
 }
 
-export const COVERAGE_STOP_WORDS = new Set([
+const COVERAGE_STOP_WORDS = new Set([
   'key',
   'keys',
   'keycard',
@@ -730,7 +727,7 @@ export const COVERAGE_STOP_WORDS = new Set([
   'roof',
 ]);
 
-export function extractCoverageTokens(value: string): string[] {
+function extractCoverageTokens(value: string): string[] {
   return extractItemTokens(value).filter((token) => !COVERAGE_STOP_WORDS.has(token));
 }
 

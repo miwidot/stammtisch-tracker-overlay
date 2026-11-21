@@ -108,7 +108,7 @@ export function readWasComments(file: string): { id: string; was: string }[] {
   let taskId: string | null = null;
   let objectiveId: string | null = null;
   let pending: string | null = null;
-  for (const line of readFileSync(file, 'utf-8').split('\n')) {
+  for (const line of readFileSync(file, 'utf-8').split(/\r?\n/)) {
     const task = line.match(/^ {4}'([0-9a-f]{24})': \{$/);
     const nested = line.match(/^ {6,}'([0-9a-f]{24})': \{$/);
     const comment = line.match(SOURCE_COMMENT);

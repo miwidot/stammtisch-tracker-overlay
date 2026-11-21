@@ -2,7 +2,7 @@
  * Tests for root overlay schema contract
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from './test-support.js';
 import Ajv from 'ajv';
 import { join } from 'path';
 import {
@@ -10,6 +10,7 @@ import {
   loadAllJson5FromDir,
   loadJsonFile,
   SUPPORTED_GAME_MODES,
+  SHARED_SCHEMA_FILES,
   type OverlayOutput,
 } from '../src/lib/index.js';
 
@@ -79,7 +80,9 @@ describe('overlay.schema.json', () => {
     (schemaFile) => {
       const { schemasDir } = getProjectPaths();
       const ajv = new Ajv({ strict: false, $data: true });
-      ajv.addSchema(loadJsonFile(join(schemasDir, 'trader-requirement.schema.json')));
+      for (const sharedSchemaFile of SHARED_SCHEMA_FILES) {
+        ajv.addSchema(loadJsonFile(join(schemasDir, sharedSchemaFile)));
+      }
       const validate = ajv.compile(loadJsonFile(join(schemasDir, schemaFile)));
       // Additions describe a whole task, overrides only the patched fields.
       const base =
@@ -118,17 +121,22 @@ describe('overlay.schema.json', () => {
     });
 
     const referencedSchemas = [
+      'task-id-aliases.schema.json',
       'edition.schema.json',
       'item-additions.schema.json',
       'prestige-override.schema.json',
       'task-override.schema.json',
       'task-additions.schema.json',
-      'trader-requirement.schema.json',
+      ...SHARED_SCHEMA_FILES,
       'story-chapter.schema.json',
       'progression-counter.schema.json',
+      'trader-task-group.schema.json',
       'locale-override.schema.json',
       'seasonal-perk.schema.json',
       'craft-additions.schema.json',
+      'map-override.schema.json',
+      'extract-requirements.schema.json',
+      'extract-cues.schema.json',
     ];
 
     for (const schemaFile of referencedSchemas) {

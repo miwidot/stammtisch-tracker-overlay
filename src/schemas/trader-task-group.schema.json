@@ -1,0 +1,32 @@
+{
+  "$id": "trader-task-group.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mode-scoped trader task-list groups",
+  "description": "The client's per-task tierAccessory: 0 is the \"Essential Tasks\" group, 1-4 are the \"Loyalty Level 1-4\" groups. Display grouping only, never an availability gate. A missing task means its group is unknown.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "regular": {
+      "$ref": "#/definitions/groups"
+    },
+    "pve": {
+      "$ref": "#/definitions/groups"
+    },
+    "pvp-season": {
+      "$ref": "#/definitions/groups"
+    }
+  },
+  "definitions": {
+    "groups": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[0-9a-f]{24}$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4
+      }
+    }
+  }
+}

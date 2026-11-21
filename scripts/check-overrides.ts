@@ -13,7 +13,7 @@
  *
  * Flags (all off by default; without them the script only reports):
  *   --strict            Fail when the overlay is inconsistent or data is being
- *                       served incorrectly (see `actionable` in main()).
+ *                       served incorrectly (see `actionable` in main()). CI enables this.
  *   --fail-on-stale     Fail when the overlay carries data tarkov.dev now
  *                       supplies itself. This is what CI runs.
  *   --fail-on-upstream  Fail on upstream data-quality regressions. Off by
@@ -37,8 +37,27 @@
  * 2 (our overlay is wrong) before 3 (our overlay is merely redundant).
  */
 
+import {
+  referenceDirectory,
+  resolveReferenceDirectory,
+  resolveReferenceFile,
+} from './local-reference.js';
+import {
+  compareOverlayFields,
+  type OverlayComparisonDetail,
+} from '../src/lib/overlay-comparison.cjs';
+import { checkAdditionContracts } from './check-addition-contracts.js';
+import { mergeTaskOverride, validObjectiveCollection } from '../src/lib/tarkov-api-shared.cjs';
+import { objectiveRemovalConflicts } from '../src/lib/task-validator.js';
+import {
+  aggregateEntityRetirement,
+  type EntityModeEvidence,
+} from '../src/lib/entity-retirement.js';
+import { comparisonTask, type ComparisonTaskData } from '../src/lib/task-comparison.cjs';
 import { join } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
+import { assertComparisonCoverage } from '../src/lib/comparison-coverage.js';
+import { checkSupplements } from './check-supplements.js';
 import {
   getProjectPaths,
   isDirectExecution,
@@ -57,6 +76,11 @@ import {
   fetchTasksWithRequirementCounts,
   fetchLocaleBundle,
   fetchRawEntities,
+  fetchItemValidationData,
+  fetchMapValidationData,
+  validateMapOverrides,
+  validateModeMapOverrides,
+  mergeMapOverrides,
   SUPPORTED_GAME_MODES,
   validateAllOverrides,
   validateLocaleOverrides,
@@ -226,6 +250,8 @@ export type AdditionResult = {
   name: string;
   status: AdditionStatus;
   message: string;
+  adopted?: boolean;
+  comparison?: OverlayComparisonDetail[];
 };
 
 export type EditionTaskReference = {
@@ -318,109 +344,188 @@ export function getValidationExitCode({
 }
 
 function buildApiIndexes(apiTasks: TaskData[]) {
-  const byWikiLink = new Map<string, TaskData>();
+  const byWikiLink = new Map<string, TaskData[]>();
   const byName = new Map<string, TaskData[]>();
-
   for (const task of apiTasks) {
     const wikiKey = normalizeWikiLink(task.wikiLink);
-    if (wikiKey) {
-      byWikiLink.set(wikiKey, task);
-    }
-
+    if (wikiKey) byWikiLink.set(wikiKey, [...(byWikiLink.get(wikiKey) ?? []), task]);
     const nameKey = normalizeName(task.name);
-    const matches = byName.get(nameKey) ?? [];
-    matches.push(task);
-    byName.set(nameKey, matches);
+    byName.set(nameKey, [...(byName.get(nameKey) ?? []), task]);
   }
-
   return { byWikiLink, byName };
 }
 
+function additionValuesMatch(comparison: OverlayComparisonDetail[]): boolean {
+  return comparison.length > 0 && comparison.every((row) => row.status === 'same');
+}
+
+function additionRetirementMessage(message: string, identical: boolean): string {
+  return identical
+    ? `${message}; all supplied values match upstream`
+    : `${message}; duplicate addition must become only proven corrections. Differing or unverified values require review before retirement`;
+}
+
+function additionComparison(
+  result: AdditionResult,
+  addition: TaskAddition,
+  upstream?: TaskData,
+  adopted = false
+): AdditionResult {
+  const comparison = compareOverlayFields(
+    addition,
+    upstream ? comparisonTask(upstream) : undefined
+  );
+  if (!adopted) return { ...result, adopted: false, comparison };
+  const identical = additionValuesMatch(comparison);
+  return {
+    ...result,
+    adopted,
+    comparison,
+    status: identical ? 'RESOLVED' : 'CHECK',
+    message: additionRetirementMessage(result.message, identical),
+  };
+}
+
+function nameAdditionResult(
+  key: string,
+  addition: TaskAddition,
+  matches: TaskData[],
+  label: string
+): AdditionResult {
+  const base = { key, name: addition.name, status: 'CHECK' as const };
+  if (matches.length === 1)
+    return additionComparison(
+      {
+        ...base,
+        message: `Matched API task '${matches[0].name}' (${matches[0].id}) by ${label} - NEEDS REVIEW`,
+      },
+      addition,
+      matches[0]
+    );
+  if (matches.length > 1)
+    return additionComparison(
+      {
+        ...base,
+        message: `Multiple API tasks share this name${label === 'name only' ? '' : ` and ${label}`} (${matches.map((task) => task.id).join(', ')}) - NEEDS REVIEW`,
+      },
+      addition
+    );
+  return additionComparison(
+    { ...base, status: 'MISSING', message: 'Still missing from API - STILL NEEDED' },
+    addition
+  );
+}
+
+function prestigeAdditionResult(
+  key: string,
+  addition: TaskAddition,
+  matches: TaskData[],
+  prestige: number
+): AdditionResult {
+  const candidates = matches.filter((task) => getPrestigeLevel(task) === prestige);
+  if (candidates.length)
+    return nameAdditionResult(key, addition, candidates, `name and requiredPrestige=${prestige}`);
+  const available = [...new Set(matches.map(getPrestigeLevel))].sort((a, b) => a - b).join(', ');
+  return additionComparison(
+    {
+      key,
+      name: addition.name,
+      status: 'MISSING',
+      message: `API tasks share this name, but none match requiredPrestige=${prestige} (available: ${available}) - STILL NEEDED`,
+    },
+    addition
+  );
+}
+
+function namedAdditionCandidates(
+  addition: TaskAddition,
+  indexes: ReturnType<typeof buildApiIndexes>
+): TaskData[] {
+  return indexes.byName.get(normalizeName(addition.name)) ?? [];
+}
+
+function unresolvedAddition(
+  key: string,
+  addition: TaskAddition,
+  indexes: ReturnType<typeof buildApiIndexes>
+): AdditionResult {
+  const matches = namedAdditionCandidates(addition, indexes);
+  const prestige = addition.requiredPrestige?.prestigeLevel;
+  if (prestige !== undefined && matches.length)
+    return prestigeAdditionResult(key, addition, matches, prestige);
+  return nameAdditionResult(key, addition, matches, 'name only');
+}
+
+function canonicalAdditionTask(
+  addition: TaskAddition,
+  key: string,
+  byId: Map<string, TaskData>
+): TaskData | undefined {
+  return byId.get(addition.id) ?? byId.get(key);
+}
+
+function wikiAdditionCandidates(
+  addition: TaskAddition,
+  indexes: ReturnType<typeof buildApiIndexes>
+): TaskData[] {
+  return indexes.byWikiLink.get(normalizeWikiLink(addition.wikiLink) ?? '') ?? [];
+}
+
+function indexedAddition(
+  key: string,
+  addition: TaskAddition,
+  byId: Map<string, TaskData>,
+  indexes: ReturnType<typeof buildApiIndexes>
+): AdditionResult {
+  const idMatch = canonicalAdditionTask(addition, key, byId);
+  if (idMatch)
+    return additionComparison(
+      {
+        key,
+        name: addition.name,
+        status: 'RESOLVED',
+        message: `Matched API task '${idMatch.name}' (${idMatch.id}) by id`,
+      },
+      addition,
+      idMatch,
+      true
+    );
+  const wikiMatches = wikiAdditionCandidates(addition, indexes);
+  if (wikiMatches.length === 1)
+    return additionComparison(
+      {
+        key,
+        name: addition.name,
+        status: 'RESOLVED',
+        message: `Matched API task '${wikiMatches[0].name}' (${wikiMatches[0].id}) by wikiLink`,
+      },
+      addition,
+      wikiMatches[0],
+      true
+    );
+  if (wikiMatches.length > 1)
+    return additionComparison(
+      {
+        key,
+        name: addition.name,
+        status: 'CHECK',
+        message: `Ambiguous wikiLink matches (${wikiMatches.map((task) => task.id).join(', ')}) - NEEDS REVIEW`,
+      },
+      addition
+    );
+  return unresolvedAddition(key, addition, indexes);
+}
+
+/** Match identities first, then compare every supplied value without equating candidates with adoption. */
 export function checkTaskAdditions(
   additions: Record<string, TaskAddition>,
   apiTasks: TaskData[]
 ): AdditionResult[] {
-  const { byWikiLink, byName } = buildApiIndexes(apiTasks);
-
-  return Object.entries(additions).map(([key, addition]) => {
-    const wikiKey = normalizeWikiLink(addition.wikiLink);
-    const wikiMatch = wikiKey ? byWikiLink.get(wikiKey) : undefined;
-    if (wikiMatch) {
-      return {
-        key,
-        name: addition.name,
-        status: 'RESOLVED',
-        message: `Matched API task '${wikiMatch.name}' (${wikiMatch.id}) by wikiLink - RESOLVED`,
-      };
-    }
-
-    const nameKey = normalizeName(addition.name);
-    const nameMatches = byName.get(nameKey) ?? [];
-    const additionPrestigeLevel = addition.requiredPrestige?.prestigeLevel;
-
-    if (additionPrestigeLevel !== undefined && nameMatches.length > 0) {
-      const prestigeMatches = nameMatches.filter(
-        (task) => getPrestigeLevel(task) === additionPrestigeLevel
-      );
-
-      if (prestigeMatches.length === 1) {
-        return {
-          key,
-          name: addition.name,
-          status: 'CHECK',
-          message: `Matched API task '${prestigeMatches[0].name}' (${prestigeMatches[0].id}) by name and requiredPrestige=${additionPrestigeLevel} - NEEDS REVIEW`,
-        };
-      }
-
-      if (prestigeMatches.length > 1) {
-        const ids = prestigeMatches.map((task) => task.id).join(', ');
-        return {
-          key,
-          name: addition.name,
-          status: 'CHECK',
-          message: `Multiple API tasks share this name and requiredPrestige=${additionPrestigeLevel} (${ids}) - NEEDS REVIEW`,
-        };
-      }
-
-      const availablePrestigeLevels = [
-        ...new Set(nameMatches.map((task) => getPrestigeLevel(task))),
-      ]
-        .sort((a, b) => a - b)
-        .join(', ');
-      return {
-        key,
-        name: addition.name,
-        status: 'MISSING',
-        message: `API tasks share this name, but none match requiredPrestige=${additionPrestigeLevel} (available: ${availablePrestigeLevels}) - STILL NEEDED`,
-      };
-    }
-
-    if (nameMatches.length === 1) {
-      return {
-        key,
-        name: addition.name,
-        status: 'CHECK',
-        message: `Matched API task '${nameMatches[0].name}' (${nameMatches[0].id}) by name only - NEEDS REVIEW`,
-      };
-    }
-
-    if (nameMatches.length > 1) {
-      const ids = nameMatches.map((task) => task.id).join(', ');
-      return {
-        key,
-        name: addition.name,
-        status: 'CHECK',
-        message: `Multiple API tasks share this name (${ids}) - NEEDS REVIEW`,
-      };
-    }
-
-    return {
-      key,
-      name: addition.name,
-      status: 'MISSING',
-      message: 'Still missing from API - STILL NEEDED',
-    };
-  });
+  const indexes = buildApiIndexes(apiTasks);
+  const byId = new Map(apiTasks.map((task) => [task.id, task]));
+  return Object.entries(additions).map(([key, addition]) =>
+    indexedAddition(key, addition, byId, indexes)
+  );
 }
 
 export function checkEditionTaskReferences(
@@ -481,6 +586,9 @@ function printResults(
     const icon = STATUS_ICONS[result.status];
     console.log(`${bold(result.name)} ${dim(`(${result.id})`)} : ${icon}`);
 
+    for (const row of result.comparison ?? []) {
+      console.log(`   ${row.field}: ${row.status.toUpperCase()} - ${row.reason}`);
+    }
     for (const detail of result.details) {
       const color = DETAIL_COLORS[detail.status];
       console.log(`   ${color}${detail.message}${colors.reset}`);
@@ -494,7 +602,12 @@ function printResults(
   const { stillNeeded, fixed, removedFromApi } = categorizeResults(results);
   const line = (r: ValidationResult) => `${r.name} (${r.id})`;
 
-  printCountSection('Still need overrides', 'green', stillNeeded.map(line), icons.success);
+  printCountSection(
+    'Not redundant; correctness requires supporting evidence',
+    'yellow',
+    stillNeeded.map(line),
+    icons.warning
+  );
   printCountSection('Fixed in API, can remove', 'yellow', fixed.map(line), icons.sync);
 
   // Fully fixed and removed entries are already counted as obsolete below.
@@ -555,6 +668,9 @@ function printAdditionResults(
     const color = ADDITION_COLORS[result.status];
     console.log(`${bold(result.name)} ${dim(`(${result.key})`)} : ${icon}`);
     console.log(`   ${color}${result.message}${colors.reset}`);
+    for (const detail of result.comparison ?? []) {
+      console.log(`   ${detail.field}: ${detail.status.toUpperCase()} - ${detail.reason}`);
+    }
     console.log();
   }
 
@@ -570,9 +686,16 @@ function printAdditionResults(
     icons.success
   );
   printCountSection('Still missing from API', 'yellow', byStatus('MISSING'), icons.warning);
-  printCountSection('Needs review (name-only matches)', 'yellow', byStatus('CHECK'), icons.sync);
+  printCountSection(
+    'Needs review (identity, value or ambiguous name matches)',
+    'yellow',
+    byStatus('CHECK'),
+    icons.sync
+  );
 
-  return { resolved: results.filter((result) => result.status === 'RESOLVED').length };
+  return {
+    resolved: results.filter((result) => result.adopted || result.status === 'RESOLVED').length,
+  };
 }
 
 function printEditionReferenceResults(missing: EditionTaskReference[]): void {
@@ -688,15 +811,54 @@ async function checkLocaleOverrides(): Promise<number> {
  * Cross-check objective overrides against the local quest reference file
  * (authoritative source). The API-only validator can only say "override differs
  * from API", which it treats as "still needed" - it cannot tell when the
- * override itself is wrong. The reference file adjudicates that. No-ops cleanly
- * when no reference file is present in `eft/`.
+ * override itself is wrong. The reference file adjudicates objective counts.
+ * Missing reference coverage is reported explicitly.
  */
-function printReferenceCrossCheck(
-  groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>
+function mergeReferenceOverrides(
+  groups: Array<{ overrides: Record<string, TaskOverride> }>
+): Record<string, TaskOverride> {
+  const merged: Record<string, TaskOverride> = {};
+  for (const { overrides } of groups) {
+    for (const [id, patch] of Object.entries(overrides)) {
+      const previous = merged[id] ?? {};
+      const objectives = { ...previous.objectives };
+      for (const [objectiveId, objective] of Object.entries(patch.objectives ?? {})) {
+        objectives[objectiveId] = { ...objectives[objectiveId], ...objective };
+      }
+      merged[id] = { ...previous, ...patch, objectives };
+    }
+  }
+  return merged;
+}
+
+function printReferenceModeCoverage(
+  refMode: GameMode | null,
+  skipped: Array<{ label: string }>
 ): void {
-  const eftDir = join(rootDir, 'eft');
+  if (refMode) {
+    console.log(dim(`  (reference mode: ${refMode})`));
+    for (const g of skipped) {
+      console.log(dim(`  (skipping ${g.label} overrides: reference is ${refMode})`));
+    }
+  } else {
+    console.log(
+      dim('  (UNVERIFIED reference mode; base comparison is diagnostic only, not gated)')
+    );
+  }
+  console.log();
+}
+
+export function printReferenceCrossCheck(
+  groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>,
+  eftDir = resolveReferenceDirectory(referenceDirectory(rootDir), rootDir)
+): number {
   const eftTasks = loadEftTasks(eftDir);
-  if (!eftTasks) return; // no reference file available; skip silently
+  if (!eftTasks) {
+    console.log(
+      'UNVERIFIED: local quest reference unavailable; upstream differences do not prove corrections are correct.'
+    );
+    return 0;
+  }
 
   printHeader('REFERENCE CROSS-CHECK');
 
@@ -706,28 +868,22 @@ function printReferenceCrossCheck(
   const refMode = detectReferenceMode(eftDir);
   const applicable = groups.filter((g) => g.label === 'base' || g.label === refMode);
   const skipped = groups.filter((g) => !applicable.includes(g));
-  if (refMode) {
-    console.log(dim(`  (reference mode: ${refMode})`));
-    for (const g of skipped) {
-      console.log(dim(`  (skipping ${g.label} overrides: reference is ${refMode})`));
-    }
-  } else {
-    console.log(dim('  (reference mode unknown; checking base overrides only)'));
-  }
-  console.log();
+  printReferenceModeCoverage(refMode, skipped);
 
   const countConflicts: CrossCheckEntry[] = [];
   const descConflicts: CrossCheckEntry[] = [];
   const unverifiable: CrossCheckEntry[] = [];
   let confirmed = 0;
 
-  for (const { overrides } of applicable) {
-    for (const entry of crossCheckOverrides(overrides, eftTasks)) {
-      if (entry.verdict === 'CONFLICTS_REFERENCE') {
-        (entry.field === 'count' ? countConflicts : descConflicts).push(entry);
-      } else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
-      else confirmed += 1;
-    }
+  const effective = mergeReferenceOverrides([
+    ...applicable.filter((group) => group.label === 'base'),
+    ...applicable.filter((group) => group.label !== 'base'),
+  ]);
+  for (const entry of crossCheckOverrides(effective, eftTasks)) {
+    if (entry.verdict === 'CONFLICTS_REFERENCE') {
+      (entry.field === 'count' ? countConflicts : descConflicts).push(entry);
+    } else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
+    else confirmed += 1;
   }
 
   const printConflict = (c: CrossCheckEntry): void => {
@@ -776,6 +932,7 @@ function printReferenceCrossCheck(
     )} : ${icons.info}`
   );
   console.log();
+  return refMode ? countConflicts.length : 0;
 }
 
 /**
@@ -825,71 +982,6 @@ function printRequirementTypeCounts(
   }
   console.log();
   return { missingRequirementIds };
-}
-
-/**
- * Report base-override verdicts across every game mode.
- *
- * Base overrides are mode-agnostic: `docs/INTEGRATION.md` applies them to both
- * modes before mode-specific ones. Validating them against regular alone can
- * therefore hide two failure shapes - an override that is stale in regular but
- * load-bearing in PvE, and one that is quietly wrong in the mode we never
- * checked. Only overrides stale in EVERY mode are safe to retire.
- */
-function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, ValidationResult[]>>): {
-  staleEverywhere: string[];
-  verdictDiffers: string[];
-} {
-  const modes = Object.keys(resultsByMode) as GameMode[];
-  printHeader('BASE OVERRIDES ACROSS ALL MODES');
-  console.log(dim(`  (base overrides apply to every mode: ${modes.join(', ')})`));
-  console.log();
-
-  const byTask = new Map<string, Partial<Record<GameMode, ValidationResult>>>();
-  for (const mode of modes) {
-    for (const result of resultsByMode[mode] ?? []) {
-      const entry = byTask.get(result.id) ?? {};
-      entry[mode] = result;
-      byTask.set(result.id, entry);
-    }
-  }
-
-  const staleEverywhere: string[] = [];
-  const verdictDiffers: string[] = [];
-
-  for (const [taskId, perMode] of byTask) {
-    const present = modes.filter((mode) => perMode[mode]);
-    // A task missing from one mode's data is mode-exclusive, not a disagreement.
-    const comparable = present.filter((mode) => perMode[mode]!.status !== 'REMOVED_FROM_API');
-    if (comparable.length === 0) continue;
-
-    const name = perMode[comparable[0]]!.name;
-    const needed = comparable.filter((mode) => perMode[mode]!.stillNeeded);
-
-    if (needed.length === 0) {
-      staleEverywhere.push(`${name} (${taskId}) - redundant in ${comparable.join(' + ')}`);
-    } else if (needed.length < comparable.length) {
-      const idle = comparable.filter((mode) => !perMode[mode]!.stillNeeded);
-      verdictDiffers.push(
-        `${name} (${taskId}) - needed in ${needed.join(' + ')}, redundant in ${idle.join(' + ')}`
-      );
-    }
-  }
-
-  printCountSection(
-    'Base overrides redundant in EVERY mode (safe to retire)',
-    'yellow',
-    staleEverywhere,
-    icons.warning
-  );
-  printCountSection(
-    'Base overrides whose verdict DIFFERS by mode (keep; consider moving to a mode file)',
-    'cyan',
-    verdictDiffers,
-    icons.info
-  );
-
-  return { staleEverywhere, verdictDiffers };
 }
 
 /**
@@ -1009,10 +1101,22 @@ function formatDivergenceValue(value: unknown): string {
   return typeof value === 'string' ? `'${value}'` : String(value);
 }
 
-/**
- * Report generic entity override/addition results (prestige, items, traders,
- * hideout, itemsAdd).
- */
+function isFieldAncestor(ancestor: string, field: string): boolean {
+  return ['.', '[', ':'].some((separator) => field.startsWith(`${ancestor}${separator}`));
+}
+
+function isRetirableEntityField(
+  detail: EntityValidationResult['details'][number],
+  details: EntityValidationResult['details']
+): boolean {
+  if (detail.status !== 'fixed' || detail.field.includes('[')) return false;
+  if (detail.field.startsWith('extractsAdd:')) return false;
+  return !details.some(
+    (parent) => parent.status === 'fixed' && isFieldAncestor(parent.field, detail.field)
+  );
+}
+
+/** Report generic entity override/addition results. */
 function printEntityResults(
   label: string,
   filePath: string,
@@ -1039,7 +1143,7 @@ function printEntityResults(
     icons.error
   );
   printCountSection(
-    'Still needed',
+    'Not redundant; correctness requires supporting evidence',
     'yellow',
     lines(grouped.stillNeeded),
     icons.warning,
@@ -1066,12 +1170,17 @@ function printEntityResults(
   }
 
   const staleFieldsInNeededEntries = grouped.stillNeeded
-    .flatMap((result) => result.details)
-    .filter((detail) => detail.status === 'fixed').length;
+    .filter((result) => result.adopted === undefined)
+    .flatMap((result) =>
+      result.details.filter((detail) => isRetirableEntityField(detail, result.details))
+    ).length;
 
   return {
     errors: grouped.removedFromApi.length + identityErrors.length,
-    stale: grouped.fixed.length + staleFieldsInNeededEntries,
+    stale:
+      grouped.fixed.length +
+      grouped.stillNeeded.filter((result) => result.adopted).length +
+      staleFieldsInNeededEntries,
   };
 }
 
@@ -1086,7 +1195,9 @@ function printStoryChapterIssues(
   );
   if (!questRefsChecked) {
     console.log(
-      dim('  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)')
+      dim(
+        '  (no data/reference/ reference available: quest-ID resolution skipped, internal consistency only)'
+      )
     );
   }
   console.log();
@@ -1118,7 +1229,8 @@ function* readReferenceCaptures(eftDir: string, files: string[], pattern: RegExp
   for (const file of files) {
     if (!pattern.test(file)) continue;
     try {
-      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
+      const capture = resolveReferenceFile(file, eftDir);
+      const raw = JSON.parse(readFileSync(capture, 'utf-8'));
       yield { raw, envelope: raw?.response?.body_response ?? raw?.response?.decoded_response };
     } catch {
       // Unusable optional captures do not invalidate definitions in other files.
@@ -1162,11 +1274,11 @@ function loadReferenceTaskIds(eftDir: string, files: string[]): string[] {
  *
  * This checks provenance, not current unlock values.
  */
-export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string> | null {
-  if (!existsSync(eftDir)) return null;
-
+export function loadReferenceQuestIds(eftDir?: string): Set<string> | null {
   let files: string[];
   try {
+    eftDir ??= resolveReferenceDirectory(referenceDirectory(rootDir), rootDir);
+    if (!existsSync(eftDir)) return null;
     files = readdirSync(eftDir, { recursive: true }).map(String);
   } catch {
     return null; // Optional references may be unreadable or disappear during a run.
@@ -1246,6 +1358,630 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequireme
   };
 }
 
+type GateCounts = Pick<ValidationGateCounts, 'actionable' | 'staleProblems' | 'upstreamProblems'>;
+type TasksByMode = Partial<Record<GameMode, TaskData[]>>;
+
+/** Audit the effective map patches after shared/mode merging (arrays replace). */
+export async function checkMapData(
+  sourceDir = srcDir,
+  fetchData = fetchMapValidationData
+): Promise<GateCounts> {
+  const sharedPath = join(sourceDir, 'overrides', 'maps.json5');
+  const shared = existsSync(sharedPath)
+    ? loadJson5File<Record<string, Record<string, unknown>>>(sharedPath)
+    : {};
+  let actionable = 0;
+  let staleProblems = 0;
+  const sharedEvidence: EntityModeEvidence[] = [];
+  for (const mode of SUPPORTED_GAME_MODES) {
+    const modePath = join(sourceDir, 'overrides', 'modes', mode, 'maps.json5');
+    const modeOverrides = existsSync(modePath)
+      ? loadJson5File<Record<string, Record<string, unknown>>>(modePath)
+      : {};
+    const effective = mergeMapOverrides(shared, modeOverrides);
+    if (Object.keys(effective).length === 0) continue;
+    printProgress(`Fetching ${mode} maps from tarkov.dev API...`);
+    const { maps, translations } = await fetchData(mode);
+    sharedEvidence.push({ mode, results: validateMapOverrides(shared, maps, translations) });
+    const report = printEntityResults(
+      `${mode} maps`,
+      `modes/${mode}/maps`,
+      validateModeMapOverrides(modeOverrides, shared, maps, translations)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+  if (Object.keys(shared).length) {
+    const report = printEntityResults(
+      'shared maps (all modes)',
+      'shared maps',
+      aggregateEntityRetirement(sharedEvidence, SUPPORTED_GAME_MODES)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+  return { actionable, staleProblems, upstreamProblems: 0 };
+}
+
+export async function checkEntityData(sourceDir = srcDir): Promise<GateCounts> {
+  let actionable = 0;
+  let staleProblems = 0;
+  const loadEntitySource = (spec: EntityCheckSpec) => {
+    const file = join(sourceDir, ...spec.segments);
+    return existsSync(file) ? loadJson5File<Record<string, unknown>>(file) : {};
+  };
+  // Prestige only exists in upstream regular mode, so its overlay is scoped
+  // to modes.regular rather than being applied to pve/pvp-season.
+  const prestigeSpec: EntityCheckSpec = {
+    label: 'regular prestige',
+    segments: ['overrides', 'modes', 'regular', 'prestige.json5'],
+    endpoint: 'tasks',
+    collectionKey: 'prestige',
+    config: {
+      identityFields: ['prestigeLevel'],
+      additiveFields: ['storyRequirements'],
+      keyedFields: ['conditions'],
+    },
+  };
+
+  // Entity types that previously had no validator at all. Memoize by
+  // endpoint and collection so specs that share one endpoint but select
+  // different collections cannot reuse an incompatible response.
+  const entityCache = new Map<string, Promise<Map<string, Record<string, unknown>>>>();
+  const getEntities = (mode: GameMode, spec: EntityCheckSpec) => {
+    const key = `${mode}/${spec.endpoint}/${spec.collectionKey ?? ''}`;
+    let pending = entityCache.get(key);
+    if (!pending) {
+      pending =
+        spec.endpoint === 'items'
+          ? fetchItemValidationData(mode)
+          : fetchRawEntities(mode, spec.endpoint, spec.collectionKey);
+      entityCache.set(key, pending);
+    }
+    return pending;
+  };
+
+  const prestigeOverrides = loadEntitySource(prestigeSpec);
+  if (Object.keys(prestigeOverrides).length > 0) {
+    printProgress('Fetching regular prestige data from tarkov.dev API...');
+    const apiEntities = await getEntities('regular', prestigeSpec);
+    printSuccess(`Fetched ${apiEntities.size} regular prestige record(s)\n`);
+    const report = printEntityResults(
+      prestigeSpec.label,
+      'src/overrides/modes/regular/prestige.json5',
+      validateEntityOverrides(prestigeOverrides, apiEntities, prestigeSpec.config)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+
+  for (const spec of ENTITY_OVERRIDE_SPECS) {
+    const entityOverrides = loadEntitySource(spec);
+    const relPath = `src/${spec.segments.join('/')}`;
+    if (Object.keys(entityOverrides).length === 0) {
+      const report = printEntityResults(spec.label, relPath, []);
+      actionable += report.errors;
+      staleProblems += report.stale;
+      continue;
+    }
+    const evidence: EntityModeEvidence[] = [];
+    for (const mode of SUPPORTED_GAME_MODES) {
+      printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
+      const apiEntities = await getEntities(mode, spec);
+      printSuccess(`Fetched ${apiEntities.size} ${mode} ${spec.label} record(s)\n`);
+      const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
+      evidence.push({ mode, results: entityResults });
+    }
+    const report = printEntityResults(
+      `${spec.label} (all modes)`,
+      relPath,
+      aggregateEntityRetirement(evidence, SUPPORTED_GAME_MODES)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+
+  for (const spec of ENTITY_ADDITION_SPECS) {
+    const entityAdditions = loadEntitySource(spec);
+    const relPath = `src/${spec.segments.join('/')}`;
+    if (Object.keys(entityAdditions).length === 0) {
+      printEntityResults(spec.label, relPath, []);
+      continue;
+    }
+    const evidence: EntityModeEvidence[] = [];
+    for (const mode of SUPPORTED_GAME_MODES) {
+      printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
+      const apiEntities = await getEntities(mode, spec);
+      printSuccess(`Fetched ${apiEntities.size} ${mode} record(s)\n`);
+      evidence.push({ mode, results: validateEntityAdditions(entityAdditions, apiEntities) });
+    }
+    const report = printEntityResults(
+      `${spec.label} (all modes)`,
+      relPath,
+      aggregateEntityRetirement(evidence, SUPPORTED_GAME_MODES)
+    );
+    actionable += report.errors;
+    staleProblems += report.stale;
+  }
+
+  return { actionable, staleProblems, upstreamProblems: 0 };
+}
+
+function addAdditionIds(ids: Set<string>, additions: Record<string, TaskAddition>): void {
+  for (const [key, addition] of Object.entries(additions)) {
+    ids.add(key);
+    if (typeof addition.id === 'string') ids.add(addition.id);
+  }
+}
+
+function knownStoryQuestIds(
+  apiTasksByMode: TasksByMode,
+  additions: Record<string, TaskAddition>
+): Set<string> | undefined {
+  const reference = loadReferenceQuestIds();
+  if (!reference) return undefined;
+  const ids = new Set(reference);
+  for (const mode of SUPPORTED_GAME_MODES) {
+    for (const task of apiTasksByMode[mode] ?? []) ids.add(task.id);
+    addAdditionIds(ids, loadModeTaskAdditions(mode));
+  }
+  addAdditionIds(ids, additions);
+  return ids;
+}
+
+function checkStoryData(
+  apiTasksByMode: TasksByMode,
+  additions: Record<string, TaskAddition>
+): GateCounts {
+  const storyChapters = loadOptional('additions', 'storyChapters.json5');
+  if (Object.keys(storyChapters).length === 0)
+    return { actionable: 0, staleProblems: 0, upstreamProblems: 0 };
+  // Story quests are absent upstream: without the local reference only internal consistency is checkable.
+  const known = knownStoryQuestIds(apiTasksByMode, additions);
+  const { errors } = printStoryChapterIssues(
+    checkStoryChapterIntegrity(storyChapters, known),
+    known !== undefined
+  );
+  return { actionable: errors, staleProblems: 0, upstreamProblems: 0 };
+}
+
+function checkSuppressions(apiTasks: TaskData[], apiTasksByMode: TasksByMode): GateCounts {
+  let actionable = 0;
+  // Suppressions hide real upstream quirks; a dead one hides future problems.
+  const suppressions = loadOptional('suppressions', 'tasks.json5');
+  if (Object.keys(suppressions).length > 0) {
+    // A suppression may target a mode-exclusive task (e.g. a PvE-only quest),
+    // so resolve IDs against every mode rather than regular alone - otherwise
+    // a live suppression would be reported as stale.
+    const allModeTasks = new Map<string, TaskData>();
+    for (const task of apiTasks) allModeTasks.set(task.id, task);
+    for (const mode of SUPPORTED_GAME_MODES) {
+      for (const task of apiTasksByMode[mode] ?? []) allModeTasks.set(task.id, task);
+    }
+    // A stale suppression is a dead overlay entry (overlay inconsistency), so
+    // it counts toward the --strict gate alongside the other checks.
+    actionable += printSuppressionResults(
+      checkTaskSuppressionStaleness(suppressions, [...allModeTasks.values()])
+    ).stale;
+  }
+
+  return { actionable, staleProblems: 0, upstreamProblems: 0 };
+}
+
+function applySharedTask(task: TaskData, patch: TaskOverride = {}): ComparisonTaskData {
+  const source = comparisonTask(task);
+  const { objectives, objectivesAdd, objectivesRemove, ...fields } = patch;
+  const result = { ...source, ...fields };
+  if (!validObjectiveCollection(source.objectives)) return result;
+  const removed = new Set(objectivesRemove ?? []);
+  const patched = source
+    .objectives!.filter((objective) => !removed.has(objective.id))
+    .map((objective) => ({
+      ...objective,
+      ...objectives?.[objective.id],
+    }));
+  result.objectives = [...patched, ...(objectivesAdd ?? [])] as ComparisonTaskData['objectives'];
+  return result;
+}
+
+/** Mode removals must preserve the effective shared correction beneath them. */
+export function validateModeTaskOverrides(
+  overrides: Record<string, TaskOverride>,
+  shared: Record<string, TaskOverride>,
+  tasks: TaskData[]
+): ValidationResult[] {
+  const inherited = tasks.map((task) => applySharedTask(task, shared[task.id]));
+  return validateAllOverrides(overrides, inherited).map((result) => {
+    // Conflicts that only appear once the shared layer is applied (a shared
+    // patch or addition of an objective this mode removes).
+    const ownConflicts = new Set(
+      objectiveRemovalConflicts(overrides[result.id] ?? {}).map((detail) => detail.field)
+    );
+    const layeredConflicts = shared[result.id]
+      ? objectiveRemovalConflicts(
+          mergeTaskOverride(shared[result.id], overrides[result.id])
+        ).filter((detail) => !ownConflicts.has(detail.field))
+      : [];
+    const details = [...result.details, ...layeredConflicts];
+    const stillNeeded = result.stillNeeded || layeredConflicts.length > 0;
+    return {
+      ...result,
+      stillNeeded,
+      status: stillNeeded && result.status === 'FIXED' ? 'NEEDED' : result.status,
+      details: details.map((detail) => ({
+        ...detail,
+        message: `Shared-applied baseline: ${detail.message}`,
+      })),
+      comparison: result.comparison?.map((row) => ({
+        ...row,
+        reason: `${row.reason}; shared overlay is applied before this mode correction`,
+      })),
+    };
+  });
+}
+
+type TaskCorrectionUnit = { field: string; patch: TaskOverride };
+
+function objectiveCorrectionUnits(
+  objectives: NonNullable<TaskOverride['objectives']>
+): TaskCorrectionUnit[] {
+  return Object.entries(objectives).flatMap(([id, patch]) =>
+    Object.entries(patch).map(([field, value]) => ({
+      field: `objective:${id}:${field}`,
+      patch: { objectives: { [id]: { [field]: value } } } as TaskOverride,
+    }))
+  );
+}
+
+function taskCorrectionUnits(patch: TaskOverride): TaskCorrectionUnit[] {
+  const { objectives, objectivesRemove, ...fields } = patch;
+  const units = Object.entries(fields).map(([field, value]) => ({
+    field,
+    patch: { [field]: value } as TaskOverride,
+  }));
+  // One unit per removed ID, so a live removal cannot hide one that is already
+  // redundant in every mode.
+  const removals = (objectivesRemove ?? []).map((id) => ({
+    field: `objectivesRemove:${id}`,
+    patch: { objectivesRemove: [id] } as TaskOverride,
+  }));
+  return [...units, ...objectiveCorrectionUnits(objectives ?? {}), ...removals];
+}
+
+function coversCorrection(shared: unknown, mode: unknown): boolean {
+  if (!isCorrectionRecord(shared)) return mode !== undefined;
+  if (!isCorrectionRecord(mode)) return false;
+  return Object.entries(shared).every(
+    ([key, value]) => Object.hasOwn(mode, key) && coversCorrection(value, mode[key])
+  );
+}
+
+function isCorrectionRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function matchingModeUnit(
+  unit: TaskCorrectionUnit,
+  modePatch: TaskOverride = {}
+): TaskCorrectionUnit | undefined {
+  // Additions concatenate and removals union across layers, so a mode entry
+  // never masks the shared one.
+  if (unit.field === 'objectivesAdd' || unit.field.startsWith('objectivesRemove')) return undefined;
+  return taskCorrectionUnits(modePatch).find((candidate) => candidate.field === unit.field);
+}
+
+function correctionMasked(
+  id: string,
+  unit: TaskCorrectionUnit,
+  modePatch: TaskOverride | undefined,
+  tasks: TaskData[]
+): boolean {
+  const modeUnit = matchingModeUnit(unit, modePatch);
+  if (!modeUnit || !coversCorrection(unit.patch, modeUnit.patch)) return false;
+  return independentlyNeededModeUnit(id, unit, modeUnit, tasks);
+}
+
+function independentlyNeededModeUnit(
+  id: string,
+  shared: TaskCorrectionUnit,
+  mode: TaskCorrectionUnit,
+  tasks: TaskData[]
+): boolean {
+  const task = tasks.find((candidate) => candidate.id === id);
+  if (!task) return false;
+  const baseline = applySharedTask(task, shared.patch);
+  const result = validateAllOverrides({ [id]: mode.patch }, [baseline])[0];
+  return (
+    result.details.every((detail) => ['fixed', 'needed'].includes(detail.status)) &&
+    result.details.some((detail) => detail.status === 'needed')
+  );
+}
+
+function availableModeTasks(tasksByMode: TasksByMode, mode: GameMode): TaskData[] {
+  return tasksByMode[mode] ?? [];
+}
+
+function unitModeResult(
+  id: string,
+  unit: TaskCorrectionUnit,
+  mode: GameMode,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>>
+): ValidationResult {
+  const result = validateAllOverrides(
+    { [id]: unit.patch },
+    availableModeTasks(tasksByMode, mode)
+  )[0];
+  if (correctionMasked(id, unit, patchesByMode[mode]?.[id], availableModeTasks(tasksByMode, mode)))
+    return { ...result, status: 'FIXED', stillNeeded: false, details: [] };
+  if (result.status !== 'REMOVED_FROM_API') return result;
+  return {
+    ...result,
+    status: 'NEEDED',
+    stillNeeded: true,
+    details: [
+      {
+        field: unit.field,
+        status: 'check',
+        message: 'Task unavailable in this mode; retirement is unverified',
+      },
+    ],
+  };
+}
+
+function sharedUnitDetail(
+  id: string,
+  unit: TaskCorrectionUnit,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>>
+): ValidationDetail {
+  const needed = SUPPORTED_GAME_MODES.filter(
+    (mode) => unitModeResult(id, unit, mode, tasksByMode, patchesByMode).stillNeeded
+  );
+  return {
+    field: unit.field,
+    status: needed.length ? 'needed' : 'fixed',
+    message: needed.length
+      ? `${unit.field}: keep shared correction; required or unverified in ${needed.join(', ')}`
+      : `${unit.field}: redundant after shared/mode layering in every supported mode`,
+  };
+}
+
+function sharedModeComparison(
+  id: string,
+  patch: TaskOverride,
+  mode: GameMode,
+  tasksByMode: TasksByMode
+): OverlayComparisonDetail[] {
+  const result = validateAllOverrides({ [id]: patch }, tasksByMode[mode] ?? [])[0];
+  return (result.comparison ?? []).map((row) => ({
+    ...row,
+    field: `${mode}.${row.field}`,
+    reason: `${row.reason}; raw upstream comparison, retirement also accounts for mode masking`,
+  }));
+}
+
+function absentFromLoadedMode(id: string, tasks: TaskData[] | undefined): boolean {
+  if (!tasks) return false;
+  return !tasks.some((task) => task.id === id);
+}
+
+function absentFromEveryMode(id: string, tasksByMode: TasksByMode): boolean {
+  return SUPPORTED_GAME_MODES.every((mode) => absentFromLoadedMode(id, tasksByMode[mode]));
+}
+
+function removedSharedTask(id: string): ValidationResult {
+  return {
+    id,
+    name: id,
+    status: 'REMOVED_FROM_API',
+    stillNeeded: false,
+    details: [
+      {
+        field: 'task',
+        status: 'info',
+        message: 'Task absent from every loaded supported mode; remove the shared override',
+      },
+    ],
+  };
+}
+
+/** Shared retirement is authoritative only after examining every supported mode. */
+export function validateSharedTaskOverrides(
+  shared: Record<string, TaskOverride>,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {}
+): ValidationResult[] {
+  return Object.entries(shared).map(([id, patch]) => {
+    if (absentFromEveryMode(id, tasksByMode)) return removedSharedTask(id);
+    const details = [
+      ...taskCorrectionUnits(patch).map((unit) =>
+        sharedUnitDetail(id, unit, tasksByMode, patchesByMode)
+      ),
+      // Units are judged one at a time, so check the whole patch for removals
+      // that contradict its own patches or additions.
+      ...objectiveRemovalConflicts(patch),
+    ];
+    const stillNeeded = details.some((detail) => detail.status !== 'fixed');
+    const name =
+      Object.values(tasksByMode)
+        .flat()
+        .find((task) => task.id === id)?.name ?? id;
+    return {
+      id,
+      name,
+      details,
+      stillNeeded,
+      status: stillNeeded ? 'NEEDED' : 'FIXED',
+      comparison: SUPPORTED_GAME_MODES.flatMap((mode) =>
+        sharedModeComparison(id, patch, mode, tasksByMode)
+      ),
+    };
+  });
+}
+
+export function checkSharedTaskOverrides(
+  shared: Record<string, TaskOverride>,
+  tasksByMode: TasksByMode,
+  patchesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {}
+): number {
+  const report = printResults(validateSharedTaskOverrides(shared, tasksByMode, patchesByMode));
+  return report.obsoleteEntries + report.staleFields;
+}
+
+export function checkModeOverrides(
+  mode: GameMode,
+  overrides: Record<string, TaskOverride>,
+  tasks: TaskData[],
+  shared: Record<string, TaskOverride>
+): number {
+  if (Object.keys(overrides).length === 0) return 0;
+  printProgress(`Validating ${mode} mode overrides...\n`);
+  const report = printResults(validateModeTaskOverrides(overrides, shared, tasks), {
+    titlePrefix: mode.toUpperCase(),
+    overridePath: `src/overrides/modes/${mode}/tasks.json5`,
+  });
+  return report.obsoleteEntries + report.staleFields;
+}
+
+function checkModeAdditions(
+  mode: GameMode,
+  additions: Record<string, TaskAddition>,
+  tasks: TaskData[]
+): number {
+  if (Object.keys(additions).length === 0) return 0;
+  printProgress(`Checking ${mode} mode additions against API...\n`);
+  return printAdditionResults(checkTaskAdditions(additions, tasks), mode.toUpperCase()).resolved;
+}
+
+function resolvedAdditionKeys(results: AdditionResult[], keys: Set<string>): void {
+  for (const result of results)
+    if (result.adopted || result.status === 'RESOLVED') keys.add(result.key);
+}
+
+function checkSharedModeAdditions(
+  mode: GameMode,
+  additions: Record<string, TaskAddition>,
+  tasks: TaskData[],
+  keys: Set<string>
+): void {
+  if (mode === 'regular') return;
+  const results = checkTaskAdditions(additions, tasks);
+  resolvedAdditionKeys(results, keys);
+  printAdditionResults(results, `SHARED ADDITIONS VS ${mode.toUpperCase()}`);
+}
+
+async function checkModeTasks(
+  getTasksForMode: ReturnType<typeof createTaskFetcher>,
+  overrides: Record<string, TaskOverride>,
+  additions: Record<string, TaskAddition>,
+  resolvedSharedKeys: Set<string>,
+  crossCheckGroups: Array<{ label: string; overrides: Record<string, TaskOverride> }>
+) {
+  let staleProblems = 0;
+  let upstreamProblems = 0;
+  // Per-mode API data and overrides, reused by the divergence and
+  // cross-mode passes so nothing is fetched twice.
+  const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
+  const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
+  const sourceTaskDataByMode: Partial<Record<GameMode, Record<string, unknown>>> = {};
+  // Keyed snapshots keep each mode's tasks and its raw trader-requirement ID
+  // counts together, so the diagnostic cannot see one without the other.
+  const snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>> = {};
+
+  // Validate mode-specific overrides and additions
+  for (const mode of SUPPORTED_GAME_MODES) {
+    const modeOverrides = loadModeTaskOverrides(mode);
+    const modeAdditions = loadModeTaskAdditions(mode);
+    modeOverridesByMode[mode] = modeOverrides;
+
+    printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
+    const modeSnapshot = await getTasksForMode(mode);
+    const modeApiTasks = modeSnapshot.tasks;
+    apiTasksByMode[mode] = modeApiTasks;
+    sourceTaskDataByMode[mode] = modeSnapshot.sourceData;
+    snapshotsByMode[mode] = modeSnapshot;
+    printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
+
+    const modeOverrideCount = Object.keys(modeOverrides).length;
+
+    if (modeOverrideCount > 0) crossCheckGroups.push({ label: mode, overrides: modeOverrides });
+    staleProblems += checkModeOverrides(mode, modeOverrides, modeApiTasks, overrides);
+    staleProblems += checkModeAdditions(mode, modeAdditions, modeApiTasks);
+    checkSharedModeAdditions(mode, additions, modeApiTasks, resolvedSharedKeys);
+  }
+  staleProblems += resolvedSharedKeys.size;
+
+  // The mode loop covers `regular` too, so every supported mode's raw
+  // diagnostic is already recorded here.
+  upstreamProblems += printRequirementTypeCounts(snapshotsByMode).missingRequirementIds;
+
+  staleProblems += checkSharedTaskOverrides(overrides, apiTasksByMode, modeOverridesByMode);
+
+  return {
+    apiTasksByMode,
+    sourceTaskDataByMode,
+    modeOverridesByMode,
+    staleProblems,
+    upstreamProblems,
+  };
+}
+
+function checkModeDivergences(
+  overrides: Record<string, TaskOverride>,
+  tasksByMode: TasksByMode,
+  overridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>>
+): number {
+  const divergences = loadDivergences();
+  printDivergenceCoverage(divergences);
+  const modes = Object.fromEntries(
+    SUPPORTED_GAME_MODES.map((mode) => [
+      mode,
+      tasksByMode[mode]
+        ? { apiTasks: tasksByMode[mode], modeOverrides: overridesByMode[mode] ?? {} }
+        : undefined,
+    ])
+  );
+  return printDivergenceReport(validateDivergences(divergences, overrides, modes)).actionable;
+}
+
+function printGateProblems({
+  strict,
+  failOnStale,
+  failOnUpstream,
+  actionable,
+  staleProblems,
+  upstreamProblems,
+}: ValidationGateCounts): void {
+  // Printed whenever the count is non-zero, gate or no gate: the whole point
+  // of issue #276 is that this must not pass silently. Only the exit code is
+  // opt-in.
+  if (upstreamProblems > 0) {
+    printError(
+      `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
+        'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
+        'an overlay.* id for them - the same shape our own additions use. An overlay ' +
+        'addition can therefore collide with a real upstream requirement instead of ' +
+        'being added alongside it. Nothing here can fix it; report it upstream.' +
+        (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
+    );
+  }
+
+  if (actionable > 0 && strict) {
+    printError(
+      `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
+        'Data is being served incorrectly or the overlay is inconsistent.'
+    );
+  }
+
+  if (staleProblems > 0 && failOnStale) {
+    printError(
+      `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
+        'Remove data now supplied upstream or scope it to the modes where it is still missing.'
+    );
+  }
+}
+
 /**
  * Main validation function
  */
@@ -1272,6 +2008,7 @@ async function main(): Promise<void> {
   let upstreamProblems = 0;
 
   try {
+    assertComparisonCoverage(srcDir);
     printProgress('Loading task overrides...');
     const overrides = loadTaskOverrides();
     const taskCount = Object.keys(overrides).length;
@@ -1288,12 +2025,6 @@ async function main(): Promise<void> {
     const { tasks: apiTasks } = await getTasksForMode();
     printSuccess(`Fetched ${apiTasks.length} tasks from API\n`);
 
-    printProgress('Validating overrides...\n');
-    const results = validateAllOverrides(overrides, apiTasks);
-
-    const baseTaskReport = printResults(results);
-    staleProblems += baseTaskReport.obsoleteEntries + baseTaskReport.staleFields;
-
     // Collect every override group for the reference cross-check below.
     const crossCheckGroups: Array<{ label: string; overrides: Record<string, TaskOverride> }> = [
       { label: 'base', overrides },
@@ -1302,240 +2033,49 @@ async function main(): Promise<void> {
     printProgress('Checking additions against API...\n');
     const staleSharedAdditionKeys = new Set<string>();
     const regularAdditionResults = checkTaskAdditions(additions, apiTasks);
-    for (const result of regularAdditionResults) {
-      if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
-    }
+    resolvedAdditionKeys(regularAdditionResults, staleSharedAdditionKeys);
     printAdditionResults(regularAdditionResults);
 
-    // Per-mode API data and overrides, reused by the divergence and
-    // cross-mode passes so nothing is fetched twice.
-    const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
-    const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
-    // Keyed snapshots keep each mode's tasks and its raw trader-requirement ID
-    // counts together, so the diagnostic cannot see one without the other.
-    const snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>> = {};
-
-    // Validate mode-specific overrides and additions
-    for (const mode of SUPPORTED_GAME_MODES) {
-      const modeOverrides = loadModeTaskOverrides(mode);
-      const modeAdditions = loadModeTaskAdditions(mode);
-      modeOverridesByMode[mode] = modeOverrides;
-
-      printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const modeSnapshot = await getTasksForMode(mode);
-      const modeApiTasks = modeSnapshot.tasks;
-      apiTasksByMode[mode] = modeApiTasks;
-      snapshotsByMode[mode] = modeSnapshot;
-      printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
-
-      const modeOverrideCount = Object.keys(modeOverrides).length;
-      const modeAdditionCount = Object.keys(modeAdditions).length;
-
-      if (modeOverrideCount > 0) {
-        crossCheckGroups.push({ label: mode, overrides: modeOverrides });
-
-        printProgress(`Validating ${mode} mode overrides...\n`);
-        const modeResults = validateAllOverrides(modeOverrides, modeApiTasks);
-        const modeTaskReport = printResults(modeResults, {
-          titlePrefix: mode.toUpperCase(),
-          overridePath: `src/overrides/modes/${mode}/tasks.json5`,
-        });
-        staleProblems += modeTaskReport.obsoleteEntries + modeTaskReport.staleFields;
-      }
-
-      if (modeAdditionCount > 0) {
-        printProgress(`Checking ${mode} mode additions against API...\n`);
-        const modeAdditionResults = checkTaskAdditions(modeAdditions, modeApiTasks);
-        staleProblems += printAdditionResults(modeAdditionResults, mode.toUpperCase()).resolved;
-      }
-
-      // Shared additions apply to every mode, so an entry appearing upstream in
-      // any one mode is stale as a shared addition and must be mode-scoped or removed.
-      if (mode !== 'regular') {
-        const sharedAdditionResults = checkTaskAdditions(additions, modeApiTasks);
-        for (const result of sharedAdditionResults) {
-          if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
-        }
-        printAdditionResults(sharedAdditionResults, `SHARED ADDITIONS VS ${mode.toUpperCase()}`);
-      }
-    }
-    staleProblems += staleSharedAdditionKeys.size;
-
-    // The mode loop covers `regular` too, so every supported mode's raw
-    // diagnostic is already recorded here.
-    upstreamProblems += printRequirementTypeCounts(snapshotsByMode).missingRequirementIds;
-
-    // Base overrides apply to every mode, so validate them against every mode.
-    const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};
-    for (const mode of SUPPORTED_GAME_MODES) {
-      const modeApiTasks = apiTasksByMode[mode];
-      if (!modeApiTasks) continue;
-      baseResultsByMode[mode] = validateAllOverrides(overrides, modeApiTasks);
-    }
-    printBaseCrossModeSummary(baseResultsByMode);
+    const modeCounts = await checkModeTasks(
+      getTasksForMode,
+      overrides,
+      additions,
+      staleSharedAdditionKeys,
+      crossCheckGroups
+    );
+    const { apiTasksByMode, sourceTaskDataByMode, modeOverridesByMode } = modeCounts;
+    staleProblems += modeCounts.staleProblems;
+    upstreamProblems += modeCounts.upstreamProblems;
 
     printProgress('Checking edition exclusions against API...\n');
     const missingEditionRefs = checkEditionTaskReferences(editions, apiTasks);
     printEditionReferenceResults(missingEditionRefs);
 
-    // Mode-divergence registry: the check that detects a mirror-direction flip.
-    const divergences = loadDivergences();
-    printDivergenceCoverage(divergences);
-    const divergenceResults = validateDivergences(divergences, overrides, {
-      regular: apiTasksByMode.regular
-        ? {
-            apiTasks: apiTasksByMode.regular,
-            modeOverrides: modeOverridesByMode.regular ?? {},
-          }
-        : undefined,
-      pve: apiTasksByMode.pve
-        ? { apiTasks: apiTasksByMode.pve, modeOverrides: modeOverridesByMode.pve ?? {} }
-        : undefined,
-      'pvp-season': apiTasksByMode['pvp-season']
-        ? {
-            apiTasks: apiTasksByMode['pvp-season'],
-            modeOverrides: modeOverridesByMode['pvp-season'] ?? {},
-          }
-        : undefined,
-    });
-    actionable += printDivergenceReport(divergenceResults).actionable;
+    actionable += checkModeDivergences(overrides, apiTasksByMode, modeOverridesByMode);
 
-    // Prestige only exists in upstream regular mode, so its overlay is scoped
-    // to modes.regular rather than being applied to pve/pvp-season.
-    const prestigeSpec: EntityCheckSpec = {
-      label: 'regular prestige',
-      segments: ['overrides', 'modes', 'regular', 'prestige.json5'],
-      endpoint: 'tasks',
-      collectionKey: 'prestige',
-      config: {
-        identityFields: ['prestigeLevel'],
-        additiveFields: ['storyRequirements'],
-        keyedFields: ['conditions'],
-      },
+    const contractCounts = await checkAdditionContracts(srcDir, apiTasksByMode);
+    const entityCounts = await checkEntityData();
+    const mapCounts = await checkMapData();
+    const supplementCounts = {
+      ...(await checkSupplements(srcDir, undefined, sourceTaskDataByMode)),
+      upstreamProblems: 0,
     };
-
-    // Entity types that previously had no validator at all. Memoize by
-    // endpoint and collection so specs that share one endpoint but select
-    // different collections cannot reuse an incompatible response.
-    const entityCache = new Map<string, Promise<Map<string, Record<string, unknown>>>>();
-    const getEntities = (mode: GameMode, spec: EntityCheckSpec) => {
-      const key = `${mode}/${spec.endpoint}/${spec.collectionKey ?? ''}`;
-      let pending = entityCache.get(key);
-      if (!pending) {
-        pending = fetchRawEntities(mode, spec.endpoint, spec.collectionKey);
-        entityCache.set(key, pending);
-      }
-      return pending;
-    };
-
-    const prestigeOverrides = loadOptional(...prestigeSpec.segments);
-    if (Object.keys(prestigeOverrides).length > 0) {
-      printProgress('Fetching regular prestige data from tarkov.dev API...');
-      const apiEntities = await getEntities('regular', prestigeSpec);
-      printSuccess(`Fetched ${apiEntities.size} regular prestige record(s)\n`);
-      const report = printEntityResults(
-        prestigeSpec.label,
-        'src/overrides/modes/regular/prestige.json5',
-        validateEntityOverrides(prestigeOverrides, apiEntities, prestigeSpec.config)
-      );
-      actionable += report.errors;
-      staleProblems += report.stale;
+    const storyCounts = checkStoryData(apiTasksByMode, additions);
+    const suppressionCounts = checkSuppressions(apiTasks, apiTasksByMode);
+    for (const counts of [
+      contractCounts,
+      entityCounts,
+      mapCounts,
+      supplementCounts,
+      storyCounts,
+      suppressionCounts,
+    ]) {
+      actionable += counts.actionable;
+      staleProblems += counts.staleProblems;
+      upstreamProblems += counts.upstreamProblems;
     }
 
-    for (const spec of ENTITY_OVERRIDE_SPECS) {
-      const entityOverrides = loadOptional(...spec.segments);
-      const relPath = `src/${spec.segments.join('/')}`;
-      if (Object.keys(entityOverrides).length === 0) {
-        const report = printEntityResults(spec.label, relPath, []);
-        actionable += report.errors;
-        staleProblems += report.stale;
-        continue;
-      }
-      for (const mode of SUPPORTED_GAME_MODES) {
-        printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
-        const apiEntities = await getEntities(mode, spec);
-        printSuccess(`Fetched ${apiEntities.size} ${mode} ${spec.label} record(s)\n`);
-        const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
-        const report = printEntityResults(`${mode} ${spec.label}`, relPath, entityResults);
-        actionable += report.errors;
-        staleProblems += report.stale;
-      }
-    }
-
-    for (const spec of ENTITY_ADDITION_SPECS) {
-      const entityAdditions = loadOptional(...spec.segments);
-      const relPath = `src/${spec.segments.join('/')}`;
-      if (Object.keys(entityAdditions).length === 0) {
-        printEntityResults(spec.label, relPath, []);
-        continue;
-      }
-      for (const mode of SUPPORTED_GAME_MODES) {
-        printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
-        const apiEntities = await getEntities(mode, spec);
-        printSuccess(`Fetched ${apiEntities.size} ${mode} record(s)\n`);
-        const report = printEntityResults(
-          `${mode} ${spec.label}`,
-          relPath,
-          validateEntityAdditions(entityAdditions, apiEntities)
-        );
-        actionable += report.errors;
-        staleProblems += report.stale;
-      }
-    }
-
-    // Story chapters: overlay-authored, so check references rather than values.
-    const storyChapters = loadOptional('additions', 'storyChapters.json5');
-    if (Object.keys(storyChapters).length > 0) {
-      // Story quests are NOT in the tarkov.dev task list, so their IDs can only
-      // be resolved against the local EFT reference. Without it, only internal
-      // consistency is checkable.
-      const referenceQuestIds = loadReferenceQuestIds();
-      let knownQuestIds: Set<string> | undefined;
-
-      if (referenceQuestIds) {
-        knownQuestIds = new Set(referenceQuestIds);
-        for (const mode of SUPPORTED_GAME_MODES) {
-          for (const task of apiTasksByMode[mode] ?? []) knownQuestIds.add(task.id);
-        }
-        for (const [key, addition] of Object.entries(additions)) {
-          knownQuestIds.add(key);
-          const id = (addition as { id?: unknown }).id;
-          if (typeof id === 'string') knownQuestIds.add(id);
-        }
-        for (const mode of SUPPORTED_GAME_MODES) {
-          for (const [key, addition] of Object.entries(loadModeTaskAdditions(mode))) {
-            knownQuestIds.add(key);
-            const id = (addition as { id?: unknown }).id;
-            if (typeof id === 'string') knownQuestIds.add(id);
-          }
-        }
-      }
-
-      actionable += printStoryChapterIssues(
-        checkStoryChapterIntegrity(storyChapters, knownQuestIds),
-        knownQuestIds !== undefined
-      ).errors;
-    }
-
-    // Suppressions hide real upstream quirks; a dead one hides future problems.
-    const suppressions = loadOptional('suppressions', 'tasks.json5');
-    if (Object.keys(suppressions).length > 0) {
-      // A suppression may target a mode-exclusive task (e.g. a PvE-only quest),
-      // so resolve IDs against every mode rather than regular alone - otherwise
-      // a live suppression would be reported as stale.
-      const allModeTasks = new Map<string, TaskData>();
-      for (const task of apiTasks) allModeTasks.set(task.id, task);
-      for (const mode of SUPPORTED_GAME_MODES) {
-        for (const task of apiTasksByMode[mode] ?? []) allModeTasks.set(task.id, task);
-      }
-      // A stale suppression is a dead overlay entry (overlay inconsistency), so
-      // it counts toward the --strict gate alongside the other checks.
-      actionable += printSuppressionResults(
-        checkTaskSuppressionStaleness(suppressions, [...allModeTasks.values()])
-      ).stale;
-    }
-
-    printReferenceCrossCheck(crossCheckGroups);
+    actionable += printReferenceCrossCheck(crossCheckGroups);
 
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();
@@ -1554,33 +2094,14 @@ async function main(): Promise<void> {
       upstreamProblems,
     });
 
-    // Printed whenever the count is non-zero, gate or no gate: the whole point
-    // of issue #276 is that this must not pass silently. Only the exit code is
-    // opt-in.
-    if (upstreamProblems > 0) {
-      printError(
-        `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
-          'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
-          'an overlay.* id for them - the same shape our own additions use. An overlay ' +
-          'addition can therefore collide with a real upstream requirement instead of ' +
-          'being added alongside it. Nothing here can fix it; report it upstream.' +
-          (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
-      );
-    }
-
-    if (actionable > 0 && strict) {
-      printError(
-        `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
-          'Data is being served incorrectly or the overlay is inconsistent.'
-      );
-    }
-
-    if (staleProblems > 0 && failOnStale) {
-      printError(
-        `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
-          'Remove data now supplied upstream or scope it to the modes where it is still missing.'
-      );
-    }
+    printGateProblems({
+      strict,
+      failOnStale,
+      failOnUpstream,
+      actionable,
+      staleProblems,
+      upstreamProblems,
+    });
 
     process.exit(exitCode);
   } catch (error) {

@@ -2,6 +2,10 @@
 
 How to use tarkov-data-overlay in your application.
 
+Consumers that load catalogs independently of language use `dist/overlay-neutral.json`.
+Follow the [language-neutral contract](NEUTRAL_OVERLAY.md) for its keyed fields,
+string tables, locale target bindings, and source identity. The examples below use `overlay.json`.
+
 For the task unlock/availability contract, account-state adapter, and generated
 mode reports, see [Task availability and unlock tracking](TASK_AVAILABILITY.md).
 
@@ -133,11 +137,6 @@ that a CDN response is authentic.
   "seasonalPerks": {
     "<perk-id>": {
       "id": "<perk-id>",
-      "type": "personal",
-      "name": "Hemophilia",
-      "description": "• Bleeding chance is increased by 25%",
-      "points": 2,
-      "mutuallyExclusiveSeasonalPerkIds": ["<other-perk-id>"],
       "effects": [
         { "effectId": "bleeding_chance_multiplicator", "multiplicator": 1.25 }
       ]
@@ -171,6 +170,11 @@ that a CDN response is authentic.
         "<item-id>": { "name": "Corrected English Item Name" }
       }
     }
+  },
+  "traderTaskGroups": {
+    "regular": { "<task-id>": 0, "<other-task-id>": 1 },
+    "pve": { "<task-id>": 0 },
+    "pvp-season": { "<task-id>": 0 }
   },
   "editions": {
     "standard": { "id": "standard", "title": "Standard Edition", ... },
@@ -236,7 +240,7 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
 
   // Apply top-level fields
   for (const [key, value] of Object.entries(taskOverride)) {
-    if (key === 'objectives' || key === 'objectivesAdd') continue; // Handle separately
+    if (key === 'objectives' || key === 'objectivesAdd' || key === 'objectivesRemove') continue; // Handle separately
     (result as any)[key] = value;
   }
 
@@ -246,6 +250,12 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
       const patch = (taskOverride.objectives as Record<string, any>)[obj.id];
       return patch ? { ...obj, ...patch } : obj;
     });
+  }
+
+  // Drop erroneous upstream objectives (by ID)
+  if (Array.isArray(taskOverride.objectivesRemove) && result.objectives) {
+    const removed = new Set(taskOverride.objectivesRemove);
+    result.objectives = result.objectives.filter((obj) => !removed.has(obj.id));
   }
 
   // Append missing objectives
@@ -262,6 +272,16 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
 If tarkov.dev is missing objectives (like new Collector items), you can append
 them using `objectivesAdd` in the overlay. The merge example above already
 handles this by appending `objectivesAdd` to the objective list.
+
+### With Removed Objectives
+
+If tarkov.dev serves an objective the game does not have (for example one that
+a mode dropped), `objectivesRemove` lists the upstream objective IDs to drop.
+Filter them out of the upstream objectives before appending `objectivesAdd`,
+as the merge example above does. `mergeTaskOverride` unions shared and
+mode-specific removals, so a mode can remove more objectives than the shared
+layer but cannot restore one it removes. Consumers that ignore the field keep
+showing the erroneous objective, which is the pre-overlay behaviour.
 
 ---
 
@@ -306,7 +326,8 @@ function applyTraderRequirements(
 ```
 
 - **Synthetic requirement IDs** use the `overlay.` prefix (for example,
-  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`). The prefix identifies
+  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`, where `<taskId>` is a
+  24-hex task ID or a `placeholder_<slug>` task ID). The prefix identifies
   the ID as synthetic; it does not imply that the requirement itself was
   authored by the overlay. Overlay-only requirements use this form, and the
   API adapter also assigns it when an upstream requirement is missing an ID.
@@ -376,17 +397,19 @@ function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddi
 > is served by tarkov.dev like any other mode — `json.tarkov.dev/pvp-season/*`,
 > listed under `gameModes` at `json.tarkov.dev/endpoints`. Fetch and merge it
 > exactly as you would `regular` or `pve`. Note the hyphenated key requires
-> bracket access (`overlay.modes["pvp-season"]`). One thing tarkov.dev does
-> _not_ serve for this mode is seasonal perks — those are a separate top-level
-> addition (`seasonalPerks`, see below), not part of the `modes` section.
+> bracket access (`overlay.modes["pvp-season"]`). Seasonal perk metadata comes
+> from `pvp-season/season`; raw effect supplements live in the top-level
+> `seasonalPerks` section (see below).
 
 ---
 
 ## Applying Seasonal Perks
 
-`seasonalPerks` is a top-level addition (not a `modes` section) because
-tarkov.dev has no seasonal-perks endpoint for the `pvp-season` mode. It is an
-object keyed by the perk id:
+`seasonalPerks` is a top-level raw-effect supplement keyed by BSG perk id.
+Fetch metadata from [season](https://json.tarkov.dev/pvp-season/season) and its
+English dictionary from [season_en](https://json.tarkov.dev/pvp-season/season_en).
+Names, descriptions, points, exclusions (`exclusiveToPerks`) and images
+(`imageLink`) belong to upstream; the overlay supplies only `id` and `effects`.
 
 ```typescript
 interface SeasonalPerkEffect {
@@ -406,27 +429,46 @@ interface SeasonalPerkEffect {
 
 interface SeasonalPerk {
   id: string;
-  type: string; // tier: "common" | "personal"
-  name: string;
-  description?: string;
-  points?: number | null; // perk-point value; null = none
-  mutuallyExclusiveSeasonalPerkIds?: string[];
-  effects?: SeasonalPerkEffect[];
+  effects: SeasonalPerkEffect[];
+}
+
+interface UpstreamSeasonalPerk {
+  id: string;
+  name: string; // translation key
+  description: string; // translation key
+  points: number | null;
+  exclusiveToPerks: string[];
+  imageLink: string;
 }
 
 // Only meaningful when the player is on a Seasonal Character.
-const perks = Object.values(overlay.seasonalPerks ?? {});
+const [seasonResponse, localeResponse] = await Promise.all([
+  fetch('https://json.tarkov.dev/pvp-season/season').then((r) => r.json()),
+  fetch('https://json.tarkov.dev/pvp-season/season_en').then((r) => r.json()),
+]);
+const season = seasonResponse.data as { perks: Record<string, UpstreamSeasonalPerk[]> };
+const dictionary = localeResponse.data as Record<string, string>;
+const perks = Object.entries(season.perks).flatMap(([type, entries]) =>
+  entries.map((perk) => ({
+    ...perk, // preserves points, exclusiveToPerks and imageLink
+    type,
+    name: dictionary[perk.name] ?? perk.name,
+    description: dictionary[perk.description] ?? perk.description,
+    effects: overlay.seasonalPerks?.[perk.id]?.effects ?? [],
+  }))
+);
 const commonPerks = perks.filter((p) => p.type === 'common');
 ```
 
-Perks with a non-empty `mutuallyExclusiveSeasonalPerkIds` cannot be selected
-together; enforce that when presenting a perk picker. All references
-(`skillIds`, `itemFilter`, trader ids, etc.) are tarkov.dev ids — resolve their
-display names through tarkov.dev's own data/locale, do not expect names here.
-The perk `name`/`description` are the only inline strings (English), because the
-perks do not exist upstream to resolve against. One perk's `itemFilter`
-references an item tarkov.dev does not serve yet; resolve `itemFilter` ids
-against `itemsAdd` as a fallback (see [Resolving Added Items](#resolving-added-items)).
+Keep every upstream perk, including those without overlay effects. Perks with
+non-empty `exclusiveToPerks` cannot be selected together; use upstream exclusions
+when presenting a picker. Raw effects can disagree with upstream display text;
+preserve both rather than deriving multipliers from descriptions.
+
+Effect references (`skillIds`, `itemFilter`, trader ids, etc.) are tarkov.dev ids;
+resolve their display names through upstream data/locale. One `itemFilter`
+references an item upstream does not serve yet; resolve against `itemsAdd` as a
+fallback (see [Resolving Added Items](#resolving-added-items)).
 
 ---
 
@@ -558,8 +600,9 @@ Rules for applying them:
   objective `description`) when rendering that locale.
 - Only apply the section matching your active locale. If you render `de`,
   ignore `locales.en` entirely.
-- Locale overrides are **not** mode-specific — locale bundles are shared
-  across `regular` and `pve`, so apply them in both modes.
+- Locale overrides apply across all supported modes. Upstream translation tables
+  may contain different values for the same key across modes, so consumers must
+  preserve upstream mode scope when building language bundles.
 - Entries are sparse: only fields broken in that locale bundle are present.
 
 ```typescript
@@ -602,6 +645,81 @@ The same pattern applies to the other entity types under `locales`
 (`items`, `traders`, `maps`, `prestige`, `storyChapters`): shallow-merge the
 patch over the entity, handling ID-keyed `objectives` patches separately
 where present.
+
+---
+
+## Applying Map Extract Additions
+
+`maps.<mapId>.extractsAdd` lists extracts tarkov.dev is missing. It is an
+overlay operation, not a tarkov.dev field, so a plain shallow merge only
+attaches an unused array. Consumers should:
+
+- Merge the shared `maps` record with `modes.<mode>.maps` first. Arrays are
+  replaced, not concatenated, so a mode-level `extractsAdd` for a map replaces
+  the shared list for that map.
+- Append each addition to the map's `extracts` unless an existing extract
+  already has the same `id` or `name`, so the entry retires itself once
+  tarkov.dev publishes it.
+- Drop `extractsAdd` from the merged map.
+
+`faction` uses the upstream lowercase vocabulary (`pmc`, `scav`, `shared`), so
+added and upstream extracts filter the same way.
+
+```typescript
+function applyExtractAdditions(map: { extracts?: Extract[]; extractsAdd?: Extract[] }) {
+  const { extractsAdd = [], ...rest } = map;
+  const extracts = [...(rest.extracts ?? [])];
+  for (const add of extractsAdd) {
+    if (!extracts.some((ext) => ext.id === add.id || ext.name === add.name)) extracts.push(add);
+  }
+  return { ...rest, extracts };
+}
+```
+
+`npm run check-overrides -- --strict --fail-on-stale` audits the effective map
+patches in every supported mode, after merging shared and mode-specific fields.
+It compares ordinary corrections with upstream map data and checks `extractsAdd`
+against the map's `extracts`, resolving names through `maps_en`. An upstream ID,
+raw name, or translated name match retires an addition even if the published
+coordinates differ. If only one mode supplies an extract, scope the addition to
+the modes where it is still missing rather than deleting it everywhere.
+An empty mode-specific `extractsAdd: []` remains necessary while it suppresses
+a nonempty shared list; the audit preserves that replacement instead of marking
+it stale. The same applies to mode fields that match upstream but replace a
+different shared correction.
+Malformed upstream map or extract collections fail the audit instead of being
+interpreted as missing extracts.
+
+---
+
+## Extract Requirement Data
+
+`extractRequirements.maps[mapId][extractId]` contains generated requirements joined
+to tarkov.dev's raw exit names. `npm run eft:extracts` reads both `exits` and
+`secretExits` from the game's location definitions. A secret exit's `Id` identifies
+one extraction-intel item, not the exit: it becomes a `transfer` rule with a count
+of one in PvP and PvE. If both lists describe the same exit, their requirements
+are combined without duplicates. Missing or malformed secret item IDs remain `unknown`; absence never means
+an exit is unrestricted. The [wiki extraction-intel list](https://escapefromtarkov.fandom.com/wiki/Keys_%26_Intel#Extraction_intel)
+corroborates the item-to-exit associations.
+
+Shared `rules` apply to both captured modes; differing definitions retain `pvp`
+and `seasonal` lists. PvE uses the regular capture's PvE fields. `sources` records
+the build and definitions hash of each capture. These are definitions, not live
+raid availability. Scene cues such as keys and flares remain separately sourced
+in `extractCues`; third-party requirements must not be presented as game-derived
+rules. `scripts/eft-extracts-curated.ts` supplies cited public-source baselines for
+exits absent from the definitions or missing their passage requirement field.
+The generator checks each exact map ID, extract ID and raw name against the
+catalog. Baselines remove only an omitted passage requirement's `unknown` rule;
+captured chance, timer and other conditions are preserved. An explicit unsupported
+passage type, or an unresolved secret exit, remains unknown. Each capture mode is
+handled separately, so curation cannot erase mode differences. `sources` describes
+the capture inputs, not the public-source baselines. These baselines are best-effort
+across PvP, PvE and Seasonal; public guides do not independently verify all modes.
+See [the requirements audit](./EXTRACT_REQUIREMENTS_AUDIT.md) for evidence and the
+13 deliberately unresolved markers. Consumers should acknowledge public references
+in their source descriptions, including on maps without scene cues.
 
 ---
 
@@ -699,6 +817,28 @@ should treat these as new tasks and append them to the API task list.
 const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
 const allTasks = [...tasksFromApi, ...addedTasks];
 ```
+
+### Trader Task Groups
+
+`traderTaskGroups` gives the in-game trader task-list group for each task, keyed
+by mode, then task id. The value is the client's `tierAccessory`: `0` is
+**Essential Tasks** and `1`–`4` are **Loyalty Level 1–4**. Operational (daily)
+tasks are a separate client group and are not listed.
+
+```typescript
+const group = overlay.traderTaskGroups?.[gameMode]?.[task.id]; // 0-4 or undefined
+const heading =
+  group === undefined ? 'Other' : group === 0 ? 'Essential Tasks' : `Loyalty Level ${group}`;
+```
+
+- **Display only:** A group is never an availability gate. Keep using
+  `traderRequirements`, `otherRequirements` and `progressionCounters` for unlocks.
+- **Missing entry:** A task without an entry has an unknown group, not Essential.
+  Show it ungrouped rather than guessing.
+- **Scope:** Values come from 1.1 PvE, PvP and Seasonal quest-list captures, which
+  agreed in every mode where a task appeared. Each mode block covers the tasks
+  tarkov.dev serves in that mode with a captured value. See the header of
+  `src/additions/traderTaskGroups.json5`.
 
 ### Story Chapters
 
@@ -884,6 +1024,8 @@ interface Overlay {
   hideout?: Record<string, HideoutOverride>;
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
+  // Mode -> task id -> 0 (Essential Tasks) | 1-4 (Loyalty Level N); display grouping only.
+  traderTaskGroups?: Partial<Record<GameMode, Record<string, 0 | 1 | 2 | 3 | 4>>>;
   // Seasonal (pvp-season) data tarkov.dev does not serve; see the sections above.
   seasonalPerks?: Record<string, SeasonalPerk>;
   craftsAdd?: Record<string, Craft>;
@@ -945,6 +1087,7 @@ interface TaskOverride {
   map?: { id: string; name: string } | null;
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
+  objectivesRemove?: string[]; // upstream objective IDs to drop
   // ... other fields
 }
 
@@ -1088,6 +1231,8 @@ interface StoryObjective {
   description: string;
   /** EFT sub-quest id backing this objective (source traceability) */
   sourceQuestId: string;
+  /** Optional layout parent: a main objective in the same chapter and sourceQuestId. */
+  parentObjectiveId?: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;

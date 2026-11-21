@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { join, relative } from 'path';
 import { existsSync } from 'fs';
 import {

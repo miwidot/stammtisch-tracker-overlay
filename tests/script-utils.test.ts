@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from './test-support.js';
 import { pathToFileURL } from 'node:url';
 import { isDirectExecution, runDirectly, sleep } from '../src/lib/script-utils.js';
 

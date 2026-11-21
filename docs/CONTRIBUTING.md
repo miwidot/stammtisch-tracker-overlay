@@ -31,11 +31,11 @@ Additions live in `src/additions/` and should include the full object.
 ## Project Data Layout
 
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
-- `src/additions/`: New entities not present in tarkov.dev (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
+- `src/additions/`: New entities and missing fields (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`, `extractRequirements`, `extractCues`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
-- `dist/overlay.json`: Generated output from `npm run build` (committed to the repo; regenerate it whenever you change source data).
+- `dist/overlay.json`: Generated output from `npm run build`. Only the release workflow commits it (after each merge to `main`); pull requests must leave it unchanged.
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
-  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
+  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`, `traderTaskGroups`, `extractRequirements`, `extractCues`).
 
 ---
 
@@ -86,9 +86,13 @@ Edit the appropriate file in `src/overrides/`:
 3. Make your changes
 4. Run `npm run validate` (and `npm run typecheck` / `npm test` when you touch
    `src/lib/`, `scripts/`, or tests)
-5. For any data change, run `npm run build` and commit the regenerated
-   `dist/overlay.json`
-6. Record the commands you ran — and call out any regenerated output — in the PR
+5. Run `npm run build` to confirm the overlay still builds, but do not commit
+   `dist/overlay.json`; the release workflow regenerates and commits it after
+   merge, and CI rejects pull requests that change it (restore it with
+   `git fetch https://github.com/tarkovtracker-org/tarkov-data-overlay.git main`
+   then `git checkout FETCH_HEAD -- dist/overlay.json`, which works from forks
+   too)
+6. Record the commands you ran in the PR
 7. Submit a PR using the template
 
 ---
@@ -101,11 +105,15 @@ Edit the appropriate file in `src/overrides/`:
 - New editions → `src/additions/editions.json5` (schema `edition.schema.json`)
 - New story chapters → `src/additions/storyChapters.json5` (schema `story-chapter.schema.json`)
 - New items → `src/additions/itemsAdd.json5` (schema `item-additions.schema.json`)
-- New seasonal (`pvp-season`) perks → `src/additions/seasonalPerks.json5` (schema `seasonal-perk.schema.json`)
+- Raw seasonal (`pvp-season`) perk effects missing upstream → `src/additions/seasonalPerks.json5` (schema `seasonal-perk.schema.json`)
 - New hideout crafts missing from the API → `src/additions/craftsAdd.json5` (schema `craft-additions.schema.json`)
+- Extract requirement rules → regenerate `src/additions/extractRequirements.json5` with `npm run eft:extracts` (schema `extract-requirements.schema.json`); never hand-edit it
+- Extract scene cues the game data does not describe (signal flares, green smoke, keys) → `src/additions/extractCues.json5` (schema `extract-cues.schema.json`), each with a public `reference`
 
-`seasonalPerks` and `craftsAdd` cover `pvp-season` (Seasonal Character) data
-tarkov.dev does not serve. Keep every new data type in `src/additions/` with its
+`seasonalPerks` supplements raw effects absent from `pvp-season/season`; keep
+perk metadata and translations upstream (`season` and `season_en`). Omit
+empty or stub effects. `craftsAdd` covers crafts tarkov.dev does not serve.
+Keep every new data type in `src/additions/` with its
 schema in `src/schemas/`, and register the schema in `SCHEMA_CONFIGS`
 (`src/lib/types.ts`). Prove additions the same way as any other: patch notes
 and/or an in-game screenshot. Reference entities by tarkov.dev id where available
@@ -161,7 +169,8 @@ regressions.
 A `GlobalVariableValue` condition is a numeric state comparison, though; it is
 not interchangeable with a `TraderLoyalty` condition or a list of prerequisite
 tasks. See [global variables and progression counters](GLOBAL_VARIABLES.md)
-before adding counter metadata, and keep incomplete or unverified mappings
+before adding counter metadata. Mappings that meet its best-effort standard can
+be published as verified; keep mappings that any observation contradicts
 informational.
 
 ### `taskRequirements` — the wiki `previous` field is not proof
@@ -257,10 +266,11 @@ have.
 **Introduction** (`5d2495a886f77425cd51e403`). Its wiki Requirements section
 still reads "Must be level 2 to start this quest". That is pre-1.1.0.0: the
 client carries no `Level` condition for it, and upstream's `minPlayerLevel` is
-already `0`. Its gate is a **dialogue** requirement — upstream serves a single
-`otherRequirements` entry of `type: 'dialogue'`, not `globalVariable`, and the
-two are mutually exclusive types. Track it by its condition ID through
-`completedConditionIds` / `dialogues` rather than as numeric variable state, and
+already `0`. Upstream serves its gate as a single `otherRequirements` entry of
+`type: 'dialogue'`, but in the captures it is the per-trader flag that the Tour
+chapter's "Talk to Mechanic" objective sets, so `src/overrides/tasks.json5`
+replaces it with a `storyObjective` gate on that objective (see the "Tour
+'Talk to <trader>' gates" section there). Track it through story progress, and
 do not re-add a level gate from that wiki line.
 
 **New Beginning (Prestige 1)** (`6761f28a022f60bb320f3e95`). An override here
@@ -436,6 +446,27 @@ If tarkov.dev is missing the objective entirely, add it using `objectivesAdd`:
 }
 ```
 
+If tarkov.dev serves an objective the game does not have (in every mode, or in
+one mode via `src/overrides/modes/<mode>/tasks.json5`), drop it by ID with
+`objectivesRemove`. Back the removal with an in-game capture or other proof
+that the objective is absent, and keep the removed text in a `Was:` comment.
+`check-overrides` reports the removal as redundant once upstream stops serving
+the objective. Don't remove an objective and also patch or re-add the same ID:
+to replace an upstream objective's values, patch it under `objectives` instead.
+`check-overrides` flags the combination, including across shared and mode files.
+
+```json5
+{
+  // Task Name - Objective the game no longer has
+  // Proof: [link or "verified against a <version> <mode> capture"]
+  'task-id-here': {
+    objectivesRemove: [
+      'objective-id-here', // Was: Survive and extract from the location
+    ],
+  },
+}
+```
+
 ---
 
 ## Local Development
@@ -450,21 +481,54 @@ npm run validate
 # Type-check scripts and tests
 npm run typecheck
 
-# Build the overlay locally (commit the regenerated dist/overlay.json for data changes)
+# Build the overlay locally (do not commit dist/overlay.json; the release workflow does)
 npm run build
-
-# Confirm the committed generated output still matches source data
-npm run build:check
 
 # Run the test suite (required when changing src/lib/, scripts/, or tests)
 npm test
 ```
+
+### Running CI locally
+
+`scripts/ci-local.ps1` runs the validation steps of `.github/workflows/ci.yml`
+without GitHub runners (PowerShell 7 and Node.js required). It tests the same
+merge commit CI would, in a temporary worktree, so your working tree is
+untouched. It runs the Validate & Build job, then the Windows LF-checkout job in
+a fresh clone with `core.autocrlf=true`. That second job is Windows evidence
+only on a Windows host; elsewhere it is labelled as an approximation. It exits 1
+if any step fails and writes the full log to `tdo-ci/<name>-<pid>.log` in your
+temp directory, where `<name>` is the branch with characters other than letters,
+digits, `_` and `-` replaced by `_` (for example `feat_x-1234.log`; the script
+prints the path). Each run uses its own work directories and log, and a later
+run removes checkouts left behind by a run that was killed.
+
+```powershell
+pwsh scripts/ci-local.ps1 -Branch feat/x          # pushed branch, merged onto origin/main
+pwsh scripts/ci-local.ps1 -Branch feat/x -Local   # committed, unpushed local branch
+pwsh scripts/ci-local.ps1                         # origin/main itself (push run)
+```
+
+Without `-Branch` it reproduces a push to `main`: it skips the PR-only check
+that rejects `dist/` changes and builds with the next overlay tag as
+`OVERLAY_VERSION`. It does not upload the release artifact.
+
+Commit review fixes and run it with `-Local` before pushing them; each push to a
+pull request starts a new CI run. Validate & Build runs on Ubuntu in CI and on
+your OS here.
 
 ---
 
 ## Master Samples
 
 See `docs/MASTER_SAMPLES.md` for the comprehensive, copy-paste JSON5 master reference.
+
+---
+
+## Licensing of Contributions
+
+Data contributions (anything under `src/overrides/`, `src/additions/`, `src/divergences/`, or
+`src/suppressions/`) are licensed under [CC BY-NC 4.0](../LICENSE-DATA). Code contributions are
+licensed under [MIT](../LICENSE). Submitting a pull request means you agree to these terms.
 
 ---
 

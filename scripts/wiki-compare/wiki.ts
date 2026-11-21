@@ -565,7 +565,7 @@ export function parseObjectives(
   return objectives;
 }
 
-export function parseRewards(lines: string[]): WikiRewards {
+function parseRewards(lines: string[]): WikiRewards {
   let xp: number | undefined;
   const reputations: TraderReputation[] = [];
   let money: number | undefined;
@@ -615,7 +615,7 @@ export function parseRewards(lines: string[]): WikiRewards {
   };
 }
 
-export function parseRelatedQuestItems(wikitext: string): WikiRelatedItem[] {
+function parseRelatedQuestItems(wikitext: string): WikiRelatedItem[] {
   const lines = wikitext.split('\n');
   const items: WikiRelatedItem[] = [];
   let inTable = false;
@@ -673,7 +673,7 @@ export function parseRelatedQuestItems(wikitext: string): WikiRelatedItem[] {
   return items;
 }
 
-export function parseInfoboxLinks(wikitext: string, field: string): string[] {
+function parseInfoboxLinks(wikitext: string, field: string): string[] {
   // Use [ \t]* instead of \s* to avoid matching newlines
   const regex = new RegExp(`^\\|\\s*${escapeRegExp(field)}\\s*=[ \\t]*(.+)$`, 'mi');
   const match = wikitext.match(regex);
@@ -693,7 +693,7 @@ export function parseInfoboxLinks(wikitext: string, field: string): string[] {
   return results;
 }
 
-export function parseInfoboxValue(wikitext: string, field: string): string | undefined {
+function parseInfoboxValue(wikitext: string, field: string): string | undefined {
   // Use [ \t]* instead of \s* to avoid matching newlines
   const regex = new RegExp(`^\\|\\s*${escapeRegExp(field)}\\s*=[ \\t]*(.+)$`, 'mi');
   const match = wikitext.match(regex);

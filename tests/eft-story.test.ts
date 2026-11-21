@@ -4,10 +4,18 @@
  * scripts/eft-story-write.ts, scripts/lib/sequence-matcher.ts)
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'node:url';
 import { join } from 'path';
@@ -34,7 +42,7 @@ import { getProjectPaths, STORY_ENDINGS } from '../src/lib/index.js';
  * fixtures would be refused as unusable rather than exercising the path intended.
  */
 const FULL_LOCK = {
-  file: 'eft/capture.json',
+  file: 'data/reference/capture.json',
   sha256: 'a'.repeat(64),
   bytes: 4096,
   clientVersion: 'test-client',
@@ -82,7 +90,8 @@ function makeStoryCapture(): string {
   });
 }
 
-describe('story reference provenance enforcement', () => {
+// Each case spawns fresh tsx processes; Windows runners take ~5x as long as Linux.
+describe('story reference provenance enforcement', { timeout: 30_000 }, () => {
   it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-'));
     const capture = JSON.stringify({
@@ -112,7 +121,7 @@ describe('story reference provenance enforcement', () => {
         },
       },
     });
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     const lockFile = join(dir, 'scripts/story-reference.lock.json');
     const run = (update = '0') =>
       execFileSync(
@@ -132,11 +141,13 @@ describe('story reference provenance enforcement', () => {
       );
     try {
       mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, capture);
       expect(() => run()).toThrow(/no scripts\/story-reference.lock.json/);
       run('1');
       const lock = JSON.parse(readFileSync(lockFile, 'utf-8'));
       expect(lock).toMatchObject({
+        file: 'data/reference/quest_list.json',
         capturedAt: '2026-06-30T12:00:00Z',
         clientVersion: 'test-client',
         gameMode: 'pve',
@@ -144,14 +155,153 @@ describe('story reference provenance enforcement', () => {
       });
       writeFileSync(lockFile, JSON.stringify({ ...lock, clientVersion: 'wrong' }));
       expect(() => run()).toThrow(/provenance mismatch for clientVersion/);
-      writeFileSync(lockFile, JSON.stringify({ ...lock, file: 'moved/original.json' }));
+      writeFileSync(
+        lockFile,
+        JSON.stringify({ ...lock, file: 'data/reference/moved/original.json' })
+      );
       expect(() => run()).not.toThrow();
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe(
+        'data/reference/moved/original.json'
+      );
       writeFileSync(file, `${capture}\n`);
       expect(() => run()).toThrow(/does not match/);
       const before = readFileSync(lockFile, 'utf-8');
       writeFileSync(file, JSON.stringify({ data: [{ _id: '68cbd33676fe74b1e80bfd91' }] }));
       expect(() => run('1')).toThrow(/no chapter quests or objective texts/);
       expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('canonicalizes re-pin inputs and rejects sources outside data/reference/ including directory-link escapes', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-path-'));
+    const capture = makeStoryCapture();
+    const source = join(dir, 'data', 'reference', 'nested', 'quest_list.json');
+    const outside = join(dir, 'outside.json');
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const run = (file: string, update = '1') =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock('${STAGE_SHA}'); promoteStoryReferenceLock('${STAGE_SHA}');`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: update },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'reference', 'nested'), { recursive: true });
+      writeFileSync(source, capture);
+      writeFileSync(outside, capture);
+      const directoryLink = process.platform === 'win32' ? 'junction' : 'dir';
+      symlinkSync(
+        join(dir, 'data', 'reference', 'nested'),
+        join(dir, 'data', 'reference', 'alias'),
+        directoryLink
+      );
+      symlinkSync(dir, join(dir, 'data', 'reference', 'escape-directory'), directoryLink);
+      symlinkSync(
+        join(dir, 'data', 'reference', 'nested'),
+        join(dir, 'outside-alias'),
+        directoryLink
+      );
+
+      for (const file of [
+        source,
+        'data/reference/nested/quest_list.json',
+        './data/reference/nested/../nested/quest_list.json',
+        'data/reference/alias/quest_list.json',
+      ]) {
+        expect(() => run(file), file).not.toThrow();
+        expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe(
+          'data/reference/nested/quest_list.json'
+        );
+      }
+      const before = readFileSync(lockFile, 'utf-8');
+      for (const file of [
+        outside,
+        'data/reference/../outside.json',
+        'data/reference/escape-directory/outside.json',
+        'outside-alias/quest_list.json',
+      ]) {
+        expect(() => run(file), file).toThrow(/source must be a capture under/);
+        expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+        expect(existsSync(join(dir, pendingLockSidecar(STAGE_SHA)))).toBe(false);
+      }
+
+      // Matching bytes do not authorize reading outside the capture directory.
+      expect(() => run(outside, '0')).toThrow(/source must be a capture under/);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+      const relocated = join(dir, 'data', 'reference', 'relocated.json');
+      writeFileSync(relocated, capture);
+      expect(() => run(relocated, '0')).not.toThrow();
+      writeFileSync(relocated, `${capture}\n`);
+      expect(() => run(relocated, '0')).toThrow(/does not match/);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+
+      // The reference directory itself cannot redirect to the project root.
+      rmSync(join(dir, 'data', 'reference'), { recursive: true, force: true });
+      symlinkSync(dir, join(dir, 'data', 'reference'), directoryLink);
+      expect(() => run('data/reference/outside.json')).toThrow(/source must be a capture under/);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('canonicalizes file symlinks and rejects file symlink escapes', (t) => {
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-file-link-'));
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
+      const source = join(dir, 'data', 'reference', 'quest_list.json');
+      const outside = join(dir, 'outside.json');
+      writeFileSync(source, makeStoryCapture());
+      writeFileSync(outside, makeStoryCapture());
+      try {
+        symlinkSync(source, join(dir, 'data', 'reference', 'alias.json'), 'file');
+      } catch (error) {
+        if (process.platform === 'win32' && (error as NodeJS.ErrnoException).code === 'EPERM') {
+          t.skip('File symlinks require Windows Developer Mode or elevated privileges');
+          return;
+        }
+        throw error;
+      }
+      symlinkSync(outside, join(dir, 'data', 'reference', 'escape.json'), 'file');
+      symlinkSync(source, join(dir, 'outside-alias.json'), 'file');
+      const run = (file: string) =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock('${STAGE_SHA}'); promoteStoryReferenceLock('${STAGE_SHA}');`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        );
+      expect(() => run('data/reference/alias.json')).not.toThrow();
+      const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+      const before = readFileSync(lockFile, 'utf8');
+      expect(JSON.parse(before).file).toBe('data/reference/quest_list.json');
+      for (const file of ['data/reference/escape.json', 'outside-alias.json']) {
+        expect(() => run(file)).toThrow(/source must be a capture under/);
+        expect(readFileSync(lockFile, 'utf8')).toBe(before);
+        expect(existsSync(join(dir, pendingLockSidecar(STAGE_SHA)))).toBe(false);
+      }
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -189,7 +339,7 @@ describe('story reference provenance enforcement', () => {
         },
       },
     });
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     const lockFile = join(dir, 'scripts/story-reference.lock.json');
     const runScript = (body: string) =>
       execFileSync(
@@ -209,6 +359,7 @@ describe('story reference provenance enforcement', () => {
       );
     try {
       mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, capture);
 
       // loadReference alone stages the pin; nothing is written.
@@ -311,24 +462,24 @@ describe('story reference provenance enforcement', () => {
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
       writeFileSync(
         firstSidecar,
-        `${JSON.stringify({ lock: { ...FULL_LOCK, file: 'eft/first.json' }, outputSha256: first })}\n`
+        `${JSON.stringify({ lock: { ...FULL_LOCK, file: 'data/reference/first.json' }, outputSha256: first })}\n`
       );
       writeFileSync(
         secondSidecar,
         `${JSON.stringify({
-          lock: { ...FULL_LOCK, file: 'eft/second.json', sha256: 'f'.repeat(64) },
+          lock: { ...FULL_LOCK, file: 'data/reference/second.json', sha256: 'f'.repeat(64) },
           outputSha256: second,
         })}\n`
       );
 
       expect(promote(first)).toBe('true');
-      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/first.json');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('data/reference/first.json');
       expect(existsSync(firstSidecar)).toBe(false);
       // The other generation's binding is untouched by this promotion.
       expect(existsSync(secondSidecar), "another run's binding was consumed").toBe(true);
 
       expect(promote(second)).toBe('true');
-      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/second.json');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('data/reference/second.json');
       expect(existsSync(secondSidecar)).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -367,7 +518,7 @@ describe('story reference provenance enforcement', () => {
         },
       },
     });
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     const binding = 'e'.repeat(64);
     const run = (body: string) =>
       spawnSync(
@@ -387,6 +538,7 @@ describe('story reference provenance enforcement', () => {
       );
     try {
       mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, capture);
 
       // First run publishes a real lock; it stages, commits and promotes normally.
@@ -420,7 +572,7 @@ describe('story reference provenance enforcement', () => {
 
       // Another capture's binding for the same payload is refused, not replaced.
       const foreign = `${JSON.stringify({
-        lock: { ...FULL_LOCK, file: 'eft/other.json', sha256: 'f'.repeat(64) },
+        lock: { ...FULL_LOCK, file: 'data/reference/other.json', sha256: 'f'.repeat(64) },
         outputSha256: binding,
       })}\n`;
       writeFileSync(join(dir, pendingLockSidecar(binding)), foreign);
@@ -465,10 +617,11 @@ describe('story reference provenance enforcement', () => {
     // that inspects it. The vanished file must not be mistaken for a conflicting
     // capture: nothing is left to conflict with, so the staging retries.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-vanish-'));
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     const binding = 'c'.repeat(64);
     try {
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, makeStoryCapture());
       // A stale binding occupies the address, and the simulated read reports it
       // as already promoted and removed - freeing the path for the retry.
@@ -507,10 +660,11 @@ describe('story reference provenance enforcement', () => {
     // A pathological race must not spin forever: each retry re-arms the path, so
     // the attempt bound is what ends the loop.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-gone-'));
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     const binding = 'c'.repeat(64);
     try {
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, makeStoryCapture());
       writeFileSync(join(dir, pendingLockSidecar(binding)), '{ "lock": {} }\n');
       expect(() =>
@@ -539,7 +693,32 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
-  it('leaves the committed lock intact when the sidecar carries no usable lock', () => {
+  it.each([
+    JSON.stringify({ outputSha256: 'b'.repeat(64) }), // no lock at all
+    JSON.stringify({ lock: { sha256: 'a'.repeat(64) }, outputSha256: null }), // no file
+    JSON.stringify({ lock: 'not-an-object', outputSha256: null }),
+    // Parses and names a capture, but drops the provenance the lock exists to record.
+    JSON.stringify({
+      lock: { file: 'data/reference/capture.json', sha256: 'a'.repeat(64) },
+      outputSha256: 'b'.repeat(64),
+    }),
+    JSON.stringify({ lock: { ...FULL_LOCK, bytes: 'not-a-number' } }),
+    ...[
+      '/absolute/capture.json',
+      'C:/absolute/capture.json',
+      'C:\\absolute\\capture.json',
+      '\\\\server\\capture.json',
+      '../capture.json',
+      'eft/capture.json',
+      'data/eft/capture.json',
+      'data/reference/../../capture.json',
+      './eft/capture.json',
+      'data/reference//capture.json',
+      'data/reference/./capture.json',
+      'data/reference/capture.json\0',
+    ].map((file) => JSON.stringify({ lock: { ...FULL_LOCK, file }, outputSha256: 'b'.repeat(64) })),
+    '{ truncated', // never finished being written
+  ])('leaves the committed lock intact for unusable sidecar %s', (payload) => {
     // The sidecar lives in the gitignored data/ tree, so an interrupted run or a
     // hand edit can leave JSON that parses but omits `lock`. Serializing that
     // straight through would write the literal `undefined` over the committed
@@ -548,44 +727,30 @@ describe('story reference provenance enforcement', () => {
     const promoted = 'b'.repeat(64);
     const sidecar = join(dir, pendingLockSidecar(promoted));
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
-    const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
+    const committed = `${JSON.stringify({ file: 'data/reference/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
     try {
       mkdirSync(join(dir, 'scripts'), { recursive: true });
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
       writeFileSync(lockFile, committed);
 
-      for (const payload of [
-        JSON.stringify({ outputSha256: 'b'.repeat(64) }), // no lock at all
-        JSON.stringify({ lock: { sha256: 'a'.repeat(64) }, outputSha256: null }), // no file
-        JSON.stringify({ lock: 'not-an-object', outputSha256: null }),
-        // Parses and names a capture, but drops the provenance the lock exists to
-        // record, so promoting it would leave the committed chapters unauditable.
-        JSON.stringify({
-          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
-          outputSha256: 'b'.repeat(64),
-        }),
-        JSON.stringify({ lock: { ...FULL_LOCK, bytes: 'not-a-number' } }),
-        '{ truncated', // never finished being written
-      ]) {
-        writeFileSync(sidecar, `${payload}\n`);
-        const promoted = execFileSync(
-          process.execPath,
-          [
-            '--import',
-            import.meta.resolve('tsx'),
-            '--input-type=module',
-            '-e',
-            `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock('${'b'.repeat(64)}'));`,
-          ],
-          { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
-        )
-          .toString()
-          .trim();
+      writeFileSync(sidecar, `${payload}\n`);
+      const promoted = execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock('${'b'.repeat(64)}'));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
 
-        expect(promoted, `promoted an unusable sidecar: ${payload}`).toBe('false');
-        expect(readFileSync(lockFile, 'utf-8'), `lock corrupted by: ${payload}`).toBe(committed);
-        expect(existsSync(sidecar), `unusable sidecar kept: ${payload}`).toBe(false);
-      }
+      expect(promoted, `promoted an unusable sidecar: ${payload}`).toBe('false');
+      expect(readFileSync(lockFile, 'utf-8'), `lock corrupted by: ${payload}`).toBe(committed);
+      expect(existsSync(sidecar), `unusable sidecar kept: ${payload}`).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -709,7 +874,7 @@ describe('story reference provenance enforcement', () => {
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
     const dest = join(dir, 'src', 'additions', 'storyChapters.json5');
     const input = join(dir, 'story-final.json');
-    const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
+    const committed = `${JSON.stringify({ file: 'data/reference/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
     const previousArtifact = '{ /* previous */ }\n';
     try {
       mkdirSync(join(dir, 'scripts'), { recursive: true });
@@ -744,7 +909,7 @@ describe('story reference provenance enforcement', () => {
       writeFileSync(
         sidecar,
         `${JSON.stringify({
-          lock: { ...FULL_LOCK, file: 'eft/newer.json', sha256: 'c'.repeat(64) },
+          lock: { ...FULL_LOCK, file: 'data/reference/newer.json', sha256: 'c'.repeat(64) },
           outputSha256: 'b'.repeat(64),
         })}\n`
       );
@@ -840,10 +1005,11 @@ describe('story reference provenance enforcement', () => {
         },
       },
     });
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     try {
       mkdirSync(join(dir, 'scripts'));
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, seasonal);
       expect(() =>
         execFileSync(
@@ -888,10 +1054,11 @@ describe('story reference provenance enforcement', () => {
         },
       ],
     });
-    const file = join(dir, 'quest_list.json');
+    const file = join(dir, 'data', 'reference', 'quest_list.json');
     try {
       mkdirSync(join(dir, 'scripts'));
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'reference'), { recursive: true });
       writeFileSync(file, unknownMode);
       expect(() =>
         execFileSync(
@@ -952,7 +1119,7 @@ describe('story reference provenance enforcement', () => {
 
       expect(promoted).toBe('true');
       expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({
-        file: 'eft/capture.json',
+        file: 'data/reference/capture.json',
         sha256: 'a'.repeat(64),
       });
       // Sidecar consumed, so a later run cannot re-apply a stale pin.
@@ -1499,6 +1666,26 @@ describe('exclusiveCounterparts', () => {
 });
 
 describe('storyReferenceCandidates', () => {
+  it('visits a directory only once when a symlink leads back to its ancestor', () => {
+    const root = mkdtempSync(join(tmpdir(), 'story-candidate-cycle-'));
+    try {
+      mkdirSync(join(root, 'nested'));
+      writeFileSync(join(root, 'quest_list.json'), makeStoryCapture());
+      writeFileSync(join(root, 'nested', 'quest_list.json'), makeStoryCapture());
+      symlinkSync(
+        root,
+        join(root, 'nested', 'cycle'),
+        process.platform === 'win32' ? 'junction' : 'dir'
+      );
+      expect(storyReferenceCandidates(root)).toEqual([
+        join(root, 'nested', 'quest_list.json'),
+        join(root, 'quest_list.json'),
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('discovers captures in a filesystem-independent order', () => {
     // readdirSync order is not portable, so discovery sorts; enriched captures
     // still rank first because they carry the localization block.
@@ -1532,11 +1719,13 @@ describe('storyReferenceCandidates', () => {
 });
 
 describe('renderStoryChaptersJson5', () => {
-  it('round-trips the committed storyChapters.json5 byte-for-byte', () => {
+  it('round-trips the committed storyChapters.json5 content with canonical LF output', () => {
     const { srcDir } = getProjectPaths();
     const committedPath = join(srcDir, 'additions', 'storyChapters.json5');
     const committed = readFileSync(committedPath, 'utf8');
     const data = JSON5.parse(committed);
-    expect(renderStoryChaptersJson5(data)).toBe(committed);
+    // Git may convert the checkout to CRLF. Generated artifacts always use LF;
+    // every other byte, including comments and ordering, must remain identical.
+    expect(renderStoryChaptersJson5(data)).toBe(committed.replace(/\r\n/g, '\n'));
   });
 });

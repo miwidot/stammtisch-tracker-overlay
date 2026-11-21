@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { join, relative, sep } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import {

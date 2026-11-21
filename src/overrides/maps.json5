@@ -1,0 +1,7 @@
+{
+  // Map corrections and additions
+  // Lighthouse's Hideout Under the Landing Stage addition was retired:
+  // all upstream modes now include Scav_Underboat_Hideout with canonical ID
+  // 3ab7031964d90e541d16b1307d2017f424518b49 and its own position.
+  // Proof: https://json.tarkov.dev/regular/maps (also /pve/maps, /pvp-season/maps)
+}

@@ -8,6 +8,9 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
+import { assertStoryObjectiveParents } from '../src/lib/story-objective-parents.js';
+import { assertTaskIdAliases } from '../src/lib/task-id-aliases.js';
+import { compileNeutralOverlay } from '../src/lib/neutral-overlay.js';
 import {
   getLatestTagVersion,
   getProjectPaths,
@@ -65,6 +68,7 @@ function loadSourceFiles(): Omit<OverlayOutput, '$meta'> {
     output.locales = locales;
   }
 
+  assertTaskIdAliases(output.taskIdAliases);
   return output;
 }
 
@@ -123,7 +127,7 @@ export function resolveBuildVersion(
 
 /** Compare an existing committed overlay with the freshly generated content. */
 function checkGeneratedOutput(
-  output: OverlayOutput,
+  output: Pick<OverlayOutput, '$meta'>,
   outputPath: string,
   checkVersion: boolean
 ): void {
@@ -160,7 +164,7 @@ function checkGeneratedOutput(
   const expected = JSON.stringify(canonicalize(withoutMetadata(output)));
   const actual = JSON.stringify(canonicalize(withoutMetadata(existing)));
   if (expected !== actual) {
-    throw new Error(`Generated overlay is stale: run 'npm run build' and commit ${outputPath}`);
+    throw new Error(`Generated overlay is stale relative to source data: ${outputPath}`);
   }
 }
 
@@ -174,6 +178,7 @@ function build(): void {
 
   // Load all source files
   const data = loadSourceFiles();
+  assertStoryObjectiveParents(data.storyChapters ?? {});
 
   // Create output with metadata
   const output: OverlayOutput = {
@@ -191,11 +196,18 @@ function build(): void {
   output.$meta.sha256 = generateSha256(jsonContent);
 
   const finalContent = JSON.stringify(output, null, 2);
+  const neutral = compileNeutralOverlay(output);
+  neutral.$meta.sha256 = generateSha256(JSON.stringify(neutral, null, 2));
 
   // Ensure dist directory exists
   const outputPath = join(distDir, 'overlay.json');
+  const neutralPath = join(distDir, 'overlay-neutral.json');
   if (process.argv.includes('--check')) {
     checkGeneratedOutput(output, outputPath, versionIsAuthoritative);
+    // Source identity includes the volatile legacy build timestamp and digest.
+    // Bind the expected sidecar to the already-validated committed legacy output.
+    const expectedNeutral = compileNeutralOverlay(loadJsonFile<OverlayOutput>(outputPath));
+    checkGeneratedOutput(expectedNeutral, neutralPath, versionIsAuthoritative);
     console.log(`Generated overlay is current: ${outputPath}`);
     return;
   }
@@ -203,6 +215,7 @@ function build(): void {
 
   // Write output
   writeFileSync(outputPath, finalContent);
+  writeFileSync(neutralPath, JSON.stringify(neutral, null, 2));
 
   // Summary
   const entityCounts = Object.entries(data)

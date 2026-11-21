@@ -2,7 +2,7 @@
  * Tests for terminal formatting utilities
  */
 
-import { afterEach, describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from './test-support.js';
 import {
   colors,
   icons,

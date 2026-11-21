@@ -23,9 +23,9 @@
  */
 
 import { SYNTHETIC_REQUIREMENT_ID_PREFIX } from './types.js';
+import { registerTaskComparison } from './task-comparison.cjs';
 import type {
   TaskData,
-  TaskItemRef,
   TaskObjective,
   TaskRewards,
   TaskRequirement,
@@ -39,14 +39,16 @@ import type {
   TraderAccessData,
 } from './types.js';
 import {
-  adaptReward as adaptSharedReward,
+  validObjectiveCollection,
+  buildItemComparisonIndex,
+  comparisonRecords,
+  validateTranslationMap,
+  createTaskNormalizers,
   buildTaskContext as buildSharedTaskContext,
   fetchCached,
   mapOptionalArray,
-  normalizeRequiredPrestige,
   readResponseJson,
   resolveDialogueTraderRefs as resolveSharedDialogueTraderRefs,
-  resolveReferenceMatrix,
 } from './tarkov-api-shared.cjs';
 
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
@@ -265,7 +267,7 @@ async function fetchTranslations(
         `Invalid json.tarkov.dev response for ${mode}/${endpoint}_${locale}: expected data object`
       );
     }
-    return envelope.data as TranslationMap;
+    return validateTranslationMap(envelope.data, `${mode}/${endpoint}_${locale}`);
   } catch (error) {
     // The endpoint registry currently advertises translations for every mode,
     // but pvp-season/items_en is absent in production. A missing translation
@@ -291,110 +293,15 @@ type Context = {
   tradersEn: TranslationMap;
 };
 
-/** Select the upstream item record, falling back to an inline reference. */
-function resolveItemRecord(
-  id: string | undefined,
-  inline: JsonRecord | undefined,
-  ctx: Context
-): JsonRecord | undefined {
-  return (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
-}
-
-/** Translate one item display field and preserve an inline fallback value. */
-function resolveItemField(
-  field: 'name' | 'shortName',
-  raw: JsonRecord | undefined,
-  inline: JsonRecord | undefined,
-  ctx: Context
-): string | undefined {
-  return (
-    translate(ctx.itemsEn, raw?.[field]) ??
-    (typeof inline?.[field] === 'string' ? inline[field] : undefined)
-  );
-}
-
-/**
- * Resolve an item reference (string id or inline `{id,...}`) into the
- * `{id,name,shortName}` shape the validator compares against.
- */
-function resolveItemRef(value: unknown, ctx: Context): TaskItemRef | undefined {
-  const id = stringId(value);
-  const inline = isRecord(value) ? value : undefined;
-  const raw = resolveItemRecord(id, inline, ctx);
-  if (!id && !raw) return undefined;
-  const name = resolveItemField('name', raw, inline, ctx);
-  const shortName = resolveItemField('shortName', raw, inline, ctx);
-  return compact({ id: id ?? '', name, shortName }) as TaskItemRef;
-}
-
-/** Resolve a list of item references and drop entries that cannot be resolved. */
-function resolveItemRefs(value: unknown, ctx: Context): TaskItemRef[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((entry) => resolveItemRef(entry, ctx))
-    .filter((entry): entry is TaskItemRef => Boolean(entry));
-}
-
-/** Resolve a nested item-reference matrix while preserving its groups. */
-function resolveItemRefMatrix(value: unknown, ctx: Context): TaskItemRef[][] | undefined {
-  return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
-}
-
-/** Resolve one map reference and its translated display name. */
-function resolveMapRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.mapsById.get(id);
-  const name = translate(ctx.mapsEn, raw?.name);
-  return compact({ id, name }) as { id: string; name: string };
-}
-
-/** Resolve a list of map references and drop malformed entries. */
-function resolveMapRefs(
-  value: unknown,
-  ctx: Context
-): Array<{ id: string; name: string }> | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((entry) => resolveMapRef(entry, ctx))
-    .filter((entry): entry is { id: string; name: string } => Boolean(entry));
-}
-
-/** Resolve one trader reference and its translated display name. */
-function resolveTraderRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.tradersById.get(id);
-  const name = translate(ctx.tradersEn, raw?.name);
-  return compact({ id, name }) as { id: string; name: string };
-}
-
-/** Resolve one task reference and its translated display name. */
-function resolveTaskRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.tasksById.get(id);
-  const name = translate(ctx.tasksEn, raw?.name);
-  return compact({ id, name }) as { id: string; name: string };
-}
-
-/**
- * Resolve a task `requiredPrestige` reference (a prestige-id string) into the
- * `{id,name,prestigeLevel}` object the validator expects. The prestige level
- * lives in the separate `prestige` array of the tasks payload.
- */
-function resolveRequiredPrestige(
-  value: unknown,
-  ctx: Context
-): { id?: string; name: string; prestigeLevel: number } | undefined {
-  if (value === undefined) return undefined;
-  const id = stringId(value);
-  const inline = isRecord(value) ? value : undefined;
-  const raw = (id ? ctx.prestigeById.get(id) : undefined) ?? inline;
-  // Preserve a declared but unresolved requirement so the availability model
-  // reports unknown instead of silently treating it as no requirement.
-  return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw?.name), raw);
-}
+const normalizers = createTaskNormalizers({ isRecord, compact, stringId, translate });
+const {
+  resolveItemRef,
+  resolveItemRefs,
+  resolveMapRef,
+  resolveTraderRef,
+  resolveTaskRef,
+  resolveRequiredPrestige,
+} = normalizers;
 
 /** Preserve a declared but unresolved task-giver reference as malformed data. */
 function adaptTaskTrader(value: unknown, ctx: Context): TaskData['trader'] {
@@ -402,46 +309,12 @@ function adaptTaskTrader(value: unknown, ctx: Context): TaskData['trader'] {
   return resolveTraderRef(value, ctx) ?? { id: '', name: 'Unknown trader' };
 }
 
-/** Resolve map data nested inside an objective zone or location. */
-function resolveZone(value: unknown, ctx: Context): unknown {
-  if (!isRecord(value)) return value;
-  return compact({ ...value, map: resolveMapRef(value.map, ctx) });
-}
-
-/** Adapt one objective and resolve its nested entity references. */
 function adaptObjective(raw: JsonRecord, ctx: Context): TaskObjective {
-  return compact({
-    ...raw,
-    id: stringId(raw) ?? '',
-    description: translate(ctx.tasksEn, raw.description),
-    maps: resolveMapRefs(raw.maps, ctx),
-    items: resolveItemRefs(raw.items, ctx),
-    item: raw.item !== undefined ? resolveItemRef(raw.item, ctx) : undefined,
-    markerItem: raw.markerItem !== undefined ? resolveItemRef(raw.markerItem, ctx) : undefined,
-    questItem: raw.questItem !== undefined ? resolveItemRef(raw.questItem, ctx) : undefined,
-    useAny: resolveItemRefs(raw.useAny, ctx),
-    containsAll: resolveItemRefs(raw.containsAll, ctx),
-    usingWeapon: resolveItemRefs(raw.usingWeapon, ctx),
-    usingWeaponMods: resolveItemRefMatrix(raw.usingWeaponMods, ctx),
-    requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
-    wearing: resolveItemRefMatrix(raw.wearing, ctx),
-    notWearing: resolveItemRefs(raw.notWearing, ctx),
-    zones: Array.isArray(raw.zones) ? raw.zones.map((zone) => resolveZone(zone, ctx)) : undefined,
-    possibleLocations: Array.isArray(raw.possibleLocations)
-      ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
-      : undefined,
-  }) as unknown as TaskObjective;
+  return normalizers.adaptObjective(raw, ctx) as unknown as TaskObjective;
 }
 
-/** Adapt one reward object using the shared reward normalizer. */
 function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
-  return adaptSharedReward<TaskRewards, Context>(raw, ctx, {
-    isRecord,
-    compact,
-    resolveItemRef,
-    resolveTraderRef,
-    resolveMapRef,
-  });
+  return normalizers.adaptReward<TaskRewards>(raw, ctx);
 }
 
 /** Adapt one task prerequisite and resolve its referenced task. */
@@ -546,21 +419,23 @@ function adaptTaskMap(value: unknown, ctx: Context): TaskData['map'] {
   return resolveMapRef(value, ctx) ?? { id: '', name: 'Unknown map' };
 }
 
-/** Adapt task objectives while dropping malformed non-object entries. */
+/** An incomplete objective list cannot establish that an objective is absent. */
 function adaptObjectives(value: unknown, ctx: Context): TaskObjective[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter(isRecord).map((objective) => adaptObjective(objective, ctx));
+  if (!validObjectiveCollection(value)) return undefined;
+  return value.map((objective) => adaptObjective(objective, ctx));
 }
 
 /** Adapt one raw task record into the validator's normalized task shape. */
 function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   const id = stringId(raw) ?? '';
   const syntheticRequirementIdOccurrences = new Map<string, number>();
-  return compact({
+  const task = compact({
+    ...raw,
     id,
     name: translate(ctx.tasksEn, raw.name) ?? id,
     trader: adaptTaskTrader(raw.trader, ctx),
     minPlayerLevel: optionalNumber(raw.minPlayerLevel, true),
+    disabled: raw.disabled,
     wikiLink: optionalString(raw.wikiLink),
     map: adaptTaskMap(raw.map, ctx),
     kappaRequired: optionalBoolean(raw.kappaRequired),
@@ -589,6 +464,8 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     startRewards: adaptReward(raw.startRewards, ctx),
     finishRewards: adaptReward(raw.finishRewards, ctx),
   }) as unknown as TaskData;
+  registerTaskComparison(task, raw, ctx);
+  return task;
 }
 
 /** Build the shared entity and translation context for task adaptation. */
@@ -656,6 +533,44 @@ export async function fetchRawEntities(
     collection,
     `${mode}/${endpoint}${collectionKey ? ` data.${collectionKey}` : ''}`
   );
+}
+
+/** Reject records that the general-purpose lookup would otherwise omit. */
+function validatedMapLookup(collection: unknown, mode: GameMode): Map<string, JsonRecord> {
+  if (!isRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/maps: expected data.maps collection`
+    );
+  }
+  const entries = Object.values(collection);
+  if (
+    entries.some((entry) => !isRecord(entry) || typeof entry.id !== 'string' || !entry.id.trim())
+  ) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/maps: expected map records with nonempty IDs`
+    );
+  }
+  return toLookup(collection, `${mode}/maps`);
+}
+
+/** Map audit inputs: retain raw IDs/coordinates and resolve names through maps_en. */
+export async function fetchMapValidationData(mode: GameMode): Promise<{
+  maps: Map<string, Record<string, unknown>>;
+  translations: TranslationMap;
+}> {
+  const cache: EndpointCache = new Map();
+  const [envelope, translations] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/maps`),
+    fetchTranslations(cache, mode, 'maps'),
+  ]);
+  const collection = isRecord(envelope.data) ? envelope.data.maps : undefined;
+  const maps = validatedMapLookup(collection, mode);
+  if (Object.values(translations).some((value) => typeof value !== 'string')) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/maps_en: expected string translations`
+    );
+  }
+  return { maps, translations };
 }
 
 /** Read an optional finite numeric field from an endpoint record. */
@@ -753,6 +668,12 @@ export async function fetchTaskModeData(gameMode?: GameMode): Promise<TaskModeDa
   return { tasks: snapshot.tasks, access };
 }
 
+function assertNonemptyTasks(tasks: JsonRecord, mode: GameMode): void {
+  if (Object.keys(tasks).length === 0) {
+    throw new EnvelopeValidationError(`Invalid ${mode}/tasks: empty task collection`);
+  }
+}
+
 /**
  * Fetch all tasks for a game mode from json.tarkov.dev, adapt them into the
  * `TaskData[]` shape used by the override validator, and report the raw
@@ -772,6 +693,7 @@ async function fetchTaskSnapshot(
     );
   }
 
+  assertNonemptyTasks(tasksData.tasks, mode);
   const taskEntries: Array<[string, JsonRecord]> = [];
   const seenIds = new Set<string>();
   for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
@@ -804,6 +726,7 @@ async function fetchTaskSnapshot(
   return {
     tasks: taskEntries.map(([, rawTask]) => adaptTask(rawTask, ctx)),
     traderRequirementIds,
+    sourceData: tasksData,
   };
 }
 
@@ -842,6 +765,8 @@ export function countTraderRequirementIds(tasksData: unknown): TraderRequirement
 export interface TaskDataWithRequirementCounts {
   tasks: TaskData[];
   traderRequirementIds: TraderRequirementIdCounts;
+  /** Validated raw endpoint data, before task adaptation changes collection shapes. */
+  sourceData: JsonRecord;
 }
 
 /** Fetch adapted tasks and raw trader-requirement ID diagnostics together. */
@@ -870,6 +795,8 @@ export interface LocaleBundle {
   locale: string;
   tasksById: Map<string, Record<string, unknown>>;
   itemsById: Map<string, Record<string, unknown>>;
+  /** Missing quest-item source cannot prove an item identity is absent. */
+  itemCatalogComplete?: boolean;
   tradersById: Map<string, Record<string, unknown>>;
   mapsById: Map<string, Record<string, unknown>>;
   /** Prestige records live in the tasks payload's `prestige` array */
@@ -930,15 +857,67 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
   return {
     locale,
     tasksById: toLookup(tasksData.tasks, `${mode}/tasks`),
-    itemsById: toLookup(itemsData.items, `${mode}/items`),
+    itemCatalogComplete: tasksData.questItems !== undefined,
+    itemsById: localeItemIndex(itemsData.items, tasksData, itemsLocale, tasksLocale),
     mapsById: toLookup(mapsData.maps, `${mode}/maps`),
     tradersById: toLookup(tradersEnvelope.data, `${mode}/traders`),
     prestigeById: toLookup(tasksData.prestige, `${mode}/tasks prestige`),
     tasksLocale,
-    itemsLocale,
+    itemsLocale: { ...tasksLocale, ...itemsLocale },
     mapsLocale,
     tradersLocale,
   };
+}
+
+/** Keep translation keys raw while including quest and dictionary-only items. */
+function localeItemIndex(
+  items: unknown,
+  tasksData: JsonRecord,
+  itemsLocale: TranslationMap,
+  tasksLocale: TranslationMap
+): Map<string, JsonRecord> {
+  const index = localeCatalogItems(items, tasksData);
+  const tasks = toLookup(tasksData.tasks, 'tasks');
+  for (const key of Object.keys({ ...tasksLocale, ...itemsLocale })) {
+    includeDictionaryLocaleItem(index, tasks, key);
+  }
+  const translations = { ...tasksLocale, ...itemsLocale };
+  for (const [id, item] of index) index.set(id, localeItemFields(item, translations));
+  return index;
+}
+
+function localeCatalogItems(items: unknown, tasksData: JsonRecord): Map<string, JsonRecord> {
+  const questItems = tasksData.questItems === undefined ? {} : tasksData.questItems;
+  const quests = comparisonRecords(questItems, 'tasks questItems', true);
+  const index = new Map(quests.map((item) => [item.id as string, item]));
+  for (const item of comparisonRecords(items, 'items', true)) index.set(item.id as string, item);
+  return index;
+}
+
+function dictionaryLocaleId(key: string): string | undefined {
+  return /^([a-f0-9]{24}) Name$/.exec(key)?.[1];
+}
+
+function includeDictionaryLocaleItem(
+  index: Map<string, JsonRecord>,
+  tasks: Map<string, JsonRecord>,
+  key: string
+): void {
+  const id = dictionaryLocaleId(key);
+  if (id && !index.has(id) && !tasks.has(id)) index.set(id, { id, name: key });
+}
+
+function localeItemFields(item: JsonRecord, translations: TranslationMap): JsonRecord {
+  const result = { ...item };
+  for (const [field, suffix] of [
+    ['name', 'Name'],
+    ['shortName', 'ShortName'],
+    ['description', 'Description'],
+  ]) {
+    const key = `${item.id} ${suffix}`;
+    if (result[field] === undefined && Object.hasOwn(translations, key)) result[field] = key;
+  }
+  return result;
 }
 
 /**
@@ -946,4 +925,29 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
  */
 export function findTaskById(tasks: TaskData[], taskId: string): TaskData | undefined {
   return tasks.find((t) => t.id === taskId);
+}
+
+/** Fetch all upstream item identities and English fields used by adoption checks. */
+export async function fetchItemValidationData(mode: GameMode): Promise<Map<string, JsonRecord>> {
+  return (await fetchItemValidationSnapshot(mode)).items;
+}
+
+/** The index and raw catalog share the same upstream exchange and source revision. */
+export async function fetchItemValidationSnapshot(mode: GameMode): Promise<{
+  items: Map<string, JsonRecord>;
+  data: JsonRecord;
+}> {
+  const cache: EndpointCache = new Map();
+  const [items, tasks, itemsEn, tasksEn] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/items`),
+    fetchEnvelope(cache, `${mode}/tasks`),
+    fetchEnvelope(cache, `${mode}/items_en`, false),
+    fetchEnvelope(cache, `${mode}/tasks_en`, false),
+  ]);
+  const tasksData = isRecord(tasks.data) ? tasks.data : undefined;
+  comparisonRecords(tasksData?.tasks, `${mode}/tasks`);
+  return {
+    items: buildItemComparisonIndex(items.data, tasks.data, itemsEn.data, tasksEn.data),
+    data: items.data as JsonRecord,
+  };
 }

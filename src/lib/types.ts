@@ -5,6 +5,8 @@
  * and eliminate duplication.
  */
 
+import type { OverlayComparisonDetail } from './overlay-comparison.cjs';
+
 /** Task override structure for corrections */
 export interface TaskOverride {
   name?: string;
@@ -18,6 +20,8 @@ export interface TaskOverride {
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
+  /** Upstream objective IDs to drop from the task (erroneous upstream objectives). */
+  objectivesRemove?: string[];
   taskRequirements?: TaskRequirement[];
   taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
@@ -223,15 +227,6 @@ export type TaskOtherRequirement =
  */
 export type TraderRequirementCompareMethod = '>=' | '<=' | '>' | '<' | '=';
 
-/**
- * The discriminated trader-requirement semantics served by json.tarkov.dev:
- * `level` is a trader Loyalty Level (LL1-LL4); `reputation` is a trader
- * reputation threshold (scav karma / trader rep). Consumers must switch their
- * requirement evaluation on this field - the value range alone is ambiguous
- * (reputation serves positive, zero, and negative values).
- */
-export type TraderRequirementType = 'level' | 'reputation';
-
 /** Shared fields for trader requirements in json.tarkov.dev's discriminated shape. */
 interface TraderRequirementBase {
   id: string;
@@ -308,6 +303,8 @@ export interface TaskObjectiveAdd extends Omit<
 
 /** Task data from tarkov.dev API */
 export interface TaskData {
+  /** Present only when upstream explicitly exposes gameplay visibility. */
+  disabled?: boolean;
   id: string;
   name: string;
   /** Trader that offers the task. */
@@ -342,6 +339,7 @@ export interface ValidationResult {
   status: ValidationStatus;
   stillNeeded: boolean;
   details: ValidationDetail[];
+  comparison?: OverlayComparisonDetail[];
 }
 
 /** Possible validation statuses */
@@ -474,6 +472,8 @@ export interface StoryObjectiveLocation {
 
 export interface StoryObjective {
   id: string;
+  /** Guaranteed tutorial baseline in all modes; consumers derive it without saving a mark. */
+  completionPolicy?: 'tutorial';
   type: 'main' | 'optional';
   description: string;
   /**
@@ -485,6 +485,8 @@ export interface StoryObjective {
    * `StoryChapter` that compiles but fails schema validation.
    */
   sourceQuestId: string;
+  /** Raw condition parent, for optional layout only; not a completion prerequisite. */
+  parentObjectiveId?: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;
@@ -636,6 +638,7 @@ export const TARKOV_MAP_NAMES_BY_ID: Readonly<Partial<Record<string, string>>> =
   '65b8d6f5cdde2479cb2a3125': 'Ground Zero 21+',
   '68236e8153654e8c1200798a': 'Ground Zero Tutorial',
   '69af492a4819ea4ba10a69c5': 'Icebreaker',
+  '6a8dd1325e15a5ea2e010820': 'Infected Factory',
   '5714dbc024597771384a510d': 'Interchange',
   '5704e4dad2720bb55b8b4567': 'Lighthouse',
   '59fc81d786f774390775787e': 'Night Factory',
@@ -681,11 +684,26 @@ export const TARKOV_TRADER_NAMES_BY_ID: Readonly<Partial<Record<string, string>>
   '688246958448b05efd61d462': 'Voevoda',
 };
 
+export interface MapExtractAddition {
+  id: string;
+  name: string;
+  faction: 'pmc' | 'scav' | 'shared';
+  position: { x: number; y: number; z: number };
+  top?: number;
+  bottom?: number;
+}
+
+export interface MapOverride {
+  disabled?: boolean;
+  extractsAdd?: MapExtractAddition[];
+}
+
 /** Mode-specific overlay data */
 export interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
   prestige?: Record<string, PrestigeOverride>;
+  maps?: Record<string, MapOverride>;
 }
 
 /**
@@ -719,22 +737,10 @@ export interface SeasonalPerkEffect {
   [key: string]: unknown;
 }
 
-/**
- * A seasonal perk (BSG "Seasonal Character" mechanic, used by the `pvp-season`
- * mode). tarkov.dev serves the pvp-season mode but not its perks (there is no
- * perks endpoint), so this ships as an overlay addition keyed by the perk id.
- */
+/** Raw effects missing from upstream pvp-season/season, keyed by BSG perk id. */
 export interface SeasonalPerk {
   id: string;
-  /** Perk tier as reported in-game (e.g. "common", "personal"). */
-  type: string;
-  name: string;
-  description?: string;
-  /** Perk-point cost/refund; null when the perk has no point value. */
-  points?: number | null;
-  /** Perk ids that cannot be selected alongside this one. */
-  mutuallyExclusiveSeasonalPerkIds?: string[];
-  effects?: SeasonalPerkEffect[];
+  effects: SeasonalPerkEffect[];
 }
 
 /** An input or output item of a craft (tarkov.dev item id + count). */
@@ -875,17 +881,23 @@ export interface PrestigeOverride {
 }
 
 /** Built overlay output structure */
-/** Evidence-scoped mapping from a condition target to distinct task completions. */
+/** Evidence-scoped mapping from a condition target to task or group completions. */
 export interface ProgressionCounterDefinition {
+  /** Informational pool identity; never an extra trader-loyalty gate or counting evidence. */
+  pool?: { traderId: string; loyaltyLevel: number };
   /** Explicit compatibility revision; callers must select the same revision. */
   revision: string;
   verification: 'verified' | 'unresolved';
   coverage: 'complete' | 'partial';
-  derivation: {
-    type: 'distinctTaskCompletions';
-    /** Candidates only unless verification and coverage permit evaluation. */
-    taskIds: string[];
-  };
+  /** Candidates only unless verification and coverage permit evaluation. */
+  derivation:
+    | { type: 'distinctTaskCompletions'; taskIds: string[] }
+    /**
+     * One point per group; a task belongs to at most one group. A task-ID list earns its point
+     * once every member is complete; `{ anyOf }` once any member is (alternatives such as faction
+     * variants). The published Mechanic faction pairs all use `anyOf`.
+     */
+    | { type: 'taskGroupCompletions'; groups: Array<string[] | { anyOf: string[] }> };
   /** Public evidence for the mapping, including contribution and reset semantics. */
   proof: string[];
 }
@@ -895,19 +907,46 @@ export type ProgressionCounterRegistry = Partial<
   Record<GameMode, Record<string, ProgressionCounterDefinition>>
 >;
 
+/**
+ * The client's per-task `tierAccessory`: 0 is the "Essential Tasks" trader-list group and 1-4
+ * are "Loyalty Level 1-4". Display grouping only, never an availability gate.
+ */
+export type TraderTaskGroup = 0 | 1 | 2 | 3 | 4;
+
+/** Mode -> task id -> group. A missing task means its group is unknown. */
+export type TraderTaskGroupRegistry = Partial<Record<GameMode, Record<string, TraderTaskGroup>>>;
+
+export interface TaskIdAliasMapping {
+  tasks: Record<string, string>;
+  objectives: Record<string, { id: string; taskId: string }>;
+}
+
+/** Permanent identity mappings. No cross-mode fallback or inferred mappings. */
+export interface TaskIdAliases {
+  schemaVersion: 1;
+  modes: Record<GameMode, TaskIdAliasMapping>;
+}
+
 export interface OverlayOutput {
+  taskIdAliases?: TaskIdAliases;
   progressionCounters?: ProgressionCounterRegistry;
+  traderTaskGroups?: TraderTaskGroupRegistry;
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
   items?: Record<string, unknown>;
   traders?: Record<string, unknown>;
   hideout?: Record<string, unknown>;
+  maps?: Record<string, MapOverride>;
   editions?: Record<string, unknown>;
   storyChapters?: Record<string, StoryChapter>;
   /** Seasonal perks (BSG Seasonal Character mechanic); absent from tarkov.dev. */
   seasonalPerks?: Record<string, SeasonalPerk>;
   /** Hideout crafts missing from tarkov.dev, in tarkov.dev's craft shape. */
   craftsAdd?: Record<string, CraftAddition>;
+  /** Extract requirement rules generated from the game's location definitions (eft:extracts). */
+  extractRequirements?: Record<string, unknown>;
+  /** Hand-curated extract scene cues (flares, smoke, keys) keyed by map then extract ID. */
+  extractCues?: Record<string, unknown>;
   /** One sparse overlay section for every mode advertised by tarkov.dev. */
   modes: Record<GameMode, ModeOverlay>;
   /** Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...) */
@@ -1012,13 +1051,27 @@ export interface DivergenceResult {
   mirrored: boolean;
 }
 
+/** Shared dependencies registered before compiling source and output schemas. */
+export const SHARED_SCHEMA_FILES = [
+  'trader-requirement.schema.json',
+  'task-shared.schema.json',
+] as const;
+
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
+  { pattern: 'additions/taskIdAliases.json5', schemaFile: 'task-id-aliases.schema.json' },
+  { pattern: 'overrides/items.json5', schemaFile: 'entity-overrides.schema.json' },
+  { pattern: 'overrides/traders.json5', schemaFile: 'entity-overrides.schema.json' },
+  { pattern: 'overrides/hideout.json5', schemaFile: 'entity-overrides.schema.json' },
   { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
+  { pattern: 'additions/traderTaskGroups.json5', schemaFile: 'trader-task-group.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
-  { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
-  { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },
-  { pattern: 'overrides/modes/pvp-season/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/maps.json5', schemaFile: 'map-override.schema.json' },
+  ...SUPPORTED_GAME_MODES.flatMap((mode) => [
+    { pattern: `overrides/modes/${mode}/tasks.json5`, schemaFile: 'task-override.schema.json' },
+    { pattern: `overrides/modes/${mode}/maps.json5`, schemaFile: 'map-override.schema.json' },
+    { pattern: `additions/modes/${mode}/tasksAdd.json5`, schemaFile: 'task-additions.schema.json' },
+  ]),
   { pattern: 'additions/tasksAdd.json5', schemaFile: 'task-additions.schema.json' },
   { pattern: 'additions/editions.json5', schemaFile: 'edition.schema.json' },
   { pattern: 'additions/seasonalPerks.json5', schemaFile: 'seasonal-perk.schema.json' },
@@ -1026,10 +1079,16 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
   { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
   {
+    pattern: 'additions/extractRequirements.json5',
+    schemaFile: 'extract-requirements.schema.json',
+  },
+  { pattern: 'additions/extractCues.json5', schemaFile: 'extract-cues.schema.json' },
+  {
     pattern: 'overrides/modes/regular/prestige.json5',
     schemaFile: 'prestige-override.schema.json',
   },
   { pattern: 'overrides/locales/*.json5', schemaFile: 'locale-override.schema.json' },
   { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
+  { pattern: 'suppressions/wiki-incorrect.json5', schemaFile: 'wiki-incorrect.schema.json' },
   { pattern: 'divergences/tasks.json5', schemaFile: 'task-divergence.schema.json' },
 ];

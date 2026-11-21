@@ -9,7 +9,7 @@
  * disables.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from './test-support.js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';
@@ -29,6 +29,21 @@ function loadStoryChapters(): Record<string, StoryChapter> {
 
 describe('story chapters (EFT-sourced)', () => {
   const chapters = loadStoryChapters();
+
+  it('places corroborated investigations before their follow-up searches', () => {
+    for (const [chapterId, earlier, later] of [
+      ['accidental-witness', '68f10c6d450cc4e461d7d95b', '68f0ff6bb0c5f1c1e59ee772'],
+      ['accidental-witness', '6907e6e7dfe4440eca8e7c4b', '68f11ad800eefa59290cede0'],
+      ['accidental-witness', '6907e6e7dfe4440eca8e7c4b', '68f11af4fdaaf4ef0473e514'],
+      ['the-labyrinth', '68ffe508dcb52296aa8a4006', '68e4e8b45fae2c907a1c4343'],
+      ['the-labyrinth', '68ffe508dcb52296aa8a4006', '68e4e97ed2c83e861e65119c'],
+    ]) {
+      const ids = (chapters[chapterId]!.objectives ?? []).map((objective) => objective.id);
+      expect(ids).toContain(earlier);
+      expect(ids).toContain(later);
+      expect(ids.indexOf(earlier)).toBeLessThan(ids.indexOf(later));
+    }
+  });
 
   it('includes the Boreas chapter with real objectives (issue #233)', () => {
     const boreas = chapters.boreas;
@@ -183,7 +198,7 @@ describe('story chapters (EFT-sourced)', () => {
     const schema = JSON5.parse(
       readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8')
     ) as object;
-    const ajv = new Ajv({ allErrors: true, strict: false });
+    const ajv = new Ajv({ allErrors: true, strict: false, strictTypes: true });
     const validate = ajv.compile(schema);
 
     const chapter = (coverage: Record<string, unknown>) => ({
@@ -233,7 +248,7 @@ describe('story chapters (EFT-sourced)', () => {
   });
 
   it('pins the source capture that produced the committed chapters', () => {
-    // Generation is local-only (eft/ is gitignored), so the lock is the only
+    // Generation is local-only (data/reference/ is gitignored), so the lock is the only
     // thing that makes the committed output auditable: it records which capture
     // was used, not any of its field values.
     const lock = JSON.parse(readFileSync(join('scripts', 'story-reference.lock.json'), 'utf8')) as {
@@ -246,8 +261,10 @@ describe('story chapters (EFT-sourced)', () => {
       quests: number;
       chapterQuests: number;
       objectiveTexts: number;
+      supplementalReferences?: Array<{ file: string; sha256: string; quests: number }>;
+      combinedCoverage?: { quests: number; chapterQuests: number; objectiveTexts: number };
     };
-    expect(lock.file).toMatch(/^eft\/.+\.json$/);
+    expect(lock.file).toMatch(/^data\/reference\/.+\.json$/);
     expect(lock.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(lock.bytes).toBeGreaterThan(0);
     expect(lock.quests).toBeGreaterThan(0);
@@ -256,20 +273,28 @@ describe('story chapters (EFT-sourced)', () => {
     expect(lock.clientVersion, 'lock clientVersion').toMatch(/\d+\.\d+\.\d+/);
     expect(['regular', 'pve', 'pvp-season']).toContain(lock.gameMode);
     expect(Number.isNaN(Date.parse(lock.capturedAt ?? '')), 'lock capturedAt').toBe(false);
-    expect(lock.chapterQuests).toBe(Object.keys(chapters).length);
-    // Every objective in the committed data came from that capture's texts.
+    const coverage = lock.combinedCoverage ?? lock;
+    expect(coverage.chapterQuests).toBe(Object.keys(chapters).length);
+    expect(lock.supplementalReferences, 'committed supplemental source pins').toHaveLength(2);
+    expect(lock.combinedCoverage, 'combined source coverage').toBeDefined();
+    for (const supplement of lock.supplementalReferences ?? []) {
+      expect(supplement.file).toMatch(/^data\/reference\/.+\.json$/);
+      expect(supplement.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(supplement.quests).toBeGreaterThan(0);
+    }
+    // Every objective comes from the hash-locked reference union.
     const objectives = Object.values(chapters).reduce(
       (total, ch) => total + (ch.objectives ?? []).length,
       0
     );
-    expect(lock.objectiveTexts).toBe(objectives);
+    expect(coverage.objectiveTexts).toBe(objectives);
     // Sub-quest coverage has to add up to the capture too, so a hand-edited lock
     // or hand-edited chapters disagree.
     const resolved = Object.values(chapters).reduce(
       (total, ch) => total + (ch.referenceCoverage?.resolvedSubquests ?? 0),
       0
     );
-    expect(resolved).toBeLessThanOrEqual(lock.quests);
+    expect(resolved).toBeLessThanOrEqual(coverage.quests);
   });
 
   it('keeps canonical chapter-local quest completion exclusions', () => {
@@ -335,26 +360,59 @@ describe('story chapters (EFT-sourced)', () => {
     }
   });
 
-  it('keeps the documented authoring sample valid against the schema', () => {
-    // docs/MASTER_SAMPLES.md advertises a copy-paste story chapter. Tightening
-    // the schema without updating it hands contributors an example that fails
-    // `npm run validate`, which is how it silently went stale before.
-    const { rootDir, schemasDir } = getProjectPaths();
-    const md = readFileSync(join(rootDir, 'docs', 'MASTER_SAMPLES.md'), 'utf8');
-    const heading = md.indexOf('### Story Chapter (map-ready objective fields)');
-    expect(heading, 'story chapter sample section missing').toBeGreaterThan(-1);
-    const block = /```json5\n([\s\S]*?)\n```/.exec(md.slice(heading));
-    expect(block, 'story chapter sample code block missing').not.toBeNull();
+  it.each(['\n', '\r\n'])(
+    'keeps the documented authoring sample valid with %j line endings',
+    (eol) => {
+      // docs/MASTER_SAMPLES.md advertises a copy-paste story chapter. Tightening
+      // the schema without updating it hands contributors an example that fails
+      // `npm run validate`, which is how it silently went stale before.
+      const { rootDir, schemasDir } = getProjectPaths();
+      const md = readFileSync(join(rootDir, 'docs', 'MASTER_SAMPLES.md'), 'utf8').replace(
+        /\r?\n/g,
+        eol
+      );
+      const heading = md.indexOf('### Story Chapter (map-ready objective fields)');
+      expect(heading, 'story chapter sample section missing').toBeGreaterThan(-1);
+      const block = /```json5\r?\n([\s\S]*?)\r?\n```/.exec(md.slice(heading));
+      expect(block, 'story chapter sample code block missing').not.toBeNull();
 
-    const sample = JSON5.parse(block![1]);
-    const schema = JSON.parse(readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8'));
-    const validate = new Ajv({ allErrors: true, strict: false }).compile(schema);
-    const valid = validate(sample);
-    expect(
-      valid,
-      `docs sample violates story-chapter.schema.json: ${(validate.errors ?? [])
-        .map((error) => `${error.instancePath} ${error.message}`)
-        .join('; ')}`
-    ).toBe(true);
+      const sample = JSON5.parse(block![1]);
+      const schema = JSON.parse(
+        readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8')
+      );
+      const validate = new Ajv({ allErrors: true, strict: false }).compile(schema);
+      const valid = validate(sample);
+      expect(
+        valid,
+        `docs sample violates story-chapter.schema.json: ${(validate.errors ?? [])
+          .map((error) => `${error.instancePath} ${error.message}`)
+          .join('; ')}`
+      ).toBe(true);
+    }
+  );
+
+  it('points every task storyObjective gate at a real chapter objective', () => {
+    // Task overrides gate on story objectives by id (e.g. the Tour "Talk to
+    // <trader>" steps); regeneration must not drop or renumber them.
+    const { srcDir } = getProjectPaths();
+    const overrides = JSON5.parse(
+      readFileSync(join(srcDir, 'overrides', 'tasks.json5'), 'utf8')
+    ) as Record<string, { otherRequirements?: Array<Record<string, any>> }>;
+    const gates = Object.entries(overrides).flatMap(([taskId, task]) =>
+      (task.otherRequirements ?? [])
+        .filter((gate) => gate.type === 'storyObjective')
+        .map((gate) => ({ taskId, gate }))
+    );
+    expect(gates.length).toBeGreaterThanOrEqual(12);
+    for (const { taskId, gate } of gates) {
+      const chapter = chapters[gate.storyChapter.id];
+      expect(chapter?.name, `${taskId}: chapter ${gate.storyChapter.id}`).toBe(
+        gate.storyChapter.name
+      );
+      const objective = (chapter.objectives ?? []).find((o) => o.id === gate.objective.id);
+      expect(objective?.description, `${taskId}: objective ${gate.objective.id}`).toBe(
+        gate.objective.name
+      );
+    }
   });
 });

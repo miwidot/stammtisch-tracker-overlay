@@ -24,10 +24,11 @@
  * Usage:
  *   tsx scripts/eft-compare.ts [eftDir] [--mode pve|regular] [--descriptions] [--json out.json]
  *
- * eftDir defaults to ./eft. The reference file is auto-detected by the
+ * eftDir defaults to ./data/reference. The reference file is auto-detected by the
  * `quest_list` filename fragment (the enriched variant is preferred).
  */
 
+import { referenceDirectory, resolveReferenceDirectory } from './local-reference.js';
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, isAbsolute } from 'path';
 import {
@@ -46,6 +47,9 @@ import {
   type TaskData,
   type GameMode,
 } from '../src/lib/index.js';
+
+import { normalizeTaskStatus } from '../src/lib/task-unlocks.js';
+import { canonicalQuestId } from './lib/quest-definitions.js';
 
 // ---------------------------------------------------------------------------
 // Reference-file parsing
@@ -66,7 +70,7 @@ interface EftCondition {
   conditionType?: string;
   value?: unknown;
   target?: unknown;
-  status?: number[];
+  status?: unknown;
 }
 
 interface EftQuest {
@@ -88,14 +92,10 @@ interface EftQuest {
 
 /** Hex object id, optionally wrapped as `[<id>]` or `[<id> name]` by the
  * enriched reference variant. */
-const ID_PATTERN = /[0-9a-f]{24}/;
 const HEX_ID_KEY = /^[0-9a-f]{24}$/;
 
 /** Unwrap a possibly-bracketed id (`[60e7... name] Long Line` -> `60e7...`). */
-function unwrapId(value: string): string {
-  const match = ID_PATTERN.exec(value);
-  return match ? match[0] : value;
-}
+const unwrapId = canonicalQuestId;
 
 /** Normalized authoritative values for a single quest from the reference file. */
 interface EftTask {
@@ -106,7 +106,7 @@ interface EftTask {
   counts: Map<string, number>;
   /**
    * Task IDs named by `AvailableForStart` `Quest` conditions - the client's own
-   * prerequisite edges, and therefore the authority for `taskRequirements`.
+   * prerequisite targets. Accepted states live in `prerequisiteConditions`.
    *
    * Unlike `minPlayerLevel`, this is populated densely enough to adjudicate by
    * absence: an empty set means the client really has no quest prerequisite (it
@@ -116,6 +116,10 @@ interface EftTask {
    * entry is not evidence of a `Quest` condition.
    */
   prerequisites: Set<string>;
+  /** Each Quest start condition is a separate AND gate. Missing statuses mean
+   * the reference cannot adjudicate that condition's accepted quest states. */
+  prerequisiteConditions?: Array<{ target?: string; statuses?: string[] }>;
+
   /** objective (condition) id -> canonical English objective text, when the
    * reference file carries a `localization.en` block. Empty otherwise. */
   descriptions: Map<string, string>;
@@ -147,7 +151,7 @@ export function firstNumber<T>(
 /**
  * Recursively collect quest-reference files (name matches `quest_list` /
  * `quest-list`, `.json`) under `dir`, including subdirectories so versioned
- * captures like `eft/eft-1.1-pve/` are discovered.
+ * captures like `data/reference/<capture>/` are discovered.
  */
 function findQuestListFiles(dir: string): string[] {
   const out: string[] = [];
@@ -166,7 +170,7 @@ function findQuestListFiles(dir: string): string[] {
   return out;
 }
 
-/** Locate the quest reference file under the eft directory. Prefers the most
+/** Locate the quest reference file under the reference directory. Prefers the most
  * recently captured reference: the capture timestamp in each file's envelope
  * (`request.timestamp`) is authoritative, with the filesystem mtime as a
  * deterministic fallback for files that lack one (e.g. after copying/editing,
@@ -175,7 +179,7 @@ function findQuestListFiles(dir: string): string[] {
  * `localization.en` objective text.
  * When `mode` is given, candidates whose capture URL identifies that mode are
  * preferred (still newest-first), so a directory holding captures for several
- * modes (e.g. `eft/eft-1.1-{regular,pve}/`) selects the capture matching the
+ * modes (e.g. `data/reference/<regular-or-pve-capture>/`) selects the capture matching the
  * requested mode instead of rejecting the directory. Candidates whose mode
  * cannot be detected stay in the pool. */
 export function findReferenceFile(eftDir: string, mode?: GameMode): string {
@@ -232,11 +236,14 @@ function readReferenceEnvelope(file: string): ReferenceEnvelope {
   try {
     const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
       request?: { url?: string; timestamp?: string };
+      source?: { mode?: unknown };
     };
     const ts = raw?.request?.timestamp;
     const ms = typeof ts === 'string' ? Date.parse(ts) : Number.NaN;
     envelope = {
-      mode: modeFromRequestUrl(raw?.request?.url),
+      // Captures identify their mode by gateway URL; saved remote-session
+      // snapshots (eft:remote) carry no request URL and record it in `source`.
+      mode: modeFromRequestUrl(raw?.request?.url) ?? modeFromSessionMode(raw?.source?.mode),
       timestamp: Number.isNaN(ms) ? null : ms,
     };
   } catch {
@@ -313,10 +320,18 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
     // a single task id; the enriched reference variant may wrap it as
     // `[<id> name]`, which unwrapId normalizes.
     const prerequisites = new Set<string>();
+    const prerequisiteConditions: NonNullable<EftTask['prerequisiteConditions']> = [];
     for (const c of start) {
       if (c.conditionType !== 'Quest') continue;
-      if (typeof c.target !== 'string') continue;
-      prerequisites.add(unwrapId(c.target));
+      const target =
+        typeof c.target === 'string' && c.target.length > 0 ? unwrapId(c.target) : undefined;
+      if (target !== undefined) prerequisites.add(target);
+      const normalized = Array.isArray(c.status) ? c.status.map(normalizeTaskStatus) : [];
+      const statuses =
+        normalized.length > 0 && normalized.every((status) => status !== undefined)
+          ? [...new Set(normalized as string[])].sort()
+          : undefined;
+      prerequisiteConditions.push({ target, statuses });
     }
 
     const descriptions = new Map<string, string>();
@@ -331,7 +346,15 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
       }
     }
 
-    out.set(id, { id, experience, minPlayerLevel, counts, prerequisites, descriptions });
+    out.set(id, {
+      id,
+      experience,
+      minPlayerLevel,
+      counts,
+      prerequisites,
+      prerequisiteConditions,
+      descriptions,
+    });
   }
   return out;
 }
@@ -543,6 +566,8 @@ export function crossCheckOverrides(
 /** Options shared by the eft:* CLI tools. */
 export interface ModeCliOptions {
   eftDir: string;
+  /** Every positional argument, each resolved under data/reference/ (eftDir is the last). */
+  positionals?: string[];
   mode: GameMode;
   jsonOut?: string;
   /** Boolean flags (from `booleanFlags`) present on the CLI. */
@@ -555,10 +580,11 @@ export interface ModeCliOptions {
  * declared via `booleanFlags` and are surfaced in `flags`.
  */
 export function parseModeArgs(argv: string[], booleanFlags: string[] = []): ModeCliOptions {
-  let eftDir = 'eft';
+  let eftDir = referenceDirectory();
   let mode: GameMode = 'pve';
   let jsonOut: string | undefined;
   const flags = new Set<string>();
+  const positionals: string[] = [];
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -578,11 +604,13 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
       flags.add(arg);
     } else if (!arg.startsWith('--')) {
       eftDir = arg;
+      positionals.push(resolveReferenceDirectory(arg));
     }
   }
 
   return {
-    eftDir: isAbsolute(eftDir) ? eftDir : join(process.cwd(), eftDir),
+    eftDir: resolveReferenceDirectory(eftDir),
+    positionals,
     mode,
     jsonOut,
     flags,
@@ -773,6 +801,32 @@ export function modeFromRequestUrl(url: string | undefined): GameMode | null {
 }
 
 /**
+ * Map a game-session mode name (`pvp`, `pvp-season`, `pve`) to the tarkov.dev
+ * mode. Remote-session snapshots record the session's mode instead of a
+ * gateway URL; `pvp` is tarkov.dev's `regular`.
+ */
+export function modeFromSessionMode(mode: unknown): GameMode | null {
+  if (mode === 'pvp' || mode === 'regular') return 'regular';
+  if (mode === 'pvp-season' || mode === 'pve') return mode;
+  return null;
+}
+
+/** Client version recorded by a capture (`App-Version` header) or snapshot. */
+export function referenceAppVersion(file: string): string | null {
+  try {
+    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
+      request?: { headers?: Record<string, unknown> };
+      source?: { appVersion?: unknown };
+    };
+    const header = raw?.request?.headers?.['App-Version'];
+    const version = typeof header === 'string' ? header : raw?.source?.appVersion;
+    return typeof version === 'string' && version.length > 0 ? version : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Detect which game mode a reference file represents from its request URL
  * metadata. Returns null when no reference file is present or the mode can't be
  * determined, so callers can decide how strict to be.
@@ -788,4 +842,14 @@ export function detectReferenceMode(eftDir: string): GameMode | null {
   return mode === 'unusable' ? null : mode;
 }
 
-export { parseEftTasks, compare, readQuestArray, type EftTask, type Discrepancy };
+export {
+  parseEftTasks,
+  compare,
+  readQuestArray,
+  findQuestListFiles,
+  modeFromReferenceFile,
+  captureTimestamp,
+  type EftQuest,
+  type EftTask,
+  type Discrepancy,
+};

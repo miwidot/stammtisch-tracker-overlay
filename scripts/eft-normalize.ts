@@ -16,18 +16,19 @@
  * the enriched and plain variants, preferring the enriched one.
  *
  * IMPORTANT: input reference files and this normalized output are LOCAL-ONLY.
- * Both `eft/` and the default output dir are gitignored. Nothing here should be
+ * Both `data/reference/` and the default output dir are gitignored. Nothing here should be
  * committed.
  *
  * Usage:
  *   tsx scripts/eft-normalize.ts [eftDir] [--out data/eft] [--lang ru,fr,all]
  *
- * eftDir defaults to ./eft; output defaults to ./data/eft (both gitignored).
+ * eftDir defaults to ./data/reference; output defaults to ./data/eft (both gitignored).
  * --lang attaches localized quest names + objective text for the given
  * language codes (comma-separated, or `all`). Codes are normalized to BCP47
  * (the source's `ge`->`de`, `ch`->`zh`, etc). English is always the base.
  */
 
+import { referenceDirectory, resolveReferenceDirectory } from './local-reference.js';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, isAbsolute } from 'path';
 import { findReferenceFile, firstNumber, modeFromRequestUrl } from './eft-compare.js';
@@ -347,7 +348,7 @@ interface Options {
 }
 
 function parseArgs(argv: string[]): Options {
-  let eftDir = 'eft';
+  let eftDir = referenceDirectory();
   let outDir = 'data/eft';
   let langs: string[] = [];
   for (let i = 0; i < argv.length; i += 1) {
@@ -366,7 +367,7 @@ function parseArgs(argv: string[]): Options {
     } else if (!arg.startsWith('--')) eftDir = arg;
   }
   const resolve = (p: string) => (isAbsolute(p) ? p : join(process.cwd(), p));
-  return { eftDir: resolve(eftDir), outDir: resolve(outDir), langs };
+  return { eftDir: resolveReferenceDirectory(eftDir), outDir: resolve(outDir), langs };
 }
 
 async function main(): Promise<void> {

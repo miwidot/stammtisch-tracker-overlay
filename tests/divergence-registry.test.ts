@@ -6,7 +6,7 @@
  * same value would silently assert there is no divergence at all.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from './test-support.js';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import {
