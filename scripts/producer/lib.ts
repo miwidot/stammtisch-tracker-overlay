@@ -20,7 +20,8 @@ import {
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { isAbsolute, join, parse, relative, resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 
 export const MANIFEST_FILE = 'producer-manifest.json';
@@ -284,9 +285,28 @@ export function currentRelease(outRoot: string): string | null {
   }
 }
 
+/**
+ * Refuses directories that must never be the root of a recursive delete: empty, relative, the
+ * filesystem root, the home directory, or a top-level system directory.
+ */
+export function assertSafeDeletionRoot(dir: string, what: string): void {
+  if (typeof dir !== 'string' || dir.trim() === '' || !isAbsolute(dir)) {
+    throw new Error(`Refusing to prune: ${what} must be a non-empty absolute path`);
+  }
+  const resolved = resolve(dir);
+  if (
+    resolved === parse(resolved).root ||
+    resolved === resolve(homedir()) ||
+    resolved.split('/').length < 3
+  ) {
+    throw new Error(`Refusing to prune: ${what} resolves to ${resolved}`);
+  }
+}
+
 /** Deletes old releases beyond `keep`, never the one `current` points at. Returns removed ids. */
 export function pruneReleases(outRoot: string, keep: number): string[] {
   if (!Number.isInteger(keep) || keep < 1) throw new Error('keep must be an integer >= 1');
+  assertSafeDeletionRoot(outRoot, 'catalog output directory');
   const releases = join(resolve(outRoot), 'releases');
   if (!existsSync(releases)) return [];
   const live = currentRelease(outRoot);
@@ -297,7 +317,10 @@ export function pruneReleases(outRoot: string, keep: number): string[] {
   const removed: string[] = [];
   for (const id of ids.slice(keep)) {
     if (id === live) continue;
-    rmSync(join(releases, id), { recursive: true });
+    const target = join(releases, id);
+    // Only real directories named like a release; a symlink or file is never followed or removed.
+    if (!lstatSync(target).isDirectory()) continue;
+    rmSync(target, { recursive: true });
     removed.push(id);
   }
   return removed;

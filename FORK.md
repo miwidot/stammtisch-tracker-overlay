@@ -34,13 +34,14 @@ Stand 2026-11-21, gemessen mit `git diff upstream/main --stat`. Alles, was wir f
 
 ### Neue Dateien — kosten beim Merge nichts
 
-| Datei                                                                                          | Zweck                                                                                             |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `FORK.md`                                                                                      | dieses Dokument                                                                                   |
-| `scripts/build-catalogs.ts`                                                                    | Erzeuger-Schritt: Overlay bauen, Tracker-Produzent laufen lassen, Kataloge atomar veröffentlichen |
-| `scripts/producer/*`                                                                           | Bausteine dazu (`lib`, `tracker`, `https-server`, `process`) und `tracker.lock.json` (Pin)        |
-| `scripts/parity.ts`, `scripts/parity/*`                                                        | Paritätsprüfung gegen tarkovtracker.org                                                           |
-| `tests/producer-lib.test.ts`, `tests/build-catalogs.test.ts`, `tests/parity-normalize.test.ts` | Tests dazu                                                                                        |
+| Datei                                                                                                                         | Zweck                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `FORK.md`                                                                                                                     | dieses Dokument                                                                                           |
+| `scripts/build-catalogs.ts`                                                                                                   | Erzeuger-Schritt: Overlay bauen, Tracker-Produzent laufen lassen, Kataloge atomar veröffentlichen         |
+| `scripts/producer/*`                                                                                                          | Bausteine dazu (`lib`, `tracker`, `https-server`, `process`) und `tracker.lock.json` (Pin)                |
+| `scripts/producer/cron-run.sh`, `scripts/producer/prune-tools.ts`                                                             | Cron-Wrapper mit Discord-Alarm (Fehler, veraltete Daten) und optionales Aufräumen alter Tracker-Checkouts |
+| `scripts/parity.ts`, `scripts/parity/*`                                                                                       | Paritätsprüfung gegen tarkovtracker.org                                                                   |
+| `tests/producer-lib.test.ts`, `tests/producer-cron.test.ts`, `tests/build-catalogs.test.ts`, `tests/parity-normalize.test.ts` | Tests dazu                                                                                                |
 
 ### Geänderte Upstream-Dateien
 
@@ -76,6 +77,19 @@ Ablauf: Overlay bauen → Overlay-Paar prüfen (`overlay-neutral.json` muss aus 
 **Warum ein gepinnter Git-Checkout** (statt Submodul oder Kopie): der Produzent importiert den halben App-Baum (`neutralCatalog`, `overlay*`, `tarkov-json`). Kopieren hieße, bei jedem Tracker-Sync Hunderte Dateien nachzuziehen; ein Submodul ändert `.gitmodules` und den Index dieses Forks, braucht Deploy-Key-Handling im Submodul und macht jeden Merge zum Zweitjob. Der Pin ist eine Datei (`scripts/producer/tracker.lock.json`, volle 40-stellige SHA, kein Branchname), der Checkout liegt **außerhalb** des Repos (`~/.cache/stammtisch-overlay-producer`, überschreibbar mit `--tools-dir`/`PRODUCER_TOOLS_DIR`) und wird bei jedem Lauf gegen den Pin und auf lokale Änderungen geprüft.
 
 **Pin anheben:** neue Tracker-SHA in `tracker.lock.json` eintragen, `npm run build:catalogs` — der neue Checkout entsteht daneben. Der Pin muss aus unserem Tracker-Fork erreichbar sein (gepusht).
+
+**Repo-URL:** `scripts/producer/tracker.lock.json` nennt `git@github.com:...`. Auf stammdev gehört der Deploy-Key des Tracker-Forks zum SSH-Alias `github-tracker`; dort `TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git` setzen (oder `--tracker-repo`). Der Pin (Commit-SHA) bleibt in der Lock-Datei, nur die Quelle wird überschrieben.
+
+**Cron-Betrieb (`scripts/producer/cron-run.sh`):**
+
+```bash
+17 */12 * * * CATALOG_OUT_DIR=$HOME/tracker-data TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh run
+47 *    * * * CATALOG_OUT_DIR=$HOME/tracker-data ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh check-age
+```
+
+- `run` ruft `npm run build:catalogs -- --out <dir> --keep <N>` auf und postet bei Fehlschlag in den Discord-Systemlog (`DISCORD_SYSTEM_LOG_WEBHOOK`, aus der Umgebung oder als einzige Variable aus `ENV_FILE` gelesen, die Datei wird nicht ausgeführt; die URL wird nie geloggt oder als Argument übergeben).
+- `check-age` alarmiert, wenn das aktive Release älter als `STALE_HOURS` (30) ist oder kein Manifest lesbar ist; Wiederholung höchstens alle `ALERT_REPEAT_HOURS` (6).
+- **Löschen, ausdrücklich:** (1) Alte **Releases** räumt der Produzent selbst auf (`--keep`, Standard 4): nur Verzeichnisse `<out>/releases/<id>` mit gültigem Release-Namen, nie das aktive, nie Symlinks; leere, relative, `/`, Home- und Top-Level-Pfade werden abgelehnt. (2) Alte **Tracker-Checkouts** (`tracker-<sha12>`, je rund 1 GB) löscht nur `prune-tools.ts` und nur, wenn `PRODUCER_TOOLS_KEEP` gesetzt ist (Standard: nie). Es entfernt ausschließlich direkte Unterverzeichnisse `tracker-<12 hex>` mit `.producer-ready`-Marker, nie den gepinnten, nie Symlinks. Trockenlauf: `npx tsx scripts/producer/prune-tools.ts --tools-dir <dir> --keep 2 --dry-run`.
 
 **`manifest`:** `releases/<id>/producer-manifest.json` enthält Overlay-Version, -Zeitstempel und -SHA (beider Dateien), Tracker-Repo und -Commit, Quelle (`json.tarkov.dev`), Zeitstempel des Laufs, Anzahl Objekte/Dateien/Bytes und die SHA-256 jeder Datei.
 
