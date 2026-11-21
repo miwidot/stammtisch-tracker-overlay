@@ -22,41 +22,73 @@ Der Fork löst das: wir bauen **eine** Datei, die Upstream-Korrekturen **und** u
 
 ## Unsere Abweichungen
 
+Stand 2026-11-21, gemessen mit `git diff upstream/main --stat`. Alles, was wir früher selbst trugen (`de.json5`, `status-locale`, Tests, `package.json`-Zeile, `ci.yml`), ist inzwischen upstream.
+
+### Gelöscht — kostet bei jedem Merge einen Handgriff
+
+| Datei                    | Was                                         | Handgriff beim Merge                                        |
+| ------------------------ | ------------------------------------------- | ----------------------------------------------------------- |
+| `.github/dependabot.yml` | gelöscht (kein Dependabot im privaten Fork) | Konflikt „deleted in HEAD": `git rm .github/dependabot.yml` |
+
+`ci.yml` und `release.yml` weichen **nicht** mehr ab. Näheres zu `release.yml` unten.
+
 ### Neue Dateien — kosten beim Merge nichts
 
-| Datei                            | Zweck                                                               | Ziel        |
-| -------------------------------- | ------------------------------------------------------------------- | ----------- |
-| `src/overrides/locales/de.json5` | die deutschen Korrekturen                                           | → upstream  |
-| `scripts/status-locale.ts`       | Übersetzungsstand je Händler, `// Was:`-Drift, wirkungslose Patches | → upstream  |
-| `tests/status-locale.test.ts`    | Tests dazu                                                          | → upstream  |
-| `tests/duplicate-keys.test.ts`   | doppelte Schlüssel in den Override-Quellen                          | → upstream  |
-| `FORK.md`                        | dieses Dokument                                                     | bleibt hier |
+| Datei                                                                                          | Zweck                                                                                             |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `FORK.md`                                                                                      | dieses Dokument                                                                                   |
+| `scripts/build-catalogs.ts`                                                                    | Erzeuger-Schritt: Overlay bauen, Tracker-Produzent laufen lassen, Kataloge atomar veröffentlichen |
+| `scripts/producer/*`                                                                           | Bausteine dazu (`lib`, `tracker`, `https-server`, `process`) und `tracker.lock.json` (Pin)        |
+| `scripts/parity.ts`, `scripts/parity/*`                                                        | Paritätsprüfung gegen tarkovtracker.org                                                           |
+| `tests/producer-lib.test.ts`, `tests/build-catalogs.test.ts`, `tests/parity-normalize.test.ts` | Tests dazu                                                                                        |
 
-Der Build (`scripts/build.ts`) lädt **alle** JSON5-Dateien aus `src/overrides/locales/` — es gibt keine Sprach-Allowlist, `de.json5` wird automatisch eingesammelt.
+### Geänderte Upstream-Dateien
 
-### Geänderte Upstream-Dateien — kosten bei jedem Merge
+| Datei          | Was                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `package.json` | zwei Zeilen unter `scripts`: `build:catalogs` und `parity` (Konfliktrisiko gering, nur bei Änderungen direkt daneben) |
 
-| Datei                       | Was                                                                  | Ziel                                       |
-| --------------------------- | -------------------------------------------------------------------- | ------------------------------------------ |
-| `package.json`              | eine Zeile: `"status:locale": "tsx scripts/status-locale.ts"`        | verschwindet, wenn das Skript upstream ist |
-| `tests/file-loader.test.ts` | prüft die `package.json` am Wurzelverzeichnis statt des Ordnernamens | → upstream, hilft jedem Fork               |
-| `dist/overlay.json`         | eingecheckter Build — siehe unten                                    | bleibt, konstruktionsbedingt               |
+### `dist/` fassen wir nicht an
 
-### `dist/overlay.json` fassen wir nicht an
+Upstream checkt `dist/overlay.json` und `dist/overlay-neutral.json` ein; ein Release-Workflow erzeugt sie und tagt. Bei uns liest niemand die eingecheckten Dateien — der Server baut selbst. Deshalb:
 
-Upstream checkt die Datei mit Absicht ein — für sie ist sie das Produkt, die Standard-`OVERLAY_URL` des Trackers zeigt auf `raw.githubusercontent.com/.../dist/overlay.json`.
+- **Niemals selbst committen.** Nach `npm run build` ist das Arbeitsverzeichnis schmutzig (neuer Zeitstempel und Hash) — das ist normal, verwerfen mit `git checkout -- dist/`.
+- Beim Upstream-Merge bringt upstream die Dateien mit; sie konfliktieren nur, wenn jemand bei uns eine eigene Fassung eingecheckt hat. Dann `git checkout --theirs dist/` bzw. `git checkout upstream/main -- dist`.
+- **Versionskennung:** `npm run build` nimmt die höchste Tag-Version, die in `HEAD` **enthalten** ist (`git tag --merged HEAD`). Wer mitten in einem noch nicht abgeschlossenen Merge baut, bekommt die alte Version (so geschehen: 1.102 statt 1.184). Erst den Merge committen, dann bauen.
 
-**Für uns ist sie es nicht.** Unser nginx liefert `~/overlay-fork/dist/overlay.json` aus, und der Server erzeugt diese Datei bei jedem Deploy selbst mit `npm run build`. Die eingecheckte Fassung liest bei uns niemand.
+⚠️ **`release.yml` läuft nach jedem erfolgreichen CI-Lauf auf `main` und committet, taggt und pusht `dist/`.** Das ist upstreams Release-Weg, in unserem privaten Fork aber unerwünscht (zwei Historien für ein Artefakt). Es steht **nicht** in dieser Datei, sondern muss in den GitHub-Einstellungen des Forks abgeschaltet sein (Actions → Release overlay → Disable, oder Actions ganz aus). Ob das heute so ist, ist hier nicht geprüft.
 
-Solange auch unsere CI sie schrieb, gab es zwei Historien für ein erzeugtes Artefakt — und damit einen Konflikt bei **jedem** Upstream-Sync. Am 2026-08-21 dreimal in einer Sitzung, zweimal mit stillschweigend zurückgedrehten Inhalten.
+⚠️ **Die eine Falle:** Wer je ohne `npm run build` deployt, liefert upstreams Overlay **ohne unsere lokalen Änderungen** aus. Heute gibt es keine (Abweichung = null Daten), aber die Falle kommt zurück, sobald wir wieder etwas Eigenes in `src/` haben.
 
-Deshalb:
+---
 
-- Der Schritt `Commit dist` in `.github/workflows/ci.yml` ist bei uns auf `if: false` gesetzt. Die Tag- und Release-Schritte hängen daran und entfallen mit — auch das ist gewollt, ein Fork schneidet keine Releases. Die Versionskennung kommt weiterhin aus upstreams Tags (`git fetch upstream` holt sie mit).
-- Unsere `dist/overlay.json` steht auf upstreams Stand und bleibt dort. Upstreams Änderungen laufen dadurch konfliktfrei durch.
-- **Niemals selbst committen.** Nach einem lokalen `npm run build` ist das Arbeitsverzeichnis schmutzig — das ist normal, die Änderung gehört verworfen: `git checkout -- dist/`.
+## Katalog-Erzeuger (`npm run build:catalogs`)
 
-⚠️ **Die eine Falle, die dadurch entsteht:** Wer je ohne `npm run build` deployt, liefert upstreams Overlay **ohne unser Deutsch** aus — still, ohne Fehlermeldung. Der Deploy-Ablauf unten baut immer; weicht davon nicht ab.
+Der Tracker liest seine Spieldaten (Quests, Items, Hideout, Strings) nicht mehr aus Cloudflare KV, sondern aus einem Verzeichnis (`TARKOV_DATA_DIR`). Dieses Verzeichnis füllt genau dieser Schritt — aus **diesem** Overlay und `json.tarkov.dev`.
+
+```bash
+npm run build:catalogs -- --out /var/lib/tracker-data
+# danach:  TARKOV_DATA_DIR=/var/lib/tracker-data/current
+```
+
+Ablauf: Overlay bauen → Overlay-Paar prüfen (`overlay-neutral.json` muss aus genau diesem `overlay.json` stammen) → Tracker-Code auf dem **gepinnten** Commit auschecken → beide Dateien über einen kurzlebigen HTTPS-Server auf Loopback ausliefern (der Tracker akzeptiert nur `https:`) → Produzent läuft gegen `json.tarkov.dev` und dieses Overlay → Ergebnis in ein Staging-Verzeichnis → prüfen (Manifest, jedes Objekt vorhanden, Größe und SHA-256 stimmen) → `producer-manifest.json` schreiben → Verzeichnis umbenennen nach `releases/<id>` → Symlink `current` atomar umhängen → alte Releases aufräumen (`--keep`, Standard 4). **Jeder Fehler bricht ab, ohne etwas zu veröffentlichen**; das vorige Release bleibt aktiv.
+
+**Warum ein gepinnter Git-Checkout** (statt Submodul oder Kopie): der Produzent importiert den halben App-Baum (`neutralCatalog`, `overlay*`, `tarkov-json`). Kopieren hieße, bei jedem Tracker-Sync Hunderte Dateien nachzuziehen; ein Submodul ändert `.gitmodules` und den Index dieses Forks, braucht Deploy-Key-Handling im Submodul und macht jeden Merge zum Zweitjob. Der Pin ist eine Datei (`scripts/producer/tracker.lock.json`, volle 40-stellige SHA, kein Branchname), der Checkout liegt **außerhalb** des Repos (`~/.cache/stammtisch-overlay-producer`, überschreibbar mit `--tools-dir`/`PRODUCER_TOOLS_DIR`) und wird bei jedem Lauf gegen den Pin und auf lokale Änderungen geprüft.
+
+**Pin anheben:** neue Tracker-SHA in `tracker.lock.json` eintragen, `npm run build:catalogs` — der neue Checkout entsteht daneben. Der Pin muss aus unserem Tracker-Fork erreichbar sein (gepusht).
+
+**`manifest`:** `releases/<id>/producer-manifest.json` enthält Overlay-Version, -Zeitstempel und -SHA (beider Dateien), Tracker-Repo und -Commit, Quelle (`json.tarkov.dev`), Zeitstempel des Laufs, Anzahl Objekte/Dateien/Bytes und die SHA-256 jeder Datei.
+
+Der Produzent bekommt nur eine Allowlist an Umgebungsvariablen — keine Cloudflare-Zugangsdaten, kein `OVERLAY_TOKEN`.
+
+### Parität gegen tarkovtracker.org
+
+```bash
+npm run parity -- fetch-live --out /tmp/live
+npm run parity -- compare --live /tmp/live --catalogs <out>/current --overlay dist/overlay.json --report parity.md --json parity.json
+```
+
+Es werden nur die öffentlichen `GET /api/tarkov/*`-Endpunkte abgefragt, nacheinander, mit Pause und ehrlichem User-Agent. Bei 403/429 bricht der Lauf ab; es wird nichts umgangen. Normalisiert werden ausschließlich `dataOverlay.generated`, `dataOverlay.sha256`, `dataOverlay.sourceUrl` und `storedAt`; jede Normalisierung steht im Bericht. `dataOverlay.version` wird bewusst **nicht** normalisiert.
 
 ---
 
@@ -96,15 +128,12 @@ So bleibt diese Datei dauerhaft klein — sie enthält idealerweise nur, was ger
 ### Upstream nachziehen
 
 ```bash
-git fetch upstream
-git merge upstream/main      # de.json5 ist neu -> dort kein Konflikt möglich
+git fetch upstream --tags
+git merge upstream/main      # Konflikt nur bei .github/dependabot.yml (git rm); dist/ kommt von upstream
 npm run validate             # Quelle sauber?
-npm run build                # dist/ neu erzeugen, NICHT von Hand mergen
-git add dist/overlay.json && git commit --no-edit
+npm run build                # Rauchtest, danach: git checkout -- dist/
 git push origin main
 ```
-
-`dist/overlay.json` konfliktiert dabei so gut wie immer — warum und wie, steht oben unter „Unsere Abweichungen".
 
 ### Ausliefern
 

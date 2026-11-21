@@ -7,6 +7,8 @@
     "validate": "tsx scripts/validate.ts",
     "build": "tsx scripts/build.ts",
     "build:check": "tsx scripts/build.ts --check",
+    "build:catalogs": "tsx scripts/build-catalogs.ts",
+    "parity": "tsx scripts/parity.ts",
     "next-overlay-tag": "node scripts/next-overlay-tag.cjs",
     "check-overrides": "tsx scripts/check-overrides.ts",
     "eft:compare": "tsx scripts/eft-compare.ts",
