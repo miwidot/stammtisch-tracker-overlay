@@ -25,11 +25,13 @@ import {
   acquireLock,
   assertNoVersionRegression,
   buildManifest,
+  DEFAULT_PRODUCER_APP_URL,
   newReleaseId,
   parseTrackerLock,
   pruneReleases,
   publishRelease,
   readOverlayIdentities,
+  resolveProducerAppUrl,
   verifyStaging,
   writeManifest,
   type ProducerManifest,
@@ -67,6 +69,8 @@ export interface PipelineOptions {
   lock: TrackerLock;
   trackerRepo?: string;
   now?: () => Date;
+  /** Public origin of the instance the precompute run names in its User-Agent (APP_URL). */
+  appUrl?: string;
   /** Deliberate downgrade (PRODUCER_ALLOW_VERSION_REGRESSION=1); skips the version guard. */
   allowVersionRegression?: boolean;
 }
@@ -129,6 +133,7 @@ export async function runPipeline(
         NEUTRAL_OVERLAY_URL: `${server.baseUrl}/overlay-neutral.json`,
         EXPECTED_OVERLAY_SHA: overlay.sha256,
         NODE_EXTRA_CA_CERTS: server.caFile,
+        APP_URL: options.appUrl ?? DEFAULT_PRODUCER_APP_URL,
       }),
     });
     const summary = verifyStaging(staging, overlay.sha256);
@@ -199,6 +204,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       timeoutMs: positiveInt(values['timeout-min'], DEFAULT_TIMEOUT_MIN, '--timeout-min') * 60_000,
       lock,
       trackerRepo: values['tracker-repo'] ?? process.env.TRACKER_REPO,
+      appUrl: resolveProducerAppUrl(process.env.PRODUCER_APP_URL),
       allowVersionRegression: process.env.PRODUCER_ALLOW_VERSION_REGRESSION === '1',
     },
     { run: runCommand, buildOverlay, ensureTracker, serve: serveFilesOverHttps }

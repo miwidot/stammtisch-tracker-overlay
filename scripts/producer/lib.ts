@@ -25,6 +25,48 @@ import { isAbsolute, join, parse, relative, resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 
 export const MANIFEST_FILE = 'producer-manifest.json';
+
+/**
+ * Identity the tracker's precompute run puts into its User-Agent towards json.tarkov.dev
+ * (`TarkovTracker/1.0 (+<origin>)`). The tracker derives it from `APP_URL`, which the scrubbed
+ * producer environment does not carry over, so without this the run would name the upstream
+ * project instead of us.
+ */
+export const DEFAULT_PRODUCER_APP_URL = 'https://tarkov-stammtisch.de';
+const UPSTREAM_APP_HOSTS = new Set(['tarkovtracker.org', 'www.tarkovtracker.org']);
+
+/**
+ * Validates `PRODUCER_APP_URL` and returns its origin. Unset or blank gives the default. A
+ * configured value must be a public https origin without credentials: a typo should stop the
+ * run, not silently fall back to an identity that claims to be the upstream project.
+ */
+export function resolveProducerAppUrl(value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return DEFAULT_PRODUCER_APP_URL;
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error('PRODUCER_APP_URL must be an absolute https URL');
+  }
+  if (url.protocol !== 'https:' || url.username || url.password) {
+    throw new Error('PRODUCER_APP_URL must be an https URL without credentials');
+  }
+  const host = url.hostname.replace(/\.$/, '');
+  if (
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host === '[::1]' ||
+    /^127(?:\.\d{1,3}){3}$/.test(host) ||
+    host === '0.0.0.0'
+  ) {
+    throw new Error('PRODUCER_APP_URL must name a public host, not a local one');
+  }
+  if (UPSTREAM_APP_HOSTS.has(host)) {
+    throw new Error('PRODUCER_APP_URL must not claim the upstream tarkovtracker.org identity');
+  }
+  return url.origin;
+}
 /** Key of the producer's own release pointer inside the data directory (percent-encoded name). */
 export const CATALOG_MANIFEST_FILE = 'neutral-catalog-v1-manifest';
 export const RELEASE_ID_PATTERN = /^\d{8}T\d{6}Z-[0-9a-f]{8}$/;

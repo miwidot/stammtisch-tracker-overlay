@@ -18,6 +18,10 @@
 #   PRODUCER_TOOLS_KEEP          set (e.g. 2) to also prune superseded tracker checkouts after a
 #                                successful run; unset = never delete checkouts (default)
 #   TRACKER_REPO                 git URL of the tracker fork, passed through to the producer
+#   PRODUCER_APP_URL             public https origin of the instance, handed to the precompute run as
+#                                APP_URL so its User-Agent towards json.tarkov.dev names us, e.g.
+#                                https://trackerdev.tarkov-stammtisch.de. Default
+#                                https://tarkov-stammtisch.de. Never the upstream tarkovtracker.org.
 #   PRODUCER_LOG                 log file, default $HOME/producer.log (rotated by rename at 5 MB)
 #   PRODUCER_STATE_DIR           alert throttle state, default = directory of the log
 #   STALE_HOURS                  default 30 (two missed 12 h runs)

@@ -80,10 +80,12 @@ Ablauf: Overlay bauen → Overlay-Paar prüfen (`overlay-neutral.json` muss aus 
 
 **Repo-URL:** `scripts/producer/tracker.lock.json` nennt `git@github.com:...`. Auf stammdev gehört der Deploy-Key des Tracker-Forks zum SSH-Alias `github-tracker`; dort `TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git` setzen (oder `--tracker-repo`). Der Pin (Commit-SHA) bleibt in der Lock-Datei, nur die Quelle wird überschrieben.
 
+**Identität gegenüber json.tarkov.dev:** Der Produzent läuft mit bereinigter Umgebung, `APP_URL` kam deshalb nie beim Tracker an, und dessen User-Agent fiel auf `TarkovTracker/1.0 (+https://tarkovtracker.org)` zurück, also auf die Upstream-Identität. `build-catalogs.ts` übergibt jetzt `APP_URL` aus `PRODUCER_APP_URL` (öffentlicher https-Ursprung, ohne Zugangsdaten, kein lokaler Host, nie `tarkovtracker.org`; ein ungültiger Wert bricht den Lauf ab statt still zurückzufallen). Ohne Variable gilt `https://tarkov-stammtisch.de`. Auf stammdev: `PRODUCER_APP_URL=https://trackerdev.tarkov-stammtisch.de` in die Cron-Zeile (`cron-run.sh` reicht die Umgebung an den Build durch).
+
 **Cron-Betrieb (`scripts/producer/cron-run.sh`):**
 
 ```bash
-17 */12 * * * CATALOG_OUT_DIR=$HOME/tracker-data TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh run
+17 */12 * * * CATALOG_OUT_DIR=$HOME/tracker-data TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git PRODUCER_APP_URL=https://trackerdev.tarkov-stammtisch.de ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh run
 47 *    * * * CATALOG_OUT_DIR=$HOME/tracker-data ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh check-age
 ```
 

@@ -136,6 +136,20 @@ describe('runPipeline success', () => {
     expect(seenArgs?.[0]).toBe('--tsconfig');
   });
 
+  it('names the configured instance, not the upstream project, in the precompute environment', async () => {
+    await runPipeline(
+      { ...options(), appUrl: 'https://trackerdev.tarkov-stammtisch.de' },
+      makeDeps(writeCatalog)
+    );
+    expect(seenEnv?.APP_URL).toBe('https://trackerdev.tarkov-stammtisch.de');
+  });
+
+  it('falls back to our own default identity when no app URL is given', async () => {
+    await runPipeline(options(), makeDeps(writeCatalog));
+    expect(seenEnv?.APP_URL).toBe('https://tarkov-stammtisch.de');
+    expect(JSON.stringify(seenEnv)).not.toContain('tarkovtracker.org');
+  });
+
   it('keeps only the newest releases', async () => {
     let tick = 0;
     for (let i = 0; i < 3; i++) {
@@ -336,6 +350,12 @@ describe('runPipeline never leaves partial output', () => {
 });
 
 describe('producerEnv', () => {
+  it('does not inherit APP_URL from the calling environment', () => {
+    expect(
+      producerEnv({ PATH: '/usr/bin', APP_URL: 'https://tarkovtracker.org' }, {}).APP_URL
+    ).toBe(undefined);
+  });
+
   const original = { ...process.env };
   afterEach(() => {
     for (const key of Object.keys(process.env)) if (!(key in original)) delete process.env[key];

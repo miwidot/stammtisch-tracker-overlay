@@ -17,6 +17,8 @@ import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import {
   CATALOG_MANIFEST_FILE,
+  DEFAULT_PRODUCER_APP_URL,
+  resolveProducerAppUrl,
   RELEASE_ID_PATTERN,
   VersionRegressionError,
   acquireLock,
@@ -383,5 +385,37 @@ describe('version regression guard', () => {
     );
     expect(liveOverlayVersion(root)).toBeNull();
     expect(() => assertNoVersionRegression(root, '1.1')).not.toThrow();
+  });
+});
+
+describe('resolveProducerAppUrl', () => {
+  it.each([undefined, '', '   '])('uses our own default for %j', (value) => {
+    expect(resolveProducerAppUrl(value)).toBe(DEFAULT_PRODUCER_APP_URL);
+    expect(DEFAULT_PRODUCER_APP_URL).not.toContain('tarkovtracker.org');
+  });
+
+  it('returns the origin of a configured public https URL', () => {
+    expect(resolveProducerAppUrl(' https://trackerdev.tarkov-stammtisch.de/some/path?x=1 ')).toBe(
+      'https://trackerdev.tarkov-stammtisch.de'
+    );
+  });
+
+  it.each([
+    'not a url',
+    'trackerdev.tarkov-stammtisch.de',
+    'http://trackerdev.tarkov-stammtisch.de',
+    'ftp://trackerdev.tarkov-stammtisch.de',
+    'javascript:alert(1)',
+    'https://user:pw@trackerdev.tarkov-stammtisch.de',
+    'https://localhost',
+    'https://app.localhost',
+    'https://127.0.0.1',
+    'https://[::1]',
+    'https://0.0.0.0',
+    'https://tarkovtracker.org',
+    'https://www.tarkovtracker.org/',
+    'https://TarkovTracker.org.',
+  ])('refuses %j instead of falling back silently', (value) => {
+    expect(() => resolveProducerAppUrl(value)).toThrow(/PRODUCER_APP_URL/);
   });
 });
