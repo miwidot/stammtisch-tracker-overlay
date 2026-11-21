@@ -285,6 +285,69 @@ export function currentRelease(outRoot: string): string | null {
   }
 }
 
+/** Exit code of build-catalogs.ts when a build is refused because its version went backwards. */
+export const VERSION_REGRESSION_EXIT_CODE = 3;
+
+export class VersionRegressionError extends Error {
+  constructor(
+    readonly previous: string,
+    readonly next: string
+  ) {
+    super(
+      `Overlay version regressed from ${previous} to ${next}; not publishing, the previous release stays live`
+    );
+    this.name = 'VersionRegressionError';
+  }
+}
+
+/** Parses "1.184" or "v1.184.2" into numeric segments; null for anything else. */
+function versionSegments(value: string): number[] | null {
+  const match = /^v?(\d+(?:\.\d+)*)$/.exec(value.trim());
+  if (!match) return null;
+  const parts = match[1]!.split('.').map(Number);
+  return parts.every(Number.isSafeInteger) ? parts : null;
+}
+
+/** Negative, zero or positive like a comparator; null when either side is not a plain dotted number. */
+export function compareOverlayVersions(a: string, b: string): number | null {
+  const left = versionSegments(a);
+  const right = versionSegments(b);
+  if (!left || !right) return null;
+  for (let i = 0; i < Math.max(left.length, right.length); i++) {
+    const diff = (left[i] ?? 0) - (right[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+/** Overlay version recorded in the manifest of the release `current` points at, if readable. */
+export function liveOverlayVersion(outRoot: string): string | null {
+  const id = currentRelease(outRoot);
+  if (!id) return null;
+  try {
+    const manifest = JSON.parse(
+      readFileSync(join(resolve(outRoot), 'releases', id, MANIFEST_FILE), 'utf8')
+    ) as { overlay?: { version?: unknown } };
+    const version = manifest.overlay?.version;
+    return typeof version === 'string' && version !== '' ? version : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Pre-flip guard: a build whose overlay version is lower than the live release's is refused
+ * before anything is staged or published, so `current` keeps pointing at the last good release.
+ * Equal versions (a rebuild) pass. Versions that are not plain dotted numbers cannot be ordered
+ * and are not blocked.
+ */
+export function assertNoVersionRegression(outRoot: string, nextVersion: string): void {
+  const previous = liveOverlayVersion(outRoot);
+  if (previous === null) return;
+  const order = compareOverlayVersions(nextVersion, previous);
+  if (order !== null && order < 0) throw new VersionRegressionError(previous, nextVersion);
+}
+
 /**
  * Refuses directories that must never be the root of a recursive delete: empty, relative, the
  * filesystem root, the home directory, or a top-level system directory.

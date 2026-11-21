@@ -20,7 +20,10 @@ import { runDirectly } from '../src/lib/script-utils.js';
 import { serveFilesOverHttps, type LocalHttps } from './producer/https-server.js';
 import {
   MANIFEST_FILE,
+  VERSION_REGRESSION_EXIT_CODE,
+  VersionRegressionError,
   acquireLock,
+  assertNoVersionRegression,
   buildManifest,
   newReleaseId,
   parseTrackerLock,
@@ -64,6 +67,8 @@ export interface PipelineOptions {
   lock: TrackerLock;
   trackerRepo?: string;
   now?: () => Date;
+  /** Deliberate downgrade (PRODUCER_ALLOW_VERSION_REGRESSION=1); skips the version guard. */
+  allowVersionRegression?: boolean;
 }
 
 export interface PipelineDeps {
@@ -100,6 +105,8 @@ export async function runPipeline(
       built.overlay.toString('utf8'),
       built.neutral.toString('utf8')
     );
+    // Before any expensive work and long before `current` can flip.
+    if (!options.allowVersionRegression) assertNoVersionRegression(outRoot, overlay.version);
     const trackerDir = await deps.ensureTracker(
       options.lock,
       options.toolsDir,
@@ -192,6 +199,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       timeoutMs: positiveInt(values['timeout-min'], DEFAULT_TIMEOUT_MIN, '--timeout-min') * 60_000,
       lock,
       trackerRepo: values['tracker-repo'] ?? process.env.TRACKER_REPO,
+      allowVersionRegression: process.env.PRODUCER_ALLOW_VERSION_REGRESSION === '1',
     },
     { run: runCommand, buildOverlay, ensureTracker, serve: serveFilesOverHttps }
   );
@@ -200,4 +208,13 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
   );
 }
 
-runDirectly(import.meta.url, () => main());
+runDirectly(import.meta.url, () =>
+  main().catch((error: unknown) => {
+    if (error instanceof VersionRegressionError) {
+      console.error(error.message);
+      // cron-run.sh maps this code to a dedicated alert instead of the generic failure one.
+      process.exit(VERSION_REGRESSION_EXIT_CODE);
+    }
+    throw error;
+  })
+);

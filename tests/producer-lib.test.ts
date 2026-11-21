@@ -8,6 +8,7 @@ import {
   readdirSync,
   readlinkSync,
   realpathSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -17,10 +18,14 @@ import { join } from 'node:path';
 import {
   CATALOG_MANIFEST_FILE,
   RELEASE_ID_PATTERN,
+  VersionRegressionError,
   acquireLock,
+  assertNoVersionRegression,
   buildManifest,
+  compareOverlayVersions,
   currentRelease,
   keyToFileName,
+  liveOverlayVersion,
   newReleaseId,
   parseTrackerLock,
   pruneReleases,
@@ -314,5 +319,69 @@ describe('acquireLock', () => {
   it('treats an unreadable pid file as a stale lock', () => {
     mkdirSync(join(root, '.lock'));
     expect(() => acquireLock(root, () => true)()).not.toThrow();
+  });
+});
+
+describe('version regression guard', () => {
+  function liveRelease(version: unknown, id = '20261121T130000Z-aaaaaaaa'): void {
+    const dir = join(root, 'releases', id);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'producer-manifest.json'), JSON.stringify({ overlay: { version } }));
+    symlinkSync(join('releases', id), join(root, 'current'));
+  }
+
+  it.each([
+    ['1.67', '1.184', -1],
+    ['1.184', '1.67', 1],
+    ['1.9', '1.10', -1],
+    ['1.184', '1.184', 0],
+    ['v1.184', '1.184', 0],
+    ['1.184.1', '1.184', 1],
+    ['2.0', '1.999', 1],
+  ])('compares %s with %s numerically', (a, b, sign) => {
+    expect(Math.sign(compareOverlayVersions(a, b)!)).toBe(sign);
+  });
+
+  it.each([['dev'], [''], ['1.x'], ['1.184-rc1'], ['1..2'], ['99999999999999999999.1']])(
+    'cannot order %j and never blocks on it',
+    (bad) => {
+      expect(compareOverlayVersions(bad, '1.184')).toBeNull();
+      expect(compareOverlayVersions('1.184', bad)).toBeNull();
+    }
+  );
+
+  it('refuses a lower version than the live release with both versions in the message', () => {
+    liveRelease('1.184');
+    expect(() => assertNoVersionRegression(root, '1.67')).toThrow(VersionRegressionError);
+    expect(() => assertNoVersionRegression(root, '1.67')).toThrow(/1\.184 to 1\.67/);
+  });
+
+  it('allows equal and higher versions', () => {
+    liveRelease('1.184');
+    expect(() => assertNoVersionRegression(root, '1.184')).not.toThrow();
+    expect(() => assertNoVersionRegression(root, '1.185')).not.toThrow();
+  });
+
+  it('allows the very first release and unreadable or unorderable live manifests', () => {
+    expect(liveOverlayVersion(root)).toBeNull();
+    expect(() => assertNoVersionRegression(root, '1.1')).not.toThrow();
+  });
+
+  it.each([[undefined], [null], [''], [184], ['dev']])(
+    'does not block when the live manifest version is %j',
+    (version) => {
+      liveRelease(version);
+      expect(() => assertNoVersionRegression(root, '1.1')).not.toThrow();
+    }
+  );
+
+  it('does not block when the live manifest is corrupt', () => {
+    liveRelease('1.184');
+    writeFileSync(
+      join(root, 'releases', '20261121T130000Z-aaaaaaaa', 'producer-manifest.json'),
+      '{'
+    );
+    expect(liveOverlayVersion(root)).toBeNull();
+    expect(() => assertNoVersionRegression(root, '1.1')).not.toThrow();
   });
 });

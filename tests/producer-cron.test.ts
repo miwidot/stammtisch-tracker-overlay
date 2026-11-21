@@ -36,6 +36,12 @@ beforeEach(() => {
     join(bin, 'curl'),
     `#!/bin/sh\ncat > "${work}/curl-stdin"\nprintf '%s\\n' "$*" > "${work}/curl-args"\nprintf '%s' "\${FAKE_CURL_CODE:-204}"\n`
   );
+  // Fake git: records the call (so no test ever touches the network), exits with FAKE_GIT_EXIT.
+  writeFileSync(
+    join(bin, 'git'),
+    `#!/bin/sh\necho "git $*" >> "${work}/git-calls"\n[ "\${FAKE_GIT_EXIT:-0}" = 0 ] || echo "fatal: unable to access origin" >&2\nexit \${FAKE_GIT_EXIT:-0}\n`
+  );
+  chmodSync(join(bin, 'git'), 0o755);
   chmodSync(join(bin, 'npm'), 0o755);
   chmodSync(join(bin, 'curl'), 0o755);
 });
@@ -60,6 +66,47 @@ function writeManifest(createdAt: string): void {
   writeFileSync(join(dir, 'producer-manifest.json'), JSON.stringify({ createdAt }));
   symlinkSync(join(dir), join(work, 'out', 'current'));
 }
+
+describe('cron-run.sh run: tags and version guard', () => {
+  it('fetches tags from origin before the build, and only then', () => {
+    const result = run('run');
+    expect(result.status).toBe(0);
+    expect(readFileSync(join(work, 'git-calls'), 'utf8').trim().split('\n')).toEqual([
+      expect.stringMatching(/^git -C .+ fetch --tags origin$/),
+    ]);
+    expect(existsSync(join(work, 'curl-stdin'))).toBe(false);
+  });
+
+  it('keeps going and alerts once when the tag fetch fails', () => {
+    const result = run('run', { FAKE_GIT_EXIT: '1' });
+    expect(result.status).toBe(0);
+    expect(existsSync(join(work, 'npm-calls'))).toBe(true);
+    expect(readFileSync(join(work, 'curl-args'), 'utf8')).toContain('could not fetch release tags');
+    expect(readFileSync(join(work, 'curl-stdin'), 'utf8')).toContain(WEBHOOK);
+    expect(readFileSync(join(work, 'producer.log'), 'utf8')).toContain('tag fetch FAILED');
+    expect(readFileSync(join(work, 'producer.log'), 'utf8')).not.toContain('SECRET-TOKEN-VALUE');
+  });
+
+  it('sends a dedicated alert, not the generic failure one, when the build refuses a version regression', () => {
+    const result = run('run', { FAKE_NPM_EXIT: '3' });
+    expect(result.status).toBe(1);
+    const args = readFileSync(join(work, 'curl-args'), 'utf8');
+    expect(args).toContain('catalog build REFUSED');
+    expect(args).toContain('version went DOWN');
+    expect(args).toContain('last good release stays live');
+    expect(args).not.toContain('catalog producer FAILED');
+    expect(readFileSync(join(work, 'curl-args'), 'utf8')).not.toContain('SECRET-TOKEN-VALUE');
+  });
+
+  it.each(['1', '2', '137'])(
+    'still sends the generic failure alert for build exit code %s',
+    (code) => {
+      const result = run('run', { FAKE_NPM_EXIT: code });
+      expect(result.status).toBe(1);
+      expect(readFileSync(join(work, 'curl-args'), 'utf8')).toContain('catalog producer FAILED');
+    }
+  );
+});
 
 describe('cron-run.sh run', () => {
   it('passes --out and --keep to build:catalogs and stays silent on success', () => {

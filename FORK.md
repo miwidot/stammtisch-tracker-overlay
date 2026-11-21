@@ -88,6 +88,7 @@ Ablauf: Overlay bauen → Overlay-Paar prüfen (`overlay-neutral.json` muss aus 
 ```
 
 - `run` ruft `npm run build:catalogs -- --out <dir> --keep <N>` auf und postet bei Fehlschlag in den Discord-Systemlog (`DISCORD_SYSTEM_LOG_WEBHOOK`, aus der Umgebung oder als einzige Variable aus `ENV_FILE` gelesen, die Datei wird nicht ausgeführt; die URL wird nie geloggt oder als Argument übergeben).
+- `run` holt vorher `git fetch --tags origin` (nicht fatal, bei Fehlschlag Alarm). **Versions-Wächter:** Liegt die gebaute Overlay-Version **unter** der des aktiven Releases (z.B. 1.184 → 1.67), bricht `build:catalogs` vor jeder Arbeit und vor dem Umhängen von `current` mit Exit-Code 3 ab (`assertNoVersionRegression` in `scripts/producer/lib.ts`, aufgerufen in `runPipeline`); `cron-run.sh` sendet dafür einen eigenen Discord-Alarm, das letzte gute Release bleibt aktiv. Gleiche Version (Neubau) und höhere gehen durch; nicht vergleichbare Versionsstrings blockieren nicht. Bewusster Rückschritt: einmalig `PRODUCER_ALLOW_VERSION_REGRESSION=1`.
 - `check-age` alarmiert, wenn das aktive Release älter als `STALE_HOURS` (30) ist oder kein Manifest lesbar ist; Wiederholung höchstens alle `ALERT_REPEAT_HOURS` (6).
 - **Löschen, ausdrücklich:** (1) Alte **Releases** räumt der Produzent selbst auf (`--keep`, Standard 4): nur Verzeichnisse `<out>/releases/<id>` mit gültigem Release-Namen, nie das aktive, nie Symlinks; leere, relative, `/`, Home- und Top-Level-Pfade werden abgelehnt. (2) Alte **Tracker-Checkouts** (`tracker-<sha12>`, je rund 1 GB) löscht nur `prune-tools.ts` und nur, wenn `PRODUCER_TOOLS_KEEP` gesetzt ist (Standard: nie). Es entfernt ausschließlich direkte Unterverzeichnisse `tracker-<12 hex>` mit `.producer-ready`-Marker, nie den gepinnten, nie Symlinks. Trockenlauf: `npx tsx scripts/producer/prune-tools.ts --tools-dir <dir> --keep 2 --dry-run`.
 
@@ -146,8 +147,14 @@ git fetch upstream --tags
 git merge upstream/main      # Konflikt nur bei .github/dependabot.yml (git rm); dist/ kommt von upstream
 npm run validate             # Quelle sauber?
 npm run build                # Rauchtest, danach: git checkout -- dist/
+git remote get-url origin    # muss miwidot/stammtisch-tracker-overlay sein, NIE tarkovtracker-org
+git push origin --tags       # Pflicht: Upstream-Tags immer mit nach origin
 git push origin main
 ```
+
+**Tags sind Pflicht, nicht optional.** Die Overlay-Version ist die höchste Tag-Version in `HEAD` (siehe oben). Fehlen die Upstream-Tags auf unserem origin, baut ein frischer Klon oder der Server eine viel zu niedrige Version (so geschehen: 1.67 statt 1.184). Deshalb holt `cron-run.sh run` vor jedem Lauf `git fetch --tags origin` (Fehlschlag: Discord-Alarm, der Lauf geht weiter), und der Produzent **verweigert** ein Release, dessen Version unter der des aktiven liegt (siehe unten).
+
+⚠️ **Bekannte Tag-Kollision:** `v1.0` bis `v1.7` zeigen auf unserem origin auf andere Commits als bei Upstream (Altlast). Sie wurden nicht überschrieben. Daher `git push origin --tags` meldet für diese acht eine Ablehnung und `git fetch --tags origin` auf einem Klon mit Upstream-Fassung dieser Tags ebenfalls; die übrigen Tags sind davon nicht betroffen. Nie mit `--force` lösen, ohne vorher zu klären, welche Fassung gelten soll.
 
 ### Ausliefern
 

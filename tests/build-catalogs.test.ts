@@ -12,7 +12,12 @@ import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import { producerEnv, runPipeline, type PipelineDeps } from '../scripts/build-catalogs.js';
-import { CATALOG_MANIFEST_FILE, currentRelease, keyToFileName } from '../scripts/producer/lib.js';
+import {
+  CATALOG_MANIFEST_FILE,
+  VersionRegressionError,
+  currentRelease,
+  keyToFileName,
+} from '../scripts/producer/lib.js';
 import type { Runner } from '../scripts/producer/process.js';
 
 const OVERLAY_SHA = 'a'.repeat(64);
@@ -140,6 +145,90 @@ describe('runPipeline success', () => {
       );
     }
     expect(readdirSync(join(out, 'releases'))).toHaveLength(2);
+  });
+});
+
+function overlayPair(version: string, sha: string) {
+  return {
+    overlay: Buffer.from(
+      JSON.stringify({ $meta: { version, generated: '2026-11-20T17:17:24.078Z', sha256: sha } })
+    ),
+    neutral: Buffer.from(
+      JSON.stringify({
+        $meta: { version, generated: '2026-11-20T17:17:24.078Z', sha256: NEUTRAL_SHA },
+        $source: { version, generated: '2026-11-20T17:17:24.078Z', sha256: sha },
+      })
+    ),
+  };
+}
+
+describe('runPipeline version regression guard', () => {
+  const LATER = () => new Date(NOW.getTime() + 3_600_000);
+  function depsFor(version: string, sha: string, calls: string[]): PipelineDeps {
+    const deps = makeDeps((target) => writeCatalog(target, sha));
+    const pair = overlayPair(version, sha);
+    return {
+      ...deps,
+      buildOverlay: async () => pair,
+      ensureTracker: async (...args) => {
+        calls.push('ensureTracker');
+        return deps.ensureTracker(...args);
+      },
+      run: async (...args) => {
+        calls.push('producer');
+        return deps.run(...args);
+      },
+    };
+  }
+
+  it('refuses a lower version before the producer runs and keeps the last good release live', async () => {
+    const first = await runPipeline(options(), makeDeps(writeCatalog));
+    const calls: string[] = [];
+    const sha = 'd'.repeat(64);
+    await expect(
+      runPipeline({ ...options(), now: LATER }, depsFor('1.67', sha, calls))
+    ).rejects.toThrow(VersionRegressionError);
+    expect(calls).toEqual([]);
+    expect(currentRelease(out)).toBe(first.manifest.releaseId);
+    expect(readdirSync(join(out, 'releases'))).toEqual([first.manifest.releaseId]);
+    expect(leftovers()).toEqual(['current']);
+    expect(serverClosed).toBe(1);
+  });
+
+  it('releases the run lock after refusing, so the next run can start', async () => {
+    await runPipeline(options(), makeDeps(writeCatalog));
+    await expect(
+      runPipeline({ ...options(), now: LATER }, depsFor('1.67', 'd'.repeat(64), []))
+    ).rejects.toThrow(VersionRegressionError);
+    await expect(
+      runPipeline({ ...options(), now: LATER }, depsFor('1.185', 'e'.repeat(64), []))
+    ).resolves.toBeDefined();
+  });
+
+  it.each([
+    ['an equal version (rebuild)', '1.184'],
+    ['a higher version', '1.185'],
+    ['a numerically higher minor (1.184 -> 1.1000)', '1.1000'],
+  ])('publishes %s', async (_label, version) => {
+    await runPipeline(options(), makeDeps(writeCatalog));
+    const sha = 'f'.repeat(64);
+    const { manifest } = await runPipeline({ ...options(), now: LATER }, depsFor(version, sha, []));
+    expect(manifest.overlay.version).toBe(version);
+    expect(currentRelease(out)).toBe(manifest.releaseId);
+  });
+
+  it('publishes a lower version only when the downgrade is explicitly allowed', async () => {
+    await runPipeline(options(), makeDeps(writeCatalog));
+    const { manifest } = await runPipeline(
+      { ...options(), now: LATER, allowVersionRegression: true },
+      depsFor('1.67', 'd'.repeat(64), [])
+    );
+    expect(currentRelease(out)).toBe(manifest.releaseId);
+    expect(manifest.overlay.version).toBe('1.67');
+  });
+
+  it('does not block the very first release at any version', async () => {
+    await expect(runPipeline(options(), depsFor('1.1', 'd'.repeat(64), []))).resolves.toBeDefined();
   });
 });
 

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Cron wrapper for the catalog producer, with Discord alerts.
 #
-#   cron-run.sh run         build overlay + catalogs (npm run build:catalogs), alert on failure
+#   cron-run.sh run         fetch tags from origin, build overlay + catalogs (npm run build:catalogs),
+#                           alert on failure. A build whose overlay version is LOWER than the live
+#                           release's is refused before `current` flips (exit code 3 of the build)
+#                           and alerts separately; the last good release stays live.
 #   cron-run.sh check-age   alert when the live catalog release is older than STALE_HOURS
 #
 # Example crontab (as the user that owns the checkout):
@@ -22,6 +25,7 @@
 #   DISCORD_SYSTEM_LOG_WEBHOOK   alert target. Never logged or echoed. If unset, ENV_FILE is
 #                                scanned for exactly that one variable (the file is not sourced).
 #   ENV_FILE                     e.g. the main site's .env
+#   PRODUCER_ALLOW_VERSION_REGRESSION  set to 1 for one deliberate downgrade (passed to the build)
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -87,13 +91,36 @@ rotate_log() {
   if [ "${size:-0}" -gt "$MAX_LOG_BYTES" ]; then mv -f "$LOG" "$LOG.1"; fi
 }
 
+# The overlay version is derived from the release tags, so stale tags produce a wrong (lower)
+# version. Fetch them from our own origin first. Never fatal: a failed fetch is logged and
+# alerted, and the version guard still protects the live release.
+fetch_tags() {
+  local output
+  if output="$(git -C "$REPO_DIR" fetch --tags origin 2>&1)"; then
+    log "tags fetched from origin"
+    return 0
+  fi
+  log "tag fetch FAILED: $(printf '%s' "$output" | tail -n 3 | tr '\n' ' ')"
+  post_alert "$(hostname -s 2>/dev/null) catalog producer could not fetch release tags from origin; building with the local tags, the version guard stays active. See $LOG"
+  return 0
+}
+
 cmd_run() {
   rotate_log
   local start
   start="$(date -Is 2>/dev/null || date)"
   cd "$REPO_DIR" || { post_alert "catalog producer FAILED ($start): cannot enter $REPO_DIR"; exit 1; }
+  fetch_tags
   log "run start (keep=$KEEP_RELEASES)"
-  if ! npm run build:catalogs -- --out "$OUT_DIR" --keep "$KEEP_RELEASES" >>"$LOG" 2>&1; then
+  npm run build:catalogs -- --out "$OUT_DIR" --keep "$KEEP_RELEASES" >>"$LOG" 2>&1
+  local status=$?
+  if [ "$status" -eq 3 ]; then
+    # Exit code 3 = version regression refused by the pre-flip guard in build-catalogs.ts.
+    log "run REFUSED: overlay version regressed, previous release stays live"
+    post_alert "$(hostname -s 2>/dev/null) catalog build REFUSED ($start): the overlay version went DOWN compared to the live release (release tags missing or wrong?). Nothing was published, the last good release stays live. See $LOG"
+    exit 1
+  fi
+  if [ "$status" -ne 0 ]; then
     log "run FAILED"
     post_alert "$(hostname -s 2>/dev/null) catalog producer FAILED ($start). The last good release stays live. See $LOG"
     exit 1
