@@ -301,6 +301,16 @@ describe('locale source files', () => {
     }
   });
 
+  it('words trader loyalty levels as Loyalitätsstufe, never Ansehensstufe', () => {
+    // User decision: "Loyalty level" is "Loyalitätsstufe". "Ansehen" stays for reputation/standing.
+    const de = loadJson5File<LocaleOverlay>(join(srcDir, 'overrides', 'locales', 'de.json5'));
+    const text = JSON.stringify(de);
+
+    expect(text).not.toMatch(/Ansehensstufe/i);
+    expect(text).toContain('Erreiche Loyalitätsstufe 2 bei Prapor');
+    expect(text).toContain('verlierst du 0,3 Ansehen bei Prapor');
+  });
+
   it('does not reintroduce the New Beginning patches tarkov.dev fixed upstream', () => {
     // The en bundle used to resolve these names to the German "Neuanfang"; it
     // now serves "New Beginning" in every mode, and check-overrides
