@@ -1686,6 +1686,9 @@
     tour: {
       name: 'Tour',
       description: 'Startaufgabe – wird zu Beginn der Storyline automatisch freigeschaltet',
+      rewards: {
+        description: 'Schaltet den Erfolg „Pathfinder“ frei',
+      },
       objectives: {
         // EN: Escape Ground Zero
         '6895bc04162304804bdc056e': {
@@ -1706,6 +1709,11 @@
         // EN: Hand over 250,000 RUB to Therapist
         '6895c24ec097ed522295a05d': {
           description: 'Übergib 250.000 RUB an Therapist',
+          unlocks: {
+            '5714dc692459777137212e12': {
+              note: 'Wird nach Abschluss des Bargeld-Abschnitts bei Therapist freigeschaltet.',
+            },
+          },
         },
         // EN: Talk to Ragman
         '68c15e129c0090b717977bd4': {
@@ -1722,6 +1730,14 @@
         // EN: Tell Ragman what you found during the recon
         '68cc123af7f4373ce2365213': {
           description: 'Erzähl Ragman, was du bei der Erkundung gefunden hast',
+          unlocks: {
+            '58330581ace78e27b8b10cee': {
+              note: 'Wird nach Abschluss des Erkundungsabschnitts auf Interchange freigeschaltet.',
+            },
+            '56f40101d2720b2a4d8b45d6': {
+              note: 'Wird nach Abschluss des Erkundungsabschnitts auf Interchange freigeschaltet.',
+            },
+          },
         },
         // EN: Talk to Skier
         '68c2c0907a45d1fc06b150a2': {
@@ -1742,6 +1758,14 @@
         // EN: Hand over any 5 building materials or tools found in raid to Skier
         '6895c4a6b9a96237b73e15a1': {
           description: 'Übergib 5 beliebige im Raid gefundene Baumaterialien oder Werkzeuge an Skier',
+          unlocks: {
+            '5a7c2eca46aef81a7ca2145d': {
+              note: 'Wird nach Abschluss des Customs-Abschnitts freigeschaltet.',
+            },
+            '55f2d3fd4bdc2d5f408b4567': {
+              note: 'Mit dem Abschluss des Customs-Abschnitts werden Factory zur Tageszeit und Factory bei Nacht freigeschaltet.',
+            },
+          },
         },
         // EN: Talk to Mechanic
         '68c41dde2ddd4581cfc7531c': {
@@ -1762,6 +1786,14 @@
         // EN: Hand over any 2 weapons found in raid to Mechanic
         '6895daa6f935f3dbe1de0a9d': {
           description: 'Übergib 2 beliebige im Raid gefundene Waffen an Mechanic',
+          unlocks: {
+            '54cb50c76803fa8b248b4571': {
+              note: 'Wird nach Abschluss des Factory-Abschnitts freigeschaltet.',
+            },
+            '5704e3c2d2720bac5b8b4567': {
+              note: 'Wird nach Abschluss des Factory-Abschnitts freigeschaltet.',
+            },
+          },
         },
         // EN: Talk to Skier
         '68c427c12529fc8fe8d2ded6': {
@@ -1774,6 +1806,14 @@
         // EN: Survive and extract from Woods or visit Woods 3 times
         '69bd84d0e08ef0a8d3a85950': {
           description: 'Überlebe und entkomme aus Woods oder besuche Woods 3-mal',
+          unlocks: {
+            '5935c25fb3acc3127c3d8cd9': {
+              note: 'Wird nach Abschluss des Woods-Abschnitts einschließlich der Zieleliminierungen freigeschaltet.',
+            },
+            '5704e554d2720bac5b8b456e': {
+              note: 'Wird nach Abschluss des Woods-Abschnitts einschließlich der Zieleliminierungen freigeschaltet.',
+            },
+          },
         },
         // EN: Visit Woods 3 times
         '69bd84e421fa07eadaa652b5': {
@@ -1814,6 +1854,11 @@
         // EN: Hand over 5 PMC dogtags to Prapor
         '6896020e3af3adc94b263d60': {
           description: 'Übergib 5 PMC-Dogtags an Prapor',
+          unlocks: {
+            '5704e5fad2720bc05b8b4567': {
+              note: 'Wird nach Abschluss des Shoreline-Abschnitts einschließlich der Dogtag-Übergabe freigeschaltet.',
+            },
+          },
         },
         // EN: Ensure access to Lighthouse
         '68c6a969f7d6765264b9c44f': {
@@ -1826,6 +1871,11 @@
         // EN: Hand over 8,000 USD to Mechanic
         '6895d2d18f186d19d54d102c': {
           description: 'Übergib 8.000 USD an Mechanic',
+          unlocks: {
+            '5704e4dad2720bb55b8b4567': {
+              note: 'Wird nach Abschluss des Bargeld-Abschnitts bei Mechanic freigeschaltet.',
+            },
+          },
         },
         // EN: Ensure access to The Lab
         '68c6b0a3cb1c5c519963e7af': {
@@ -1858,6 +1908,11 @@
         // EN: Locate the escape path through the drainage system in The Lab
         '68c6aa4040bb6d7ff66c0abb': {
           description: 'Finde den Fluchtweg durch das Entwässerungssystem in The Lab',
+          unlocks: {
+            '5b0fc42d86f7744a585f9105': {
+              note: 'Wird nach Abschluss des Abschnitts zur TerraGroup-Anlage freigeschaltet, einschließlich der Durchsuchung von Büros, Serverraum und Entwässerungssystem.',
+            },
+          },
         },
       },
     },
@@ -1866,6 +1921,10 @@
     'falling-skies': {
       name: 'Fallender Himmel',
       description: 'Untersuche die Aktion rund um das abgestürzte Flugzeug und entscheide, was mit dem Armored case geschehen soll.',
+      notes: 'Wenn du den Armored case behältst, verlierst du 0,3 Ansehen bei Prapor und die Routen in Das Ticket ändern sich.',
+      activation: {
+        summary: 'Frage Mechanic im Verlauf von Tour nach dem abgestürzten Flugzeug.',
+      },
       objectives: {
         // EN: Locate the fallen plane
         '68dfa85efdedf14d640a6ee2': {
@@ -2002,6 +2061,9 @@
     batya: {
       name: 'Batya',
       description: 'Untersuche die BEAR-Truppe Bogatyr, nimm ihre Spur wieder auf und stimme dich mit Lightkeeper und Voevoda ab.',
+      activation: {
+        summary: 'Besuche einen der markierten Orte mit BEAR-Spuren auf Customs, Reserve, Shoreline oder Woods.',
+      },
       objectives: {
         // EN: Locate the traces of the BEAR special squad
         '68dea804e88b45b0ecefa10d': {
@@ -2246,6 +2308,9 @@
     'the-unheard': {
       name: 'The Unheard',
       description: 'Verfolge das Blue-Ice-Protokoll von The Unheard durch TerraGroup-Unterlagen, das Netzwerk von A.P. und verschlüsselte Daten.',
+      activation: {
+        summary: 'Nimm an einem der TerraGroup-Orte auf Streets of Tarkov oder Ground Zero die Purification-Notiz an dich und lies den Text.',
+      },
       objectives: {
         // EN: Learn more about The Unheard
         '68ec51edb0e734a60d7544bd': {
@@ -2394,6 +2459,10 @@
     'blue-fire': {
       name: 'Blaues Feuer',
       description: 'Untersuche den EMP-Vorfall, sichere die Informationen zu Item 1156 und folge der Kette von Hinweisen rund um Rus Post.',
+      notes: 'Das Platzieren des Hacking-Geräts dauert 60 Sekunden.',
+      activation: {
+        summary: 'Nimm auf Woods, Interchange oder in The Labyrinth ein EMERCOM leaflet oder eine Notiz zu Item 1156 an dich und lies den Text.',
+      },
       objectives: {
         // EN: Talk to Mechanic about the EMP blast
         '68e79075869625375c90c382': {
@@ -2449,6 +2518,9 @@
     'they-are-already-here': {
       name: 'Sie sind schon hier',
       description: 'Folge der Spur des Eye of the World durch Orte der Kultisten, die Sordi-Infrastruktur und die ARRS Station 14-4 KORD.',
+      activation: {
+        summary: 'Nimm auf Customs, Reserve, Woods oder Shoreline die Note about the Eye of the World an dich und lies den Text.',
+      },
       objectives: {
         // EN: Learn more about the people leaving strange symbols in Tarkov
         '68e79e9c013734664b218cb3': {
@@ -2621,6 +2693,9 @@
     'accidental-witness': {
       name: 'Zufälliger Zeuge',
       description: 'Verfolge Kozlovs Beweiskette durch die Wohnheime, Streets of Tarkov und Reshalas Lagernetzwerk.',
+      activation: {
+        summary: 'Finde das vollgekritzelte Auto im Hof der Wohnheime auf Customs.',
+      },
       objectives: {
         // EN: Figure out where Kozlov lived
         '68f0f7d9a3fa68269236e047': {
@@ -2745,6 +2820,10 @@
     'the-labyrinth': {
       name: 'Das Labyrinth',
       description: 'Untersuche den Vorfall im unterirdischen Labyrinth, sichere die Daten der Wissenschaftler und finde die vermisste BEAR-Truppe.',
+      notes: 'Äußerst gefährliches Gebiet mit Fallen, Giftgefahren und Begegnungen mit Minibossen.',
+      activation: {
+        summary: 'Finde mit dem Knossos-Schlüssel den Übergang zum Labyrinth im Keller des Westflügels im Health Resort auf Shoreline.',
+      },
       objectives: {
         // EN: Ask the traders about the underground facility
         '68e3aa759490da153915d7bb': {
@@ -2817,6 +2896,10 @@
     'the-ticket': {
       name: 'Das Ticket',
       description: 'Verzweigt sich in die vier Enden der Storyline, die in `endings` mit den echten IDs aufgeführt sind, die der Client in ending_list ausliefert. Laut Wiki bestehen die Entscheidungspunkte darin, Mr. Kerman zu helfen oder ihn zu verraten, Prapor zu bezahlen oder Lightkeeper aufzusuchen; jedes Ende wird durch eine eigene Unteraufgabe freigeschaltet.',
+      notes: 'Die sich gegenseitig ausschließenden Abschlüsse von Unteraufgaben aus der Referenzaufnahme werden auf Kapitelebene als `mutuallyExclusiveQuestPairs` ausgegeben. Teilfortschritt bei beiden Seiten ist erlaubt. Es sind nur Paare aufgelöster Unteraufgaben innerhalb dieses Kapitels enthalten. Die Abdeckung der Ziele ist unvollständig (siehe `referenceCoverage`): Der Client liefert die Vorlage einer Story-Unteraufgabe erst aus, sobald der Spieler sie erreicht hat, daher liegen nur für Enden, deren `objectiveCount` über null liegt, Belege auf Zielebene vor. Die Entscheidung über den Armored case in Fallender Himmel beeinflusst die verfügbaren optionalen Ziele (Zugang zu Lightkeeper).',
+      activation: {
+        summary: 'Mache nach dem Erhalt des Armored case mit Fallender Himmel weiter und starte die Terminal-Kette von Mr. Kerman.',
+      },
       objectives: {
         // EN: Talk to Mr. Kerman
         '68d921de0d2f39698f6562c1': {
@@ -3169,6 +3252,9 @@
     boreas: {
       name: 'Boreas',
       description: 'Untersuche den Icebreaker „Boreas“ von Paradigm Shipping, geh an Bord und hole für Mechanic die Festplatten aus Abteil C-1.',
+      activation: {
+        summary: 'Frage Mechanic nach der Verbindung zwischen TerraGroup und Paradigm Shipping und folge dann der Spur zum Atom-Icebreaker „Boreas“.',
+      },
       objectives: {
         // EN: Find out from traders more about the connection between TerraGroup and Paradigm Shipping
         '69a05f6893647652e0182471': {

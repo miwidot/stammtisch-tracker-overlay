@@ -16,6 +16,38 @@
       },
       "description": "ID-keyed objective patches for locale-sensitive objective text",
       "type": "object"
+    },
+    "storyObjectiveLocalePatches": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Corrected story objective description for this locale",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Corrected story objective notes for this locale",
+            "type": "string"
+          },
+          "unlocks": {
+            "additionalProperties": {
+              "additionalProperties": false,
+              "properties": {
+                "note": {
+                  "description": "Corrected unlock note for this locale",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "description": "Unlock locale patches keyed by the unlock ID within the objective",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "description": "ID-keyed story objective patches for locale-sensitive objective text",
+      "type": "object"
     }
   },
   "description": "Schema for a single locale's corrections (src/overrides/locales/<locale>.json5). The file name determines the locale code (e.g. en.json5 -> en). Locale overrides patch broken translation bundles only; they are not data corrections and apply only when the consumer renders the matching locale.",
@@ -83,6 +115,17 @@
       "additionalProperties": {
         "additionalProperties": false,
         "properties": {
+          "activation": {
+            "additionalProperties": false,
+            "description": "Corrected story chapter activation text for this locale",
+            "properties": {
+              "summary": {
+                "description": "Corrected story chapter activation summary for this locale",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
           "description": {
             "description": "Corrected story chapter description for this locale",
             "type": "string"
@@ -91,8 +134,23 @@
             "description": "Corrected story chapter name for this locale",
             "type": "string"
           },
+          "notes": {
+            "description": "Corrected story chapter notes for this locale",
+            "type": "string"
+          },
           "objectives": {
-            "$ref": "#/definitions/objectiveLocalePatches"
+            "$ref": "#/definitions/storyObjectiveLocalePatches"
+          },
+          "rewards": {
+            "additionalProperties": false,
+            "description": "Corrected story chapter rewards text for this locale",
+            "properties": {
+              "description": {
+                "description": "Corrected story chapter rewards description for this locale",
+                "type": "string"
+              }
+            },
+            "type": "object"
           }
         },
         "type": "object"

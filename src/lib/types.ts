@@ -813,12 +813,27 @@ export interface PrestigeLocaleOverride {
   name?: string;
 }
 
+/** Locale patch for a single story objective unlock's locale-sensitive text */
+export interface StoryUnlockLocaleOverride {
+  note?: string;
+}
+
+/** Locale patch for a single story objective's locale-sensitive text */
+export interface StoryObjectiveLocaleOverride extends ObjectiveLocaleOverride {
+  notes?: string;
+  /** Unlock locale patches keyed by the unlock ID within the objective */
+  unlocks?: Record<string, StoryUnlockLocaleOverride>;
+}
+
 /** Locale patch for a single story chapter's locale-sensitive fields */
 export interface StoryChapterLocaleOverride {
   name?: string;
   description?: string;
+  notes?: string;
+  activation?: { summary?: string };
+  rewards?: { description?: string };
   /** ID-keyed objective locale patches */
-  objectives?: Record<string, ObjectiveLocaleOverride>;
+  objectives?: Record<string, StoryObjectiveLocaleOverride>;
 }
 
 /**

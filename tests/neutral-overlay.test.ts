@@ -86,6 +86,70 @@ describe('neutral overlay producer', () => {
     expect(tasks.quest?.objectives[0]?.exitStatus).toEqual(['ExpBonusmarathon Name']);
   });
 
+  it('compiles German story text corrections into targets for every new field', () => {
+    const output = compileNeutralOverlay(
+      fixture({
+        storyChapters: {
+          chapter: {
+            notes: 'A note',
+            activation: { summary: 'Visit the trader' },
+            rewards: { description: 'Unlocks achievement Pathfinder' },
+            objectives: [
+              {
+                id: 'step',
+                description: 'Step',
+                notes: 'Step note',
+                unlocks: [{ type: 'map', id: 'map-1', name: 'Customs', note: 'Unlocked later' }],
+              },
+            ],
+          },
+        },
+        locales: {
+          de: {
+            storyChapters: {
+              chapter: {
+                notes: 'Eine Notiz',
+                activation: { summary: 'Besuche den Händler' },
+                rewards: { description: 'Schaltet den Erfolg Pathfinder frei' },
+                objectives: {
+                  step: {
+                    notes: 'Schrittnotiz',
+                    unlocks: { 'map-1': { note: 'Später freigeschaltet' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+    );
+    const base = '@tt:overlay:/storyChapters/chapter';
+    const expected: Record<string, [string[], string]> = {
+      [`${base}/notes`]: [['storyChapters', 'chapter', 'notes'], 'Eine Notiz'],
+      [`${base}/activation/summary`]: [
+        ['storyChapters', 'chapter', 'activation', 'summary'],
+        'Besuche den Händler',
+      ],
+      [`${base}/rewards/description`]: [
+        ['storyChapters', 'chapter', 'rewards', 'description'],
+        'Schaltet den Erfolg Pathfinder frei',
+      ],
+      [`${base}/objectives/step/notes`]: [
+        ['storyChapters', 'chapter', 'objectives', 'step', 'notes'],
+        'Schrittnotiz',
+      ],
+      [`${base}/objectives/step/unlocks/map-1/note`]: [
+        ['storyChapters', 'chapter', 'objectives', 'step', 'unlocks', 'map-1', 'note'],
+        'Später freigeschaltet',
+      ],
+    };
+    for (const [key, [path, text]] of Object.entries(expected)) {
+      expect(output.$localeTargets[key]).toEqual(path);
+      expect(output.$strings.de?.[key]).toBe(text);
+      expect(output.$strings.en?.[key]).toBeDefined();
+    }
+  });
+
   it('rejects locale corrections whose semantics cannot be represented by strings', () => {
     expect(() =>
       compileNeutralOverlay(

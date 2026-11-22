@@ -598,6 +598,9 @@ Rules for applying them:
 - Apply locale overrides **after** data overrides; they take precedence for
   locale-sensitive fields (`name`, `shortName`, `description`, `wikiLink`,
   objective `description`) when rendering that locale.
+- `storyChapters` locale entries also carry `notes`, `activation.summary`,
+  `rewards.description`, and, per objective, `notes` and `unlocks[unlockId].note`.
+  Objectives and unlocks are keyed by ID. `wikiLink` is not translatable there.
 - Only apply the section matching your active locale. If you render `de`,
   ignore `locales.en` entirely.
 - Locale overrides apply across all supported modes. Upstream translation tables

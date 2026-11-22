@@ -18,6 +18,8 @@ import {
   type LocaleOverlay,
 } from '../src/lib/index.js';
 import { getValidator, initializeValidators } from '../scripts/validate.js';
+import { compileNeutralOverlay } from '../src/lib/neutral-overlay.js';
+import type { OverlayOutput } from '../src/lib/types.js';
 
 const { srcDir, schemasDir } = getProjectPaths();
 
@@ -89,6 +91,92 @@ describe('locale-override.schema.json', () => {
 
     expect(validate.errors).toBeNull();
     expect(valid).toBe(true);
+  });
+
+  it('accepts story chapter notes, activation summary, rewards, objective notes and unlock notes', () => {
+    const validate = compileLocaleSchema();
+    const valid = validate({
+      storyChapters: {
+        tour: {
+          notes: 'Chapter note.',
+          activation: { summary: 'Ask the trader.' },
+          rewards: { description: 'Unlocks achievement Pathfinder' },
+          objectives: {
+            'objective-id-1': {
+              description: 'Visit the terminal',
+              notes: 'Objective note.',
+              unlocks: { 'map-id-1': { note: 'Unlocked after the first stage.' } },
+            },
+          },
+        },
+      },
+    });
+
+    expect(validate.errors).toBeNull();
+    expect(valid).toBe(true);
+  });
+
+  it('rejects unknown and untranslatable fields on story chapter patches', () => {
+    const validate = compileLocaleSchema();
+    const chapter = (patch: object) => validate({ storyChapters: { tour: patch } });
+
+    // wikiLink is a URL and stays untranslated for story chapters
+    expect(chapter({ wikiLink: 'https://example.com/tour' })).toBe(false);
+    expect(chapter({ order: 2 })).toBe(false);
+    expect(chapter({ activation: { locations: [] } })).toBe(false);
+    expect(chapter({ activation: { summary: 'ok', extra: 'x' } })).toBe(false);
+    expect(chapter({ rewards: { items: [] } })).toBe(false);
+    expect(chapter({ rewards: { description: 'ok', extra: 'x' } })).toBe(false);
+  });
+
+  it('rejects unknown fields on story objective and unlock patches', () => {
+    const validate = compileLocaleSchema();
+    const objective = (patch: object) =>
+      validate({ storyChapters: { tour: { objectives: { 'objective-id-1': patch } } } });
+
+    expect(objective({ count: 5 })).toBe(false);
+    expect(objective({ unlocks: { 'map-id-1': { name: 'Customs' } } })).toBe(false);
+    expect(objective({ unlocks: { 'map-id-1': { note: 'ok', type: 'map' } } })).toBe(false);
+  });
+
+  it('rejects non-string values for the story text fields', () => {
+    const validate = compileLocaleSchema();
+    const invalid = [
+      { notes: 42 },
+      { notes: null },
+      { activation: { summary: 1 } },
+      { activation: 'text' },
+      { rewards: { description: ['a'] } },
+      { rewards: 'text' },
+      { objectives: { o: { notes: {} } } },
+      { objectives: { o: { unlocks: { u: { note: false } } } } },
+      { objectives: { o: { unlocks: [] } } },
+    ];
+
+    for (const patch of invalid) {
+      expect(validate({ storyChapters: { tour: patch } })).toBe(false);
+    }
+  });
+
+  it('keeps task objectives limited to description', () => {
+    const validate = compileLocaleSchema();
+
+    expect(
+      validate({ tasks: { 'task-id-1': { objectives: { o: { notes: 'Not for tasks' } } } } })
+    ).toBe(false);
+    expect(validate({ tasks: { 'task-id-1': { objectives: { o: { unlocks: {} } } } } })).toBe(
+      false
+    );
+  });
+
+  it('treats empty story text strings like every other locale string field', () => {
+    // The schema constrains types only (no minLength anywhere in this file), so an
+    // empty string passes for the new fields exactly as it does for name/description.
+    const validate = compileLocaleSchema();
+
+    expect(validate({ storyChapters: { tour: { name: '' } } })).toBe(true);
+    expect(validate({ storyChapters: { tour: { notes: '' } } })).toBe(true);
+    expect(validate({ storyChapters: { tour: { activation: { summary: '' } } } })).toBe(true);
   });
 
   it('accepts an empty per-locale object (sparse by design)', () => {
@@ -173,6 +261,43 @@ describe('locale source files', () => {
         throw new Error(`locale file '${locale}.json5' failed validation:\n${errors}`);
       }
       expect(valid).toBe(true);
+    }
+  });
+
+  it('translates every German story note, summary, reward and unlock note without orphan patches', () => {
+    // Compile the real source files the way the producer does and compare the two string
+    // tables: a text the German file misses stays English, a patch whose ID path matches
+    // nothing never applies.
+    const storyChapters = loadJson5File<Record<string, unknown>>(
+      join(srcDir, 'additions', 'storyChapters.json5')
+    );
+    const de = loadJson5File<LocaleOverlay>(join(srcDir, 'overrides', 'locales', 'de.json5'));
+    const output = compileNeutralOverlay({
+      modes: { regular: {}, pve: {}, 'pvp-season': {} },
+      storyChapters,
+      locales: { de },
+      $meta: { version: '1.0', generated: '2026-11-22T00:00:00Z' },
+    } as unknown as OverlayOutput);
+    const english = output.$strings.en ?? {};
+    const german = output.$strings.de ?? {};
+    const storyKeys = (table: Record<string, string>) =>
+      Object.keys(table).filter((key) => key.startsWith('@tt:overlay:/storyChapters/'));
+    const translatable = (key: string) =>
+      /\/(notes|summary)$/.test(key) ||
+      /\/rewards\/description$/.test(key) ||
+      /\/unlocks\/[^/]+\/note$/.test(key);
+
+    const missing = storyKeys(english)
+      .filter(translatable)
+      .filter((key) => !(key in german));
+    const orphans = storyKeys(german).filter((key) => !(key in english));
+
+    expect(storyKeys(english).filter(translatable).length).toBeGreaterThan(0);
+    expect(missing).toEqual([]);
+    expect(orphans).toEqual([]);
+    for (const key of storyKeys(german)) {
+      expect(output.$localeTargets[key]).toBeDefined();
+      expect(german[key]?.trim()).not.toBe('');
     }
   });
 
