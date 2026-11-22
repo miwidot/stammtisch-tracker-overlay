@@ -1,102 +1,124 @@
 # Fork-Abweichungen — Tarkov Stammtisch Daten-Overlay
 
-Privater Fork von [tarkovtracker-org/tarkov-data-overlay](https://github.com/tarkovtracker-org/tarkov-data-overlay) (**MIT**).
+Privater Fork von [tarkovtracker-org/tarkov-data-overlay](https://github.com/tarkovtracker-org/tarkov-data-overlay) (**MIT**). Stand: Branch `sync/upstream-2026-11-21`, Upstream `main` = Version 1.184. Diese Datei wurde gegen `git diff --name-status upstream/main HEAD` abgeglichen.
 
-> ⚠️ **Namensverwirrung:** „Overlay" bedeutet bei uns drei verschiedene Dinge.
-> Dieses Repo ist das **Spieldaten-Overlay**: Korrekturen an den Quest-/Item-Daten von tarkov.dev. Reines JSON, keine Darstellung.
-> Nicht zu verwechseln mit dem **Theme** des Trackers (Farben, liegen im App-Fork in `tailwind.css`/`app.config.ts`) und nicht mit den **OBS-Overlays** für Streams auf der Hauptseite.
+> ⚠️ **Namensverwirrung:** „Overlay" bedeutet bei uns drei Dinge.
+> Dieses Repo ist das **Spieldaten-Overlay**: Korrekturen an den Quest-/Item-Daten von tarkov.dev, reines JSON ohne Darstellung.
+> Nicht zu verwechseln mit dem **Theme** des Trackers (Farben, im App-Fork in `tailwind.css`/`app.config.ts`) und nicht mit den **OBS-Overlays** für Streams auf der Hauptseite.
 
-Zugehörig: App-Fork [`miwidot/stammtisch-tracker`](https://github.com/miwidot/stammtisch-tracker) · Epic [#1293](https://github.com/miwidot/tarkov-stammtisch/issues/1293)
-
----
-
-## Warum wir das forken
-
-Der Tracker unterstützt **genau eine** Overlay-Quelle. Zeigt `OVERLAY_URL` auf eine eigene Datei, ist das Upstream-Overlay **komplett weg** — inklusive aller Korrekturen.
-
-Praktisch gemessen: Ein eigenes Test-Overlay liess die Task-Anzahl von **487 auf 517** springen, weil rund 30 per `disabled: true` ausgefilterte Tasks wieder auftauchten. Dazu wären alle 211 Task-Korrekturen verloren gegangen.
-
-Der Fork löst das: wir bauen **eine** Datei, die Upstream-Korrekturen **und** unser Deutsch enthält.
+Zugehörig: App-Fork [`miwidot/stammtisch-tracker`](https://github.com/miwidot/stammtisch-tracker) (eigene `FORK.md`, dort steht auch, wie der App-Server `OVERLAY_URL` liest) · Epic [#1293](https://github.com/miwidot/tarkov-stammtisch/issues/1293)
 
 ---
 
-## Unsere Abweichungen
+## Worum es geht
 
-Stand 2026-11-21, gemessen mit `git diff upstream/main --stat`. Alles, was wir früher selbst trugen (`de.json5`, `status-locale`, Tests, `package.json`-Zeile, `ci.yml`), ist inzwischen upstream.
+Der Tracker unterstützt **genau eine** Overlay-Quelle. Zeigt `OVERLAY_URL` auf eine eigene Datei, ist das Upstream-Overlay komplett weg, inklusive aller Korrekturen. Deshalb betreiben wir dieses Repo als Fork, der Upstream laufend einmerged, und bauen **eine** Datei aus Upstreams Stand.
 
-### Gelöscht — kostet bei jedem Merge einen Handgriff
+**Unsere deutschen Übersetzungen (`src/overrides/locales/de.json5`) sind seit den Upstream-PRs #280/#281 bei Upstream.** Dieser Fork trägt keine Daten- oder Übersetzungsänderungen mehr: `src/` und `dist/` sind identisch mit Upstream (`git diff upstream/main HEAD -- src dist` ist leer). Der Fork existiert heute wegen des **Katalog-Erzeugers** (unten) und weil Server und Cron aus unserem eigenen Remote arbeiten.
 
-| Datei                    | Was                                         | Handgriff beim Merge                                        |
-| ------------------------ | ------------------------------------------- | ----------------------------------------------------------- |
-| `.github/dependabot.yml` | gelöscht (kein Dependabot im privaten Fork) | Konflikt „deleted in HEAD": `git rm .github/dependabot.yml` |
+---
 
-`ci.yml` und `release.yml` weichen **nicht** mehr ab. Näheres zu `release.yml` unten.
+## Was noch abweicht
 
-### Neue Dateien — kosten beim Merge nichts
+Gemessen mit `git diff --name-status upstream/main HEAD`: 19 Dateien, alle hinzugefügt außer zwei.
 
-| Datei                                                                                                                         | Zweck                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `FORK.md`                                                                                                                     | dieses Dokument                                                                                           |
-| `scripts/build-catalogs.ts`                                                                                                   | Erzeuger-Schritt: Overlay bauen, Tracker-Produzent laufen lassen, Kataloge atomar veröffentlichen         |
-| `scripts/producer/*`                                                                                                          | Bausteine dazu (`lib`, `tracker`, `https-server`, `process`) und `tracker.lock.json` (Pin)                |
-| `scripts/producer/cron-run.sh`, `scripts/producer/prune-tools.ts`                                                             | Cron-Wrapper mit Discord-Alarm (Fehler, veraltete Daten) und optionales Aufräumen alter Tracker-Checkouts |
-| `scripts/parity.ts`, `scripts/parity/*`                                                                                       | Paritätsprüfung gegen tarkovtracker.org                                                                   |
-| `tests/producer-lib.test.ts`, `tests/producer-cron.test.ts`, `tests/build-catalogs.test.ts`, `tests/parity-normalize.test.ts` | Tests dazu                                                                                                |
+### Gelöscht
 
-### Geänderte Upstream-Dateien
+| Datei                    | Handgriff beim Merge                                              |
+| ------------------------ | ----------------------------------------------------------------- |
+| `.github/dependabot.yml` | Konflikt „deleted in HEAD": `git rm .github/dependabot.yml`       |
 
-| Datei          | Was                                                                                                                   |
-| -------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `package.json` | zwei Zeilen unter `scripts`: `build:catalogs` und `parity` (Konfliktrisiko gering, nur bei Änderungen direkt daneben) |
+Kein Dependabot-Versions-Update im privaten Fork.
 
-### `dist/` fassen wir nicht an
+### Geändert
 
-Upstream checkt `dist/overlay.json` und `dist/overlay-neutral.json` ein; ein Release-Workflow erzeugt sie und tagt. Bei uns liest niemand die eingecheckten Dateien — der Server baut selbst. Deshalb:
+| Datei          | Was                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `package.json` | zwei Zeilen unter `scripts`: `build:catalogs` und `parity` (Konfliktrisiko gering, nur bei Änderungen direkt daneben)     |
 
-- **Niemals selbst committen.** Nach `npm run build` ist das Arbeitsverzeichnis schmutzig (neuer Zeitstempel und Hash) — das ist normal, verwerfen mit `git checkout -- dist/`.
-- Beim Upstream-Merge bringt upstream die Dateien mit; sie konfliktieren nur, wenn jemand bei uns eine eigene Fassung eingecheckt hat. Dann `git checkout --theirs dist/` bzw. `git checkout upstream/main -- dist`.
-- **Versionskennung:** `npm run build` nimmt die höchste Tag-Version, die in `HEAD` **enthalten** ist (`git tag --merged HEAD`). Wer mitten in einem noch nicht abgeschlossenen Merge baut, bekommt die alte Version (so geschehen: 1.102 statt 1.184). Erst den Merge committen, dann bauen.
+### Neu (kosten beim Merge nichts)
 
-⚠️ **`release.yml` läuft nach jedem erfolgreichen CI-Lauf auf `main` und committet, taggt und pusht `dist/`.** Das ist upstreams Release-Weg, in unserem privaten Fork aber unerwünscht (zwei Historien für ein Artefakt). Es steht **nicht** in dieser Datei, sondern muss in den GitHub-Einstellungen des Forks abgeschaltet sein (Actions → Release overlay → Disable, oder Actions ganz aus). Ob das heute so ist, ist hier nicht geprüft.
+| Datei                                                                                                                         | Zweck                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `FORK.md`                                                                                                                     | dieses Dokument                                                                                             |
+| `scripts/build-catalogs.ts`                                                                                                   | Erzeuger: Overlay bauen, Tracker-Produzent laufen lassen, Kataloge atomar veröffentlichen                   |
+| `scripts/producer/lib.ts`, `tracker.ts`, `https-server.ts`, `process.ts`, `tracker.lock.json`                                 | Bausteine dazu und der Pin auf den Tracker-Commit                                                           |
+| `scripts/producer/cron-run.sh`, `scripts/producer/prune-tools.ts`                                                             | Cron-Wrapper mit Discord-Alarm; optionales Aufräumen alter Tracker-Checkouts                                |
+| `scripts/parity.ts`, `scripts/parity/{catalogs,compare,normalize}.ts`                                                         | Paritätsprüfung gegen tarkovtracker.org                                                                     |
+| `tests/producer-lib.test.ts`, `producer-cron.test.ts`, `build-catalogs.test.ts`, `parity-normalize.test.ts`                   | Tests dazu                                                                                                  |
 
-⚠️ **Die eine Falle:** Wer je ohne `npm run build` deployt, liefert upstreams Overlay **ohne unsere lokalen Änderungen** aus. Heute gibt es keine (Abweichung = null Daten), aber die Falle kommt zurück, sobald wir wieder etwas Eigenes in `src/` haben.
+### Nicht im Code, sondern in den GitHub-Einstellungen des Forks
+
+- Workflow **„Release overlay" ist deaktiviert** (`disabled_manually`). Upstreams `release.yml` committet, taggt und pusht `dist/` nach jedem erfolgreichen CI-Lauf auf `main`; bei uns wäre das eine zweite Historie für ein Artefakt. Die Datei selbst ist unverändert (kein Merge-Konflikt). Nicht wieder einschalten.
+- Aktiv: CI, Annual license year update, Dependabot Updates.
+
+---
+
+## Remotes
+
+| Remote     | URL                                                  | Regel                                                                                  |
+| ---------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `origin`   | `git@github.com:miwidot/stammtisch-tracker-overlay.git` | Unser Fork. Hierhin pushen, Server und Cron holen von hier                          |
+| `mirror`   | `git@github.com:MiwiDots/tarkov-data-overlay.git`       | Öffentlicher Fork, **nur** für Pull Requests an Upstream                            |
+| `upstream` | `https://github.com/tarkovtracker-org/tarkov-data-overlay.git` | **Nie pushen** ohne ausdrückliche Rückfrage                                   |
+
+Vor jedem Push `git remote get-url origin` prüfen.
+
+---
+
+## Tags und Version
+
+Die Overlay-Version ist die **höchste Tag-Version `v*`, die in `HEAD` enthalten ist** (`git tag --merged HEAD --list 'v*'`, aktuell `v1.184`). Fehlen Upstream-Tags, baut ein frischer Klon oder der Server eine viel zu niedrige Version (so geschehen: 1.67 statt 1.184).
+
+- **`v1.0` bis `v1.7` zeigen jetzt auf Upstreams Commits** (alle liegen in `upstream/main`). Früher zeigten sie bei uns auf andere Commits (Altlast aus August 2026) und blockierten `git push --tags`.
+- **Unsere alten August-Tags sind erhalten** als `fork-2026-08/v1.0` bis `fork-2026-08/v1.7` (lokal und auf `origin`). `--merged HEAD --list 'v*'` zählt sie nicht mit, weil sie nicht mit `v` beginnen.
+- Beim Merge deshalb immer `git push origin --tags`; das lehnt jetzt keine Tags mehr ab. Nie mit `--force` überschreiben, ohne zu klären, welche Fassung gelten soll.
+- Wer mitten in einem noch nicht abgeschlossenen Merge baut, bekommt die alte Version: erst den Merge committen, dann bauen.
+
+---
+
+## `dist/` fassen wir nicht an
+
+Upstream checkt `dist/overlay.json` und `dist/overlay-neutral.json` ein. Bei uns liest niemand die eingecheckten Dateien, der Server baut selbst. Nach `npm run build` ist das Arbeitsverzeichnis schmutzig (neuer Zeitstempel und Hash): normal, verwerfen mit `git checkout -- dist/`. Nie selbst committen. Konfliktiert `dist/` bei einem Merge: `git checkout upstream/main -- dist`.
+
+⚠️ **Die eine Falle:** Wer ohne `npm run build` deployt, liefert upstreams Overlay aus. Heute gibt es keine eigenen Daten, aber die Falle kehrt zurück, sobald wir wieder etwas Eigenes in `src/` haben.
 
 ---
 
 ## Katalog-Erzeuger (`npm run build:catalogs`)
 
-Der Tracker liest seine Spieldaten (Quests, Items, Hideout, Strings) nicht mehr aus Cloudflare KV, sondern aus einem Verzeichnis (`TARKOV_DATA_DIR`). Dieses Verzeichnis füllt genau dieser Schritt — aus **diesem** Overlay und `json.tarkov.dev`.
+Der Tracker liest seine Spieldaten (Quests, Items, Hideout, Strings) aus einem Verzeichnis (`TARKOV_DATA_DIR`, nicht aus Cloudflare KV). Dieses Verzeichnis füllt dieser Schritt, aus **diesem** Overlay und `json.tarkov.dev`.
 
 ```bash
-npm run build:catalogs -- --out /var/lib/tracker-data
-# danach:  TARKOV_DATA_DIR=/var/lib/tracker-data/current
+npm run build:catalogs -- --out ~/tracker-data
+# danach:  TARKOV_DATA_DIR=~/tracker-data/current
 ```
 
-Ablauf: Overlay bauen → Overlay-Paar prüfen (`overlay-neutral.json` muss aus genau diesem `overlay.json` stammen) → Tracker-Code auf dem **gepinnten** Commit auschecken → beide Dateien über einen kurzlebigen HTTPS-Server auf Loopback ausliefern (der Tracker akzeptiert nur `https:`) → Produzent läuft gegen `json.tarkov.dev` und dieses Overlay → Ergebnis in ein Staging-Verzeichnis → prüfen (Manifest, jedes Objekt vorhanden, Größe und SHA-256 stimmen) → `producer-manifest.json` schreiben → Verzeichnis umbenennen nach `releases/<id>` → Symlink `current` atomar umhängen → alte Releases aufräumen (`--keep`, Standard 4). **Jeder Fehler bricht ab, ohne etwas zu veröffentlichen**; das vorige Release bleibt aktiv.
+Ablauf: Overlay bauen → Overlay-Paar prüfen (`overlay-neutral.json` muss aus genau diesem `overlay.json` stammen) → **Versions-Wächter** → Tracker-Code auf dem gepinnten Commit auschecken → beide Dateien über einen kurzlebigen HTTPS-Server auf Loopback ausliefern (der Tracker akzeptiert nur `https:`) → Produzent läuft gegen `json.tarkov.dev` und dieses Overlay → Staging-Verzeichnis → prüfen (Manifest, jedes Objekt vorhanden, Größe und SHA-256) → `producer-manifest.json` schreiben → umbenennen nach `releases/<id>` → Symlink `current` atomar umhängen → alte Releases aufräumen (`--keep`, Standard 4). **Jeder Fehler bricht ab, ohne etwas zu veröffentlichen**; das vorige Release bleibt aktiv.
 
-**Warum ein gepinnter Git-Checkout** (statt Submodul oder Kopie): der Produzent importiert den halben App-Baum (`neutralCatalog`, `overlay*`, `tarkov-json`). Kopieren hieße, bei jedem Tracker-Sync Hunderte Dateien nachzuziehen; ein Submodul ändert `.gitmodules` und den Index dieses Forks, braucht Deploy-Key-Handling im Submodul und macht jeden Merge zum Zweitjob. Der Pin ist eine Datei (`scripts/producer/tracker.lock.json`, volle 40-stellige SHA, kein Branchname), der Checkout liegt **außerhalb** des Repos (`~/.cache/stammtisch-overlay-producer`, überschreibbar mit `--tools-dir`/`PRODUCER_TOOLS_DIR`) und wird bei jedem Lauf gegen den Pin und auf lokale Änderungen geprüft.
+Der Produzent bekommt nur eine Allowlist an Umgebungsvariablen: keine Cloudflare-Zugangsdaten, kein `OVERLAY_TOKEN`.
 
-**Pin anheben:** neue Tracker-SHA in `tracker.lock.json` eintragen, `npm run build:catalogs` — der neue Checkout entsteht daneben. Der Pin muss aus unserem Tracker-Fork erreichbar sein (gepusht).
+**Der Pin** liegt in `scripts/producer/tracker.lock.json`: Repo `git@github.com:miwidot/stammtisch-tracker.git`, Commit **`abd13a95…`** (volle 40-stellige SHA, kein Branchname; das ist der Tracker-Commit „offer only German and English"). Warum ein Git-Checkout statt Submodul oder Kopie: der Produzent importiert den halben App-Baum (`neutralCatalog`, `overlay*`, `tarkov-json`); ein Submodul änderte `.gitmodules` und den Index dieses Forks, und eine Kopie müsste bei jedem Tracker-Sync Hunderte Dateien nachziehen. Der Checkout liegt außerhalb des Repos (`~/.cache/stammtisch-overlay-producer`, überschreibbar mit `--tools-dir`/`PRODUCER_TOOLS_DIR`) und wird bei jedem Lauf gegen den Pin und auf lokale Änderungen geprüft.
 
-**Repo-URL:** `scripts/producer/tracker.lock.json` nennt `git@github.com:...`. Auf stammdev gehört der Deploy-Key des Tracker-Forks zum SSH-Alias `github-tracker`; dort `TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git` setzen (oder `--tracker-repo`). Der Pin (Commit-SHA) bleibt in der Lock-Datei, nur die Quelle wird überschrieben.
+**Pin anheben:** neue Tracker-SHA eintragen, `npm run build:catalogs`; der neue Checkout entsteht daneben. Der Pin muss im Tracker-Fork gepusht sein. Nötig insbesondere, wenn sich dort die Sprachliste ändert (der Pin bestimmt, welche Katalog-Sprachen entstehen).
 
-**Identität gegenüber json.tarkov.dev:** Der Produzent läuft mit bereinigter Umgebung, `APP_URL` kam deshalb nie beim Tracker an, und dessen User-Agent fiel auf `TarkovTracker/1.0 (+https://tarkovtracker.org)` zurück, also auf die Upstream-Identität. `build-catalogs.ts` übergibt jetzt `APP_URL` aus `PRODUCER_APP_URL` (öffentlicher https-Ursprung, ohne Zugangsdaten, kein lokaler Host, nie `tarkovtracker.org`; ein ungültiger Wert bricht den Lauf ab statt still zurückzufallen). Ohne Variable gilt `https://tarkov-stammtisch.de`. Auf stammdev: `PRODUCER_APP_URL=https://trackerdev.tarkov-stammtisch.de` in die Cron-Zeile (`cron-run.sh` reicht die Umgebung an den Build durch).
+**Repo-URL überschreiben:** Auf stammdev gehört der Deploy-Key des Tracker-Forks zum SSH-Alias `github-tracker`; dort `TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git` setzen (oder `--tracker-repo`). Die SHA bleibt in der Lock-Datei.
 
-**Cron-Betrieb (`scripts/producer/cron-run.sh`):**
+**Identität gegenüber `json.tarkov.dev`:** Der Produzent läuft mit bereinigter Umgebung. `build-catalogs.ts` übergibt deshalb `APP_URL` aus **`PRODUCER_APP_URL`** (öffentlicher https-Ursprung, ohne Zugangsdaten, kein lokaler Host, nie `tarkovtracker.org`; ein ungültiger Wert bricht den Lauf ab). Daraus bildet der Tracker seinen User-Agent. Ohne Variable gilt `https://tarkov-stammtisch.de`. Auf stammdev: `PRODUCER_APP_URL=https://trackerdev.tarkov-stammtisch.de`.
+
+### Cron (`scripts/producer/cron-run.sh`)
 
 ```bash
 17 */12 * * * CATALOG_OUT_DIR=$HOME/tracker-data TRACKER_REPO=git@github-tracker:miwidot/stammtisch-tracker.git PRODUCER_APP_URL=https://trackerdev.tarkov-stammtisch.de ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh run
 47 *    * * * CATALOG_OUT_DIR=$HOME/tracker-data ENV_FILE=$HOME/tarkov-stammtisch/.env /pfad/zum/overlay/scripts/producer/cron-run.sh check-age
 ```
 
-- `run` ruft `npm run build:catalogs -- --out <dir> --keep <N>` auf und postet bei Fehlschlag in den Discord-Systemlog (`DISCORD_SYSTEM_LOG_WEBHOOK`, aus der Umgebung oder als einzige Variable aus `ENV_FILE` gelesen, die Datei wird nicht ausgeführt; die URL wird nie geloggt oder als Argument übergeben).
-- `run` holt vorher `git fetch --tags origin` (nicht fatal, bei Fehlschlag Alarm). **Versions-Wächter:** Liegt die gebaute Overlay-Version **unter** der des aktiven Releases (z.B. 1.184 → 1.67), bricht `build:catalogs` vor jeder Arbeit und vor dem Umhängen von `current` mit Exit-Code 3 ab (`assertNoVersionRegression` in `scripts/producer/lib.ts`, aufgerufen in `runPipeline`); `cron-run.sh` sendet dafür einen eigenen Discord-Alarm, das letzte gute Release bleibt aktiv. Gleiche Version (Neubau) und höhere gehen durch; nicht vergleichbare Versionsstrings blockieren nicht. Bewusster Rückschritt: einmalig `PRODUCER_ALLOW_VERSION_REGRESSION=1`.
-- `check-age` alarmiert, wenn das aktive Release älter als `STALE_HOURS` (30) ist oder kein Manifest lesbar ist; Wiederholung höchstens alle `ALERT_REPEAT_HOURS` (6).
-- **Löschen, ausdrücklich:** (1) Alte **Releases** räumt der Produzent selbst auf (`--keep`, Standard 4): nur Verzeichnisse `<out>/releases/<id>` mit gültigem Release-Namen, nie das aktive, nie Symlinks; leere, relative, `/`, Home- und Top-Level-Pfade werden abgelehnt. (2) Alte **Tracker-Checkouts** (`tracker-<sha12>`, je rund 1 GB) löscht nur `prune-tools.ts` und nur, wenn `PRODUCER_TOOLS_KEEP` gesetzt ist (Standard: nie). Es entfernt ausschließlich direkte Unterverzeichnisse `tracker-<12 hex>` mit `.producer-ready`-Marker, nie den gepinnten, nie Symlinks. Trockenlauf: `npx tsx scripts/producer/prune-tools.ts --tools-dir <dir> --keep 2 --dry-run`.
+- **`run` (alle 12 h):** holt zuerst `git fetch --tags origin` (nicht fatal; bei Fehlschlag Alarm, der Lauf geht weiter), dann `npm run build:catalogs -- --out <dir> --keep <N>`. Schreibt `~/tracker-data/releases/<id>` und den Symlink `current`, behält **4** Releases (`PRODUCER_KEEP_RELEASES`). Bei Fehlschlag Discord-Alarm in den Systemlog (`DISCORD_SYSTEM_LOG_WEBHOOK`, aus der Umgebung oder als einzige Variable aus `ENV_FILE` gelesen, die Datei wird nicht ausgeführt; die URL wird nie geloggt).
+- **Versions-Wächter:** Liegt die gebaute Overlay-Version **unter** der des aktiven Releases (z. B. 1.184 → 1.67), bricht `build:catalogs` vor jeder Arbeit und vor dem Umhängen von `current` mit **Exit-Code 3** ab (`assertNoVersionRegression` in `scripts/producer/lib.ts`); `cron-run.sh` sendet dafür einen eigenen Alarm, das letzte gute Release bleibt aktiv. Gleiche und höhere Versionen gehen durch, nicht vergleichbare Strings blockieren nicht. Bewusster Rückschritt: einmalig `PRODUCER_ALLOW_VERSION_REGRESSION=1`.
+- **`check-age` (stündlich):** alarmiert, wenn das aktive Release älter als `STALE_HOURS` (30) ist oder kein Manifest lesbar ist; Wiederholung höchstens alle `ALERT_REPEAT_HOURS` (6).
+- **Löschen, ausdrücklich:** (1) Alte **Releases** räumt der Produzent selbst auf: nur Verzeichnisse `<out>/releases/<id>` mit gültigem Release-Namen, nie das aktive, nie Symlinks; leere, relative, `/`, Home- und Top-Level-Pfade werden abgelehnt. (2) Alte **Tracker-Checkouts** (`tracker-<sha12>`, je rund 1 GB) löscht nur `prune-tools.ts` und nur, wenn `PRODUCER_TOOLS_KEEP` gesetzt ist (Standard: nie), ausschließlich direkte Unterverzeichnisse `tracker-<12 hex>` mit `.producer-ready`-Marker, nie den gepinnten, nie Symlinks. Trockenlauf: `npx tsx scripts/producer/prune-tools.ts --tools-dir <dir> --keep 2 --dry-run`.
 
-**`manifest`:** `releases/<id>/producer-manifest.json` enthält Overlay-Version, -Zeitstempel und -SHA (beider Dateien), Tracker-Repo und -Commit, Quelle (`json.tarkov.dev`), Zeitstempel des Laufs, Anzahl Objekte/Dateien/Bytes und die SHA-256 jeder Datei.
-
-Der Produzent bekommt nur eine Allowlist an Umgebungsvariablen — keine Cloudflare-Zugangsdaten, kein `OVERLAY_TOKEN`.
+**Manifest:** `releases/<id>/producer-manifest.json` enthält Overlay-Version, -Zeitstempel und -SHA (beider Dateien), Tracker-Repo und -Commit, Quelle (`json.tarkov.dev`), Zeitstempel, Anzahl Objekte/Dateien/Bytes und die SHA-256 jeder Datei.
 
 ### Parität gegen tarkovtracker.org
 
@@ -105,89 +127,53 @@ npm run parity -- fetch-live --out /tmp/live
 npm run parity -- compare --live /tmp/live --catalogs <out>/current --overlay dist/overlay.json --report parity.md --json parity.json
 ```
 
-Es werden nur die öffentlichen `GET /api/tarkov/*`-Endpunkte abgefragt, nacheinander, mit Pause und ehrlichem User-Agent. Bei 403/429 bricht der Lauf ab; es wird nichts umgangen. Normalisiert werden ausschließlich `dataOverlay.generated`, `dataOverlay.sha256`, `dataOverlay.sourceUrl` und `storedAt`; jede Normalisierung steht im Bericht. `dataOverlay.version` wird bewusst **nicht** normalisiert.
+Fragt nur die öffentlichen `GET /api/tarkov/*`-Endpunkte ab, nacheinander, mit Pause und ehrlichem User-Agent; bei 403/429 bricht der Lauf ab, es wird nichts umgangen. Normalisiert werden ausschließlich `dataOverlay.generated`, `dataOverlay.sha256`, `dataOverlay.sourceUrl` und `storedAt`; `dataOverlay.version` bewusst nicht.
 
 ---
 
-## Was wo hingehört — und wohin es am Ende soll
+## Ausliefern
 
-**Grundhaltung: Deutsche Korrekturen gehören upstream.** Der `locales`-Mechanismus ist genau dafür gebaut — deren `en.json5` korrigiert englische Strings, unsere `de.json5` korrigiert deutsche. Dieselbe Struktur, dasselbe Schema. Deutsch fehlt dort nur, weil es bisher niemand beigetragen hat.
-
-Drei Gründe:
-
-1. **Fair.** Wir leben von 211 Korrekturen, die andere gepflegt haben. Deutschsprachige Nutzer von tarkovtracker.org hätten denselben Nutzen.
-2. **Billiger für uns.** Was upstream landet, pflegen wir nicht mehr. Jeder Eintrag, der hier liegen bleibt, ist Ballast bei jedem Merge.
-3. **MIT-Lizenz**, also geringe Hürde.
-
-### Dieses Repo ist die Vorstufe, nicht das Endlager
-
-| Fall                                         | Weg                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------- |
-| Deutsche Übersetzung objektiv falsch/fehlend | hier eintragen, testen, **dann als PR upstream**                    |
-| Sachlicher Datenfehler (Level, Map, Händler) | **direkt** Upstream-PR gegen `src/overrides/tasks.json5` — nie hier |
-| Stammtisch-spezifische Formulierung          | bleibt hier                                                         |
-| Upstream lehnt ab / PR hängt                 | bleibt hier, bis geklärt                                            |
-
-**Ablauf:** Eintrag hier → bauen → im Tracker prüfen, dass die Übersetzung ankommt → PR an Upstream. Wird er gemerged, **Eintrag hier wieder entfernen** (der nächste `git merge upstream/main` bringt ihn dann von dort mit). `npm run check-overrides` hilft dabei: es meldet, was Upstream inzwischen selbst abdeckt.
-
-So bleibt diese Datei dauerhaft klein — sie enthält idealerweise nur, was gerade unterwegs oder bewusst unser ist.
+Der Tracker liest `OVERLAY_URL` zur Laufzeit; eine geänderte Overlay-Datei braucht keinen Neubau der App, nur Neustart bzw. Cache-Ablauf (TTL 1 h, `OVERLAY_CACHE_BUSTER` erzwingt sofort). `OVERLAY_URL` darf `https:`, `http:` nur auf Loopback oder `file:` unterhalb von `OVERLAY_FILE_ROOT` sein; alles andere fällt **still** auf die Upstream-Adresse zurück (Details im App-Fork). **`$meta.version` ist Pflicht** in der Datei, sonst wird das Overlay still verworfen; der Build setzt sie automatisch.
 
 ---
 
-## Ablauf
-
-### Übersetzung ergänzen
-
-1. Eintrag in `src/overrides/locales/de.json5`, mit Beleg als Kommentar (Wiki-Link oder `json.tarkov.dev`-URL)
-2. `npm run build` → erzeugt `dist/overlay.json`
-3. Ausliefern (siehe unten)
-
-### Upstream nachziehen
+## Upstream nachziehen
 
 ```bash
 git fetch upstream --tags
 git merge upstream/main      # Konflikt nur bei .github/dependabot.yml (git rm); dist/ kommt von upstream
-npm run validate             # Quelle sauber?
+npm run validate
 npm run build                # Rauchtest, danach: git checkout -- dist/
 git remote get-url origin    # muss miwidot/stammtisch-tracker-overlay sein, NIE tarkovtracker-org
 git push origin --tags       # Pflicht: Upstream-Tags immer mit nach origin
-git push origin main
+git push origin <branch>
 ```
 
-**Tags sind Pflicht, nicht optional.** Die Overlay-Version ist die höchste Tag-Version in `HEAD` (siehe oben). Fehlen die Upstream-Tags auf unserem origin, baut ein frischer Klon oder der Server eine viel zu niedrige Version (so geschehen: 1.67 statt 1.184). Deshalb holt `cron-run.sh run` vor jedem Lauf `git fetch --tags origin` (Fehlschlag: Discord-Alarm, der Lauf geht weiter), und der Produzent **verweigert** ein Release, dessen Version unter der des aktiven liegt (siehe unten).
+Merge-Konflikt in `package.json` nur, wenn Upstream direkt neben unseren zwei `scripts`-Zeilen etwas ändert.
 
-⚠️ **Bekannte Tag-Kollision:** `v1.0` bis `v1.7` zeigen auf unserem origin auf andere Commits als bei Upstream (Altlast). Sie wurden nicht überschrieben. Daher `git push origin --tags` meldet für diese acht eine Ablehnung und `git fetch --tags origin` auf einem Klon mit Upstream-Fassung dieser Tags ebenfalls; die übrigen Tags sind davon nicht betroffen. Nie mit `--force` lösen, ohne vorher zu klären, welche Fassung gelten soll.
-
-### Ausliefern
-
-Der Tracker liest `OVERLAY_URL` **zur Laufzeit** — eine geänderte Overlay-Datei braucht **keinen** Neubau der App, nur einen Neustart bzw. den nächsten Cache-Ablauf (TTL 1 h, `OVERLAY_CACHE_BUSTER` erzwingt sofort).
-
-⚠️ **`OVERLAY_URL` muss HTTPS sein** (seit App-Version 1.73.2 zwingend, PR #755 upstream). Ein `http:`-Overlay fällt **still** auf die Upstream-Adresse zurück — keine Fehlermeldung, unsere Übersetzungen sind einfach weg.
-
-⚠️ **`$meta.version` ist Pflicht** in der ausgelieferten Datei. Fehlt sie, wird das komplette Overlay **still verworfen**. Der Build setzt sie automatisch.
+**Wohin Korrekturen gehören:** Deutsche Übersetzungen und sachliche Datenfehler (Level, Map, Händler) gehen als Pull Request an Upstream (über `mirror`), nicht hierher; ein Eintrag in `src/` wäre wieder eine eigene Abweichung. Ausnahme wäre etwas rein Stammtisch-Spezifisches.
 
 ---
 
-## Nützliche Upstream-Werkzeuge (bekommen wir geschenkt)
+## Nützliche Upstream-Werkzeuge
 
 | Befehl                    | Zweck                                                                                   |
 | ------------------------- | --------------------------------------------------------------------------------------- |
 | `npm run build`           | erzeugt `dist/overlay.json`                                                             |
 | `npm run validate`        | prüft gegen die JSON-Schemata                                                           |
-| `npm run check-overrides` | meldet Korrekturen, die Upstream **inzwischen selbst behoben** hat → bei uns entfernbar |
-| `npm run wiki:compare`    | Abgleich gegen das Fandom-Wiki                                                          |
+| `npm run check-overrides` | meldet Korrekturen, die Upstream inzwischen selbst behoben hat                          |
+| `npm run status:locale de`| offene und veraltete Übersetzungen je Händler                                           |
+| `npm run wiki:compare`    | Abgleich gegen das Fandom-Wiki (liefert Kandidaten, keine Fehler)                       |
 | `npm run eft:audit`       | Datenabgleich gegen die Spieldaten                                                      |
 | `npm run monitor`         | Weboberfläche zum Durchsehen                                                            |
-
-`check-overrides` ist auf Dauer der wichtigste: er verhindert, dass wir Korrekturen mitschleppen, die längst überflüssig sind.
 
 ---
 
 ## Rauchtest nach jedem Upstream-Merge
 
-- [ ] `npm run build` läuft durch, Log zeigt `Locales: de(tasks: N)` mit unserem N
-- [ ] `npm run validate` grün
-- [ ] `$meta.version` in `dist/overlay.json` vorhanden
+- [ ] `npm run build` läuft durch, `$meta.version` in `dist/overlay.json` vorhanden, Version = höchster `v*`-Tag (`git tag --merged HEAD --list 'v*'`)
+- [ ] `npm run validate` und `npx vitest run` grün
+- [ ] `npm run build:catalogs` (oder der nächste Cron-Lauf) erzeugt ein Release ohne Versions-Rückschritt, `producer-manifest.json` ist frisch
 - [ ] Ein bekannter deutscher Quest-Name kommt im laufenden Tracker an
-- [ ] Task-Anzahl im Tracker plausibel (nicht plötzlich ~30 mehr — das hiesse, das Upstream-Overlay fehlt)
-- [ ] `npm run check-overrides` durchsehen: was hat Upstream inzwischen selbst gefixt?
+- [ ] Task-Anzahl im Tracker plausibel (nicht plötzlich rund 30 mehr: das hieße, das Upstream-Overlay fehlt)
+- [ ] `git push origin --tags` meldet keine abgelehnten Tags
