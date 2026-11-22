@@ -165,7 +165,6 @@ Merge-Konflikt in `package.json` nur, wenn Upstream direkt neben unseren zwei `s
 | `npm run status:locale de`| offene und veraltete Übersetzungen je Händler                                           |
 | `npm run wiki:compare`    | Abgleich gegen das Fandom-Wiki (liefert Kandidaten, keine Fehler)                       |
 | `npm run eft:audit`       | Datenabgleich gegen die Spieldaten                                                      |
-| `npm run monitor`         | Weboberfläche zum Durchsehen                                                            |
 
 ---
 
